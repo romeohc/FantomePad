@@ -29,26 +29,8 @@ void UpdateUIMode()
    SetObjPosition("Header", startX, startY);
    SetObjPosition("Title", startX + 15, startY + 12);
    
-   // Bouton Settings (Aligné à droite)
-   SetObjPosition("Btn_Settings", startX + PanelWidth - 30, startY + 5);
-
-   
-   // --- LIGNE 1 : SÉLECTEUR D'ACTIF ---
-   SetObjPosition("Label_Symbol", startX + paddingX, currentY);
-   currentY += 15; // Hauteur Label
-   
-   SetObjPosition("Btn_SymbolSelect", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XSIZE, PanelWidth - (paddingX*2));
-   ObjectSetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YSIZE, inputH);
-   
-   // Si la liste est ouverte, on la repositionne aussi
-   if(IsListOpen)
-   {
-       CloseSymbolList();
-       ToggleSymbolList();
-   }
-   
-   currentY += inputH + sectionGap;
+   // --- LIGNE 1 : REMOVED SYMBOL SELECTOR ---
+   // (Moved to Manager Panel)
    
    // --- LIGNE 2 : TYPE D'ORDRE ---
    SetObjPosition("Label_Type", startX + paddingX, currentY);
@@ -234,17 +216,11 @@ void CreatePanel()
    // 1. Fond & Header
    CreateRect("Bg", 0, 0, PanelWidth, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Header", 0, 0, PanelWidth, 40, g_ColorHeader, BORDER_FLAT);
-   CreateLabel("Title", "MagicKey 1", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Title", "Trading Panel", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
-   // Icone Settings (Hamburger Menu)
-   CreateButton("Btn_Settings", "≡", 0, 0, 25, 25, g_ColorHeader, g_ColorLabel);
-   ObjectSetInteger(0, PREFIX+"Btn_Settings", OBJPROP_FONTSIZE, 14);
-   ObjectSetString(0, PREFIX+"Btn_Settings", OBJPROP_FONT, "Arial Bold");
-   ObjectSetInteger(0, PREFIX+"Btn_Settings", OBJPROP_BORDER_COLOR, g_ColorHeader);
-   
-   // 2. Actif (Symbol)
-   CreateLabel("Label_Symbol", "Symbol", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
-   CreateButton("Btn_SymbolSelect", Symbol(), 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
+   // 2. Actif (Symbol) - MOVED TO MANAGER PANEL
+   // CreateLabel("Label_Symbol", "Symbol", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   // CreateButton("Btn_SymbolSelect", Symbol(), 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
    
    // 3. Type d'Ordre
    CreateLabel("Label_Type", "Order type", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
@@ -291,131 +267,7 @@ void CreatePanel()
    ObjectSetString(0, PREFIX + "Btn_Action", OBJPROP_FONT, "Trebuchet MS Bold");
 }
 
-//+------------------------------------------------------------------+
-//| GESTION DE LA LISTE DÉROULANTE                                   |
-//+------------------------------------------------------------------+
-void CloseSymbolList()
-{
-   // Supprime tous les objets de liste
-   for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
-   {
-      string name = ObjectName(0, i);
-      if(StringFind(name, PREFIX + "ListItem_") >= 0 || 
-         name == PREFIX + "ScrollTrack" || 
-         name == PREFIX + "ScrollThumb") 
-      {
-         ObjectDelete(0, name);
-      }
-   }
-   
-   ObjectDelete(0, PREFIX + "ListContainer");
-   
-   IsListOpen = false;
-   VisibleListItems = 0;
-   // Note: We do NOT reset g_SymbolListOffset here to remember position if reopened? 
-   // Actually better to reset for fresh UX usually, but user might want persistence.
-   // User didn't specify, but standard is reset or keep. Let's reset to be safe/clean.
-   g_SymbolListOffset = 0; 
-   ChartRedraw();
-}
-
-void DrawSymbolList()
-{
-   long x = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XDISTANCE);
-   long y = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YDISTANCE);
-   long w = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XSIZE);
-   long h = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YSIZE);
-   
-   int total = SymbolsTotal(true);
-   int itemHeight = 25;
-   int scrollBarWidth = 10;
-   
-   // Determine visible count
-   int maxVis = g_SymbolListMaxVisible;
-   int count = (total > maxVis) ? maxVis : total;
-   
-   // Safety clamp offset
-   if(g_SymbolListOffset > total - count) g_SymbolListOffset = total - count;
-   if(g_SymbolListOffset < 0) g_SymbolListOffset = 0;
-   
-   VisibleListItems = count;
-   
-   bool showScroll = (total > maxVis);
-   
-   int startY = (int)y + (int)h + 2; 
-   int contentHeight = count * itemHeight;
-   int containerWidth = (int)w; // Keep same width
-   
-   CreateRect("ListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
-   
-   int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
-   int itemX = (int)x + 2;
-   int currentY = startY;
-   
-   // ITEMS
-   for(int i = 0; i < count; i++)
-   {
-      int dataIdx = g_SymbolListOffset + i;
-      if(dataIdx >= total) break;
-      
-      string symName = SymbolName(dataIdx, true);
-      string btnName = "ListItem_" + IntegerToString(i);
-      
-      CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);
-      ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); // Explicit text update required for scrolling
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
-      
-      currentY += itemHeight;
-   }
-   
-   // SCROLLBAR
-   if(showScroll)
-   {
-       int trackX = (int)x + containerWidth - scrollBarWidth - 2;
-       int trackH = contentHeight;
-       int trackY = startY;
-       
-       // Track
-       CreateRect("ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "ScrollTrack", OBJPROP_ZORDER, 10);
-       
-       // Thumb
-       double ratio = (double)count / (double)total;
-       int thumbH = (int)(trackH * ratio);
-       if(thumbH < 20) thumbH = 20; // Min height
-       
-       // Position
-       // Max usable height for thumb movement = trackH - thumbH
-       // Scrollable items = total - count
-       // Percent scrolled = offset / (total - count)
-       
-       int maxOffset = total - count;
-       double scrollPrc = (maxOffset > 0) ? (double)g_SymbolListOffset / (double)maxOffset : 0;
-       int availableTrack = trackH - thumbH;
-       int relativeY = (int)(scrollPrc * availableTrack);
-       
-       CreateRect("ScrollThumb", trackX + 1, trackY + relativeY, scrollBarWidth - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_ZORDER, 11);
-       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorLabel); // Grey thumb
-   }
-   
-   ChartRedraw();
-}
-
-void ToggleSymbolList()
-{
-   if(IsListOpen) CloseSymbolList();
-   else 
-   {
-      IsListOpen = true;
-      DrawSymbolList();
-   }
-}
+// LIST FUNCTIONS MOVED TO PANEL_MANAGER.MQH
 
 //+------------------------------------------------------------------+
 //| Logique Automatique : Changement de Type selon Lignes            |
@@ -533,4 +385,49 @@ void AutoSwitchOrderType()
       UpdateCalculatedLot();
       ChartRedraw();
    }
+}
+
+//+------------------------------------------------------------------+
+//| VISIBILITY CONTROL                                               |
+//+------------------------------------------------------------------+
+void ToggleMainPanel(bool visible)
+{
+   SetObjVisible("Bg", visible);
+   SetObjVisible("Header", visible);
+   SetObjVisible("Title", visible);
+   SetObjVisible("Header", visible);
+   SetObjVisible("Title", visible);
+   // SetObjVisible("Label_Symbol", visible);
+   // SetObjVisible("Btn_SymbolSelect", visible);
+   SetObjVisible("Label_Type", visible);
+   SetObjVisible("Btn_Type", visible);
+   
+   // Conditional visibility objects - if hiding, hide all. 
+   // If showing, UpdateUIMode handles specific visibility logic (like Price field)
+   if(!visible)
+   {
+      SetObjVisible("Label_Price", false);
+      SetObjVisible("Edit_Price", false);
+      SetObjVisible("Btn_Buy", false);
+      SetObjVisible("Btn_Sell", false);
+      SetObjVisible("Btn_Action", false);
+   }
+   else
+   {
+      // If showing, we rely on UpdateUIMode to restore correct state
+      UpdateUIMode(); 
+   }
+   
+   SetObjVisible("Label_SL", visible);
+   SetObjVisible("Edit_SL", visible);
+   SetObjVisible("Label_TP", visible);
+   SetObjVisible("Edit_TP", visible);
+   SetObjVisible("Label_Risk", visible);
+   SetObjVisible("Edit_Risk", visible);
+   SetObjVisible("Label_RiskPerc", visible);
+   SetObjVisible("Label_Lot", visible);
+   SetObjVisible("Edit_Lot", visible);
+   
+   // If hiding, also close the list if open -> No longer linked to Main Panel
+   // if(!visible && IsListOpen) CloseSymbolList();
 }

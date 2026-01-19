@@ -133,13 +133,8 @@ void OpenSettings()
    CreateRect("Set_Header", x, y, w, 50, g_ColorHeader, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 110); // Elevated to cover scroll content
    
-   CreateLabel("Set_Title", "SETTINGS", x + 20, y + 15, 12, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Set_Title", "Settings", x + 20, y + 15, 12, clrWhite, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + "Set_Title", OBJPROP_ZORDER, 111);
-   
-   CreateButton("Set_Btn_Close", "X", x + w - 35, y + 12, 25, 25, g_ColorHeader, clrGray);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_ZORDER, 111);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_FONTSIZE, 12);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_BORDER_COLOR, g_ColorHeader);
    
    // --- CONTENT GENERATION ---
    // We define absolute Y relative to the Content Start (0)

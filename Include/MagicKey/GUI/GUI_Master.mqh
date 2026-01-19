@@ -18,7 +18,17 @@
 void GUI_OnInit()
 {
    CreatePanel();
+   CreateInfoPanel();
+   CreateManagerPanel(); 
    UpdateUIMode(); 
+}
+
+//+------------------------------------------------------------------+
+//| EVENT TICK (MISE A JOUR CONTINUE)                                |
+//+------------------------------------------------------------------+
+void GUI_OnTick()
+{
+   UpdateInfoPanel();
 }
 
 //+------------------------------------------------------------------+
@@ -33,6 +43,8 @@ void GUI_OnChartEvent(const int id,
    if(id == CHARTEVENT_CHART_CHANGE)
    {
       CreatePanel();
+      CreateInfoPanel();
+      CreateManagerPanel();
       UpdateUIMode();
       if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
    }
@@ -199,8 +211,10 @@ void GUI_OnChartEvent(const int id,
                   SettingsY = (chartH/2) - (350/2);
                }
                
-               // Detection Header Settings (Taille approx 300x40)
-               if(mouseX >= SettingsX && mouseX <= SettingsX + 300 && mouseY >= SettingsY && mouseY <= SettingsY + 40)
+               // Detection Settings Panel (Full Window)
+               int settingsW = 340;
+               int settingsH = 50 + SettingsViewportHeight;
+               if(mouseX >= SettingsX && mouseX <= SettingsX + settingsW && mouseY >= SettingsY && mouseY <= SettingsY + settingsH)
                {
                   IsSettingsDragging = true;
                   SettingsDragOffsetX = mouseX - SettingsX;
@@ -218,8 +232,37 @@ void GUI_OnChartEvent(const int id,
             }
          }
          
+         // --- 1.5 DRAG INFO PANEL ---
+         bool processedInfo = false;
+         if(!processedSettings && !IsSettingsDragging && !IsDragging && !IsScrollDragging)
+         {
+            if(!IsInfoDragging)
+            {
+               // Detection Info Panel
+               int infoW = 200;
+               long infoH = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
+               if(infoH < 50) infoH = 150;
+               
+               if(mouseX >= InfoPanelX && mouseX <= InfoPanelX + infoW && mouseY >= InfoPanelY && mouseY <= InfoPanelY + infoH)
+               {
+                  IsInfoDragging = true;
+                  InfoDragOffsetX = mouseX - InfoPanelX;
+                  InfoDragOffsetY = mouseY - InfoPanelY;
+                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+               }
+            }
+            
+            if(IsInfoDragging)
+            {
+               InfoPanelX = mouseX - InfoDragOffsetX;
+               InfoPanelY = mouseY - InfoDragOffsetY;
+               UpdateInfoLayout();
+               processedInfo = true;
+            }
+         }
+         
          // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
+         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !IsScrollDragging && !IsSettingsScrollDragging)
          {
             if(!IsDragging)
             {
@@ -229,8 +272,12 @@ void GUI_OnChartEvent(const int id,
                int curX = (PanelX == -1) ? (chartW / 2) - (PanelWidth / 2) : PanelX;
                int curY = (PanelY == -1) ? (chartH / 2) - (200) : PanelY;
    
-               // On vérifie si on est sur le Header pour commencer le drag
-               if(mouseX >= curX && mouseX <= curX + PanelWidth && mouseY >= curY && mouseY <= curY + 40)
+               // On récupère la hauteur dynamique du fond
+               long bgH = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
+               if(bgH < 50) bgH = 200; // Fallback safety
+               
+               // On vérifie si on est sur le Panel pour commencer le drag (Header OU Body)
+               if(mouseX >= curX && mouseX <= curX + PanelWidth && mouseY >= curY && mouseY <= curY + bgH)
                {
                   IsDragging = true;
                   PanelX = curX; // On fixe la position
@@ -261,6 +308,10 @@ void GUI_OnChartEvent(const int id,
          if(IsSettingsDragging)
          {
             IsSettingsDragging = false;
+         }
+         if(IsInfoDragging)
+         {
+            IsInfoDragging = false;
          }
          if(IsScrollDragging)
          {
@@ -387,19 +438,39 @@ void GUI_OnChartEvent(const int id,
       }
       
       // --- SETTINGS ---
-      if(sparam == PREFIX + "Btn_Settings")
+
+      
+      // --- MANAGER PANEL EVENTS ---
+      
+      // 1. Toggle Trading Panel
+      if(sparam == PREFIX + "Mgr_Btn_Main")
       {
-         ToggleSettings();
+         IsMainPanelVisible = !IsMainPanelVisible;
+         ToggleMainPanel(IsMainPanelVisible);
+         UpdateManagerPanel(); // Refresh button state (color)
          EffectButton(sparam);
          return;
       }
       
-      if(sparam == PREFIX + "Set_Btn_Close")
+      // 2. Toggle Info Panel
+      if(sparam == PREFIX + "Mgr_Btn_Info")
       {
-         CloseSettings();
+         IsInfoPanelVisible = !IsInfoPanelVisible;
+         ToggleInfoPanel(IsInfoPanelVisible);
+         UpdateManagerPanel(); // Refresh button state
+         EffectButton(sparam);
          return;
       }
       
+      // 3. Toggle Settings (Shortcut)
+      if(sparam == PREFIX + "Mgr_Btn_Settings")
+      {
+         ToggleSettings();
+         UpdateManagerPanel(); // Refresh button state
+         EffectButton(sparam);
+         return;
+      }
+
       // --- COLOR PICKER EVENTS ---
       // 1. Click on a Settings Color Button -> Open Picker
       if(StringFind(sparam, PREFIX + "Set_Btn_Color_") >= 0)
@@ -456,6 +527,8 @@ void GUI_OnChartEvent(const int id,
               
               SaveConfigToFile();
               CreatePanel();
+              CreateInfoPanel();
+              CreateManagerPanel(); // Refresh Manager Colors
               UpdateUIMode();
               OpenSettings();
             }
@@ -509,6 +582,8 @@ void GUI_OnChartEvent(const int id,
             
             SaveConfigToFile();
             CreatePanel();  // Refresh Main Panel Colors
+            CreateInfoPanel(); // Refresh Info Panel Colors
+            CreateManagerPanel(); // Refresh Manager Colors
             UpdateUIMode(); // Refresh Layout
             OpenSettings(); // Refresh Settings (incl. bg)
          }
@@ -696,6 +771,19 @@ void GUI_OnChartEvent(const int id,
       
       if(StringFind(sparam, PREFIX + "Edit_") >= 0)
       {
+         // Validation: Ne pas autoriser les cellules vides pour SL, TP et Risk
+         string currentText = ObjectGetString(0, sparam, OBJPROP_TEXT);
+         StringTrimLeft(currentText);
+         StringTrimRight(currentText);
+         
+         if(currentText == "")
+         {
+             if(sparam == PREFIX + "Edit_SL" || sparam == PREFIX + "Edit_TP" || sparam == PREFIX + "Edit_Risk")
+             {
+                 ObjectSetString(0, sparam, OBJPROP_TEXT, "0");
+             }
+         }
+         
          UpdateChartLines(); 
          AutoSwitchOrderType(); // Vérification logique après édition manuelle
          UpdateCalculatedLot(); // Recalcul si SL, TP, Entry ou Risk change

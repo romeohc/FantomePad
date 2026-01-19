@@ -65,39 +65,4 @@ C'est le **Master Controller**.
 
 ---
 
-## 4. Fonctionnalités Implémentées
-
-### 1. Main Trading Panel
-- Sélection d'actif via liste déroulante (multicolonne).
-- Sélection de Type d'Ordre (Market, Limit, Stop) avec bascule automatique intelligente via `AutoSwitchOrderType` (détecte si le prix est au dessus/dessous pour proposer Limit ou Stop).
-- Champs : SL, TP, Risk %, Entry Price.
-- Calcul automatique du Lot.
-- Boutons : BUY/SELL (Market) ou PLACE ORDER (Pending).
-
-### 2. Settings Panel
-- Changement du risque par défaut.
-- Personnalisation complète des couleurs (Color Picker intégré).
-
-### 3. Fonctionnalités Futures (Architecture Prête)
-Les fichiers sont créés mais vides (squelettes) :
-- **Info Panel (`Panel_Info.mqh`)** : Destiné à afficher Balance, Equity, Free Margin en temps réel.
-- **Manager Panel (`Panel_Manager.mqh`)** : Destiné à apparaître quand un trade est ouvert pour gérer (BreakEven, Close Partial, etc.).
-
----
-
-## 5. Guide pour l'IA (Comment modifier ce projet ?)
-
-Si vous êtes une IA chargée de continuer ce travail :
-
-1.  **Ajouter un élément graphique ?** Utilisez les helpers de `Components.mqh`. Ne réinventez pas `ObjectCreate`.
-2.  **Modifier la logique de prise de position ?** Allez dans `Trade.mqh`.
-3.  **Ajouter un nouveau Panneau ?**
-    - Codez la logique de création dans le fichier `.mqh` correspondant (ex: `Panel_Manager.mqh`).
-    - Appelez la fonction de création depuis `GUI_Master.mqh`.
-    - Ajoutez le routing des événements dans `GUI_OnChartEvent` (dans `GUI_Master.mqh`) si ce panneau a des boutons.
-4.  **Dépendances** :
-    - `magikey.mq4` inclut `GUI_Master.mqh`.
-    - `GUI_Master.mqh` inclut tous les Panels et `Trade.mqh`.
-    - Tous les fichiers incluent implicitement `Defines.mqh` via la chaine d'inclusion (assurez-vous que les variables globales sont accessibles).
-
 Ce projet est conçu pour être propre et segmenté. Maintenez cette séparation rigoureuse.

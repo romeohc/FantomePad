@@ -42,6 +42,8 @@ int    RiskMode   = 0; // 0=%, 1=Currency, 2=Risk R
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
 int    PanelWidth  = 280; // Slightly wider for comfort
 bool   IsListOpen = false; // État de la liste déroulante
+bool   IsMainPanelVisible = true; // État de visibilité du Panel Principal
+bool   IsInfoPanelVisible = true; // État de visibilité du Panel Info
 int    VisibleListItems = 0; // Nombre d'items affichés dans la liste
 int    g_SymbolListOffset = 0; // Scroll offset for symbol list
 int    g_SymbolListMaxVisible = 20; // Max visible items in symbol list
@@ -50,6 +52,13 @@ int    PanelY = -1;          // Position Y du panel (-1 = centré)
 bool   IsDragging = false;   // État du drag-and-drop
 int    DragOffsetX = 0;      // Offset X pour le drag
 int    DragOffsetY = 0;      // Offset Y pour le drag
+
+// --- INFO PANEL GLOBALS ---
+int    InfoPanelX = 20;      // Position X du panel info (Coin gauche par défaut)
+int    InfoPanelY = 70;      // Position Y du panel info (Decalé sous le Manager)
+bool   IsInfoDragging = false;
+int    InfoDragOffsetX = 0;
+int    InfoDragOffsetY = 0;
 
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
