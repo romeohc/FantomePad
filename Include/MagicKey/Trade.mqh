@@ -153,9 +153,9 @@ void UpdateOpenOrderLines()
 //+------------------------------------------------------------------+
 //| CALCUL ET EXECUTION                                             |
 //+------------------------------------------------------------------+
-double CalculateLotSize(double entryPrice, double slPrice, double riskPercent)
+double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
 {
-   if(entryPrice <= 0 || slPrice <= 0 || riskPercent <= 0) return 0.0;
+   if(entryPrice <= 0 || slPrice <= 0 || riskValue <= 0) return 0.0;
    if(MathAbs(entryPrice - slPrice) <= Point) return 0.0;
    
    string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
@@ -170,7 +170,18 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskPercent)
    if(tickSize == 0 || tickValue == 0) return 0.0;
    
    // Calcul du risque en argent
-   double riskMoney = AccountBalance() * (riskPercent / 100.0);
+   double riskMoney = 0;
+   
+   if(RiskInCurrency)
+   {
+      // Risque exprimé directement en devise du compte
+      riskMoney = riskValue;
+   }
+   else
+   {
+      // Risque exprimé en pourcentage du solde
+      riskMoney = AccountBalance() * (riskValue / 100.0);
+   }
    
    // Distance SL en points
    double distance = MathAbs(entryPrice - slPrice);
@@ -231,8 +242,8 @@ void UpdateCalculatedLot()
          }
          else        
          {
-             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorGreen);
-             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BORDER_COLOR, g_ColorGreen);
+             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorBtnValid);
+             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
           }
        }
        else // SELL BUTTON
@@ -244,8 +255,8 @@ void UpdateCalculatedLot()
           }
           else        
           {
-             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorRed);
-             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BORDER_COLOR, g_ColorRed);
+             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorBtnValid);
+             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
           }
        }
    }

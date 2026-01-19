@@ -156,7 +156,16 @@ void UpdateUIMode()
    ObjectSetInteger(0, PREFIX + "Edit_Risk", OBJPROP_YSIZE, inputH);
    
    // Positionnement du symbole % à l'intérieur de la case Risk
-   SetObjPosition("Label_RiskPerc", startX + paddingX + halfWidth - 15, currentY + 7);
+   // Positionnement du symbole % ou Devise à l'intérieur de la case Risk
+   string riskUnit = "%";
+   if(RiskInCurrency) riskUnit = AccountCurrency();
+   ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_TEXT, riskUnit);
+   
+   int unitWidth = 35; 
+   // Ajustement position pour être à droite dans l'input
+   SetObjPosition("Label_RiskPerc", startX + paddingX + halfWidth - unitWidth - 2, currentY + 4);
+   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_XSIZE, unitWidth);
+   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_YSIZE, 20);
    ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
    
    SetObjPosition("Edit_Lot", startX + paddingX + halfWidth + 10, currentY);
@@ -254,7 +263,14 @@ void CreatePanel()
    // 6. Risque
    CreateLabel("Label_Risk", "Risk", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    CreateEdit("Edit_Risk", DoubleToString(g_DefaultRisk, 1), 0, 0, PanelWidth - 40, 28);
-   CreateLabel("Label_RiskPerc", "%", 0, 0, 9, g_ColorLabel, "Trebuchet MS Bold");
+   
+   // Bouton interactif pour changer le mode de risque (% <-> Devise)
+   // On utilise un bouton pour faciliter le clic
+   CreateButton("Label_RiskPerc", "%", 0, 0, 40, 20, g_ColorInput, g_ColorLabel);
+   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_BORDER_COLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_FONTSIZE, 9);
+   ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_FONT, "Trebuchet MS Bold");
+   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
    
    // 7. Position
    CreateLabel("Label_Lot", "Lots (size)", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
@@ -279,11 +295,13 @@ void CreatePanel()
 //+------------------------------------------------------------------+
 void CloseSymbolList()
 {
-   // Supprime tous les objets qui contiennent "ListItem_"
+   // Supprime tous les objets de liste
    for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i);
-      if(StringFind(name, PREFIX + "ListItem_") >= 0)
+      if(StringFind(name, PREFIX + "ListItem_") >= 0 || 
+         name == PREFIX + "ScrollTrack" || 
+         name == PREFIX + "ScrollThumb") 
       {
          ObjectDelete(0, name);
       }
@@ -293,6 +311,98 @@ void CloseSymbolList()
    
    IsListOpen = false;
    VisibleListItems = 0;
+   // Note: We do NOT reset g_SymbolListOffset here to remember position if reopened? 
+   // Actually better to reset for fresh UX usually, but user might want persistence.
+   // User didn't specify, but standard is reset or keep. Let's reset to be safe/clean.
+   g_SymbolListOffset = 0; 
+   ChartRedraw();
+}
+
+void DrawSymbolList()
+{
+   long x = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XDISTANCE);
+   long y = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YDISTANCE);
+   long w = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XSIZE);
+   long h = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YSIZE);
+   
+   int total = SymbolsTotal(true);
+   int itemHeight = 25;
+   int scrollBarWidth = 10;
+   
+   // Determine visible count
+   int maxVis = g_SymbolListMaxVisible;
+   int count = (total > maxVis) ? maxVis : total;
+   
+   // Safety clamp offset
+   if(g_SymbolListOffset > total - count) g_SymbolListOffset = total - count;
+   if(g_SymbolListOffset < 0) g_SymbolListOffset = 0;
+   
+   VisibleListItems = count;
+   
+   bool showScroll = (total > maxVis);
+   
+   int startY = (int)y + (int)h + 2; 
+   int contentHeight = count * itemHeight;
+   int containerWidth = (int)w; // Keep same width
+   
+   CreateRect("ListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
+   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
+   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
+   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
+   
+   int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
+   int itemX = (int)x + 2;
+   int currentY = startY;
+   
+   // ITEMS
+   for(int i = 0; i < count; i++)
+   {
+      int dataIdx = g_SymbolListOffset + i;
+      if(dataIdx >= total) break;
+      
+      string symName = SymbolName(dataIdx, true);
+      string btnName = "ListItem_" + IntegerToString(i);
+      
+      CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);
+      ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); // Explicit text update required for scrolling
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
+      
+      currentY += itemHeight;
+   }
+   
+   // SCROLLBAR
+   if(showScroll)
+   {
+       int trackX = (int)x + containerWidth - scrollBarWidth - 2;
+       int trackH = contentHeight;
+       int trackY = startY;
+       
+       // Track
+       CreateRect("ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
+       ObjectSetInteger(0, PREFIX + "ScrollTrack", OBJPROP_ZORDER, 10);
+       
+       // Thumb
+       double ratio = (double)count / (double)total;
+       int thumbH = (int)(trackH * ratio);
+       if(thumbH < 20) thumbH = 20; // Min height
+       
+       // Position
+       // Max usable height for thumb movement = trackH - thumbH
+       // Scrollable items = total - count
+       // Percent scrolled = offset / (total - count)
+       
+       int maxOffset = total - count;
+       double scrollPrc = (maxOffset > 0) ? (double)g_SymbolListOffset / (double)maxOffset : 0;
+       int availableTrack = trackH - thumbH;
+       int relativeY = (int)(scrollPrc * availableTrack);
+       
+       CreateRect("ScrollThumb", trackX + 1, trackY + relativeY, scrollBarWidth - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
+       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_ZORDER, 11);
+       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorLabel); // Grey thumb
+   }
+   
    ChartRedraw();
 }
 
@@ -301,49 +411,8 @@ void ToggleSymbolList()
    if(IsListOpen) CloseSymbolList();
    else 
    {
-      long x = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XDISTANCE);
-      long y = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YDISTANCE);
-      long w = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XSIZE);
-      long h = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YSIZE);
-      
-      int total = SymbolsTotal(true); 
-      int startY = (int)y + (int)h + 2; 
-      
-      int maxDisplay = total; 
-      if(maxDisplay > 100) maxDisplay = 100;
-      VisibleListItems = maxDisplay;
-      
-      int itemsPerColumn = 15; 
-      int numColumns = (maxDisplay + itemsPerColumn - 1) / itemsPerColumn;
-      int numRows = (maxDisplay < itemsPerColumn) ? maxDisplay : itemsPerColumn;
-      
-      int itemHeight = 25; 
-      int containerWidth = numColumns * (int)w; 
-      int containerHeight = (numRows * itemHeight) + 4;
-      
-      CreateRect("ListContainer", (int)x, startY - 2, containerWidth, containerHeight, g_ColorBg, BORDER_FLAT);
-      ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
-      ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
-      ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
-      
-      for(int i = 0; i < maxDisplay; i++)
-      {
-         string symName = SymbolName(i, true);
-         string btnName = "ListItem_" + IntegerToString(i);
-         
-         int col = i / itemsPerColumn;
-         int row = i % itemsPerColumn;
-         
-         int posX = (int)x + (col * (int)w); 
-         int posY = startY + (row * itemHeight); 
-         
-         CreateButton(btnName, symName, posX, posY, (int)w, itemHeight, g_ColorInput, g_ColorText);
-         ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
-         ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
-         ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
-      }
-      
       IsListOpen = true;
+      DrawSymbolList();
    }
 }
 

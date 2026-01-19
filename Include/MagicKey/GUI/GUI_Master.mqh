@@ -37,6 +37,17 @@ void GUI_OnChartEvent(const int id,
       if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
    }
    
+   // --- CLIC SUR LE GRAPHIQUE (VIDE) ---
+   if(id == CHARTEVENT_CLICK)
+   {
+      // On n'exécute la fermeture que si le dernier clic sur un objet date de plus de 100ms
+      // car MT4 envoie parfois les deux événements presque en même temps.
+      if(IsListOpen && (GetTickCount() - LastClickTime) > 100) 
+      {
+         CloseSymbolList();
+      }
+   }
+   
    // --- GESTION DU HOVER ET DRAG ---
    if(id == CHARTEVENT_MOUSE_MOVE)
    {
@@ -44,12 +55,99 @@ void GUI_OnChartEvent(const int id,
       int mouseY = (int)dparam;
       int buttons = (int)sparam;
       
+      // Update Globals for Wheel
+      LastMouseX = mouseX;
+      LastMouseY = mouseY;
+      
+      // --- DETECT HOVER ON LIST (POUR DISABLE CHART SCROLL) ---
+      bool isOverList = false;
+      if(IsListOpen)
+      {
+          long lx = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_XDISTANCE);
+          long ly = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_YDISTANCE);
+          long lw = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_XSIZE);
+          long lh = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_YSIZE);
+          
+          if(mouseX >= lx && mouseX <= lx + lw && mouseY >= ly && mouseY <= ly + lh)
+          {
+             isOverList = true;
+          }
+      }
+      
       // LOGIQUE DE DRAG AND DROP
       if((buttons & 1) == 1) // Clic gauche enfoncé
       {
+         g_BlockClick = false; // Reset safety block on new press
+         
+         // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
+         if(IsDragging || IsSettingsDragging || IsScrollDragging || isOverList)
+         {
+             ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+         }
+      
+         // --- 0. DRAG SCROLLBAR ---
+         if(IsListOpen)
+         {
+             if(!IsScrollDragging && !IsDragging && !IsSettingsDragging)
+             {
+                 // Check start drag
+                 long tx = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_XDISTANCE);
+                 long ty = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YDISTANCE);
+                 long tw = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_XSIZE);
+                 long th = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YSIZE);
+                 
+                 // Expanded hit area for easier grabbing
+                 if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
+                 {
+                     IsScrollDragging = true;
+                     ScrollDragY = mouseY;
+                     ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                 }
+                 else 
+                 {
+                     // Check if clicking on Track to jump? (Optional, skip for now to keep simple)
+                 }
+             }
+             
+             if(IsScrollDragging)
+             {
+                 int deltaY = mouseY - ScrollDragY;
+                 if(deltaY != 0)
+                 {
+                     // Calculate movement ratio
+                     long trackH = ObjectGetInteger(0, PREFIX + "ScrollTrack", OBJPROP_YSIZE);
+                     long thumbH = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YSIZE);
+                     int availableTrack = (int)(trackH - thumbH);
+                     
+                     if(availableTrack > 0)
+                     {
+                         int total = SymbolsTotal(true);
+                         int maxOffset = total - VisibleListItems; // Approx
+                         if (maxOffset < 0) maxOffset = 0;
+                         
+                         // How much offset represents 1 pixel of movement?
+                         // offset / maxOffset = thumb_pos / availableTrack
+                         // delta_offset = (deltaY / availableTrack) * maxOffset
+                         
+                         double moveRatio = (double)deltaY / (double)availableTrack;
+                         int offsetChange = (int)(moveRatio * maxOffset);
+                         
+                         // Accumulate changes? No, simpler to step and reset DragY
+                         // This is "relative" drag which is smoother for low res
+                         if(MathAbs(offsetChange) >= 1)
+                         {
+                             g_SymbolListOffset += offsetChange;
+                             ScrollDragY = mouseY; // Reset anchor
+                             DrawSymbolList(); // This ensures clamps are applied
+                         }
+                     }
+                 }
+             }
+         }
+      
          // --- 1. DRAG SETTINGS PANEL ---
          bool processedSettings = false;
-         if(IsSettingsOpen && !IsDragging)
+         if(IsSettingsOpen && !IsDragging && !IsScrollDragging)
          {
             if(!IsSettingsDragging)
             {
@@ -82,7 +180,7 @@ void GUI_OnChartEvent(const int id,
          }
          
          // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging)
+         if(!processedSettings && !IsSettingsDragging && !IsScrollDragging)
          {
             if(!IsDragging)
             {
@@ -116,19 +214,35 @@ void GUI_OnChartEvent(const int id,
       }
       else
       {
+         // MOUSE UP
          if(IsDragging)
          {
             IsDragging = false;
-            ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
          }
          if(IsSettingsDragging)
          {
             IsSettingsDragging = false;
-            ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
          }
+         if(IsScrollDragging)
+         {
+             IsScrollDragging = false;
+             g_BlockClick = true; // Block subsequent click event from this release
+         }
+         
+         // Re-enable chart scroll ONLY if not over list and not in other modal state
+         if(!isOverList) 
+         {
+             ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
+         }
+         else
+         {
+             // Keep disabled if hovering list to allow wheel scroll without chart scroll
+             ChartSetInteger(0, CHART_MOUSE_SCROLL, false); 
+         }
+         ChartRedraw();
       }
 
-      if(IsListOpen && !IsDragging)
+      if(IsListOpen && !IsDragging && !IsSettingsDragging && !IsScrollDragging)
       {
          // On boucle uniquement sur les items visibles pour optimiser
          for(int i = 0; i < VisibleListItems; i++)
@@ -154,10 +268,75 @@ void GUI_OnChartEvent(const int id,
          ChartRedraw();
       }
    }
+   
+   // --- MOUSE WHEEL SCROLLING ---
+   if(id == CHARTEVENT_MOUSE_WHEEL)
+   {
+      if(IsListOpen)
+      {
+          // Check if mouse is over ListContainer
+          long lx = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_XDISTANCE);
+          long ly = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_YDISTANCE);
+          long lw = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_XSIZE);
+          long lh = ObjectGetInteger(0, PREFIX + "ListContainer", OBJPROP_YSIZE);
+          
+          if(LastMouseX >= lx && LastMouseX <= lx + lw && LastMouseY >= ly && LastMouseY <= ly + lh)
+          {
+              int delta = (int)dparam;
+              int total = SymbolsTotal(true);
+              
+              if(delta > 0) // SCROLL UP
+              {
+                  if(g_SymbolListOffset > 0) g_SymbolListOffset--;
+              }
+              else // SCROLL DOWN
+              {
+                  if(g_SymbolListOffset < total - VisibleListItems) g_SymbolListOffset++;
+              }
+              
+              DrawSymbolList();
+              // Prevent chart scrolling if possible, but MQL4 doesn't easily allow consuming this event.
+              // However, since we handled it, the user sees the list scroll.
+          }
+      }
+   }
 
    // Gestion des clics boutons
    if(id == CHARTEVENT_OBJECT_CLICK)
    {
+       LastClickTime = GetTickCount(); // Enregistrer l'heure du clic sur un objet
+       
+       // --- SAFETY BLOCK AFTER DRAG ---
+       if(g_BlockClick || IsScrollDragging)
+       {
+           g_BlockClick = false;
+           ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Reset visual state
+           ChartRedraw();
+           return;
+       }
+   
+      // --- TOGGLE RISK MODE (% / CURRENCY) ---
+      if(sparam == PREFIX + "Label_RiskPerc")
+      {
+         RiskInCurrency = !RiskInCurrency;
+         
+         // RESET to Default Value
+         if(RiskInCurrency)
+         {
+            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskMoney, 2));
+         }
+         else
+         {
+            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRisk, 1));
+         }
+         
+         UpdateUIMode();
+         UpdateCalculatedLot();
+         // Petit effet visuel
+         EffectButton(sparam);
+         return;
+      }
+      
       // --- SETTINGS ---
       if(sparam == PREFIX + "Btn_Settings")
       {
@@ -230,9 +409,9 @@ void GUI_OnChartEvent(const int id,
               CreatePanel();
               UpdateUIMode();
               OpenSettings();
-           }
-           CloseColorPicker();
-           return;
+            }
+            CloseColorPicker();
+            return;
        }
 
        // 3. Click on a Color Picker Item -> Apply & Close
@@ -259,7 +438,7 @@ void GUI_OnChartEvent(const int id,
             if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
                  g_ColorChartFg = (color)pickedCol;
                  ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
-              }
+            }
             if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
@@ -291,6 +470,7 @@ void GUI_OnChartEvent(const int id,
       // 1. Clic sur le bouton principal de l'actif
       if(sparam == PREFIX + "Btn_SymbolSelect")
       {
+         ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Désactiver l'état "enfoncé" pour garder la couleur d'origine
          ToggleSymbolList();
          ChartRedraw();
          return; // On arrête là pour éviter les conflits
@@ -316,7 +496,11 @@ void GUI_OnChartEvent(const int id,
       }
       
       // Si on clique ailleurs et que la liste est ouverte, on la ferme
-      if(IsListOpen && StringFind(sparam, PREFIX + "ListItem_") < 0 && sparam != PREFIX + "Btn_SymbolSelect")
+      if(IsListOpen && 
+         StringFind(sparam, PREFIX + "ListItem_") < 0 && 
+         sparam != PREFIX + "Btn_SymbolSelect" &&
+         sparam != PREFIX + "ScrollTrack" &&
+         sparam != PREFIX + "ScrollThumb")
       {
          CloseSymbolList();
       }
@@ -418,7 +602,21 @@ void GUI_OnChartEvent(const int id,
           {
              g_DefaultRisk = r;
              SaveConfigToFile();
-             CreatePanel(); // Logic to propagate if needed
+             // Si on est en mode %, on met à jour immédiatemment le panneau principal si on n'a pas modifié manuellement (optionnel, mais propre)
+             // ici on redessine juste le panel par simplicité
+             CreatePanel(); 
+             UpdateUIMode();
+          }
+      }
+      
+      if(sparam == PREFIX + "Set_Edit_RiskMoney")
+      {
+          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_TEXT));
+          if(r > 0) 
+          {
+             g_DefaultRiskMoney = r;
+             SaveConfigToFile();
+             CreatePanel(); 
              UpdateUIMode();
           }
       }

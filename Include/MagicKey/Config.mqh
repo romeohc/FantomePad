@@ -68,6 +68,7 @@ void SaveConfigToFile()
    {
       // Format: Key=Value
       FileWrite(handle, "DefaultRisk=" + DoubleToString(g_DefaultRisk, 2));
+      FileWrite(handle, "DefaultRiskMoney=" + DoubleToString(g_DefaultRiskMoney, 2));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
       FileWrite(handle, "ColorHeader=" + IntegerToString(g_ColorHeader));
       FileWrite(handle, "ColorInput=" + IntegerToString(g_ColorInput));
@@ -107,6 +108,7 @@ void LoadConfig()
             string val = sep[1];
             
             if(key == "DefaultRisk") g_DefaultRisk = StringToDouble(val);
+            if(key == "DefaultRiskMoney") g_DefaultRiskMoney = StringToDouble(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
             if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
             if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);

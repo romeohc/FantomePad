@@ -6,6 +6,7 @@
 
 //--- Inputs externes (Configuration de base)
 input double   DefaultRisk = 1.0;      // Risque par défaut (%)
+input double   DefaultRiskMoney = 100.0; // Risque par défaut (Devise)
 input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
@@ -33,11 +34,15 @@ string ConfigFileName = "MagicKey_Config.txt";
 
 //--- États globaux
 int    CurrentTypeIndex = 0; // 0=Market, 1=BuyLim, 2=SellLim, 3=BuyStop, 4=SellStop
+
 int    CurrentDirection = 0; // 0=Buy, 1=Sell (utilisé pour le cycle toggle)
+bool   RiskInCurrency   = false; // Nouvelle variable : false=%, true=Devise du compte
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
 int    PanelWidth  = 280; // Slightly wider for comfort
 bool   IsListOpen = false; // État de la liste déroulante
 int    VisibleListItems = 0; // Nombre d'items affichés dans la liste
+int    g_SymbolListOffset = 0; // Scroll offset for symbol list
+int    g_SymbolListMaxVisible = 20; // Max visible items in symbol list
 int    PanelX = -1;          // Position X du panel (-1 = centré)
 int    PanelY = -1;          // Position Y du panel (-1 = centré)
 bool   IsDragging = false;   // État du drag-and-drop
@@ -46,6 +51,7 @@ int    DragOffsetY = 0;      // Offset Y pour le drag
 
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
+double   g_DefaultRiskMoney;
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText, g_ColorLabel;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg, g_ColorChartFg;
 color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine;
@@ -63,10 +69,19 @@ bool   IsSettingsDragging = false;
 int    SettingsDragOffsetX = 0;
 int    SettingsDragOffsetY = 0;
 
+// --- MOUSE TRACKING ---
+int    LastMouseX = -1;
+int    LastMouseY = -1;
+bool   IsScrollDragging = false;
+int    ScrollDragY = 0;
+bool   g_BlockClick = false;
+uint   LastClickTime = 0;
+
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
    g_DefaultRisk = DefaultRisk;
+   g_DefaultRiskMoney = DefaultRiskMoney;
    g_ColorBg     = ColorBg;
    g_ColorHeader = ColorHeader;
    g_ColorInput  = ColorInput;

@@ -81,6 +81,19 @@ void OpenSettings()
    ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_BORDER_COLOR, C'60,64,72');
    ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_ALIGN, ALIGN_CENTER);
    
+   curY += 30; // Next line for Risk Money
+   
+   string currency = AccountCurrency();
+   CreateLabel("Set_Lbl_RiskMoney", "Default Risk (" + currency + ")", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
+   ObjectSetInteger(0, PREFIX + "Set_Lbl_RiskMoney", OBJPROP_ZORDER, 102);
+   
+   CreateEdit("Set_Edit_RiskMoney", DoubleToString(g_DefaultRiskMoney, 2), x + w - 80, curY, 60, 25);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_ZORDER, 102);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_BGCOLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_BORDER_COLOR, C'60,64,72');
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_ALIGN, ALIGN_CENTER);
+   
    curY += 40;
    CreateRect("Set_Sep1", x + padX, curY, w - (padX*2), 1, C'50,50,50', BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Set_Sep1", OBJPROP_ZORDER, 102);
