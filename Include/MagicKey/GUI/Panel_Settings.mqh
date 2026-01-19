@@ -4,17 +4,96 @@
 //+------------------------------------------------------------------+
 #property strict
 
-// Forward declarations helpers
-void CreateColorRow(string suffix, string label, int x, int y, color col)
+// Helper to manage visibility based on scroll
+bool IsItemVisible(int relY, int h)
 {
-   CreateLabel("Set_Lbl_" + suffix, label, x, y + 4, 8, g_ColorLabel, "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_" + suffix, OBJPROP_ZORDER, 102);
+   // Visible window relative to content start (0)
+   int viewTop = g_SettingsScrollY;
+   int viewBottom = g_SettingsScrollY + SettingsViewportHeight;
    
-   // Box at relative right of column (approx 130px width per col)
-   int boxX = x + 110; 
-   CreateButton("Set_Btn_Color_" + suffix, "", boxX, y, 25, 25, col, clrNONE);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Color_" + suffix, OBJPROP_ZORDER, 102);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Color_" + suffix, OBJPROP_BORDER_COLOR, C'100,100,100');
+   // Item range
+   int itemTop = relY;
+   int itemBottom = relY + h;
+   
+   // STRICT CHECK to avoid overflow bugs (Header/Footer bleeding)
+   // We hide the item if it's not FULLY within the viewport
+   if(itemTop < viewTop) return false; 
+   if(itemBottom > viewBottom) return false;
+   
+   return true;
+}
+
+// Forward declarations helpers
+void CreateColorRow(string suffix, string label, int x, int y, color col, bool visible)
+{
+   string lblName = "Set_Lbl_" + suffix;
+   string btnName = "Set_Btn_Color_" + suffix;
+   
+   if(visible)
+   {
+      CreateLabel(lblName, label, x, y + 4, 8, g_ColorLabel, "Trebuchet MS");
+      ObjectSetInteger(0, PREFIX + lblName, OBJPROP_ZORDER, 102);
+      SetObjVisible(lblName, true);
+      
+      // Box at relative right of column (approx 130px width per col)
+      int boxX = x + 110; 
+      CreateButton(btnName, "", boxX, y, 25, 25, col, clrNONE);
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 102);
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, C'100,100,100');
+      SetObjVisible(btnName, true);
+   }
+   else
+   {
+      // Hide if exists, or don't create
+      if(ObjectFind(0, PREFIX + lblName) >= 0) SetObjVisible(lblName, false);
+      if(ObjectFind(0, PREFIX + btnName) >= 0) SetObjVisible(btnName, false);
+   }
+}
+
+void DrawSettingsScrollbar(int x, int y)
+{
+   int scrollBarWidth = 10;
+   int trackX = x + 340 - scrollBarWidth - 2; // Right aligned with slight padding
+   int trackY = y + 50;
+   int trackH = SettingsViewportHeight;
+   
+   // 1. Track
+   CreateRect("Set_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
+   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_ZORDER, 115);
+   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorHeader);
+   
+   // 2. Thumb
+   // Calculate Height Ratio
+   // If ContentHeight <= Viewport, Thumb = Track
+   int contentH = MathMax(SettingsContentHeight, 1);
+   double ratio = (double)SettingsViewportHeight / (double)contentH;
+   if(ratio > 1.0) ratio = 1.0;
+   
+   int thumbH = (int)(trackH * ratio);
+   if(thumbH < 30) thumbH = 30; // Min size
+   
+   // Position
+   // ScrollY goes from 0 to (ContentH - ViewportH)
+   // ThumbY goes from 0 to (TrackH - ThumbH)
+   int maxScroll = contentH - SettingsViewportHeight;
+   if(maxScroll <= 0) maxScroll = 1;
+   
+   int maxThumb = trackH - thumbH;
+   
+   double p = (double)g_SettingsScrollY / (double)maxScroll;
+   if(p < 0) p = 0; 
+   if(p > 1) p = 1;
+   
+   int thumbY = trackY + (int)(p * maxThumb);
+   
+   // Use CreateButton to ensure it is interactive/detectable if needed, or Rect to match exact look.
+   // Panel_Main uses CreateRect. Since our interaction logic in GUI_Master is coordinate based, Rect is fine.
+   // But Panel_Settings used Button before. Let's use Button simply for consistency in this file,
+   // BUT style it to look like the Rect (Flat, specific color).
+   
+   CreateButton("Set_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorLabel, clrNONE);
+   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_ZORDER, 116);
+   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorLabel); 
 }
 
 void CloseSettings()
@@ -32,8 +111,8 @@ void OpenSettings()
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
-   int w = 340; // Wider for 2 columns
-   int h = 650; // Taller to accommodate newly added Line options (SL/TP) & Risk R
+   int w = 340; 
+   int h = 50 + SettingsViewportHeight; // Header + Viewport
    
    if(SettingsX == -1)
    {
@@ -52,134 +131,198 @@ void OpenSettings()
    
    // --- HEADER ---
    CreateRect("Set_Header", x, y, w, 50, g_ColorHeader, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 101);
+   ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 110); // Elevated to cover scroll content
    
    CreateLabel("Set_Title", "SETTINGS", x + 20, y + 15, 12, clrWhite, "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + "Set_Title", OBJPROP_ZORDER, 102);
+   ObjectSetInteger(0, PREFIX + "Set_Title", OBJPROP_ZORDER, 111);
    
    CreateButton("Set_Btn_Close", "X", x + w - 35, y + 12, 25, 25, g_ColorHeader, clrGray);
-   ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_ZORDER, 102);
+   ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_ZORDER, 111);
    ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_FONTSIZE, 12);
    ObjectSetInteger(0, PREFIX + "Set_Btn_Close", OBJPROP_BORDER_COLOR, g_ColorHeader);
    
-   // --- CONTENT ---
-   int curY = y + 70;
+   // --- CONTENT GENERATION ---
+   // We define absolute Y relative to the Content Start (0)
+   // Content Start on screen is y + 50
+   
+   int relY = 20; 
    int padX = 20;
+   int contentStartScreenY = y + 50;
+   
+   // Helper lambda substitution
+   #define CHECK_VIS(h) IsItemVisible(relY, h)
+   #define SCREEN_Y (contentStartScreenY + relY - g_SettingsScrollY)
    
    // 1. RISK
-   CreateLabel("Set_Lbl_Cat1", "RISK MANAGEMENT", x + padX, curY, 9, C'100,100,100', "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_Cat1", OBJPROP_ZORDER, 102);
-   curY += 25;
+   bool v = CHECK_VIS(25);
+   string n = "Set_Lbl_Cat1";
+   if(v) { CreateLabel(n, "RISK MANAGEMENT", x + padX, SCREEN_Y, 9, C'100,100,100', "Trebuchet MS Bold"); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
+   else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 25;
    
-   CreateLabel("Set_Lbl_Risk", "Default Risk (%)", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_Risk", OBJPROP_ZORDER, 102);
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_Risk"; string ne = "Set_Edit_Risk";
+   if(v) {
+      CreateLabel(n, "Default Risk (%)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+      CreateEdit(ne, DoubleToString(g_DefaultRisk, 1), x + w - 80, SCREEN_Y, 60, 25);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
+      SetObjVisible(ne, true);
+   } else {
+      if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+      if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
+   }
+   relY += 30;
    
-   CreateEdit("Set_Edit_Risk", DoubleToString(g_DefaultRisk, 1), x + w - 80, curY, 60, 25);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_ZORDER, 102);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_BORDER_COLOR, C'60,64,72');
-   ObjectSetInteger(0, PREFIX + "Set_Edit_Risk", OBJPROP_ALIGN, ALIGN_CENTER);
-   
-   curY += 30; // Next line for Risk Money
-   
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_RiskMoney"; ne = "Set_Edit_RiskMoney";
    string currency = AccountCurrency();
-   CreateLabel("Set_Lbl_RiskMoney", "Default Risk (" + currency + ")", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_RiskMoney", OBJPROP_ZORDER, 102);
+   if(v) {
+      CreateLabel(n, "Default Risk (" + currency + ")", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+      CreateEdit(ne, DoubleToString(g_DefaultRiskMoney, 2), x + w - 80, SCREEN_Y, 60, 25);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
+      SetObjVisible(ne, true);
+   } else {
+      if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+      if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
+   }
+   relY += 30;
    
-   CreateEdit("Set_Edit_RiskMoney", DoubleToString(g_DefaultRiskMoney, 2), x + w - 80, curY, 60, 25);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_ZORDER, 102);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_BORDER_COLOR, C'60,64,72');
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_ALIGN, ALIGN_CENTER);
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_RiskR"; ne = "Set_Edit_RiskR";
+   if(v) {
+      CreateLabel(n, "Default Risk (R)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+      CreateEdit(ne, DoubleToString(g_DefaultRiskR, 2), x + w - 80, SCREEN_Y, 60, 25);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
+      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
+      SetObjVisible(ne, true);
+   } else {
+       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+       if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
+   }
+   relY += 30;
    
-   curY += 30;
-   CreateLabel("Set_Lbl_RiskR", "Default Risk (R)", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_RiskR", OBJPROP_ZORDER, 102);
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_OneRPercent"; ne = "Set_Edit_OneRPercent";
+   if(v) {
+       CreateLabel(n, "1R Value (%)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       CreateEdit(ne, DoubleToString(g_OneRPercent, 2), x + w - 80, SCREEN_Y, 60, 25);
+       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
+       ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
+       ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
+       ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
+       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
+       SetObjVisible(ne, true);
+   } else {
+       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+       if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
+   }
+   relY += 40;
    
-   CreateEdit("Set_Edit_RiskR", DoubleToString(g_DefaultRiskR, 2), x + w - 80, curY, 60, 25);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_ZORDER, 102);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_BORDER_COLOR, C'60,64,72');
-   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_ALIGN, ALIGN_CENTER);
-   
-   curY += 30;
-   CreateLabel("Set_Lbl_OneRPercent", "1R Value (%)", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_OneRPercent", OBJPROP_ZORDER, 102);
-   
-   CreateEdit("Set_Edit_OneRPercent", DoubleToString(g_OneRPercent, 2), x + w - 80, curY, 60, 25);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_ZORDER, 102);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_BORDER_COLOR, C'60,64,72');
-   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_ALIGN, ALIGN_CENTER);
-   
-   curY += 40;
-   CreateRect("Set_Sep1", x + padX, curY, w - (padX*2), 1, C'50,50,50', BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Set_Sep1", OBJPROP_ZORDER, 102);
-   curY += 20;
+   v = CHECK_VIS(1);
+   n = "Set_Sep1";
+   if(v) {
+       CreateRect(n, x + padX, SCREEN_Y, w - (padX*2) - 15, 1, C'50,50,50', BORDER_FLAT);
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 20;
 
    // 2. COLORS
-   CreateLabel("Set_Lbl_Cat2", "INTERFACE COLORS", x + padX, curY, 9, C'100,100,100', "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + "Set_Lbl_Cat2", OBJPROP_ZORDER, 102);
-   curY += 30;
+   v = CHECK_VIS(20);
+   n = "Set_Lbl_Cat2";
+   if(v) {
+       CreateLabel(n, "INTERFACE COLORS", x + padX, SCREEN_Y, 9, C'100,100,100', "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 30;
    
    // Columns
    int col1X = x + padX;
    int col2X = x + (w/2) + 10;
-   int boxSize = 25;
    int rowH = 32;
    
    // Helper to create Color Row
-   // Row 1: Backgrounds
-   CreateColorRow("Bg",      "Panel Background",  col1X, curY, g_ColorBg);
-   CreateColorRow("Head",    "Header Bar",        col2X, curY, g_ColorHeader);
-   curY += rowH;
+   // Row 1
+   v = CHECK_VIS(25);
+   CreateColorRow("Bg", "Panel Background", col1X, SCREEN_Y, g_ColorBg, v);
+   CreateColorRow("Head", "Header Bar", col2X, SCREEN_Y, g_ColorHeader, v);
+   relY += rowH;
    
-   // Row 2: Fields & Chart
-   CreateColorRow("Input",   "Field Background",  col1X, curY, g_ColorInput);
-   CreateColorRow("ChrtBg",  "Chart Background",  col2X, curY, g_ColorChartBg);
-   curY += rowH;
+   // Row 2
+   v = CHECK_VIS(25);
+   CreateColorRow("Input", "Field Background", col1X, SCREEN_Y, g_ColorInput, v);
+   CreateColorRow("ChrtBg", "Chart Background", col2X, SCREEN_Y, g_ColorChartBg, v);
+   relY += rowH;
    
-   // Row 2.5: Chart Text
-   CreateColorRow("ChrtFg",  "Chart Text",        col1X, curY, g_ColorChartFg);
-   curY += rowH;
-
-   // Row 3: Typography
-   CreateColorRow("Txt",     "Primary Text",      col1X, curY, g_ColorText);
-   CreateColorRow("Lbl",     "Secondary Labels",  col2X, curY, g_ColorLabel);
-   curY += rowH;
+   // Row 3
+   v = CHECK_VIS(25);
+   CreateColorRow("ChrtFg", "Chart Text", col1X, SCREEN_Y, g_ColorChartFg, v);
+   CreateColorRow("Txt", "Primary Text", col2X, SCREEN_Y, g_ColorText, v); // Moved Txt here
+   relY += rowH;
    
-   // Row 4: Trading
-   CreateColorRow("Green",   "Buy (Long)",        col1X, curY, g_ColorGreen);
-   CreateColorRow("Red",     "Sell (Short)",      col2X, curY, g_ColorRed);
-   curY += rowH;
+    // Row 4
+   v = CHECK_VIS(25);
+   CreateColorRow("Lbl", "Secondary Labels", col1X, SCREEN_Y, g_ColorLabel, v);
+   CreateColorRow("Green", "Buy (Long)", col2X, SCREEN_Y, g_ColorGreen, v);
+   relY += rowH;
    
-   // Row 4.5: Entry Line & SL Line
-   CreateColorRow("EntLine", "Entry Line",        col1X, curY, g_ColorEntryLine);
-   CreateColorRow("SLLine",  "Stop Loss Line",    col2X, curY, g_ColorSLLine);
-   curY += rowH;
+   // Row 5
+   v = CHECK_VIS(25);
+   CreateColorRow("Red", "Sell (Short)", col1X, SCREEN_Y, g_ColorRed, v);
+   CreateColorRow("EntLine", "Entry Line", col2X, SCREEN_Y, g_ColorEntryLine, v);
+   relY += rowH;
+   
+   // Row 6
+   v = CHECK_VIS(25);
+   CreateColorRow("SLLine", "Stop Loss Line", col1X, SCREEN_Y, g_ColorSLLine, v);
+   CreateColorRow("TPLine", "Take Profit Line", col2X, SCREEN_Y, g_ColorTPLine, v);
+   relY += rowH;
 
-   // Row 4.8: TP Line
-   CreateColorRow("TPLine",  "Take Profit Line",  col1X, curY, g_ColorTPLine);
-   curY += rowH;
-
-   // Row 5: Chart Candles
-   CreateColorRow("CUp",     "Candle Up",         col1X, curY, g_ColorCandleUp);
-   CreateColorRow("CDown",   "Candle Down",       col2X, curY, g_ColorCandleDown);
-   curY += rowH;
-
-   // Row 6: Actions
-   CreateColorRow("BtnVal",  "Button Valid",      col1X, curY, g_ColorBtnValid);
-   CreateColorRow("BtnInv",  "Button Invalid",    col2X, curY, g_ColorBtnInvalid);
+   // Row 7
+   v = CHECK_VIS(25);
+   CreateColorRow("CUp", "Candle Up", col1X, SCREEN_Y, g_ColorCandleUp, v);
+   CreateColorRow("CDown", "Candle Down", col2X, SCREEN_Y, g_ColorCandleDown, v);
+   relY += rowH;
+   
+   // Row 8
+   v = CHECK_VIS(25);
+   CreateColorRow("BtnVal", "Button Valid", col1X, SCREEN_Y, g_ColorBtnValid, v);
+   CreateColorRow("BtnInv", "Button Invalid", col2X, SCREEN_Y, g_ColorBtnInvalid, v);
+   relY += rowH;
+   
+   // --- SCROLLBAR ---
+   DrawSettingsScrollbar(x, y);
+   
+   // --- OVERLAY FOR CLIPPING (Visual Fix for Header) ---
+   // Top Header is already Z=105, Items are Z=102. So Header covers items scrolling up.
+   // But we need to cover items scrolling DOWN past the bottom?
+   // Create a "Footer" mask if needed, but better to just use visibility check which we did.
+   // Note: Items partiality is handled by "CHECK_VIS". If bottom of item > viewBottom, it returns false (hidden).
+   // So items will pop out when fully visible. That's safer for now.
 }
 
 void ToggleSettings()
 {
    if(IsSettingsOpen) CloseSettings();
-   else OpenSettings();
+   else 
+   {
+      g_SettingsScrollY = 0;
+      OpenSettings();
+   }
 }
 
 //+------------------------------------------------------------------+
@@ -199,7 +342,7 @@ void CreateColorPicker()
    
    int w = 250;
    int h = 300;
-   int x = (chartW/2) - (w/2) + 20; // Slight offset from settings
+   int x = (chartW/2) - (w/2) + 20; 
    int y = (chartH/2) - (h/2) + 20;
    
    // Bg

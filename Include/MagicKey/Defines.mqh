@@ -67,11 +67,19 @@ bool     IsSettingsOpen = false;
 string   g_ColorPickerTarget = ""; // Target button to update
 
 // --- SETTINGS DRAG GLOBALS ---
+// --- SETTINGS DRAG GLOBALS ---
 int    SettingsX = -1;
 int    SettingsY = -1;
 bool   IsSettingsDragging = false;
 int    SettingsDragOffsetX = 0;
 int    SettingsDragOffsetY = 0;
+
+// --- SETTINGS SCROLL GLOBALS ---
+int    g_SettingsScrollY = 0;
+bool   IsSettingsScrollDragging = false;
+int    SettingsScrollDragY = 0;
+int    SettingsViewportHeight = 400; // Visible height for content
+int    SettingsContentHeight = 650;  // Total height of content (approx)
 
 // --- MOUSE TRACKING ---
 int    LastMouseX = -1;

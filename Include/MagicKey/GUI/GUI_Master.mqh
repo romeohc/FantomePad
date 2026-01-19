@@ -80,15 +80,15 @@ void GUI_OnChartEvent(const int id,
          g_BlockClick = false; // Reset safety block on new press
          
          // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
-         if(IsDragging || IsSettingsDragging || IsScrollDragging || isOverList)
+         if(IsDragging || IsSettingsDragging || IsScrollDragging || IsSettingsScrollDragging || isOverList)
          {
              ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
          }
       
-         // --- 0. DRAG SCROLLBAR ---
+         // --- 0. DRAG SCROLLBAR (SYMBOL LIST) ---
          if(IsListOpen)
          {
-             if(!IsScrollDragging && !IsDragging && !IsSettingsDragging)
+             if(!IsScrollDragging && !IsDragging && !IsSettingsDragging && !IsSettingsScrollDragging)
              {
                  // Check start drag
                  long tx = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_XDISTANCE);
@@ -102,10 +102,6 @@ void GUI_OnChartEvent(const int id,
                      IsScrollDragging = true;
                      ScrollDragY = mouseY;
                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                 }
-                 else 
-                 {
-                     // Check if clicking on Track to jump? (Optional, skip for now to keep simple)
                  }
              }
              
@@ -125,15 +121,9 @@ void GUI_OnChartEvent(const int id,
                          int maxOffset = total - VisibleListItems; // Approx
                          if (maxOffset < 0) maxOffset = 0;
                          
-                         // How much offset represents 1 pixel of movement?
-                         // offset / maxOffset = thumb_pos / availableTrack
-                         // delta_offset = (deltaY / availableTrack) * maxOffset
-                         
                          double moveRatio = (double)deltaY / (double)availableTrack;
                          int offsetChange = (int)(moveRatio * maxOffset);
                          
-                         // Accumulate changes? No, simpler to step and reset DragY
-                         // This is "relative" drag which is smoother for low res
                          if(MathAbs(offsetChange) >= 1)
                          {
                              g_SymbolListOffset += offsetChange;
@@ -144,10 +134,59 @@ void GUI_OnChartEvent(const int id,
                  }
              }
          }
+         
+         // --- 0.5 DRAG SCROLLBAR (SETTINGS) ---
+         if(IsSettingsOpen)
+         {
+             if(!IsSettingsScrollDragging && !IsDragging && !IsSettingsDragging && !IsScrollDragging)
+             {
+                  long tx = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_XDISTANCE);
+                  long ty = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YDISTANCE);
+                  long tw = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_XSIZE);
+                  long th = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YSIZE);
+                  
+                  if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
+                  {
+                      IsSettingsScrollDragging = true;
+                      SettingsScrollDragY = mouseY;
+                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                  }
+             }
+             
+             if(IsSettingsScrollDragging)
+             {
+                 int deltaY = mouseY - SettingsScrollDragY;
+                 if(deltaY != 0)
+                 {
+                     long trackH = SettingsViewportHeight;
+                     long thumbH = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YSIZE);
+                     int availableTrack = (int)(trackH - thumbH);
+                     
+                     if(availableTrack > 0)
+                     {
+                         int maxScroll = SettingsContentHeight - SettingsViewportHeight;
+                         if(maxScroll < 0) maxScroll = 0;
+                         
+                         double moveRatio = (double)deltaY / (double)availableTrack;
+                         int offsetChange = (int)(moveRatio * maxScroll);
+                         
+                         if(MathAbs(offsetChange) >= 1)
+                         {
+                             g_SettingsScrollY += offsetChange;
+                             if(g_SettingsScrollY < 0) g_SettingsScrollY = 0;
+                             if(g_SettingsScrollY > maxScroll) g_SettingsScrollY = maxScroll;
+                             
+                             SettingsScrollDragY = mouseY;
+                             OpenSettings();
+                         }
+                     }
+                 }
+             }
+         }
       
          // --- 1. DRAG SETTINGS PANEL ---
          bool processedSettings = false;
-         if(IsSettingsOpen && !IsDragging && !IsScrollDragging)
+         if(IsSettingsOpen && !IsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
          {
             if(!IsSettingsDragging)
             {
@@ -180,7 +219,7 @@ void GUI_OnChartEvent(const int id,
          }
          
          // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging && !IsScrollDragging)
+         if(!processedSettings && !IsSettingsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
          {
             if(!IsDragging)
             {
@@ -227,6 +266,11 @@ void GUI_OnChartEvent(const int id,
          {
              IsScrollDragging = false;
              g_BlockClick = true; // Block subsequent click event from this release
+         }
+         if(IsSettingsScrollDragging)
+         {
+             IsSettingsScrollDragging = false;
+             g_BlockClick = true;
          }
          
          // Re-enable chart scroll ONLY if not over list and not in other modal state
