@@ -318,14 +318,19 @@ void GUI_OnChartEvent(const int id,
       // --- TOGGLE RISK MODE (% / CURRENCY) ---
       if(sparam == PREFIX + "Label_RiskPerc")
       {
-         RiskInCurrency = !RiskInCurrency;
+         RiskMode++;
+         if(RiskMode > 2) RiskMode = 0;
          
          // RESET to Default Value
-         if(RiskInCurrency)
+         if(RiskMode == 1) // Currency
          {
             ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskMoney, 2));
          }
-         else
+         else if(RiskMode == 2) // R
+         {
+             ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskR, 2));
+         }
+         else // %
          {
             ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRisk, 1));
          }
@@ -615,6 +620,30 @@ void GUI_OnChartEvent(const int id,
           if(r > 0) 
           {
              g_DefaultRiskMoney = r;
+             SaveConfigToFile();
+             CreatePanel(); 
+             UpdateUIMode();
+          }
+      }
+      
+      if(sparam == PREFIX + "Set_Edit_RiskR")
+      {
+          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskR", OBJPROP_TEXT));
+          if(r > 0) 
+          {
+             g_DefaultRiskR = r;
+             SaveConfigToFile();
+             CreatePanel(); 
+             UpdateUIMode();
+          }
+      }
+      
+      if(sparam == PREFIX + "Set_Edit_OneRPercent")
+      {
+          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_TEXT));
+          if(r > 0) 
+          {
+             g_OneRPercent = r;
              SaveConfigToFile();
              CreatePanel(); 
              UpdateUIMode();

@@ -7,6 +7,8 @@
 //--- Inputs externes (Configuration de base)
 input double   DefaultRisk = 1.0;      // Risque par défaut (%)
 input double   DefaultRiskMoney = 100.0; // Risque par défaut (Devise)
+input double   DefaultRiskR = 1.0;     // Risque par défaut (R)
+input double   OneRPercent = 2.0;      // Valeur de 1R en %
 input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
@@ -36,7 +38,7 @@ string ConfigFileName = "MagicKey_Config.txt";
 int    CurrentTypeIndex = 0; // 0=Market, 1=BuyLim, 2=SellLim, 3=BuyStop, 4=SellStop
 
 int    CurrentDirection = 0; // 0=Buy, 1=Sell (utilisé pour le cycle toggle)
-bool   RiskInCurrency   = false; // Nouvelle variable : false=%, true=Devise du compte
+int    RiskMode   = 0; // 0=%, 1=Currency, 2=Risk R
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
 int    PanelWidth  = 280; // Slightly wider for comfort
 bool   IsListOpen = false; // État de la liste déroulante
@@ -52,6 +54,8 @@ int    DragOffsetY = 0;      // Offset Y pour le drag
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
 double   g_DefaultRiskMoney;
+double   g_DefaultRiskR;
+double   g_OneRPercent;
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText, g_ColorLabel;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg, g_ColorChartFg;
 color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine;
@@ -82,6 +86,8 @@ void InitGlobals()
 {
    g_DefaultRisk = DefaultRisk;
    g_DefaultRiskMoney = DefaultRiskMoney;
+   g_DefaultRiskR = DefaultRiskR;
+   g_OneRPercent = OneRPercent;
    g_ColorBg     = ColorBg;
    g_ColorHeader = ColorHeader;
    g_ColorInput  = ColorInput;

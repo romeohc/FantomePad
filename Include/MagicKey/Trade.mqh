@@ -172,12 +172,19 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
    // Calcul du risque en argent
    double riskMoney = 0;
    
-   if(RiskInCurrency)
+   if(RiskMode == 1) // Currency
    {
       // Risque exprimé directement en devise du compte
       riskMoney = riskValue;
    }
-   else
+   else if(RiskMode == 2) // Risk R (Factor)
+   {
+       // Convertir R en % du solde
+       // Exemple: Input 1.0 R -> 1.0 * g_OneRPercent (2%) -> 2% risk
+       double riskPrc = riskValue * g_OneRPercent;
+       riskMoney = AccountBalance() * (riskPrc / 100.0);
+   }
+   else // Percentage (RiskMode == 0)
    {
       // Risque exprimé en pourcentage du solde
       riskMoney = AccountBalance() * (riskValue / 100.0);

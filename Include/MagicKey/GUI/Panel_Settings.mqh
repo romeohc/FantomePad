@@ -33,7 +33,7 @@ void OpenSettings()
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
    int w = 340; // Wider for 2 columns
-   int h = 580; // Taller to accommodate newly added Line options (SL/TP)
+   int h = 650; // Taller to accommodate newly added Line options (SL/TP) & Risk R
    
    if(SettingsX == -1)
    {
@@ -93,6 +93,28 @@ void OpenSettings()
    ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_COLOR, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_BORDER_COLOR, C'60,64,72');
    ObjectSetInteger(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_ALIGN, ALIGN_CENTER);
+   
+   curY += 30;
+   CreateLabel("Set_Lbl_RiskR", "Default Risk (R)", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
+   ObjectSetInteger(0, PREFIX + "Set_Lbl_RiskR", OBJPROP_ZORDER, 102);
+   
+   CreateEdit("Set_Edit_RiskR", DoubleToString(g_DefaultRiskR, 2), x + w - 80, curY, 60, 25);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_ZORDER, 102);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_BGCOLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_BORDER_COLOR, C'60,64,72');
+   ObjectSetInteger(0, PREFIX + "Set_Edit_RiskR", OBJPROP_ALIGN, ALIGN_CENTER);
+   
+   curY += 30;
+   CreateLabel("Set_Lbl_OneRPercent", "1R Value (%)", x + padX, curY + 3, 9, g_ColorLabel, "Trebuchet MS");
+   ObjectSetInteger(0, PREFIX + "Set_Lbl_OneRPercent", OBJPROP_ZORDER, 102);
+   
+   CreateEdit("Set_Edit_OneRPercent", DoubleToString(g_OneRPercent, 2), x + w - 80, curY, 60, 25);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_ZORDER, 102);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_BGCOLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_BORDER_COLOR, C'60,64,72');
+   ObjectSetInteger(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_ALIGN, ALIGN_CENTER);
    
    curY += 40;
    CreateRect("Set_Sep1", x + padX, curY, w - (padX*2), 1, C'50,50,50', BORDER_FLAT);

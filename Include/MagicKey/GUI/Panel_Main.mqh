@@ -158,7 +158,8 @@ void UpdateUIMode()
    // Positionnement du symbole % à l'intérieur de la case Risk
    // Positionnement du symbole % ou Devise à l'intérieur de la case Risk
    string riskUnit = "%";
-   if(RiskInCurrency) riskUnit = AccountCurrency();
+   if(RiskMode == 1) riskUnit = AccountCurrency();
+   else if(RiskMode == 2) riskUnit = "R";
    ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_TEXT, riskUnit);
    
    int unitWidth = 35; 
