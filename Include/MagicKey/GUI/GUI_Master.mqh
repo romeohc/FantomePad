@@ -550,6 +550,29 @@ void GUI_OnChartEvent(const int id,
          return;
       }
 
+      // --- CLICK ON ACTIVE ORDER (INFO PANEL) ---
+      if(StringFind(sparam, PREFIX + "Info_Ord_") >= 0)
+      {
+          string symObj = sparam;
+          // Normalise to Symbol Object to extract text
+          // We look for _Bg_ or _Typ_ because the suffix comes with an underscore (e.g. _0)
+          // and the prefix part ends with underscore (Ord_). 
+          // Pattern is: ...Info_Ord_Bg_X
+          
+          if(StringFind(symObj, "_Bg_") > 0) StringReplace(symObj, "_Bg_", "_Sym_");
+          else if(StringFind(symObj, "_Typ_") > 0) StringReplace(symObj, "_Typ_", "_Sym_");
+          
+          string symbol = ObjectGetString(0, symObj, OBJPROP_TEXT);
+          
+          // Switch Chart if different
+          if(symbol != "" && symbol != Symbol())
+          {
+             ChartSetSymbolPeriod(0, symbol, Period());
+             // Note: Changing symbol triggers EA reload
+          }
+          return;
+      }
+
       // --- COLOR PICKER EVENTS ---
       // 1. Click on a Settings Color Button -> Open Picker
       if(StringFind(sparam, PREFIX + "Set_Btn_Color_") >= 0)
