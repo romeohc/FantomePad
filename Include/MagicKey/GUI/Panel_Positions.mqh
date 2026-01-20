@@ -8,6 +8,7 @@
 int    g_LastPosTicket = -1;
 double g_LastPosSL = -1.0;
 double g_LastPosTP = -1.0;
+double g_LastPosEntry = -1.0;
 bool   g_PosBE_Active = false;
 
 //+------------------------------------------------------------------+
@@ -83,6 +84,16 @@ void UpdatePositionsLayout()
    int lblH     = 15;
    int sectionGap = 15;
    
+   // --- Entry Price ---
+   SetObjPosition("Pos_Lbl_Entry", startX + paddingX, currentY);
+   currentY += lblH;
+   
+   SetObjPosition("Pos_Edit_Entry", startX + paddingX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_XSIZE, width - (paddingX * 2));
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_YSIZE, inputH);
+   
+   currentY += inputH + sectionGap;
+
    // SL & BE
    SetObjPosition("Pos_Lbl_SL", startX + paddingX, currentY);
    currentY += lblH;
@@ -200,7 +211,11 @@ void CreatePositionsPanel()
    // Cleanup pre-previous objects just in case
    if(ObjectFind(0, PREFIX + "Pos_Val_RiskMoney") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_RiskMoney");
    
-   // 4. Protection (SL & BE)
+   // 4. Entry Price
+   CreateLabel("Pos_Lbl_Entry", "Entry Price", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateEdit("Pos_Edit_Entry", "0", 0, 0, width - 40, 28);
+
+   // 5. Protection (SL & BE)
    CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
    
@@ -263,6 +278,7 @@ void UpdatePositionsValues()
              double profit = OrderProfit();
              double comm = OrderCommission();
              double swap = OrderSwap();
+             double open = OrderOpenPrice();
              double sl = OrderStopLoss();
              double tp = OrderTakeProfit();
              
@@ -328,6 +344,12 @@ void UpdatePositionsValues()
                  g_LastPosTP = tp;
              }
              
+             if(ticketChanged || MathAbs(open - g_LastPosEntry) > Point)
+             {
+                 ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, DoubleToString(open, Digits));
+                 g_LastPosEntry = open;
+             }
+             
              if(ticketChanged)
              {
                  g_PosBE_Active = false;
@@ -350,6 +372,21 @@ void UpdatePositionsValues()
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
+             
+             // Enable/Disable Entry Price Edit based on Type
+             if(type <= 1) // Market Order (OP_BUY=0, OP_SELL=1)
+             {
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, true);
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorBg); // Visually distinct
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorLabel); // Visually distinct
+             }
+             else // Pending Order
+             {
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, false);
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorInput);
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText);
+             }
+             
              return; 
          }
       }
@@ -366,6 +403,7 @@ void UpdatePositionsValues()
    ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, "0");
+   ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, "-");
@@ -391,6 +429,9 @@ void TogglePositionsPanel(bool visible)
    
    SetObjVisible("Pos_Lbl_Profit", visible);
    SetObjVisible("Pos_Val_Profit", visible);
+   
+   SetObjVisible("Pos_Lbl_Entry", visible);
+   SetObjVisible("Pos_Edit_Entry", visible);
    
    SetObjVisible("Pos_Lbl_SL", visible);
    SetObjVisible("Pos_Edit_SL", visible);

@@ -805,6 +805,13 @@ void GUI_OnChartEvent(const int id,
                      
                      double inputSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
                      double inputTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+                     double inputOpen = currentOpen;
+
+                     // Only update Entry Price for Pending Orders
+                     if(OrderType() > 1) 
+                     {
+                        inputOpen = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
+                     }
                      
                      // Check if changed
                      // If BE Active, override Input SL
@@ -813,13 +820,14 @@ void GUI_OnChartEvent(const int id,
                         inputSL = OrderOpenPrice();
                      }
 
-                     if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point)
+                     if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point || MathAbs(inputOpen - currentOpen) > Point)
                      {
-                         bool res = OrderModify(SelectedPositionTicket, currentOpen, inputSL, inputTP, (datetime)0, clrBlue);
+                         bool res = OrderModify(SelectedPositionTicket, inputOpen, inputSL, inputTP, (datetime)0, clrBlue);
                          if(res)
                          {
                              g_LastPosSL = inputSL;
                              g_LastPosTP = inputTP;
+                             g_LastPosEntry = inputOpen;
                              
                              // Reset BE State
                              if(g_PosBE_Active)
