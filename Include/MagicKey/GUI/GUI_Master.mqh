@@ -11,6 +11,7 @@
 #include "Panel_Settings.mqh"
 #include "Panel_Info.mqh"
 #include "Panel_Manager.mqh"
+#include "Panel_Positions.mqh"
 
 //+------------------------------------------------------------------+
 //| INITIALISATION GUI GLOBALE                                       |
@@ -20,6 +21,7 @@ void GUI_OnInit()
    CreatePanel();
    CreateInfoPanel();
    CreateManagerPanel(); 
+   CreatePositionsPanel();
    UpdateUIMode(); 
 }
 
@@ -29,6 +31,7 @@ void GUI_OnInit()
 void GUI_OnTick()
 {
    UpdateInfoPanel();
+   UpdatePositionsValues();
 }
 
 //+------------------------------------------------------------------+
@@ -45,6 +48,7 @@ void GUI_OnChartEvent(const int id,
       CreatePanel();
       CreateInfoPanel();
       CreateManagerPanel();
+      CreatePositionsPanel();
       UpdateUIMode();
       if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
    }
@@ -260,9 +264,38 @@ void GUI_OnChartEvent(const int id,
                processedInfo = true;
             }
          }
+
+         // --- 1.6 DRAG POSITIONS PANEL ---
+         bool processedPos = false;
+         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !IsDragging && !IsScrollDragging)
+         {
+            if(!IsPositionsDragging)
+            {
+               // Detection Positions Panel
+               int posW = 220; // Matches CreatePositionsPanel
+               long posH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
+               if(posH < 50) posH = 150;
+               
+               if(mouseX >= PositionsPanelX && mouseX <= PositionsPanelX + posW && mouseY >= PositionsPanelY && mouseY <= PositionsPanelY + posH)
+               {
+                  IsPositionsDragging = true;
+                  PositionsDragOffsetX = mouseX - PositionsPanelX;
+                  PositionsDragOffsetY = mouseY - PositionsPanelY;
+                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+               }
+            }
+            
+            if(IsPositionsDragging)
+            {
+               PositionsPanelX = mouseX - PositionsDragOffsetX;
+               PositionsPanelY = mouseY - PositionsDragOffsetY;
+               UpdatePositionsLayout();
+               processedPos = true;
+            }
+         }
          
          // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !IsScrollDragging && !IsSettingsScrollDragging)
+         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
          {
             if(!IsDragging)
             {
@@ -312,6 +345,10 @@ void GUI_OnChartEvent(const int id,
          if(IsInfoDragging)
          {
             IsInfoDragging = false;
+         }
+         if(IsPositionsDragging)
+         {
+            IsPositionsDragging = false;
          }
          if(IsScrollDragging)
          {
@@ -452,7 +489,17 @@ void GUI_OnChartEvent(const int id,
          return;
       }
       
-      // 2. Toggle Info Panel
+      // 2. Button Positions Panel (Toggle Positions)
+      if(sparam == PREFIX + "Mgr_Btn_Pos")
+      {
+         IsPositionsPanelVisible = !IsPositionsPanelVisible;
+         TogglePositionsPanel(IsPositionsPanelVisible);
+         UpdateManagerPanel(); // Refresh button state
+         EffectButton(sparam);
+         return;
+      }
+
+      // 3. Toggle Info Panel
       if(sparam == PREFIX + "Mgr_Btn_Info")
       {
          IsInfoPanelVisible = !IsInfoPanelVisible;
@@ -631,6 +678,169 @@ void GUI_OnChartEvent(const int id,
 
       // --- FIN GESTION SÉLECTEUR ---
 
+      // --- POSITION SELECTOR EVENTS ---
+      
+      // 1. Clic sur le bouton de selection de position
+      if(sparam == PREFIX + "Pos_Btn_Select")
+      {
+         ObjectSetInteger(0, sparam, OBJPROP_STATE, false); 
+         TogglePositionList();
+         ChartRedraw();
+         return; 
+      }
+      
+      // 2. Clic sur un item de la liste des positions
+      if(StringFind(sparam, PREFIX + "PosListItem_") >= 0 && sparam != PREFIX + "PosListItem_None")
+      {
+         string text = ObjectGetString(0, sparam, OBJPROP_TEXT);
+         // Format is "#Ticket Type Size" e.g. "#123456 BUY 1.00"
+         // Extract Ticket
+         int hashIndex = StringFind(text, "#");
+         int spaceIndex = StringFind(text, " ");
+         if(hashIndex >= 0 && spaceIndex > hashIndex)
+         {
+             string sTicket = StringSubstr(text, hashIndex + 1, spaceIndex - hashIndex - 1);
+             SelectedPositionTicket = (int)StringToInteger(sTicket);
+             
+             ClosePositionList();
+             UpdatePositionsValues(); 
+             ChartRedraw();
+             return;
+         }
+      }
+      
+      // Close List if clicked outside
+      if(IsPosListOpen && 
+         StringFind(sparam, PREFIX + "PosListItem_") < 0 && 
+         sparam != PREFIX + "Pos_Btn_Select" &&
+         sparam != PREFIX + "PosListScrollTrack" &&
+         sparam != PREFIX + "PosListScrollThumb")
+      {
+         ClosePositionList();
+      }
+      
+      // --- PARTIAL CLOSE SHORTCUTS ---
+      if(sparam == PREFIX + "Pos_Btn_25") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "25");
+      if(sparam == PREFIX + "Pos_Btn_50") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "50");
+      if(sparam == PREFIX + "Pos_Btn_100") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "100");
+      
+      // --- BE BUTTON LOGIC ---
+      if(sparam == PREFIX + "Pos_Btn_BE")
+      {
+         g_PosBE_Active = !g_PosBE_Active;
+         
+         color bg = g_PosBE_Active ? g_ColorBtnValid : g_ColorInput;
+         color txt = g_PosBE_Active ? clrWhite : g_ColorText;
+         
+         ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, bg);
+         ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, txt);
+         
+         EffectButton(sparam);
+         return;
+      }
+      
+      // --- VALIDATE ACTION ---
+      if(sparam == PREFIX + "Pos_Btn_Validate")
+      {
+         EffectButton(sparam);
+         if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+         {
+             if(OrderCloseTime() == 0) // Must be open
+             {
+                 // 1. HANDLE CLOSE
+                 double pct = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+                 if(pct > 0)
+                 {
+                     double lots = OrderLots();
+                     double toClose = lots * (pct / 100.0);
+                     
+                     // Normalize Lots
+                     double step = MarketInfo(OrderSymbol(), MODE_LOTSTEP);
+                     double min = MarketInfo(OrderSymbol(), MODE_MINLOT);
+                     
+                     // Round to step
+                     toClose = MathFloor(toClose / step) * step;
+                     
+                     if(toClose < min) toClose = min; // At least close min
+                     if(toClose > lots) toClose = lots; // Max all
+                     
+                     // If 100%, ensure close all despite rounding issues
+                     if(pct >= 99.9) toClose = lots; 
+                     
+                     // Close
+                     int cmd = OrderType();
+                     double closePrice = (cmd == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+                     
+                     bool closed = OrderClose(SelectedPositionTicket, toClose, closePrice, 10, clrGray);
+                     if(closed)
+                     {
+                         ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
+                         if(toClose >= lots) 
+                         {
+                             SelectedPositionTicket = -1; // Fully Closed
+                             UpdatePositionsValues();
+                             ChartRedraw();
+                             return; // Stop here
+                         }
+                         
+                         // Re-select if partial
+                         OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET);
+                     }
+                     else
+                     {
+                         Alert("Close Error: " + IntegerToString(GetLastError()));
+                     }
+                 }
+                 
+                 // 2. HANDLE MODIFY (SL/TP)
+                 // Re-read incase partial close changed something (unlikely for SL/TP values but good practice)
+                 if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+                 {
+                     double currentSL = OrderStopLoss();
+                     double currentTP = OrderTakeProfit();
+                     double currentOpen = OrderOpenPrice();
+                     
+                     double inputSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+                     double inputTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+                     
+                     // Check if changed
+                     // If BE Active, override Input SL
+                     if(g_PosBE_Active)
+                     {
+                        inputSL = OrderOpenPrice();
+                     }
+
+                     if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point)
+                     {
+                         bool res = OrderModify(SelectedPositionTicket, currentOpen, inputSL, inputTP, 0, Blue);
+                         if(res)
+                         {
+                             g_LastPosSL = inputSL;
+                             g_LastPosTP = inputTP;
+                             
+                             // Reset BE State
+                             if(g_PosBE_Active)
+                             {
+                                 g_PosBE_Active = false;
+                                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+                             }
+                         }
+                         else
+                         {
+                             Alert("Modify Error: " + IntegerToString(GetLastError()));
+                         }
+                     }
+                 }
+            }
+         }
+         
+         UpdatePositionsValues();
+         ChartRedraw();
+      }
+      
+      // --- END POSITION SELECTOR EVENTS ---
+
       // Cycle Type d'Ordre
       if(sparam == PREFIX + "Btn_Type")
       {
@@ -788,6 +998,9 @@ void GUI_OnChartEvent(const int id,
          AutoSwitchOrderType(); // Vérification logique après édition manuelle
          UpdateCalculatedLot(); // Recalcul si SL, TP, Entry ou Risk change
       }
+      
+      // --- UPDATE POSITION SL/TP (Old Auto Logic Removed) ---
+      // We do nothing here now, waiting for Validate button.
    }
    
    // --- SYNCHRONISATION GRAPHIQUE -> PANEL (Déplacement Lignes) ---

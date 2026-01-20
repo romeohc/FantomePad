@@ -53,12 +53,26 @@ bool   IsDragging = false;   // État du drag-and-drop
 int    DragOffsetX = 0;      // Offset X pour le drag
 int    DragOffsetY = 0;      // Offset Y pour le drag
 
+
 // --- INFO PANEL GLOBALS ---
 int    InfoPanelX = 20;      // Position X du panel info (Coin gauche par défaut)
 int    InfoPanelY = 70;      // Position Y du panel info (Decalé sous le Manager)
 bool   IsInfoDragging = false;
 int    InfoDragOffsetX = 0;
 int    InfoDragOffsetY = 0;
+
+// --- POSITIONS PANEL GLOBALS ---
+bool   IsPositionsPanelVisible = false;
+int    PositionsPanelX = 260; // Default position
+int    PositionsPanelY = 70;
+bool   IsPositionsDragging = false;
+int    PositionsDragOffsetX = 0;
+int    PositionsDragOffsetY = 0;
+int    SelectedPositionTicket = -1; // -1 = None
+bool   IsPosListOpen = false;
+int    g_PosListOffset = 0;
+int    g_PosListMaxVisible = 10;
+
 
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;

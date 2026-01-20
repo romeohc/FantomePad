@@ -7,8 +7,8 @@
 // --- Manager Panel Globals ---
 int MgrPanelX = 20; // Top Left (offset slightly)
 int MgrPanelY = 20; 
-int MgrPanelW = 290;
-int MgrPanelH = 40;
+   int MgrPanelW = 350; 
+   int MgrPanelH = 40;
 
 void CreateManagerPanel()
 {
@@ -26,17 +26,22 @@ void CreateManagerPanel()
    color bgTrade = IsMainPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, clrWhite);
    
-   // Button 2: Info Panel (Toggle Account Info)
+   // Button 2: Positions Panel (Toggle Positions)
    int currentX = startX + btnW + margin;
+   color bgPos = IsPositionsPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
+   CreateButton("Mgr_Btn_Pos", "Pos", currentX, startY, btnW, btnH, bgPos, clrWhite);
+
+   // Button 3: Info Panel (Toggle Account Info)
+   currentX += btnW + margin;
    color bgInfo = IsInfoPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Info", "Info", currentX, startY, btnW, btnH, bgInfo, clrWhite);
    
-   // Button 3: Settings (Toggle Config)
+   // Button 4: Settings (Toggle Config)
    currentX += btnW + margin;
    color bgSet = IsSettingsOpen ? g_ColorGreen : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Settings", "Set", currentX, startY, btnW, btnH, bgSet, clrWhite);
 
-   // Button 4: Symbol Select
+   // Button 5: Symbol Select
    currentX += btnW + margin;
    int symBtnW = 100; // Wider for symbol name
    // We reuse the ID "Btn_SymbolSelect" so GUI_Master logic works
