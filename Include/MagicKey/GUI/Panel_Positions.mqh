@@ -63,6 +63,20 @@ void UpdatePositionsLayout()
    SetObjPosition("Pos_Val_Swap", startX + paddingX, currentY);
    SetObjPosition("Pos_Val_Comm", startX + paddingX + colW + colGap, currentY);
    
+   currentY += 20 + 10;
+   
+   // Row 3: Risk
+   SetObjPosition("Pos_Lbl_Risk", startX + paddingX, currentY);
+   
+   currentY += lblH;
+   
+   // 3 Value Columns
+   int riskColW = (width - (paddingX * 2)) / 3;
+   
+   SetObjPosition("Pos_Val_Risk", startX + paddingX, currentY);
+   SetObjPosition("Pos_Val_RiskR", startX + paddingX + riskColW, currentY);
+   SetObjPosition("Pos_Val_RiskMoney", startX + paddingX + (riskColW * 2), currentY);
+   
    currentY += 20 + sectionGap;
    
    // 4. SL & BE Section (Swapped TP with BE)
@@ -166,6 +180,14 @@ void CreatePositionsPanel()
    CreateLabel("Pos_Lbl_Comm", "Commission", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Pos_Val_Comm", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
    
+   // Risk Section (Updated)
+   CreateLabel("Pos_Lbl_Risk", "Risk", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   
+   // 3 labels corresponding to %, R, Currency
+   CreateLabel("Pos_Val_Risk", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Val_RiskR", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Val_RiskMoney", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   
    // 4. Protection (SL & BE)
    CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
@@ -244,6 +266,45 @@ void UpdatePositionsValues()
              string sSwap = DoubleToString(swap, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, sSwap);
              
+             // --- RISK CALCULATION ---
+             string sRisk = "-";
+             string sRiskR = "-";
+             string sRiskMoney = "-";
+             
+             if(sl > 0)
+             {
+                 double tickSize = MarketInfo(Symbol(), MODE_TICKSIZE);
+                 double tickVal  = MarketInfo(Symbol(), MODE_TICKVALUE);
+                 if(tickSize > 0)
+                 {
+                     double dist = MathAbs(OrderOpenPrice() - sl);
+                     double riskValMoney = (dist / tickSize) * tickVal * lots;
+                     
+                     sRiskMoney = DoubleToString(riskValMoney, 2) + " " + AccountCurrency();
+                     
+                     double bal = AccountBalance();
+                     if(bal > 0) {
+                        double riskPrc = (riskValMoney / bal) * 100.0;
+                        sRisk = DoubleToString(riskPrc, 2) + " %";
+                        
+                        if(g_OneRPercent > 0) {
+                           double riskR = riskPrc / g_OneRPercent;
+                           sRiskR = DoubleToString(riskR, 2) + " R";
+                        }
+                     }
+                 }
+             }
+             else 
+             {
+                sRisk = "No SL";
+                sRiskR = "-"; 
+                sRiskMoney = "-";
+             }
+             
+             ObjectSetString(0, PREFIX + "Pos_Val_Risk", OBJPROP_TEXT, sRisk);
+             ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, sRiskR);
+             ObjectSetString(0, PREFIX + "Pos_Val_RiskMoney", OBJPROP_TEXT, sRiskMoney);
+             
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              
              if(ticketChanged || MathAbs(sl - g_LastPosSL) > Point)
@@ -284,6 +345,9 @@ void UpdatePositionsValues()
    ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_Risk", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_RiskMoney", OBJPROP_TEXT, "-");
    ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, g_ColorText);
 }
 
@@ -317,6 +381,11 @@ void TogglePositionsPanel(bool visible)
    
    SetObjVisible("Pos_Lbl_Swap", visible);
    SetObjVisible("Pos_Val_Swap", visible);
+   
+   SetObjVisible("Pos_Lbl_Risk", visible);
+   SetObjVisible("Pos_Val_Risk", visible);
+   SetObjVisible("Pos_Val_RiskR", visible);
+   SetObjVisible("Pos_Val_RiskMoney", visible);
    
    SetObjVisible("Pos_Lbl_Close", visible);
    SetObjVisible("Pos_Btn_25", visible);
