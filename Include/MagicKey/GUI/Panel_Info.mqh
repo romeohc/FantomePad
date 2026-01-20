@@ -44,28 +44,32 @@ void UpdateInfoLayout()
    ObjectSetInteger(0, PREFIX + "Info_Bg", OBJPROP_XSIZE, width);
    ObjectSetInteger(0, PREFIX + "Info_Header", OBJPROP_XSIZE, width);
    
-   // --- ACCOUNT SECTION ---
-   // Balance (Main)
-   SetObjPosition("Info_Lbl_Balance", startX + paddingX, currentY);
-   currentY += 14; 
-   SetObjPosition("Info_Val_Balance", startX + paddingX, currentY);
-   currentY += 30; // More space after Balance
+   // --- ACCOUNT SECTION (GROUPED) ---
+   int statsBgH = 110;
    
-   // Equity & Margin (Side by Side)
-   int secondColX = startX + (width / 2) + 5;
-   int firstColX  = startX + paddingX;
+   SetObjPosition("Info_Stats_Bg", startX + paddingX, currentY);
+   ObjectSetInteger(0, PREFIX + "Info_Stats_Bg", OBJPROP_XSIZE, width - (paddingX*2));
+   ObjectSetInteger(0, PREFIX + "Info_Stats_Bg", OBJPROP_YSIZE, statsBgH);
+   
+   int statsDescX = startX + paddingX + 15;
+   int statsTopY  = currentY + 10;
+   
+   // Balance (Row 1)
+   SetObjPosition("Info_Lbl_Balance", statsDescX, statsTopY);
+   SetObjPosition("Info_Val_Balance", statsDescX, statsTopY + 15);
+   
+   int row2Y = statsTopY + 45;
+   int colW  = (width - (paddingX*2) - 30) / 2;
    
    // Equity (Left)
-   SetObjPosition("Info_Lbl_Equity", firstColX, currentY);
+   SetObjPosition("Info_Lbl_Equity", statsDescX, row2Y);
+   SetObjPosition("Info_Val_Equity", statsDescX, row2Y + 15);
+   
    // Margin (Right)
-   SetObjPosition("Info_Lbl_Margin", secondColX, currentY);
+   SetObjPosition("Info_Lbl_Margin", statsDescX + colW, row2Y);
+   SetObjPosition("Info_Val_Margin", statsDescX + colW, row2Y + 15);
    
-   currentY += 14;
-   
-   SetObjPosition("Info_Val_Equity", firstColX, currentY);
-   SetObjPosition("Info_Val_Margin", secondColX, currentY);
-   
-   currentY += 30; // Space before separator
+   currentY += statsBgH + 15;
    
    // --- SEPARATOR ---
    SetObjPosition("Info_Sep", startX + paddingX, currentY);
@@ -115,23 +119,26 @@ void CreateInfoPanel()
    // 1. Fond & Header
    CreateRect("Info_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Info_Header", 0, 0, width, 45, g_ColorHeader, BORDER_FLAT);
-   CreateLabel("Info_Title", "ACCOUNT OVERVIEW", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Info_Title", "Account Overview", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Account Data
+   CreateRect("Info_Stats_Bg", 0, 0, width - 40, 110, g_ColorInput, BORDER_FLAT); // Grouping Box
+   ObjectSetInteger(0, PREFIX + "Info_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
+
    CreateLabel("Info_Lbl_Balance", "BALANCE", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Info_Val_Balance", "...", 0, 0, 14, clrWhite, "Trebuchet MS Bold"); // Bigger, White
+   CreateLabel("Info_Val_Balance", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold"); // Reduced to 9
    
    CreateLabel("Info_Lbl_Equity", "EQUITY", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Info_Val_Equity", "...", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Info_Val_Equity", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    CreateLabel("Info_Lbl_Margin", "MARGIN", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Info_Val_Margin", "...", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Info_Val_Margin", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // 3. Separator Line
    CreateRect("Info_Sep", 0, 0, 100, 1, g_ColorHeader, BORDER_FLAT);
    
    // 4. SubHeader
-   CreateLabel("Info_SubTitle_Pos", "ACTIVE ORDERS", 0, 0, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    
    UpdateInfoLayout();
    UpdateInfoPanel();
@@ -157,6 +164,9 @@ void UpdateInfoPanel()
    ObjectSetString(0, PREFIX + "Info_Val_Balance", OBJPROP_TEXT, sBal);
    ObjectSetString(0, PREFIX + "Info_Val_Equity", OBJPROP_TEXT, sEqu);
    ObjectSetString(0, PREFIX + "Info_Val_Margin", OBJPROP_TEXT, sMarg);
+   
+   // Ensure colors are consistent if they were changed elsewhere
+   ObjectSetInteger(0, PREFIX + "Info_Val_Balance", OBJPROP_COLOR, g_ColorText);
    
    // --- ORDER LIST UPDATES ---
    int total = OrdersTotal();
@@ -224,6 +234,7 @@ void ToggleInfoPanel(bool visible)
    SetObjVisible("Info_Header", visible);
    SetObjVisible("Info_Title", visible);
    
+   SetObjVisible("Info_Stats_Bg", visible); // Show Group Box
    SetObjVisible("Info_Lbl_Balance", visible);
    SetObjVisible("Info_Val_Balance", visible);
    SetObjVisible("Info_Lbl_Equity", visible);
