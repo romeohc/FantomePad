@@ -18,97 +18,98 @@ void UpdatePositionsLayout()
    int startX = PositionsPanelX;
    int startY = PositionsPanelY;
    int width  = 280; 
-   
    int paddingX = 20;
-   int colGap   = 10;
-   int colW     = (width - (paddingX * 2) - colGap) / 2; // ~115px
    
-   int inputH   = 28;
-   int lblH     = 15;
-   int sectionGap = 15;
-   
-   int currentY = startY + 50; 
-   
-   // 1. Fond & Header
+   // --- Header ---
    SetObjPosition("Pos_Bg", startX, startY);
    SetObjPosition("Pos_Header", startX, startY);
    ObjectSetInteger(0, PREFIX + "Pos_Header", OBJPROP_XSIZE, width);
    SetObjPosition("Pos_Title", startX + 15, startY + 12);
    
-   // 2. Select Button
+   int currentY = startY + 50; 
+   
+   // --- Select Key ---
    SetObjPosition("Pos_Btn_Select", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE, width - (paddingX * 2));
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE, 30);
+   currentY += 30 + 15;
    
-   currentY += 30 + sectionGap;
-
-   // 3. Info Grid (2x2)
-   // Row 1: Size & Profit
-   SetObjPosition("Pos_Lbl_Size", startX + paddingX, currentY);
-   SetObjPosition("Pos_Lbl_Profit", startX + paddingX + colW + colGap, currentY);
+   // --- STATS GRID (Modern Look) ---
+   // Calculs de géométrie
+   int statsBgH = 135; // Increased from 125 to 135 for better bottom padding
+   int statsY = currentY;
    
-   currentY += lblH;
+   // Background Stats
+   SetObjPosition("Pos_Stats_Bg", startX + paddingX, statsY);
+   ObjectSetInteger(0, PREFIX + "Pos_Stats_Bg", OBJPROP_XSIZE, width - (paddingX * 2));
+   ObjectSetInteger(0, PREFIX + "Pos_Stats_Bg", OBJPROP_YSIZE, statsBgH);
    
-   SetObjPosition("Pos_Val_Size", startX + paddingX, currentY);
-   SetObjPosition("Pos_Val_Profit", startX + paddingX + colW + colGap, currentY);
+   // Internal Grid Padding
+   int gridPadX = 15;
+   int gridPadY = 10;
+   int colW = (width - (paddingX*2) - (gridPadX*2)) / 2; // ~100px
+   int startGridX = startX + paddingX + gridPadX;
+   int startGridY = statsY + gridPadY;
    
-   currentY += 20 + 10; 
+   // ROW 1: SIZE | PROFIT
+   // Size
+   SetObjPosition("Pos_Lbl_Size", startGridX, startGridY);
+   SetObjPosition("Pos_Val_Size", startGridX, startGridY + 15);
    
-   // Row 2: Fees & Commission
-   SetObjPosition("Pos_Lbl_Swap", startX + paddingX, currentY); 
-   SetObjPosition("Pos_Lbl_Comm", startX + paddingX + colW + colGap, currentY);
+   // Profit (Right Aligned visually or 2nd Col)
+   SetObjPosition("Pos_Lbl_Profit", startGridX + colW, startGridY);
+   SetObjPosition("Pos_Val_Profit", startGridX + colW, startGridY + 15);
    
-   currentY += lblH;
+   // ROW 2: FEES | COMM
+   int row2Y = startGridY + 40;
+   SetObjPosition("Pos_Lbl_Swap", startGridX, row2Y);
+   SetObjPosition("Pos_Val_Swap", startGridX, row2Y + 15);
    
-   SetObjPosition("Pos_Val_Swap", startX + paddingX, currentY);
-   SetObjPosition("Pos_Val_Comm", startX + paddingX + colW + colGap, currentY);
+   SetObjPosition("Pos_Lbl_Comm", startGridX + colW, row2Y);
+   SetObjPosition("Pos_Val_Comm", startGridX + colW, row2Y + 15);
    
-   currentY += 20 + 10;
+   // ROW 3: RISK R | RISK %
+   int row3Y = row2Y + 40;
+   SetObjPosition("Pos_Lbl_RiskR", startGridX, row3Y);
+   SetObjPosition("Pos_Val_RiskR", startGridX, row3Y + 15);
    
-   // Row 3: Risk
-   SetObjPosition("Pos_Lbl_Risk", startX + paddingX, currentY);
+   SetObjPosition("Pos_Lbl_RiskPrc", startGridX + colW, row3Y);
+   SetObjPosition("Pos_Val_RiskPrc", startGridX + colW, row3Y + 15);
    
-   currentY += lblH;
+   currentY += statsBgH + 15;
    
-   // 3 Value Columns
-   int riskColW = (width - (paddingX * 2)) / 3;
+   // --- Protection Section ---
+   int inputH   = 28;
+   int lblH     = 15;
+   int sectionGap = 15;
    
-   SetObjPosition("Pos_Val_Risk", startX + paddingX, currentY);
-   SetObjPosition("Pos_Val_RiskR", startX + paddingX + riskColW, currentY);
-   SetObjPosition("Pos_Val_RiskMoney", startX + paddingX + (riskColW * 2), currentY);
-   
-   currentY += 20 + sectionGap;
-   
-   // 4. SL & BE Section (Swapped TP with BE)
+   // SL & BE
    SetObjPosition("Pos_Lbl_SL", startX + paddingX, currentY);
-   // BE Button doesn't need external label, it's a button.
-   // But we occupy the space.
-   
    currentY += lblH;
    
-   // SL Input (Left)
+   int halfW = (width - (paddingX * 2) - 10) / 2;
+   
    SetObjPosition("Pos_Edit_SL", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_XSIZE, colW);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_XSIZE, halfW);
    ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_YSIZE, inputH);
    
-   // BE Button (Right) - Was TP Input
-   SetObjPosition("Pos_Btn_BE", startX + paddingX + colW + colGap, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_XSIZE, colW); // Same width as input
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_YSIZE, inputH); // Same height
+   SetObjPosition("Pos_Btn_BE", startX + paddingX + halfW + 10, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_XSIZE, halfW); 
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_YSIZE, inputH); 
    
    currentY += inputH + sectionGap;
    
-   // 5. TP Section (Full Width Below) - Was BE Button
+   // TP
    SetObjPosition("Pos_Lbl_TP", startX + paddingX, currentY);
    currentY += lblH;
    
    SetObjPosition("Pos_Edit_TP", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_XSIZE, width - (paddingX * 2)); // Full width
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_XSIZE, width - (paddingX * 2)); 
    ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_YSIZE, inputH);
    
    currentY += inputH + sectionGap;
 
-   // 6. Partial Close Section
+   // Partial Close Section
    SetObjPosition("Pos_Lbl_Close", startX + paddingX, currentY);
    currentY += lblH;
    
@@ -136,14 +137,14 @@ void UpdatePositionsLayout()
    
    currentY += inputH + (sectionGap * 1.5); 
    
-   // 7. VALIDATE BUTTON
+   // Validate
    SetObjPosition("Pos_Btn_Validate", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_XSIZE, width - (paddingX * 2));
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_YSIZE, 45); 
    
    currentY += 45 + 20; 
    
-   // Ajustement hauteur fond
+   // Adjust Main Bg
    int totalHeight = currentY - startY;
    ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_XSIZE, width);
    ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE, totalHeight);
@@ -167,26 +168,37 @@ void CreatePositionsPanel()
    CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);
    ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   // 3. Details (Grid) with Correct Casing
-   CreateLabel("Pos_Lbl_Size", "Size", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Size", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
+   // 3. STATS CARD (Grouped)
+   CreateRect("Pos_Stats_Bg", 0, 0, width - 40, 135, g_ColorInput, BORDER_FLAT); // Background for stats (Increased height)
+   ObjectSetInteger(0, PREFIX + "Pos_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
    
-   CreateLabel("Pos_Lbl_Profit", "Profit", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Profit", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
+   // Labels: uniform size (7 or 8), Muted Color
+   // Values: uniform size (10 or 11), Bold, Bright Color
    
-   CreateLabel("Pos_Lbl_Swap", "Fees", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Swap", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Lbl_Size", "SIZE", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Size", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Comm", "Commission", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Comm", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Profit", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   // Risk Section (Updated)
-   CreateLabel("Pos_Lbl_Risk", "Risk", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Swap", "FEES", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Swap", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   // 3 labels corresponding to %, R, Currency
-   CreateLabel("Pos_Val_Risk", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
-   CreateLabel("Pos_Val_RiskR", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
-   CreateLabel("Pos_Val_RiskMoney", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Lbl_Comm", "COMMISSION", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Comm", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
+   
+   // Risk Section (Split Columns)
+   CreateLabel("Pos_Lbl_RiskR", "RISK R", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_RiskR", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
+   
+   CreateLabel("Pos_Lbl_RiskPrc", "RISK %", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_RiskPrc", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
+   
+   // Cleanup Old Objects (Risk single line)
+   if(ObjectFind(0, PREFIX + "Pos_Lbl_Risk") >= 0) ObjectDelete(0, PREFIX + "Pos_Lbl_Risk");
+   if(ObjectFind(0, PREFIX + "Pos_Val_Risk") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_Risk");
+   // Cleanup pre-previous objects just in case
+   if(ObjectFind(0, PREFIX + "Pos_Val_RiskMoney") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_RiskMoney");
    
    // 4. Protection (SL & BE)
    CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
@@ -267,9 +279,8 @@ void UpdatePositionsValues()
              ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, sSwap);
              
              // --- RISK CALCULATION ---
-             string sRisk = "-";
              string sRiskR = "-";
-             string sRiskMoney = "-";
+             string sRiskPrc = "-";
              
              if(sl > 0)
              {
@@ -280,30 +291,28 @@ void UpdatePositionsValues()
                      double dist = MathAbs(OrderOpenPrice() - sl);
                      double riskValMoney = (dist / tickSize) * tickVal * lots;
                      
-                     sRiskMoney = DoubleToString(riskValMoney, 2) + " " + AccountCurrency();
-                     
                      double bal = AccountBalance();
                      if(bal > 0) {
                         double riskPrc = (riskValMoney / bal) * 100.0;
-                        sRisk = DoubleToString(riskPrc, 2) + " %";
+                        sRiskPrc = DoubleToString(riskPrc, 2) + "%";
                         
                         if(g_OneRPercent > 0) {
-                           double riskR = riskPrc / g_OneRPercent;
-                           sRiskR = DoubleToString(riskR, 2) + " R";
+                           double riskRVal = riskPrc / g_OneRPercent;
+                           sRiskR = DoubleToString(riskRVal, 2) + " R";
                         }
                      }
                  }
              }
              else 
              {
-                sRisk = "No SL";
-                sRiskR = "-"; 
-                sRiskMoney = "-";
+                sRiskR = "-";
+                sRiskPrc = "No SL";
              }
              
-             ObjectSetString(0, PREFIX + "Pos_Val_Risk", OBJPROP_TEXT, sRisk);
              ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, sRiskR);
-             ObjectSetString(0, PREFIX + "Pos_Val_RiskMoney", OBJPROP_TEXT, sRiskMoney);
+             ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, sRiskPrc);
+             // Removed Pos_Val_RiskR and Money separate updates
+
              
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              
@@ -345,9 +354,8 @@ void UpdatePositionsValues()
    ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_Risk", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_RiskMoney", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, "-");
    ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, g_ColorText);
 }
 
@@ -361,6 +369,7 @@ void TogglePositionsPanel(bool visible)
    SetObjVisible("Pos_Header", visible);
    SetObjVisible("Pos_Title", visible);
    SetObjVisible("Pos_Btn_Select", visible);
+   SetObjVisible("Pos_Stats_Bg", visible); // New Stats Bg
    
    SetObjVisible("Pos_Lbl_Size", visible);
    SetObjVisible("Pos_Val_Size", visible);
@@ -382,10 +391,10 @@ void TogglePositionsPanel(bool visible)
    SetObjVisible("Pos_Lbl_Swap", visible);
    SetObjVisible("Pos_Val_Swap", visible);
    
-   SetObjVisible("Pos_Lbl_Risk", visible);
-   SetObjVisible("Pos_Val_Risk", visible);
+   SetObjVisible("Pos_Lbl_RiskR", visible);
    SetObjVisible("Pos_Val_RiskR", visible);
-   SetObjVisible("Pos_Val_RiskMoney", visible);
+   SetObjVisible("Pos_Lbl_RiskPrc", visible);
+   SetObjVisible("Pos_Val_RiskPrc", visible);
    
    SetObjVisible("Pos_Lbl_Close", visible);
    SetObjVisible("Pos_Btn_25", visible);
