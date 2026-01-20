@@ -17,93 +17,121 @@ void UpdatePositionsLayout()
 {
    int startX = PositionsPanelX;
    int startY = PositionsPanelY;
-   int width  = 220; 
+   int width  = 280; 
    
    int paddingX = 20;
+   int colGap   = 10;
+   int colW     = (width - (paddingX * 2) - colGap) / 2; // ~115px
+   
+   int inputH   = 28;
+   int lblH     = 15;
    int sectionGap = 15;
+   
    int currentY = startY + 50; 
    
    // 1. Fond & Header
    SetObjPosition("Pos_Bg", startX, startY);
    SetObjPosition("Pos_Header", startX, startY);
-   SetObjPosition("Pos_Title", startX + 15, startY + 12);
-   
-   ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_XSIZE, width);
    ObjectSetInteger(0, PREFIX + "Pos_Header", OBJPROP_XSIZE, width);
+   SetObjPosition("Pos_Title", startX + 15, startY + 12);
    
    // 2. Select Button
    SetObjPosition("Pos_Btn_Select", startX + paddingX, currentY);
-   currentY += 25 + sectionGap;
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE, width - (paddingX * 2));
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE, 30);
+   
+   currentY += 30 + sectionGap;
 
-   // 3. Info Labels
-   // Size
+   // 3. Info Grid (2x2)
+   // Row 1: Size & Profit
    SetObjPosition("Pos_Lbl_Size", startX + paddingX, currentY);
-   currentY += 12;
+   SetObjPosition("Pos_Lbl_Profit", startX + paddingX + colW + colGap, currentY);
+   
+   currentY += lblH;
+   
    SetObjPosition("Pos_Val_Size", startX + paddingX, currentY);
-   currentY += 20 + 5;
-
-   // Profit
-   SetObjPosition("Pos_Lbl_Profit", startX + paddingX, currentY);
-   currentY += 12;
-   SetObjPosition("Pos_Val_Profit", startX + paddingX, currentY);
-   currentY += 20 + sectionGap; // Extra gap before inputs
+   SetObjPosition("Pos_Val_Profit", startX + paddingX + colW + colGap, currentY);
    
-   // SL / TP Inputs
-   int inputW = (width - (paddingX * 2) - 10) / 2;
+   currentY += 20 + 10; 
    
-   // SL
-   SetObjPosition("Pos_Lbl_SL", startX + paddingX, currentY);
-   SetObjPosition("Pos_Btn_BE", startX + paddingX + 65, currentY); // BE Button
-   SetObjPosition("Pos_Edit_SL", startX + paddingX, currentY + 12);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_XSIZE, inputW);
+   // Row 2: Fees & Commission
+   SetObjPosition("Pos_Lbl_Swap", startX + paddingX, currentY); 
+   SetObjPosition("Pos_Lbl_Comm", startX + paddingX + colW + colGap, currentY);
    
-   // TP
-    SetObjPosition("Pos_Lbl_TP", startX + paddingX + inputW + 10, currentY);
-   SetObjPosition("Pos_Edit_TP", startX + paddingX + inputW + 10, currentY + 12);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_XSIZE, inputW);
+   currentY += lblH;
    
-   currentY += 12 + 25 + sectionGap;
-   
-   // Commission
-   SetObjPosition("Pos_Lbl_Comm", startX + paddingX, currentY);
-   currentY += 12;
-   SetObjPosition("Pos_Val_Comm", startX + paddingX, currentY);
-   currentY += 20 + 5;
-   
-   // Swap
-   SetObjPosition("Pos_Lbl_Swap", startX + paddingX, currentY);
-   currentY += 12;
    SetObjPosition("Pos_Val_Swap", startX + paddingX, currentY);
+   SetObjPosition("Pos_Val_Comm", startX + paddingX + colW + colGap, currentY);
+   
    currentY += 20 + sectionGap;
+   
+   // 4. SL & BE Section (Swapped TP with BE)
+   SetObjPosition("Pos_Lbl_SL", startX + paddingX, currentY);
+   // BE Button doesn't need external label, it's a button.
+   // But we occupy the space.
+   
+   currentY += lblH;
+   
+   // SL Input (Left)
+   SetObjPosition("Pos_Edit_SL", startX + paddingX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_XSIZE, colW);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_SL", OBJPROP_YSIZE, inputH);
+   
+   // BE Button (Right) - Was TP Input
+   SetObjPosition("Pos_Btn_BE", startX + paddingX + colW + colGap, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_XSIZE, colW); // Same width as input
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_YSIZE, inputH); // Same height
+   
+   currentY += inputH + sectionGap;
+   
+   // 5. TP Section (Full Width Below) - Was BE Button
+   SetObjPosition("Pos_Lbl_TP", startX + paddingX, currentY);
+   currentY += lblH;
+   
+   SetObjPosition("Pos_Edit_TP", startX + paddingX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_XSIZE, width - (paddingX * 2)); // Full width
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_TP", OBJPROP_YSIZE, inputH);
+   
+   currentY += inputH + sectionGap;
 
-   // --- CLOSE SECTION ---
+   // 6. Partial Close Section
    SetObjPosition("Pos_Lbl_Close", startX + paddingX, currentY);
-   currentY += 15;
+   currentY += lblH;
    
-   // 25% 50% 100% Buttons and Custom Edit
-   int btnW = 35;
-   int gap = 5;
-   int rowX = startX + paddingX;
+   int pcBtnW = (width - (paddingX*2) - 15) / 4;
+   int pcX = startX + paddingX;
    
-   SetObjPosition("Pos_Btn_25", rowX, currentY);
-   rowX += btnW + gap;
-   SetObjPosition("Pos_Btn_50", rowX, currentY);
-   rowX += btnW + gap;
-   SetObjPosition("Pos_Btn_100", rowX, currentY);
-   rowX += btnW + gap + 5;
-   SetObjPosition("Pos_Edit_Close", rowX, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_XSIZE, 45); 
+   SetObjPosition("Pos_Btn_25", pcX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_XSIZE, pcBtnW);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_YSIZE, inputH);
    
-   currentY += 25 + sectionGap;
+   pcX += pcBtnW + 5;
+   SetObjPosition("Pos_Btn_50", pcX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_XSIZE, pcBtnW);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_YSIZE, inputH);
    
-   // VALIDATE BUTTON
+   pcX += pcBtnW + 5;
+   SetObjPosition("Pos_Btn_100", pcX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_XSIZE, pcBtnW);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_YSIZE, inputH);
+   
+   pcX += pcBtnW + 5;
+   SetObjPosition("Pos_Edit_Close", pcX, currentY);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_XSIZE, pcBtnW);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_YSIZE, inputH);
+   
+   currentY += inputH + (sectionGap * 1.5); 
+   
+   // 7. VALIDATE BUTTON
    SetObjPosition("Pos_Btn_Validate", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_XSIZE, width - (paddingX * 2));
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_YSIZE, 45); 
    
-   currentY += 30 + 5;
+   currentY += 45 + 20; 
    
    // Ajustement hauteur fond
-   int totalHeight = currentY - startY + 10;
+   int totalHeight = currentY - startY;
+   ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_XSIZE, width);
    ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE, totalHeight);
    
    ChartRedraw();
@@ -114,7 +142,7 @@ void UpdatePositionsLayout()
 //+------------------------------------------------------------------+
 void CreatePositionsPanel()
 {
-   int width = 220;
+   int width = 280; 
    
    // 1. Fond & Header
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
@@ -122,48 +150,57 @@ void CreatePositionsPanel()
    CreateLabel("Pos_Title", "Position Manager", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Select Button
-   CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 25, g_ColorInput, g_ColorText);
+   CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);
+   ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   // 3. Details
-   CreateLabel("Pos_Lbl_Size", "SIZE", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Size", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   // 3. Details (Grid) with Correct Casing
+   CreateLabel("Pos_Lbl_Size", "Size", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Size", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Profit", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Lbl_Profit", "Profit", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Profit", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
    
-   // SL/TP Edits (using width=80 placeholder, resized in layout)
-   CreateLabel("Pos_Lbl_SL", "STOP LOSS", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateButton("Pos_Btn_BE", "BE", 0, 0, 20, 12, g_ColorInput, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONTSIZE, 7);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BORDER_COLOR, g_ColorInput); // Remove border visual if needed or match input
-   CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 25);
+   CreateLabel("Pos_Lbl_Swap", "Fees", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Swap", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_TP", "TAKE PROFIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateEdit("Pos_Edit_TP", "0", 0, 0, 80, 25);
+   CreateLabel("Pos_Lbl_Comm", "Commission", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_Comm", "-", 0, 0, 11, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Comm", "COMMISSION", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Comm", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   // 4. Protection (SL & BE)
+   CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
    
-   CreateLabel("Pos_Lbl_Swap", "FEES", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateLabel("Pos_Val_Swap", "-", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
-   
-   // Close Section
-   CreateLabel("Pos_Lbl_Close", "PARTIAL CLOSE (%)", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
-   CreateButton("Pos_Btn_25", "25", 0, 0, 35, 22, g_ColorInput, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_FONTSIZE, 8);
-   
-   CreateButton("Pos_Btn_50", "50", 0, 0, 35, 22, g_ColorInput, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_FONTSIZE, 8);
-   
-   CreateButton("Pos_Btn_100", "100", 0, 0, 35, 22, g_ColorInput, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_FONTSIZE, 8);
-   
-   CreateEdit("Pos_Edit_Close", "0", 0, 0, 45, 22);
-   
-   // Validate
-   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 30, g_ColorBtnValid, clrWhite);
+   // BE Button moved to right of SL
+   CreateButton("Pos_Btn_BE", "BREAKEVEN", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONTSIZE, 8); // Smaller font for smaller button
+   ObjectSetString(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONT, "Trebuchet MS Bold");
 
+   // 5. TP (Below)
+   CreateLabel("Pos_Lbl_TP", "Take profit", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateEdit("Pos_Edit_TP", "0", 0, 0, 80, 28);
    
+   // 6. Close Section
+   CreateLabel("Pos_Lbl_Close", "Partial Close %", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   
+   CreateButton("Pos_Btn_25", "25", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_FONTSIZE, 9);
+   ObjectSetString(0, PREFIX + "Pos_Btn_25", OBJPROP_FONT, "Trebuchet MS");
+   
+   CreateButton("Pos_Btn_50", "50", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_FONTSIZE, 9);
+   ObjectSetString(0, PREFIX + "Pos_Btn_50", OBJPROP_FONT, "Trebuchet MS");
+   
+   CreateButton("Pos_Btn_100", "100", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_FONTSIZE, 9);
+   ObjectSetString(0, PREFIX + "Pos_Btn_100", OBJPROP_FONT, "Trebuchet MS");
+   
+   CreateEdit("Pos_Edit_Close", "0", 0, 0, 45, 28);
+   
+   // 7. Validate
+   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 45, g_ColorBtnValid, clrWhite);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONTSIZE, 11);
+   ObjectSetString(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONT, "Trebuchet MS Bold");
+
    if(IsPositionsPanelVisible)
    {
       UpdatePositionsLayout();
@@ -182,12 +219,10 @@ void UpdatePositionsValues()
 {
    if(!IsPositionsPanelVisible) return;
    
-   // Check if ticket is still valid and matches symbol
    if(SelectedPositionTicket != -1)
    {
       if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
       {
-         // Verify it's still open and matches symbol (optional, but good practice)
          if(OrderCloseTime() == 0 && OrderSymbol() == Symbol())
          {
              double lots = OrderLots();
@@ -209,17 +244,14 @@ void UpdatePositionsValues()
              string sSwap = DoubleToString(swap, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, sSwap);
              
-             // UPDATE SL/TP INPUTS ONLY IF CHANGED (PREVENTS TYPING INTERRUPT)
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              
-             // Check SL
              if(ticketChanged || MathAbs(sl - g_LastPosSL) > Point)
              {
                  ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(sl, Digits));
                  g_LastPosSL = sl;
              }
              
-             // Check TP
              if(ticketChanged || MathAbs(tp - g_LastPosTP) > Point)
              {
                  ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, DoubleToString(tp, Digits));
@@ -235,19 +267,16 @@ void UpdatePositionsValues()
              
              g_LastPosTicket = SelectedPositionTicket;
              
-             // Button Label
              string type = (OrderType() == OP_BUY) ? "BUY" : "SELL";
              ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "#" + IntegerToString(SelectedPositionTicket) + " " + type);
              return; 
          }
       }
       
-      // If we reach here, position is invalid/closed
       SelectedPositionTicket = -1;
       g_LastPosTicket = -1;
    }
    
-   // Default State
    ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "Select Position...");
    ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
@@ -276,11 +305,12 @@ void TogglePositionsPanel(bool visible)
    SetObjVisible("Pos_Val_Profit", visible);
    
    SetObjVisible("Pos_Lbl_SL", visible);
-   SetObjVisible("Pos_Btn_BE", visible);
    SetObjVisible("Pos_Edit_SL", visible);
    
    SetObjVisible("Pos_Lbl_TP", visible);
    SetObjVisible("Pos_Edit_TP", visible);
+   
+   SetObjVisible("Pos_Btn_BE", visible);
    
    SetObjVisible("Pos_Lbl_Comm", visible);
    SetObjVisible("Pos_Val_Comm", visible);
@@ -335,7 +365,6 @@ void DrawPositionList()
    long w = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE);
    long h = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE);
    
-   // 1. Collect Tickets for Current Symbol
    int tickets[];
    int count = 0;
    for(int i=0; i<OrdersTotal(); i++)
@@ -353,9 +382,7 @@ void DrawPositionList()
    
    if(count == 0)
    {
-      // Show "No Positions" item? Or just don't open?
-      // Let's show a single disabled item "No Positions"
-      ClosePositionList(); // Clear old
+      ClosePositionList();
       
       int itemHeight = 25;
       int startY = (int)y + (int)h + 2; 
@@ -365,7 +392,7 @@ void DrawPositionList()
       
       CreateButton("PosListItem_None", "No Positions", (int)x + 2, startY, (int)w - 4, itemHeight, g_ColorInput, g_ColorLabel);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
-      ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false); // Not clickable really
+      ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false);
       IsPosListOpen = true;
       return; 
    }
@@ -373,7 +400,6 @@ void DrawPositionList()
    int itemHeight = 25;
    int scrollBarWidth = 10;
    
-   // Determine visible count
    int maxVis = g_PosListMaxVisible;
    int visibleCount = (count > maxVis) ? maxVis : count;
    
@@ -414,9 +440,6 @@ void DrawPositionList()
       }
    }
    
-   // SCROLLBAR (Simplified, non-interactive for now or copy generic logic if critical)
-   // For now, if > 10 positions, just showing first 10 is acceptable mostly, 
-   // but I will add visual scrollbar if dragged in Master.
    if(showScroll)
    {
        int trackX = (int)x + containerWidth - scrollBarWidth - 2;

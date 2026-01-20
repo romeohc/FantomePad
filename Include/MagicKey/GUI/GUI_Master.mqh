@@ -272,7 +272,7 @@ void GUI_OnChartEvent(const int id,
             if(!IsPositionsDragging)
             {
                // Detection Positions Panel
-               int posW = 220; // Matches CreatePositionsPanel
+               int posW = 280; // Matches CreatePositionsPanel
                long posH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
                if(posH < 50) posH = 150;
                
@@ -784,7 +784,7 @@ void GUI_OnChartEvent(const int id,
                          }
                          
                          // Re-select if partial
-                         OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET);
+                         if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET)) {}
                      }
                      else
                      {
@@ -812,7 +812,7 @@ void GUI_OnChartEvent(const int id,
 
                      if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point)
                      {
-                         bool res = OrderModify(SelectedPositionTicket, currentOpen, inputSL, inputTP, 0, Blue);
+                         bool res = OrderModify(SelectedPositionTicket, currentOpen, inputSL, inputTP, (datetime)0, clrBlue);
                          if(res)
                          {
                              g_LastPosSL = inputSL;
