@@ -37,7 +37,7 @@ void UpdatePositionsLayout()
    
    // --- STATS GRID (Modern Look) ---
    // Calculs de géométrie
-   int statsBgH = 135; // Increased from 125 to 135 for better bottom padding
+   int statsBgH = 175; // Increased from 135 to 175 for extra row
    int statsY = currentY;
    
    // Background Stats
@@ -60,22 +60,30 @@ void UpdatePositionsLayout()
    // Profit (Right Aligned visually or 2nd Col)
    SetObjPosition("Pos_Lbl_Profit", startGridX + colW, startGridY);
    SetObjPosition("Pos_Val_Profit", startGridX + colW, startGridY + 15);
-   
-   // ROW 2: FEES | COMM
+
+   // ROW 2: PROFIT R | PROFIT %
    int row2Y = startGridY + 40;
-   SetObjPosition("Pos_Lbl_Swap", startGridX, row2Y);
-   SetObjPosition("Pos_Val_Swap", startGridX, row2Y + 15);
+   SetObjPosition("Pos_Lbl_ProfitR", startGridX, row2Y);
+   SetObjPosition("Pos_Val_ProfitR", startGridX, row2Y + 15);
    
-   SetObjPosition("Pos_Lbl_Comm", startGridX + colW, row2Y);
-   SetObjPosition("Pos_Val_Comm", startGridX + colW, row2Y + 15);
+   SetObjPosition("Pos_Lbl_ProfitPrc", startGridX + colW, row2Y);
+   SetObjPosition("Pos_Val_ProfitPrc", startGridX + colW, row2Y + 15);
    
-   // ROW 3: RISK R | RISK %
+   // ROW 3: FEES | COMM
    int row3Y = row2Y + 40;
-   SetObjPosition("Pos_Lbl_RiskR", startGridX, row3Y);
-   SetObjPosition("Pos_Val_RiskR", startGridX, row3Y + 15);
+   SetObjPosition("Pos_Lbl_Swap", startGridX, row3Y);
+   SetObjPosition("Pos_Val_Swap", startGridX, row3Y + 15);
    
-   SetObjPosition("Pos_Lbl_RiskPrc", startGridX + colW, row3Y);
-   SetObjPosition("Pos_Val_RiskPrc", startGridX + colW, row3Y + 15);
+   SetObjPosition("Pos_Lbl_Comm", startGridX + colW, row3Y);
+   SetObjPosition("Pos_Val_Comm", startGridX + colW, row3Y + 15);
+   
+   // ROW 4: RISK R | RISK %
+   int row4Y = row3Y + 40;
+   SetObjPosition("Pos_Lbl_RiskR", startGridX, row4Y);
+   SetObjPosition("Pos_Val_RiskR", startGridX, row4Y + 15);
+   
+   SetObjPosition("Pos_Lbl_RiskPrc", startGridX + colW, row4Y);
+   SetObjPosition("Pos_Val_RiskPrc", startGridX + colW, row4Y + 15);
    
    currentY += statsBgH + 15;
    
@@ -180,7 +188,7 @@ void CreatePositionsPanel()
    ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // 3. STATS CARD (Grouped)
-   CreateRect("Pos_Stats_Bg", 0, 0, width - 40, 135, g_ColorInput, BORDER_FLAT); // Background for stats (Increased height)
+   CreateRect("Pos_Stats_Bg", 0, 0, width - 40, 175, g_ColorInput, BORDER_FLAT); // Background for stats (Increased height)
    ObjectSetInteger(0, PREFIX + "Pos_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
    
    // Labels: uniform size (7 or 8), Muted Color
@@ -191,6 +199,12 @@ void CreatePositionsPanel()
    
    CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Pos_Val_Profit", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
+
+   CreateLabel("Pos_Lbl_ProfitR", "PROFIT R", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_ProfitR", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
+   
+   CreateLabel("Pos_Lbl_ProfitPrc", "PROFIT %", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Val_ProfitPrc", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    CreateLabel("Pos_Lbl_Swap", "FEES", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Pos_Val_Swap", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
@@ -287,6 +301,20 @@ void UpdatePositionsValues()
              string sProfit = DoubleToString(profit, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, sProfit);
              ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
+
+             double bal = AccountBalance();
+             double profitPrc = 0.0;
+             double profitR = 0.0;
+             if(bal > 0) profitPrc = (profit / bal) * 100.0;
+             if(g_OneRPercent > 0) profitR = profitPrc / g_OneRPercent;
+             
+             string sProfitR = DoubleToString(profitR, 2) + " R";
+             ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, sProfitR);
+             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
+
+             string sProfitPrc = DoubleToString(profitPrc, 2) + "%";
+             ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, sProfitPrc);
+             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
              
              string sComm = DoubleToString(comm, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, sComm);
@@ -402,6 +430,10 @@ void UpdatePositionsValues()
    
    ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, "-");
+   ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, "-");
+   ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, g_ColorText);
    ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, "0");
    ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
@@ -429,6 +461,11 @@ void TogglePositionsPanel(bool visible)
    
    SetObjVisible("Pos_Lbl_Profit", visible);
    SetObjVisible("Pos_Val_Profit", visible);
+   
+   SetObjVisible("Pos_Lbl_ProfitR", visible);
+   SetObjVisible("Pos_Val_ProfitR", visible);
+   SetObjVisible("Pos_Lbl_ProfitPrc", visible);
+   SetObjVisible("Pos_Val_ProfitPrc", visible);
    
    SetObjVisible("Pos_Lbl_Entry", visible);
    SetObjVisible("Pos_Edit_Entry", visible);
