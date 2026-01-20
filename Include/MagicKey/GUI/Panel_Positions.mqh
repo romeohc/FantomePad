@@ -335,10 +335,21 @@ void UpdatePositionsValues()
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
              }
              
-             g_LastPosTicket = SelectedPositionTicket;
+             string typeStr = "";
+             color typeBg = g_ColorInput;
+             int type = OrderType();
              
-             string type = (OrderType() == OP_BUY) ? "BUY" : "SELL";
-             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "#" + IntegerToString(SelectedPositionTicket) + " " + type);
+             if(type == OP_BUY) { typeStr = "BUY MARKET"; typeBg = g_ColorGreen; }
+             else if(type == OP_SELL) { typeStr = "SELL MARKET"; typeBg = g_ColorRed; }
+             else if(type == OP_BUYLIMIT) { typeStr = "BUY LIMIT"; typeBg = g_ColorGreen; }
+             else if(type == OP_SELLLIMIT) { typeStr = "SELL LIMIT"; typeBg = g_ColorRed; }
+             else if(type == OP_BUYSTOP) { typeStr = "BUY STOP"; typeBg = g_ColorGreen; }
+             else if(type == OP_SELLSTOP) { typeStr = "SELL STOP"; typeBg = g_ColorRed; }
+             
+             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, typeStr + " " + DoubleToString(lots, 2));
+             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
+             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
+             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
              return; 
          }
       }
@@ -348,6 +359,10 @@ void UpdatePositionsValues()
    }
    
    ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "Select Position...");
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, g_ColorText);
+   
    ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, "0");
@@ -449,12 +464,13 @@ void DrawPositionList()
    {
       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
       {
-         if(OrderSymbol() == Symbol() && (OrderType() == OP_BUY || OrderType() == OP_SELL))
-         {
-            ArrayResize(tickets, count+1);
-            tickets[count] = OrderTicket();
-            count++;
-         }
+          int type = OrderType();
+          if(OrderSymbol() == Symbol() && (type == OP_BUY || type == OP_SELL || type == OP_BUYLIMIT || type == OP_SELLLIMIT || type == OP_BUYSTOP || type == OP_SELLSTOP))
+          {
+             ArrayResize(tickets, count+1);
+             tickets[count] = OrderTicket();
+             count++;
+          }
       }
    }
    
@@ -497,17 +513,24 @@ void DrawPositionList()
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = (int)x + 2;
    int currentY = startY;
-   
-   for(int i = 0; i < visibleCount; i++)
-   {
+      for(int i = 0; i < visibleCount; i++)
+    {
       int dataIdx = g_PosListOffset + i;
       if(dataIdx >= count) break;
       
       int tck = tickets[dataIdx];
       if(OrderSelect(tck, SELECT_BY_TICKET))
       {
-         string type = (OrderType() == OP_BUY) ? "BUY" : "SELL";
-         string txt = "#" + IntegerToString(tck) + " " + type + " " + DoubleToString(OrderLots(), 2);
+         string typeStr = "";
+         int type = OrderType();
+         if(type == OP_BUY) typeStr = "BUY MARKET";
+         else if(type == OP_SELL) typeStr = "SELL MARKET";
+         else if(type == OP_BUYLIMIT) typeStr = "BUY LIMIT";
+         else if(type == OP_SELLLIMIT) typeStr = "SELL LIMIT";
+         else if(type == OP_BUYSTOP) typeStr = "BUY STOP";
+         else if(type == OP_SELLSTOP) typeStr = "SELL STOP";
+
+         string txt = typeStr + " " + DoubleToString(OrderLots(), 2);
          string btnName = "PosListItem_" + IntegerToString(tck);
          
          CreateButton(btnName, txt, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);

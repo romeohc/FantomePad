@@ -692,21 +692,14 @@ void GUI_OnChartEvent(const int id,
       // 2. Clic sur un item de la liste des positions
       if(StringFind(sparam, PREFIX + "PosListItem_") >= 0 && sparam != PREFIX + "PosListItem_None")
       {
-         string text = ObjectGetString(0, sparam, OBJPROP_TEXT);
-         // Format is "#Ticket Type Size" e.g. "#123456 BUY 1.00"
-         // Extract Ticket
-         int hashIndex = StringFind(text, "#");
-         int spaceIndex = StringFind(text, " ");
-         if(hashIndex >= 0 && spaceIndex > hashIndex)
-         {
-             string sTicket = StringSubstr(text, hashIndex + 1, spaceIndex - hashIndex - 1);
-             SelectedPositionTicket = (int)StringToInteger(sTicket);
-             
-             ClosePositionList();
-             UpdatePositionsValues(); 
-             ChartRedraw();
-             return;
-         }
+         string prefix = PREFIX + "PosListItem_";
+         string sTicket = StringSubstr(sparam, StringLen(prefix));
+         SelectedPositionTicket = (int)StringToInteger(sTicket);
+         
+         ClosePositionList();
+         UpdatePositionsValues(); 
+         ChartRedraw();
+         return;
       }
       
       // Close List if clicked outside
@@ -769,9 +762,19 @@ void GUI_OnChartEvent(const int id,
                      
                      // Close
                      int cmd = OrderType();
-                     double closePrice = (cmd == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+                     bool closed = false;
                      
-                     bool closed = OrderClose(SelectedPositionTicket, toClose, closePrice, 10, clrGray);
+                     if(cmd > 1) // Pending Order (Limit/Stop)
+                     {
+                        // For pending orders, "Close" means Delete. 
+                        // We ignore the percentage (toClose), assuming user wants to remove the order.
+                        closed = OrderDelete(SelectedPositionTicket, clrGray);
+                     }
+                     else // Market Order
+                     {
+                        double closePrice = (cmd == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+                        closed = OrderClose(SelectedPositionTicket, toClose, closePrice, 10, clrGray);
+                     }
                      if(closed)
                      {
                          ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
