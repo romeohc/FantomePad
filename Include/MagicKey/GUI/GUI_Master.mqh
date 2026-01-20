@@ -399,6 +399,38 @@ void GUI_OnChartEvent(const int id,
          }
          ChartRedraw();
       }
+
+      // --- HOVER ACTIVE ORDERS (INFO PANEL) ---
+      if(IsInfoPanelVisible && !IsDragging && !IsSettingsDragging && !IsScrollDragging && !IsInfoDragging)
+      {
+          bool redraw = false;
+          for(int i=0; i<g_LastInfoOrderCount; i++)
+          {
+             string cardName = PREFIX + "Info_Ord_Bg_" + IntegerToString(i);
+             // Check if object exists (safety)
+             if(ObjectFind(0, cardName) < 0) continue;
+             
+             long x = ObjectGetInteger(0, cardName, OBJPROP_XDISTANCE);
+             long y = ObjectGetInteger(0, cardName, OBJPROP_YDISTANCE);
+             long w = ObjectGetInteger(0, cardName, OBJPROP_XSIZE);
+             long h = ObjectGetInteger(0, cardName, OBJPROP_YSIZE);
+             
+             color currentColor = (color)ObjectGetInteger(0, cardName, OBJPROP_BGCOLOR);
+             color targetColor = g_ColorInput;
+             
+             if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h)
+             {
+                targetColor = g_ColorListHover; // Use global dynamic hover color
+             }
+             
+             if(currentColor != targetColor)
+             {
+                ObjectSetInteger(0, cardName, OBJPROP_BGCOLOR, targetColor);
+                redraw = true;
+             }
+          }
+          if(redraw) ChartRedraw();
+      }
    }
    
    // --- MOUSE WHEEL SCROLLING ---
