@@ -33,8 +33,10 @@ void UpdateUIMode()
    // (Moved to Manager Panel)
    
    // --- LIGNE 2 : TYPE D'ORDRE ---
-   SetObjPosition("Label_Type", startX + paddingX, currentY);
-   currentY += 15;
+   // --- LIGNE 2 : TYPE D'ORDRE ---
+   // Label "Order Type" removed as requested
+   // SetObjPosition("Label_Type", startX + paddingX, currentY);
+   // currentY += 15;
    
    SetObjPosition("Btn_Type", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_XSIZE, PanelWidth - (paddingX*2));
@@ -49,13 +51,13 @@ void UpdateUIMode()
    {
       if(CurrentDirection == 0) 
       {
-         typeText = "MARKET BUY";
+         typeText = "BUY MARKET";
          typeBgColor = g_ColorGreen;
          typeBorderColor = typeBgColor; // No border (matches bg)
       }
       else 
       {
-         typeText = "MARKET SELL";
+         typeText = "SELL MARKET";
          typeBgColor = g_ColorRed;
          typeBorderColor = typeBgColor; // No border (matches bg)
       }
@@ -155,7 +157,7 @@ void UpdateUIMode()
    ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_XSIZE, halfWidth);
    ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_YSIZE, inputH);
    
-   currentY += inputH + (sectionGap * 2); // Double espace avant les boutons
+   currentY += inputH + sectionGap; // Espace normal avant les boutons
    
    // --- LIGNE 6 : BOUTONS D'ACTION ---
    
@@ -223,8 +225,9 @@ void CreatePanel()
    // CreateButton("Btn_SymbolSelect", Symbol(), 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
    
    // 3. Type d'Ordre
-   CreateLabel("Label_Type", "Order type", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   // CreateLabel("Label_Type", "Order type", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
    CreateButton("Btn_Type", OrderTypes[CurrentTypeIndex], 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
+   ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // 4. Prix (Pending)
    CreateLabel("Label_Price", "Entry price", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
@@ -399,7 +402,7 @@ void ToggleMainPanel(bool visible)
    SetObjVisible("Title", visible);
    // SetObjVisible("Label_Symbol", visible);
    // SetObjVisible("Btn_SymbolSelect", visible);
-   SetObjVisible("Label_Type", visible);
+   // SetObjVisible("Label_Type", visible);
    SetObjVisible("Btn_Type", visible);
    
    // Conditional visibility objects - if hiding, hide all. 
