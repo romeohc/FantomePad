@@ -5,6 +5,92 @@
 #property strict
 
 //+------------------------------------------------------------------+
+//| HELPER: APPLY FILTER LOGIC                                       |
+//+------------------------------------------------------------------+
+void UpdateHistoryFilter()
+{
+   int total = OrdersHistoryTotal();
+   ArrayResize(g_HistoryFilteredIndices, 0); // Start empty
+   
+   datetime startLimit = 0;
+   datetime endLimit = 0; // 0 means no limit (or far future)
+   
+   if(g_HistoryFilterMode == H_FILTER_DAILY)
+   {
+      // Start of Today
+      MqlDateTime dt;
+      TimeToStruct(TimeCurrent(), dt);
+      dt.hour = 0; dt.min = 0; dt.sec = 0;
+      startLimit = StructToTime(dt);
+   }
+   else if(g_HistoryFilterMode == H_FILTER_WEEKLY)
+   {
+      // Start of Week (Sunday/Monday depending on broker, let's use week start)
+      MqlDateTime dt;
+      TimeToStruct(TimeCurrent(), dt);
+      // Adjust to day 0 (Sunday) or 1 (Monday)? Usually start of week is straightforward
+      // Simplest: TimeCurrent() - (DayOfWeek * 24*3600) + Clean Hours
+      // But let's use iTime(NULL, PERIOD_W1, 0)
+      startLimit = iTime(NULL, PERIOD_W1, 0);
+   }
+   else if(g_HistoryFilterMode == H_FILTER_MONTHLY)
+   {
+      startLimit = iTime(NULL, PERIOD_MN1, 0);
+   }
+   else if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+   {
+      startLimit = g_HistoryCustomStart;
+      endLimit   = g_HistoryCustomEnd;
+   }
+   
+   // Loop and Filter
+   // Reserve potentially needed memory to speed up?
+   // ArrayResize(g_HistoryFilteredIndices, total); 
+   // But we'll push back.
+   
+   int count = 0;
+   for(int i=0; i<total; i++)
+   {
+      if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
+      {
+         datetime ct = OrderCloseTime();
+         bool match = false;
+         
+         if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+         {
+             if(ct >= startLimit && ct <= endLimit) match = true;
+         }
+         else
+         {
+             if(ct >= startLimit) match = true;
+         }
+         
+         if(match)
+         {
+            ArrayResize(g_HistoryFilteredIndices, count+1);
+            g_HistoryFilteredIndices[count] = i; // Save POSITION index
+            count++;
+         }
+      }
+   }
+   
+   // Reset scroll if needed
+   // g_HistoryScrollY = 0; // Maybe not force reset if just updating? But safe.
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: SET FILTER MODE                                          |
+//+------------------------------------------------------------------+
+void SetHistoryFilter(ENUM_HISTORY_FILTER mode)
+{
+    g_HistoryFilterMode = mode;
+    g_HistoryScrollY = 0; // Reset scroll on view change
+    UpdateHistoryFilter();
+    CreateHistoryPanel(); // Redraw
+}
+
+
+//+------------------------------------------------------------------+
 //| CREATION DU PANEL HISTORIQUE                                     |
 //+------------------------------------------------------------------+
 void CreateHistoryPanel()
@@ -18,15 +104,71 @@ void CreateHistoryPanel()
    int startX = HistoryPanelX;
    int startY = HistoryPanelY;
    
-   // 1. Fond & Header
-   // Increased height to account for content offset (header + padding + labels offset)
-   // Content starts at headerHeight + 35 roughly, so we add more padding to background.
-   CreateRect("Hist_Bg", startX, startY, width, headerHeight + HistoryViewportHeight + 45, g_ColorBg, BORDER_FLAT);
+   // --- Calculate Dynamic Offsets ---
+   int toolbarHeight = 35;
+   int customInputHeight = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? 35 : 0;
+   
+   int topSectionHeight = headerHeight + toolbarHeight + customInputHeight;
+   
+   // 1. Fond & Header (Adjusted height)
+   CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + 45, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorHeader, BORDER_FLAT);
    CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, clrWhite, "Trebuchet MS Bold");
    
-   // 2. Headings
-   int colY = startY + headerHeight + 10;
+   // 2. Filter Buttons Toolbar
+   int btnY = startY + headerHeight + 5;
+   int btnW = 80;
+   int btnH = 25;
+   int gap = 10;
+   int curBtnX = startX + 15;
+   
+   color bgDaily   = (g_HistoryFilterMode == H_FILTER_DAILY) ? ColorBtnActive : g_ColorInput;
+   color bgWeekly  = (g_HistoryFilterMode == H_FILTER_WEEKLY) ? ColorBtnActive : g_ColorInput;
+   color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? ColorBtnActive : g_ColorInput;
+   color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? ColorBtnActive : g_ColorInput;
+   
+   CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, clrWhite);
+   curBtnX += btnW + gap;
+   CreateButton("Hist_Btn_Weekly", "Weekly", curBtnX, btnY, btnW, btnH, bgWeekly, clrWhite);
+   curBtnX += btnW + gap;
+   CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, clrWhite);
+   curBtnX += btnW + gap;
+   CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, clrWhite);
+   
+   // 2.5 Custom Inputs (If Active)
+   if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+   {
+       int inpY = btnY + btnH + 5;
+       
+       // Centering relative to the buttons (Total Buttons Width ~350px, Starts at startX + 15)
+       // Center of buttons = startX + 15 + 175 = startX + 190.
+       // Content Width approx: Lbl(35) + Inp(100) + Gap(20) + Lbl(25) + Inp(100) = 280px.
+       // StartX for Content = (startX + 190) - (280/2) = startX + 50.
+       
+       int cursorX = startX + 50;
+       int inpW = 100;
+       
+       CreateLabel("Hist_Lbl_From", "From:", cursorX, inpY+3, 8, g_ColorLabel);
+       CreateEdit("Hist_Input_Start", TimeToString(g_HistoryCustomStart, TIME_DATE), cursorX + 35, inpY, inpW, 25);
+       
+       cursorX = cursorX + 35 + inpW + 20; // Move after first input + gap
+       
+       CreateLabel("Hist_Lbl_To", "To:", cursorX, inpY+3, 8, g_ColorLabel);
+       CreateEdit("Hist_Input_End", TimeToString(g_HistoryCustomEnd, TIME_DATE), cursorX + 25, inpY, inpW, 25);
+       
+       // Apply button removed as requested (Auto-apply on edit)
+   }
+   else
+   {
+       // Cleanup inputs if switching away
+       if(ObjectFind(0, PREFIX+"Hist_Input_Start") >= 0) ObjectDelete(0, PREFIX+"Hist_Input_Start");
+       if(ObjectFind(0, PREFIX+"Hist_Input_End") >= 0) ObjectDelete(0, PREFIX+"Hist_Input_End");
+       if(ObjectFind(0, PREFIX+"Hist_Lbl_From") >= 0) ObjectDelete(0, PREFIX+"Hist_Lbl_From");
+       if(ObjectFind(0, PREFIX+"Hist_Lbl_To") >= 0) ObjectDelete(0, PREFIX+"Hist_Lbl_To");
+   }
+   
+   // 3. Headings
+   int colY = startY + topSectionHeight + 10;
    int colX = startX + 20;
    
    // Layout Dimensions
@@ -43,19 +185,22 @@ void CreateHistoryPanel()
    CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Fees", "FEES", colX + wTime + wType + wSym, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSym + wFees, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_RetP", "RETURN %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
-   CreateLabel("Hist_H_RetR", "RETURN R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
+   CreateLabel("Hist_H_RetP", "RETURN %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_RetR", "RETURN R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    
-   // Cleanup Old Labels
+   // Cleanup Old Labels (Safety)
    if(ObjectFind(0, PREFIX + "Hist_H_Size") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Size");
    if(ObjectFind(0, PREFIX + "Hist_H_Price") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Price");
    
-   // 3. Content
+   // 4. Content
    int contentY = colY + 25;
    DrawHistoryContent(startX, contentY, width, rowHeight);
    
-   // 4. Scrollbar
-   DrawHistoryScrollbar(startX, contentY, width);
+   // 5. Scrollbar
+   // Adjust Scrollbar Y and H? 
+   // Scrollbar should be aligned with content area
+   int scrollY = contentY;
+   DrawHistoryScrollbar(startX, scrollY, width);
    
    ChartRedraw();
 }
@@ -65,14 +210,15 @@ void CreateHistoryPanel()
 //+------------------------------------------------------------------+
 void DrawHistoryContent(int x, int y, int w, int rowH)
 {
-   // Cleanup old items
+   // Cleanup old visible items
    for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
    {
        string name = ObjectName(0, i);
        if(StringFind(name, PREFIX + "Hist_Item_") >= 0) ObjectDelete(0, name);
    }
 
-   int total = OrdersHistoryTotal();
+   // Use Filtered Indices
+   int total = ArraySize(g_HistoryFilteredIndices);
    HistoryContentHeight = total * rowH;
    
    int maxVisibleRows = HistoryViewportHeight / rowH;
@@ -89,7 +235,7 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    if(startIdx < 0) startIdx = 0;
    
    int currentY = y;
-   int paddingX = 20; // Matches Header
+   int paddingX = 20; 
    
    int wTime  = 150;
    int wType  = 100;
@@ -97,16 +243,19 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    int wFees  = 100;
    int wProf  = 120;
    int wRetP  = 90;
-   // wRetR
 
    // Loop maxVisibleRows
    for(int i = 0; i < maxVisibleRows; i++)
    {
        int logicalIndex = startIdx + i;
-       // We want Newest First (Total-1 down to 0)
-       int orderIndex = total - 1 - logicalIndex;
+       // We want Newest First (Total-1 down to 0) from the filtered list?
+       // g_HistoryFilteredIndices stores indices in ascending order (OLD -> NEW) usually if loop was 0..Total
+       // So we want the end of the array.
+       int arrayIndex = total - 1 - logicalIndex;
        
-       if(orderIndex < 0) break;
+       if(arrayIndex < 0) break;
+       
+       int orderIndex = g_HistoryFilteredIndices[arrayIndex];
        
        if(OrderSelect(orderIndex, SELECT_BY_POS, MODE_HISTORY))
        {
@@ -133,8 +282,9 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            double prof    = OrderProfit() + OrderCommission() + OrderSwap();
            string profStr = DoubleToString(prof, 2);
            
-           // Return % Calculation
-           double bal = AccountBalance();
+           // Return % Calculation relative to CURRENT Balance (Estimation)
+           // ideally it should be relative to Balance AT OPEN, but complex to query. Current balance is standard approx.
+           double bal = AccountBalance(); 
            double retPrc = 0.0;
            if(bal > 0) retPrc = (prof / bal) * 100.0;
            string retPrcStr = DoubleToString(retPrc, 2) + "%";
@@ -186,7 +336,7 @@ void DrawHistoryScrollbar(int x, int y, int w)
    ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
    
    int contentH = HistoryContentHeight;
-   if(contentH <= HistoryViewportHeight) contentH = HistoryViewportHeight + 1; // Prevent div 0 or full
+   if(contentH <= HistoryViewportHeight) contentH = HistoryViewportHeight + 1; 
    
    double ratio = (double)HistoryViewportHeight / (double)contentH;
    if(ratio > 1.0) ratio = 1.0;
@@ -230,9 +380,26 @@ void ToggleHistoryPanel(bool visible)
    SetObjVisible("Hist_ScrollTrack", visible);
    SetObjVisible("Hist_ScrollThumb", visible);
    
-   // Items
-   // We might just delete them if hidden to save resources, or hide
-   // Deleting is safer for dynamic lists
+   SetObjVisible("Hist_Btn_Daily", visible);
+   SetObjVisible("Hist_Btn_Weekly", visible);
+   SetObjVisible("Hist_Btn_Monthly", visible);
+   SetObjVisible("Hist_Btn_Custom", visible);
+   
+   if(visible && g_HistoryFilterMode == H_FILTER_CUSTOM)
+   {
+       SetObjVisible("Hist_Input_Start", true);
+       SetObjVisible("Hist_Input_End", true);
+       SetObjVisible("Hist_Lbl_From", true);
+       SetObjVisible("Hist_Lbl_To", true);
+   }
+   else
+   {
+       SetObjVisible("Hist_Input_Start", false);
+       SetObjVisible("Hist_Input_End", false);
+       SetObjVisible("Hist_Lbl_From", false);
+       SetObjVisible("Hist_Lbl_To", false);
+   }
+   
    if(!visible)
    {
        for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
@@ -243,6 +410,7 @@ void ToggleHistoryPanel(bool visible)
    }
    else
    {
-      CreateHistoryPanel(); // Will redraw items
+       UpdateHistoryFilter(); // Refresh filter on open
+       CreateHistoryPanel(); 
    }
 }

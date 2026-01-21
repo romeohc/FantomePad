@@ -669,6 +669,37 @@ void GUI_OnChartEvent(const int id,
           return;
       }
 
+      // --- HISTORY FILTER EVENTS --- 
+      if(sparam == PREFIX + "Hist_Btn_Daily")
+      {
+         SetHistoryFilter(H_FILTER_DAILY);
+         EffectButton(sparam);
+         return;
+      }
+      if(sparam == PREFIX + "Hist_Btn_Weekly")
+      {
+         SetHistoryFilter(H_FILTER_WEEKLY);
+         EffectButton(sparam);
+         return;
+      }
+      if(sparam == PREFIX + "Hist_Btn_Monthly")
+      {
+         SetHistoryFilter(H_FILTER_MONTHLY);
+         EffectButton(sparam);
+         return;
+      }
+      if(sparam == PREFIX + "Hist_Btn_Custom")
+      {
+         SetHistoryFilter(H_FILTER_CUSTOM);
+         EffectButton(sparam);
+         return;
+      }
+      if(sparam == PREFIX + "Hist_Btn_Apply")
+      {
+          // Deprecated - Auto Update logic moved to ENDEDIT
+          return;
+      }
+
       // --- COLOR PICKER EVENTS ---
       // 1. Click on a Settings Color Button -> Open Picker
       if(StringFind(sparam, PREFIX + "Set_Btn_Color_") >= 0)
@@ -1163,6 +1194,19 @@ void GUI_OnChartEvent(const int id,
       
       // --- UPDATE POSITION SL/TP (Old Auto Logic Removed) ---
       // We do nothing here now, waiting for Validate button.
+      
+      // --- HISTORY CUSTOM DATE AUTO-UPDATE ---
+      if(sparam == PREFIX + "Hist_Input_Start" || sparam == PREFIX + "Hist_Input_End")
+      {
+          string sStart = ObjectGetString(0, PREFIX + "Hist_Input_Start", OBJPROP_TEXT);
+          string sEnd   = ObjectGetString(0, PREFIX + "Hist_Input_End", OBJPROP_TEXT);
+          
+          g_HistoryCustomStart = StringToTime(sStart);
+          g_HistoryCustomEnd   = StringToTime(sEnd);
+          
+          UpdateHistoryFilter();
+          CreateHistoryPanel(); // Redraw with new filter
+      }
    }
    
    // --- SYNCHRONISATION GRAPHIQUE -> PANEL (Déplacement Lignes) ---

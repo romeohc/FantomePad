@@ -29,6 +29,7 @@ input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
 //--- Couleurs pour la liste
 color ColorListNormal = C'34,38,46';   // Couleur normale item liste
 color ColorListHover  = C'45,52,60';   // Couleur au survol
+color ColorBtnActive  = C'0,184,148'; // Couleur bouton filtre actif
 
 //--- Préfixe pour tous les objets graphiques
 string PREFIX = "PTP_";
@@ -87,6 +88,13 @@ bool   IsHistoryScrollDragging = false;
 int    HistoryScrollDragY = 0;
 int    HistoryViewportHeight = 400; // Visible height
 int    HistoryContentHeight = 0;    // Calculated content height
+
+// --- HISTORY FILTER GLOBALS ---
+enum ENUM_HISTORY_FILTER { H_FILTER_DAILY, H_FILTER_WEEKLY, H_FILTER_MONTHLY, H_FILTER_CUSTOM };
+ENUM_HISTORY_FILTER g_HistoryFilterMode = H_FILTER_DAILY; // Default to Daily
+int    g_HistoryFilteredIndices[]; // Stores original indices of filtered orders
+datetime g_HistoryCustomStart = 0;
+datetime g_HistoryCustomEnd = 0;
 
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
@@ -151,4 +159,8 @@ void InitGlobals()
    g_ColorCandleDown = ColorCandleDown;
    g_ColorListNormal = ColorListNormal;
    g_ColorListHover = ColorListHover;
+
+   // Init default custom dates (last 7 days by default)
+   g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;
+   g_HistoryCustomEnd = TimeCurrent() + 24 * 3600;
 }
