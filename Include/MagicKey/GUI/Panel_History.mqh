@@ -30,21 +30,25 @@ void CreateHistoryPanel()
    int colY = startY + headerHeight + 10;
    int colX = startX + 20;
    
+   // New Layout
    int wTime  = 160;
    int wType  = 100;
-   int wSize  = 80;
-   int wSym   = 100;
-   int wPrice = 100;
+   int wSym   = 120; // Increased width
+   int wFees  = 120; // New column
    // Profit gets the rest
    
    // Remove old headers if any (part of full redraw)
-   // We use simple labels
    CreateLabel("Hist_H_Time", "TIME", colX, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Type", "TYPE", colX + wTime, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Size", "SIZE", colX + wTime + wType, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType + wSize, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Price","PRICE", colX + wTime + wType + wSize + wSym, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSize + wSym + wPrice, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   // Removed Size
+   CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   // Removed Price
+   CreateLabel("Hist_H_Fees", "FEES", colX + wTime + wType + wSym, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New!
+   CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSym + wFees, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   
+   // Cleanup Old Labels (important if we switch panel content dynamically)
+   if(ObjectFind(0, PREFIX + "Hist_H_Size") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Size");
+   if(ObjectFind(0, PREFIX + "Hist_H_Price") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Price");
    
    // 3. Content
    int contentY = colY + 25;
@@ -90,11 +94,12 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    
    int currentY = y;
    int paddingX = 20; // Matches Header
+   
    int wTime  = 160;
    int wType  = 100;
-   int wSize  = 80;
-   int wSym   = 100;
-   int wPrice = 100;
+   int wSym   = 120;
+   int wFees  = 120;
+   // wProfit = Rest
 
    // Loop maxVisibleRows
    for(int i = 0; i < maxVisibleRows; i++)
@@ -120,10 +125,19 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            string timeStr = TimeToString(OrderCloseTime(), TIME_DATE|TIME_MINUTES);
            int type = OrderType();
            string typeStr = (type == OP_BUY) ? "BUY" : (type == OP_SELL) ? "SELL" : (type == OP_BUYLIMIT) ? "BUY LIM" : (type == OP_SELLLIMIT) ? "SELL LIM" : "PENDING";
-           string sizeStr = DoubleToString(OrderLots(), 2);
            string symStr  = OrderSymbol();
-           double price   = (OrderCloseTime() > 0) ? OrderClosePrice() : OrderOpenPrice();
-           string priceStr= DoubleToString(price, 5); // Digits generic
+           
+           // Fees Calculation (Commission + Swap)
+           double fees = OrderCommission() + OrderSwap();
+           string feesStr = DoubleToString(fees, 2) + " " + AccountCurrency();
+           
+           // Profit (Includes fees in original requirement? Or Net? Usually separate means Breakdown)
+           // But code was: OrderProfit() + OrderCommission() + OrderSwap(). This is Total Net Profit.
+           // If we separate Fees, we should probably keep showing Total Net Profit so the user knows what they made.
+           // Or should we show Gross Profit? 
+           // User request: "colonne fees... qui affichera tous les frais compris de la position"
+           // Usually users want to see Fees separate, and the Result separate. 
+           // I will keep Profit as Net Profit (End result).
            double prof    = OrderProfit() + OrderCommission() + OrderSwap();
            string profStr = DoubleToString(prof, 2) + " " + AccountCurrency();
            
@@ -135,17 +149,15 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            
            CreateLabel("Hist_Item_Time"+sfx, timeStr, colX, txtY, 8, g_ColorText, "Trebuchet MS");
            CreateLabel("Hist_Item_Type"+sfx, typeStr, colX + wTime, txtY, 8, typeCol, "Trebuchet MS");
-           CreateLabel("Hist_Item_Size"+sfx, sizeStr, colX + wTime + wType, txtY, 8, g_ColorText, "Trebuchet MS");
-           CreateLabel("Hist_Item_Sym"+sfx, symStr, colX + wTime + wType + wSize, txtY, 8, g_ColorText, "Trebuchet MS");
-           CreateLabel("Hist_Item_Pr"+sfx, priceStr, colX + wTime + wType + wSize + wSym, txtY, 8, g_ColorText, "Trebuchet MS");
-           CreateLabel("Hist_Item_Prof"+sfx, profStr, colX + wTime + wType + wSize + wSym + wPrice, txtY, 8, profCol, "Trebuchet MS Bold");
+           CreateLabel("Hist_Item_Sym"+sfx, symStr, colX + wTime + wType, txtY, 8, g_ColorText, "Trebuchet MS");
+           CreateLabel("Hist_Item_Fees"+sfx, feesStr, colX + wTime + wType + wSym, txtY, 8, g_ColorLabel, "Trebuchet MS"); // Fees darker color
+           CreateLabel("Hist_Item_Prof"+sfx, profStr, colX + wTime + wType + wSym + wFees, txtY, 8, profCol, "Trebuchet MS Bold");
            
            // ZOrder 12 for text
            ObjectSetInteger(0, PREFIX + "Hist_Item_Time"+sfx, OBJPROP_ZORDER, 12);
            ObjectSetInteger(0, PREFIX + "Hist_Item_Type"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Size"+sfx, OBJPROP_ZORDER, 12);
            ObjectSetInteger(0, PREFIX + "Hist_Item_Sym"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Pr"+sfx, OBJPROP_ZORDER, 12);
+           ObjectSetInteger(0, PREFIX + "Hist_Item_Fees"+sfx, OBJPROP_ZORDER, 12);
            ObjectSetInteger(0, PREFIX + "Hist_Item_Prof"+sfx, OBJPROP_ZORDER, 12);
        }
    }
@@ -200,9 +212,8 @@ void ToggleHistoryPanel(bool visible)
    
    SetObjVisible("Hist_H_Time", visible);
    SetObjVisible("Hist_H_Type", visible);
-   SetObjVisible("Hist_H_Size", visible);
    SetObjVisible("Hist_H_Sym", visible);
-   SetObjVisible("Hist_H_Price", visible);
+   SetObjVisible("Hist_H_Fees", visible);
    SetObjVisible("Hist_H_Prof", visible);
    
    SetObjVisible("Hist_ScrollTrack", visible);
