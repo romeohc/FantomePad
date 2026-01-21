@@ -75,32 +75,52 @@ void UpdateInfoLayout()
    
    int statsDescX = startX + paddingX + 15;
    int statsTopY  = currentY + 10;
+   int colW  = (width - (paddingX*2) - 30) / 2;
    
-   // Balance (Row 1)
+   // Balance (Row 1 Left)
    SetObjPosition("Info_Lbl_Balance", statsDescX, statsTopY);
    SetObjPosition("Info_Val_Balance", statsDescX, statsTopY + 15);
    
+   // PNL (Row 1 Right)
+   SetObjPosition("Info_Lbl_PnL", statsDescX + colW, statsTopY);
+   SetObjPosition("Info_Val_PnL", statsDescX + colW, statsTopY + 15);
+   
+   // --- ROW 2: ROI % & ROI R ---
    int row2Y = statsTopY + 45;
-   int colW  = (width - (paddingX*2) - 30) / 2;
    
-   // Equity (Left)
-   SetObjPosition("Info_Lbl_Equity", statsDescX, row2Y);
-   SetObjPosition("Info_Val_Equity", statsDescX, row2Y + 15);
+   // ROI % (Row 2 Left)
+   SetObjPosition("Info_Lbl_PerfP", statsDescX, row2Y);
+   SetObjPosition("Info_Val_PerfP", statsDescX, row2Y + 15);
    
-   // Margin (Right)
-   SetObjPosition("Info_Lbl_Margin", statsDescX + colW, row2Y);
-   SetObjPosition("Info_Val_Margin", statsDescX + colW, row2Y + 15);
+   // ROI R (Row 2 Right)
+   SetObjPosition("Info_Lbl_PerfR", statsDescX + colW, row2Y);
+   SetObjPosition("Info_Val_PerfR", statsDescX + colW, row2Y + 15);
    
-   // Deposit / Withdraw (Row 3)
+   // --- ROW 3: EQUITY & MARGIN ---
    int row3Y = row2Y + 45;
    
+   // Equity (Left)
+   SetObjPosition("Info_Lbl_Equity", statsDescX, row3Y);
+   SetObjPosition("Info_Val_Equity", statsDescX, row3Y + 15);
+   
+   // Margin (Right)
+   SetObjPosition("Info_Lbl_Margin", statsDescX + colW, row3Y);
+   SetObjPosition("Info_Val_Margin", statsDescX + colW, row3Y + 15);
+   
+   // --- ROW 4: DEPOSIT & WITHDRAW ---
+   int row4Y = row3Y + 45;
+   
    // Deposit (Left)
-   SetObjPosition("Info_Lbl_Deposit", statsDescX, row3Y);
-   SetObjPosition("Info_Val_Deposit", statsDescX, row3Y + 15);
+   SetObjPosition("Info_Lbl_Deposit", statsDescX, row4Y);
+   SetObjPosition("Info_Val_Deposit", statsDescX, row4Y + 15);
    
    // Withdraw (Right)
-   SetObjPosition("Info_Lbl_Withdraw", statsDescX + colW, row3Y);
-   SetObjPosition("Info_Val_Withdraw", statsDescX + colW, row3Y + 15);
+   SetObjPosition("Info_Lbl_Withdraw", statsDescX + colW, row4Y);
+   SetObjPosition("Info_Val_Withdraw", statsDescX + colW, row4Y + 15);
+   
+   // Adjust height if needed or keep standard
+   int row5Y = row4Y + 45; // Just for consistency logic if we added more
+
    
    currentY += statsBgH + 15;
    
@@ -108,24 +128,8 @@ void UpdateInfoLayout()
    SetObjPosition("Info_Sep", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Info_Sep", OBJPROP_XSIZE, width - (paddingX*2));
    
-   SetObjPosition("Info_Lbl_Withdraw", statsDescX + colW, row3Y);
-   SetObjPosition("Info_Val_Withdraw", statsDescX + colW, row3Y + 15);
-   
-   // P&L & Perf % (Row 4)
-   int row4Y = row3Y + 45;
-   
-   SetObjPosition("Info_Lbl_PnL", statsDescX, row4Y);
-   SetObjPosition("Info_Val_PnL", statsDescX, row4Y + 15);
-   
-   SetObjPosition("Info_Lbl_PerfP", statsDescX + colW, row4Y);
-   SetObjPosition("Info_Val_PerfP", statsDescX + colW, row4Y + 15);
-   
-   // Perf R (Row 5)
-   int row5Y = row4Y + 45;
-   SetObjPosition("Info_Lbl_PerfR", statsDescX, row5Y);
-   SetObjPosition("Info_Val_PerfR", statsDescX, row5Y + 15);
-   
-   currentY += statsBgH + 15;
+   currentY += 15;
+
    
    // --- POSITIONS HEADER ---
    SetObjPosition("Info_SubTitle_Pos", startX + paddingX, currentY);
@@ -150,6 +154,12 @@ void UpdateInfoLayout()
       SetObjPosition("Info_Ord_Typ" + suffix, startX + width - paddingX - 70, currentY + 7);
       
       currentY += rowH + gapY;
+   }
+   
+   if(g_LastInfoOrderCount == 0)
+   {
+      SetObjPosition("Info_NoOrd_Msg", startX + paddingX, currentY);
+      currentY += 20;
    }
    
    // Ajustement hauteur fond
@@ -193,20 +203,23 @@ void CreateInfoPanel()
    CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Info_Val_Withdraw", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PnL", "PROFIT & LOSS", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PnL", "PNL", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Info_Val_PnL", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PerfP", "PERFORMANCE (%)", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PerfP", "ROI", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Info_Val_PerfP", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PerfR", "PERFORMANCE (R)", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PerfR", "ROI", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
    CreateLabel("Info_Val_PerfR", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // 3. Separator Line
    CreateRect("Info_Sep", 0, 0, 100, 1, g_ColorHeader, BORDER_FLAT);
    
    // 4. SubHeader
-   CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorLabel, "Trebuchet MS Bold");
+   
+   // 5. No Orders Message
+   CreateLabel("Info_NoOrd_Msg", "No active orders", 0, 0, 8, g_ColorText, "Trebuchet MS");
    
    UpdateInfoLayout();
    UpdateInfoPanel();
@@ -225,9 +238,9 @@ void UpdateInfoPanel()
    double equ = AccountEquity();
    double marg = AccountFreeMargin();
    
-   string sBal = DoubleToString(bal, 2) + " " + currency;
-   string sEqu = DoubleToString(equ, 2) + " " + currency;
-   string sMarg = DoubleToString(marg, 2) + " " + currency;
+   string sBal = DoubleToString(bal, 2);
+   string sEqu = DoubleToString(equ, 2);
+   string sMarg = DoubleToString(marg, 2);
    
    ObjectSetString(0, PREFIX + "Info_Val_Balance", OBJPROP_TEXT, sBal);
    ObjectSetString(0, PREFIX + "Info_Val_Equity", OBJPROP_TEXT, sEqu);
@@ -237,11 +250,8 @@ void UpdateInfoPanel()
    double deps = 0, wits = 0;
    GetAccountHistoryStats(deps, wits);
    
-   string sDeps = DoubleToString(deps, 2) + " " + currency;
-   string sWits = DoubleToString(wits, 2) + " " + currency;
-   
-   ObjectSetString(0, PREFIX + "Info_Val_Deposit", OBJPROP_TEXT, sDeps);
-   ObjectSetString(0, PREFIX + "Info_Val_Withdraw", OBJPROP_TEXT, sWits);
+   string sDeps = DoubleToString(deps, 2);
+   string sWits = DoubleToString(wits, 2);
    
    ObjectSetString(0, PREFIX + "Info_Val_Deposit", OBJPROP_TEXT, sDeps);
    ObjectSetString(0, PREFIX + "Info_Val_Withdraw", OBJPROP_TEXT, sWits);
@@ -258,7 +268,7 @@ void UpdateInfoPanel()
    double perfR = 0.0;
    if(g_OneRPercent > 0) perfR = perfP / g_OneRPercent;
    
-   string sPnL   = DoubleToString(pnl, 2) + " " + currency;
+   string sPnL   = DoubleToString(pnl, 2);
    string sPerfP = DoubleToString(perfP, 2) + " %";
    string sPerfR = DoubleToString(perfR, 2) + " R";
    
@@ -318,6 +328,16 @@ void UpdateInfoPanel()
       }
    }
    
+   // Handle "No active orders" visibility
+   if(visualIndex == 0)
+   {
+      SetObjVisible("Info_NoOrd_Msg", true);
+   }
+   else
+   {
+      SetObjVisible("Info_NoOrd_Msg", false);
+   }
+   
    // Clean up stale objects (Bg + Sym + Typ)
    if(visualIndex < g_LastInfoOrderCount)
    {
@@ -371,6 +391,11 @@ void ToggleInfoPanel(bool visible)
    
    SetObjVisible("Info_Sep", visible);
    SetObjVisible("Info_SubTitle_Pos", visible);
+   
+   if(visible && g_LastInfoOrderCount == 0)
+       SetObjVisible("Info_NoOrd_Msg", true);
+   else
+       SetObjVisible("Info_NoOrd_Msg", false);
    
    // Position Lines
    for(int i=0; i<g_LastInfoOrderCount; i++)
