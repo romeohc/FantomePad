@@ -19,7 +19,9 @@ void CreateHistoryPanel()
    int startY = HistoryPanelY;
    
    // 1. Fond & Header
-   CreateRect("Hist_Bg", startX, startY, width, headerHeight + HistoryViewportHeight + 10, g_ColorBg, BORDER_FLAT);
+   // Increased height to account for content offset (header + padding + labels offset)
+   // Content starts at headerHeight + 35 roughly, so we add more padding to background.
+   CreateRect("Hist_Bg", startX, startY, width, headerHeight + HistoryViewportHeight + 45, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorHeader, BORDER_FLAT);
    CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, clrWhite, "Trebuchet MS Bold");
    
@@ -28,12 +30,12 @@ void CreateHistoryPanel()
    int colX = startX + 20;
    
    // Layout Dimensions
-   int wTime  = 130;
-   int wType  = 80;
-   int wSym   = 80;
-   int wFees  = 80;
-   int wProf  = 100;
-   int wRetP  = 80;
+   int wTime  = 150;
+   int wType  = 100;
+   int wSym   = 100;
+   int wFees  = 100;
+   int wProf  = 120;
+   int wRetP  = 90;
    // wRetR (Rest)
    
    CreateLabel("Hist_H_Time", "TIME", colX, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
@@ -41,8 +43,8 @@ void CreateHistoryPanel()
    CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Fees", "FEES", colX + wTime + wType + wSym, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSym + wFees, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_RetP", "RET %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
-   CreateLabel("Hist_H_RetR", "RET R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
+   CreateLabel("Hist_H_RetP", "RETURN %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
+   CreateLabel("Hist_H_RetR", "RETURN R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorLabel, "Trebuchet MS Bold"); // New
    
    // Cleanup Old Labels
    if(ObjectFind(0, PREFIX + "Hist_H_Size") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Size");
@@ -89,12 +91,12 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    int currentY = y;
    int paddingX = 20; // Matches Header
    
-   int wTime  = 130;
-   int wType  = 80;
-   int wSym   = 80;
-   int wFees  = 80;
-   int wProf  = 100;
-   int wRetP  = 80;
+   int wTime  = 150;
+   int wType  = 100;
+   int wSym   = 100;
+   int wFees  = 100;
+   int wProf  = 120;
+   int wRetP  = 90;
    // wRetR
 
    // Loop maxVisibleRows
@@ -125,11 +127,11 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            
            // Fees Calculation (Commission + Swap)
            double fees = OrderCommission() + OrderSwap();
-           string feesStr = DoubleToString(fees, 2) + " " + AccountCurrency();
+           string feesStr = DoubleToString(fees, 2);
            
            // Net Profit (including fees)
            double prof    = OrderProfit() + OrderCommission() + OrderSwap();
-           string profStr = DoubleToString(prof, 2) + " " + AccountCurrency();
+           string profStr = DoubleToString(prof, 2);
            
            // Return % Calculation
            double bal = AccountBalance();
@@ -152,7 +154,7 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            CreateLabel("Hist_Item_Type"+sfx, typeStr, colX + wTime, txtY, 8, typeCol, "Trebuchet MS");
            CreateLabel("Hist_Item_Sym"+sfx, symStr, colX + wTime + wType, txtY, 8, g_ColorText, "Trebuchet MS");
            CreateLabel("Hist_Item_Fees"+sfx, feesStr, colX + wTime + wType + wSym, txtY, 8, g_ColorLabel, "Trebuchet MS"); 
-           CreateLabel("Hist_Item_Prof"+sfx, profStr, colX + wTime + wType + wSym + wFees, txtY, 8, profCol, "Trebuchet MS Bold");
+           CreateLabel("Hist_Item_Prof"+sfx, profStr, colX + wTime + wType + wSym + wFees, txtY, 8, profCol, "Trebuchet MS");
            
            // New Columns
            CreateLabel("Hist_Item_RetP"+sfx, retPrcStr, colX + wTime + wType + wSym + wFees + wProf, txtY, 8, profCol, "Trebuchet MS");
