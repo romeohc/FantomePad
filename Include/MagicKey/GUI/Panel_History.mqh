@@ -65,6 +65,12 @@ void UpdateHistoryFilter()
              if(ct >= startLimit) match = true;
          }
          
+         // Symbol Filter
+         if(match && g_HistoryFilterSymbol != "")
+         {
+             if(StringFind(OrderSymbol(), g_HistoryFilterSymbol) == -1) match = false;
+         }
+         
          if(match)
          {
             ArrayResize(g_HistoryFilteredIndices, count+1);
@@ -134,6 +140,11 @@ void CreateHistoryPanel()
    CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, clrWhite);
    curBtnX += btnW + gap;
    CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, clrWhite);
+   
+   // Symbol Filter UI (Right of buttons)
+   int symX = curBtnX + btnW + 30;
+   CreateLabel("Hist_Lbl_SymFilter", "Symbol:", symX, btnY+3, 8, g_ColorLabel);
+   CreateEdit("Hist_Input_Symbol", g_HistoryFilterSymbol, symX + 40, btnY, 80, btnH);
    
    // 2.5 Custom Inputs (If Active)
    if(g_HistoryFilterMode == H_FILTER_CUSTOM)
@@ -384,6 +395,9 @@ void ToggleHistoryPanel(bool visible)
    SetObjVisible("Hist_Btn_Weekly", visible);
    SetObjVisible("Hist_Btn_Monthly", visible);
    SetObjVisible("Hist_Btn_Custom", visible);
+   
+   SetObjVisible("Hist_Lbl_SymFilter", visible);
+   SetObjVisible("Hist_Input_Symbol", visible);
    
    if(visible && g_HistoryFilterMode == H_FILTER_CUSTOM)
    {

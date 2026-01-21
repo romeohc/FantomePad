@@ -1195,6 +1195,22 @@ void GUI_OnChartEvent(const int id,
       // --- UPDATE POSITION SL/TP (Old Auto Logic Removed) ---
       // We do nothing here now, waiting for Validate button.
       
+
+      // --- HISTORY SYMBOL FILTER AUTO-UPDATE ---
+      if(sparam == PREFIX + "Hist_Input_Symbol")
+      {
+          string sSym = ObjectGetString(0, PREFIX + "Hist_Input_Symbol", OBJPROP_TEXT);
+          StringToUpper(sSym);
+          StringTrimLeft(sSym);
+          StringTrimRight(sSym);
+          
+          g_HistoryFilterSymbol = sSym;
+          ObjectSetString(0, PREFIX + "Hist_Input_Symbol", OBJPROP_TEXT, g_HistoryFilterSymbol);
+          
+          UpdateHistoryFilter();
+          CreateHistoryPanel();
+      }
+
       // --- HISTORY CUSTOM DATE AUTO-UPDATE ---
       if(sparam == PREFIX + "Hist_Input_Start" || sparam == PREFIX + "Hist_Input_End")
       {

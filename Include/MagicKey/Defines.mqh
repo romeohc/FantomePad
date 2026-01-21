@@ -95,6 +95,7 @@ ENUM_HISTORY_FILTER g_HistoryFilterMode = H_FILTER_DAILY; // Default to Daily
 int    g_HistoryFilteredIndices[]; // Stores original indices of filtered orders
 datetime g_HistoryCustomStart = 0;
 datetime g_HistoryCustomEnd = 0;
+string g_HistoryFilterSymbol = ""; // Symbol filter string
 
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
