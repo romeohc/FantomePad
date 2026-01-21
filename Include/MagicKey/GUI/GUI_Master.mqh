@@ -12,6 +12,7 @@
 #include "Panel_Info.mqh"
 #include "Panel_Manager.mqh"
 #include "Panel_Positions.mqh"
+#include "Panel_History.mqh"
 
 //+------------------------------------------------------------------+
 //| INITIALISATION GUI GLOBALE                                       |
@@ -22,6 +23,7 @@ void GUI_OnInit()
    CreateInfoPanel();
    CreateManagerPanel(); 
    CreatePositionsPanel();
+   CreateHistoryPanel();
    UpdateUIMode(); 
 }
 
@@ -49,6 +51,7 @@ void GUI_OnChartEvent(const int id,
       CreateInfoPanel();
       CreateManagerPanel();
       CreatePositionsPanel();
+      CreateHistoryPanel();
       UpdateUIMode();
       if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
    }
@@ -96,7 +99,7 @@ void GUI_OnChartEvent(const int id,
          g_BlockClick = false; // Reset safety block on new press
          
          // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
-         if(IsDragging || IsSettingsDragging || IsScrollDragging || IsSettingsScrollDragging || isOverList)
+         if(IsDragging || IsSettingsDragging || IsScrollDragging || IsSettingsScrollDragging || IsHistoryDragging || IsHistoryScrollDragging || isOverList)
          {
              ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
          }
@@ -199,6 +202,55 @@ void GUI_OnChartEvent(const int id,
                  }
              }
          }
+         
+         // --- 0.6 DRAG SCROLLBAR (HISTORY) ---
+         if(IsHistoryPanelVisible)
+         {
+             if(!IsHistoryScrollDragging && !IsDragging && !IsSettingsDragging && !IsScrollDragging && !IsSettingsScrollDragging && !IsHistoryDragging)
+             {
+                  long tx = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_XDISTANCE);
+                  long ty = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YDISTANCE);
+                  long tw = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_XSIZE);
+                  long th = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YSIZE);
+                  
+                  if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
+                  {
+                      IsHistoryScrollDragging = true;
+                      HistoryScrollDragY = mouseY;
+                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                  }
+             }
+             
+             if(IsHistoryScrollDragging)
+             {
+                 int deltaY = mouseY - HistoryScrollDragY;
+                 if(deltaY != 0)
+                 {
+                     long trackH = HistoryViewportHeight;
+                     long thumbH = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YSIZE);
+                     int availableTrack = (int)(trackH - thumbH);
+                     
+                     if(availableTrack > 0)
+                     {
+                         int maxScroll = HistoryContentHeight - HistoryViewportHeight;
+                         if(maxScroll < 0) maxScroll = 0;
+                         
+                         double moveRatio = (double)deltaY / (double)availableTrack;
+                         int offsetChange = (int)(moveRatio * maxScroll);
+                         
+                         if(MathAbs(offsetChange) >= 1)
+                         {
+                             g_HistoryScrollY += offsetChange;
+                             if(g_HistoryScrollY < 0) g_HistoryScrollY = 0;
+                             if(g_HistoryScrollY > maxScroll) g_HistoryScrollY = maxScroll;
+                             
+                             HistoryScrollDragY = mouseY;
+                             CreateHistoryPanel(); // Redraws content
+                         }
+                     }
+                 }
+             }
+         }
       
          // --- 1. DRAG SETTINGS PANEL ---
          bool processedSettings = false;
@@ -293,9 +345,37 @@ void GUI_OnChartEvent(const int id,
                processedPos = true;
             }
          }
+
+          // --- 1.7 DRAG HISTORY PANEL ---
+          bool processedHistory = false;
+          if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !IsDragging && !IsScrollDragging && !IsHistoryScrollDragging)
+          {
+             if(!IsHistoryDragging)
+             {
+                int histW = 800; // Matches CreateHistoryPanel
+                long histH = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
+                if(histH < 50) histH = 200;
+                
+                if(mouseX >= HistoryPanelX && mouseX <= HistoryPanelX + histW && mouseY >= HistoryPanelY && mouseY <= HistoryPanelY + histH)
+                {
+                   IsHistoryDragging = true;
+                   HistoryDragOffsetX = mouseX - HistoryPanelX;
+                   HistoryDragOffsetY = mouseY - HistoryPanelY;
+                   ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                }
+             }
+             
+             if(IsHistoryDragging)
+             {
+                HistoryPanelX = mouseX - HistoryDragOffsetX;
+                HistoryPanelY = mouseY - HistoryDragOffsetY;
+                CreateHistoryPanel(); // Updates position
+                processedHistory = true;
+             }
+          }
          
          // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
+         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !processedHistory && !IsHistoryDragging && !IsScrollDragging && !IsSettingsScrollDragging && !IsHistoryScrollDragging)
          {
             if(!IsDragging)
             {
@@ -359,6 +439,12 @@ void GUI_OnChartEvent(const int id,
          {
              IsSettingsScrollDragging = false;
              g_BlockClick = true;
+         }
+         if(IsHistoryDragging) IsHistoryDragging = false;
+         if(IsHistoryScrollDragging)
+         {
+            IsHistoryScrollDragging = false;
+            g_BlockClick = true;
          }
          
          // Re-enable chart scroll ONLY if not over list and not in other modal state
@@ -540,6 +626,16 @@ void GUI_OnChartEvent(const int id,
          EffectButton(sparam);
          return;
       }
+      
+      // 3.5 History Panel
+      if(sparam == PREFIX + "Mgr_Btn_History")
+       {
+          IsHistoryPanelVisible = !IsHistoryPanelVisible;
+          ToggleHistoryPanel(IsHistoryPanelVisible);
+          UpdateManagerPanel(); 
+          EffectButton(sparam);
+          return;
+       }
       
       // 3. Toggle Settings (Shortcut)
       if(sparam == PREFIX + "Mgr_Btn_Settings")

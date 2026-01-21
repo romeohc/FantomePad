@@ -7,7 +7,7 @@
 // --- Manager Panel Globals ---
 int MgrPanelX = 20; // Top Left (offset slightly)
 int MgrPanelY = 20; 
-   int MgrPanelW = 350; 
+   int MgrPanelW = 410; 
    int MgrPanelH = 40;
 
 void CreateManagerPanel()
@@ -35,13 +35,18 @@ void CreateManagerPanel()
    currentX += btnW + margin;
    color bgInfo = IsInfoPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Info", "Info", currentX, startY, btnW, btnH, bgInfo, clrWhite);
+
+   // Button 4: History (New)
+   currentX += btnW + margin;
+   color bgHist = IsHistoryPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
+   CreateButton("Mgr_Btn_History", "Hist", currentX, startY, btnW, btnH, bgHist, clrWhite);
    
-   // Button 4: Settings (Toggle Config)
+   // Button 5: Settings (Toggle Config)
    currentX += btnW + margin;
    color bgSet = IsSettingsOpen ? g_ColorGreen : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Settings", "Set", currentX, startY, btnW, btnH, bgSet, clrWhite);
 
-   // Button 5: Symbol Select
+   // Button 6: Symbol Select
    currentX += btnW + margin;
    int symBtnW = 100; // Wider for symbol name
    // We reuse the ID "Btn_SymbolSelect" so GUI_Master logic works

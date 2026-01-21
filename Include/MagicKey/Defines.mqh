@@ -74,6 +74,20 @@ int    g_PosListOffset = 0;
 int    g_PosListMaxVisible = 10;
 
 
+
+// --- HISTORY PANEL GLOBALS ---
+bool   IsHistoryPanelVisible = false;
+int    HistoryPanelX = 50; 
+int    HistoryPanelY = 100;
+bool   IsHistoryDragging = false;
+int    HistoryDragOffsetX = 0;
+int    HistoryDragOffsetY = 0;
+int    g_HistoryScrollY = 0;
+bool   IsHistoryScrollDragging = false;
+int    HistoryScrollDragY = 0;
+int    HistoryViewportHeight = 400; // Visible height
+int    HistoryContentHeight = 0;    // Calculated content height
+
 // --- SETTINGS GLOBALS ---
 double   g_DefaultRisk;
 double   g_DefaultRiskMoney;
