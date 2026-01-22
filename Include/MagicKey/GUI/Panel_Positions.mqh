@@ -194,29 +194,29 @@ void CreatePositionsPanel()
    // Labels: uniform size (7 or 8), Muted Color
    // Values: uniform size (10 or 11), Bold, Bright Color
    
-   CreateLabel("Pos_Lbl_Size", "SIZE", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Size", "SIZE", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_Size", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_Profit", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
 
-   CreateLabel("Pos_Lbl_ProfitR", "PROFIT R", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_ProfitR", "PROFIT R", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_ProfitR", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_ProfitPrc", "PROFIT %", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_ProfitPrc", "PROFIT %", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_ProfitPrc", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Swap", "FEES", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Swap", "FEES", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_Swap", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_Comm", "COMMISSION", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Comm", "COMMISSION", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_Comm", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // Risk Section (Split Columns)
-   CreateLabel("Pos_Lbl_RiskR", "RISK R", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_RiskR", "RISK R", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_RiskR", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Pos_Lbl_RiskPrc", "RISK %", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_RiskPrc", "RISK %", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_RiskPrc", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // Cleanup Old Objects (Risk single line)
@@ -226,11 +226,11 @@ void CreatePositionsPanel()
    if(ObjectFind(0, PREFIX + "Pos_Val_RiskMoney") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_RiskMoney");
    
    // 4. Entry Price
-   CreateLabel("Pos_Lbl_Entry", "Entry Price", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Entry", "Entry Price", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Pos_Edit_Entry", "0", 0, 0, width - 40, 28);
 
    // 5. Protection (SL & BE)
-   CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
    
    // BE Button moved to right of SL
@@ -239,11 +239,11 @@ void CreatePositionsPanel()
    ObjectSetString(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // 5. TP (Below)
-   CreateLabel("Pos_Lbl_TP", "Take profit", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_TP", "Take profit", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Pos_Edit_TP", "0", 0, 0, 80, 28);
    
    // 6. Close Section
-   CreateLabel("Pos_Lbl_Close", "Partial Close %", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Close", "Partial Close %", 0, 0, 8, g_ColorText, "Trebuchet MS");
    
    CreateButton("Pos_Btn_25", "25", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_FONTSIZE, 9);
@@ -335,7 +335,7 @@ void UpdatePositionsValues()
                      double dist = MathAbs(OrderOpenPrice() - sl);
                      double riskValMoney = (dist / tickSize) * tickVal * lots;
                      
-                     double bal = AccountBalance();
+                     bal = AccountBalance();
                      if(bal > 0) {
                         double riskPrc = (riskValMoney / bal) * 100.0;
                         sRiskPrc = DoubleToString(riskPrc, 2) + "%";
@@ -406,7 +406,7 @@ void UpdatePositionsValues()
              {
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, true);
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorBg); // Visually distinct
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorLabel); // Visually distinct
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText); // Visually distinct
              }
              else // Pending Order
              {
@@ -562,7 +562,7 @@ void DrawPositionList()
       ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
       ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
       
-      CreateButton("PosListItem_None", "No Positions", (int)x + 2, startY, (int)w - 4, itemHeight, g_ColorInput, g_ColorLabel);
+      CreateButton("PosListItem_None", "No Positions", (int)x + 2, startY, (int)w - 4, itemHeight, g_ColorInput, g_ColorText);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false);
       IsPosListOpen = true;

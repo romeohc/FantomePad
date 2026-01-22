@@ -149,7 +149,7 @@ void CreateHistoryPanel()
    
    // Symbol Filter UI (Right of buttons)
    int symX = curBtnX + btnW + 30;
-   CreateLabel("Hist_Lbl_SymFilter", "Symbol:", symX, btnY+3, 8, g_ColorLabel);
+   CreateLabel("Hist_Lbl_SymFilter", "Symbol:", symX, btnY+3, 8, g_ColorText);
    CreateEdit("Hist_Input_Symbol", g_HistoryFilterSymbol, symX + 40, btnY, 80, btnH);
    
    // 2.5 Custom Inputs (If Active)
@@ -165,12 +165,12 @@ void CreateHistoryPanel()
        int cursorX = startX + 50;
        int inpW = 100;
        
-       CreateLabel("Hist_Lbl_From", "From:", cursorX, inpY+3, 8, g_ColorLabel);
+       CreateLabel("Hist_Lbl_From", "From:", cursorX, inpY+3, 8, g_ColorText);
        CreateEdit("Hist_Input_Start", TimeToString(g_HistoryCustomStart, TIME_DATE), cursorX + 35, inpY, inpW, 25);
        
        cursorX = cursorX + 35 + inpW + 20; // Move after first input + gap
        
-       CreateLabel("Hist_Lbl_To", "To:", cursorX, inpY+3, 8, g_ColorLabel);
+       CreateLabel("Hist_Lbl_To", "To:", cursorX, inpY+3, 8, g_ColorText);
        CreateEdit("Hist_Input_End", TimeToString(g_HistoryCustomEnd, TIME_DATE), cursorX + 25, inpY, inpW, 25);
        
        // Apply button removed as requested (Auto-apply on edit)
@@ -197,13 +197,13 @@ void CreateHistoryPanel()
    int wRetP  = 90;
    // wRetR (Rest)
    
-   CreateLabel("Hist_H_Time", "TIME", colX, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Type", "TYPE", colX + wTime, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Fees", "FEES", colX + wTime + wType + wSym, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSym + wFees, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_RetP", "RETURN %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
-   CreateLabel("Hist_H_RetR", "RETURN R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_Time", "TIME", colX, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_Type", "TYPE", colX + wTime, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_Sym",  "SYMBOL", colX + wTime + wType, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_Fees", "FEES", colX + wTime + wType + wSym, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_Prof", "PROFIT", colX + wTime + wType + wSym + wFees, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_RetP", "RETURN %", colX + wTime + wType + wSym + wFees + wProf, colY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_H_RetR", "RETURN R", colX + wTime + wType + wSym + wFees + wProf + wRetP, colY, 8, g_ColorText, "Trebuchet MS Bold");
    
    // Cleanup Old Labels (Safety)
    if(ObjectFind(0, PREFIX + "Hist_H_Size") >= 0) ObjectDelete(0, PREFIX + "Hist_H_Size");
@@ -323,7 +323,7 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            CreateLabel("Hist_Item_Time"+sfx, timeStr, colX, txtY, 8, g_ColorText, "Trebuchet MS");
            CreateLabel("Hist_Item_Type"+sfx, typeStr, colX + wTime, txtY, 8, typeCol, "Trebuchet MS");
            CreateLabel("Hist_Item_Sym"+sfx, symStr, colX + wTime + wType, txtY, 8, g_ColorText, "Trebuchet MS");
-           CreateLabel("Hist_Item_Fees"+sfx, feesStr, colX + wTime + wType + wSym, txtY, 8, g_ColorLabel, "Trebuchet MS"); 
+           CreateLabel("Hist_Item_Fees"+sfx, feesStr, colX + wTime + wType + wSym, txtY, 8, g_ColorText, "Trebuchet MS"); 
            CreateLabel("Hist_Item_Prof"+sfx, profStr, colX + wTime + wType + wSym + wFees, txtY, 8, profCol, "Trebuchet MS");
            
            // New Columns
@@ -377,7 +377,7 @@ void DrawHistoryScrollbar(int x, int y, int w)
    
    CreateRect("Hist_ScrollThumb", trackX + 1, thumbY, trackW - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);
-   ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_BGCOLOR, g_ColorLabel);
+   ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
 }
 
 //+------------------------------------------------------------------+
@@ -443,13 +443,13 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    int textY = y + 10; // Vertical centering for text
 
    // Draw Totals columns
-   CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorText, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_Prof", sProf, colX + wTime + wType + wSym + wFees, textY, 8, colProf, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_RetP", sRetP, colX + wTime + wType + wSym + wFees + wProf, textY, 8, colProf, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_RetR", sRetR, colX + wTime + wType + wSym + wFees + wProf + wRetP, textY, 8, colProf, "Trebuchet MS Bold");
    
    // Label "TOTAL" aligned to LEFT (Styled like headers: Size 8, Bold, ColorLabel)
-   CreateLabel("Hist_Foot_Label", "TOTAL", x + 15, textY, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Hist_Foot_Label", "TOTAL", x + 15, textY, 8, g_ColorText, "Trebuchet MS Bold");
 }
 
 //+------------------------------------------------------------------+

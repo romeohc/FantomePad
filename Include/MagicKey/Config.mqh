@@ -75,13 +75,13 @@ void SaveConfigToFile()
       FileWrite(handle, "ColorHeader=" + IntegerToString(g_ColorHeader));
       FileWrite(handle, "ColorInput=" + IntegerToString(g_ColorInput));
       FileWrite(handle, "ColorText=" + IntegerToString(g_ColorText));
-      FileWrite(handle, "ColorLabel=" + IntegerToString(g_ColorLabel));
+      // FileWrite(handle, "ColorLabel=" + IntegerToString(g_ColorLabel)); // Removed
       FileWrite(handle, "ColorGreen=" + IntegerToString(g_ColorGreen));
       FileWrite(handle, "ColorRed=" + IntegerToString(g_ColorRed));
       FileWrite(handle, "ColorBtnValid=" + IntegerToString(g_ColorBtnValid));
       FileWrite(handle, "ColorBtnInvalid=" + IntegerToString(g_ColorBtnInvalid));
       FileWrite(handle, "ColorChartBg=" + IntegerToString(g_ColorChartBg));
-      FileWrite(handle, "ColorChartFg=" + IntegerToString(g_ColorChartFg));
+      // FileWrite(handle, "ColorChartFg=" + IntegerToString(g_ColorChartFg)); // Removed
       FileWrite(handle, "ColorEntryLine=" + IntegerToString(g_ColorEntryLine));
       FileWrite(handle, "ColorSLLine=" + IntegerToString(g_ColorSLLine));
       FileWrite(handle, "ColorTPLine=" + IntegerToString(g_ColorTPLine));
@@ -138,14 +138,14 @@ void LoadConfig()
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
             if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
             if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);
-            if(key == "ColorText")   g_ColorText   = (color)StringToInteger(val);
-            if(key == "ColorLabel")  g_ColorLabel  = (color)StringToInteger(val);
+      if(key == "ColorText")   g_ColorText   = (color)StringToInteger(val);
+            // Removed ColorLabel and ColorChartFg as requested to simplify to single text color
             if(key == "ColorGreen")  g_ColorGreen  = (color)StringToInteger(val);
             if(key == "ColorRed")    g_ColorRed    = (color)StringToInteger(val);
             if(key == "ColorBtnValid")   g_ColorBtnValid   = (color)StringToInteger(val);
             if(key == "ColorBtnInvalid") g_ColorBtnInvalid = (color)StringToInteger(val);
             if(key == "ColorChartBg")g_ColorChartBg= (color)StringToInteger(val);
-            if(key == "ColorChartFg")g_ColorChartFg= (color)StringToInteger(val);
+            // Removed ColorChartFg
             if(key == "ColorEntryLine")g_ColorEntryLine= (color)StringToInteger(val);
             if(key == "ColorSLLine")   g_ColorSLLine   = (color)StringToInteger(val);
             if(key == "ColorTPLine")   g_ColorTPLine   = (color)StringToInteger(val);

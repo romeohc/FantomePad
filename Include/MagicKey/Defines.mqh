@@ -13,11 +13,11 @@ input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
 input color    ColorText   = C'224,228,230'; // Texte Principal (Off-White)
-input color    ColorLabel  = C'140,148,160'; // Texte Label (Muted Blue-Grey)
+// input color    ColorLabel removed
 input color    ColorGreen  = C'0,184,148';   // Vibrant Mint (Modern Buy)
 input color    ColorRed    = C'214,48,49';   // Vibrant Red (Modern Sell)
 input color    ColorChartBg= clrBlack;       // Chart Background
-input color    ColorChartFg= clrWhite;       // Chart Foreground (Axis Text)
+// input color    ColorChartFg removed
 input color    ColorCandleUp = C'0,184,148'; // Candle Up
 input color    ColorCandleDown = C'214,48,49'; // Candle Down
 input color    ColorBtnValid = C'0,90,180';    // Button Valid (Functional)
@@ -102,8 +102,8 @@ double   g_DefaultRisk;
 double   g_DefaultRiskMoney;
 double   g_DefaultRiskR;
 double   g_OneRPercent;
-color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText, g_ColorLabel;
-color    g_ColorGreen, g_ColorRed, g_ColorChartBg, g_ColorChartFg;
+color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
+color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
 color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine;
 color    g_ColorSLLine, g_ColorTPLine;
 color    g_ColorCandleUp, g_ColorCandleDown;
@@ -146,13 +146,13 @@ void InitGlobals()
    g_ColorHeader = ColorHeader;
    g_ColorInput  = ColorInput;
    g_ColorText   = ColorText;
-   g_ColorLabel  = ColorLabel;
+   // g_ColorLabel removed
    g_ColorGreen  = ColorGreen;
    g_ColorRed    = ColorRed;
    g_ColorBtnValid = ColorBtnValid;
    g_ColorBtnInvalid = ColorBtnInvalid;
    g_ColorChartBg= ColorChartBg;
-   g_ColorChartFg= ColorChartFg;
+   // g_ColorChartFg removed
    g_ColorEntryLine = ColorEntryLine;
    g_ColorSLLine = ColorSLLine;
    g_ColorTPLine = ColorTPLine;

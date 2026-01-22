@@ -31,7 +31,7 @@ void CreateColorRow(string suffix, string label, int x, int y, color col, bool v
    
    if(visible)
    {
-      CreateLabel(lblName, label, x, y + 4, 8, g_ColorLabel, "Trebuchet MS");
+      CreateLabel(lblName, label, x, y + 4, 8, g_ColorText, "Trebuchet MS");
       ObjectSetInteger(0, PREFIX + lblName, OBJPROP_ZORDER, 102);
       SetObjVisible(lblName, true);
       
@@ -91,9 +91,9 @@ void DrawSettingsScrollbar(int x, int y)
    // But Panel_Settings used Button before. Let's use Button simply for consistency in this file,
    // BUT style it to look like the Rect (Flat, specific color).
    
-   CreateButton("Set_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorLabel, clrNONE);
+   CreateButton("Set_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorText, clrNONE);
    ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_ZORDER, 116);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorLabel); 
+   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText); 
 }
 
 void CloseSettings()
@@ -158,7 +158,7 @@ void OpenSettings()
    v = CHECK_VIS(25);
    n = "Set_Lbl_Risk"; string ne = "Set_Edit_Risk";
    if(v) {
-      CreateLabel(n, "Default Risk (%)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      CreateLabel(n, "Default Risk (%)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
       CreateEdit(ne, DoubleToString(g_DefaultRisk, 1), x + w - 80, SCREEN_Y, 60, 25);
       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
@@ -177,7 +177,7 @@ void OpenSettings()
    n = "Set_Lbl_RiskMoney"; ne = "Set_Edit_RiskMoney";
    string currency = AccountCurrency();
    if(v) {
-      CreateLabel(n, "Default Risk (" + currency + ")", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      CreateLabel(n, "Default Risk (" + currency + ")", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
       CreateEdit(ne, DoubleToString(g_DefaultRiskMoney, 2), x + w - 80, SCREEN_Y, 60, 25);
       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
@@ -195,7 +195,7 @@ void OpenSettings()
    v = CHECK_VIS(25);
    n = "Set_Lbl_RiskR"; ne = "Set_Edit_RiskR";
    if(v) {
-      CreateLabel(n, "Default Risk (R)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+      CreateLabel(n, "Default Risk (R)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
       CreateEdit(ne, DoubleToString(g_DefaultRiskR, 2), x + w - 80, SCREEN_Y, 60, 25);
       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
@@ -213,7 +213,7 @@ void OpenSettings()
    v = CHECK_VIS(25);
    n = "Set_Lbl_OneRPercent"; ne = "Set_Edit_OneRPercent";
    if(v) {
-       CreateLabel(n, "1R Value (%)", x + padX, SCREEN_Y + 3, 9, g_ColorLabel, "Trebuchet MS");
+       CreateLabel(n, "1R Value (%)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
        ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
        CreateEdit(ne, DoubleToString(g_OneRPercent, 2), x + w - 80, SCREEN_Y, 60, 25);
        ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
@@ -264,17 +264,11 @@ void OpenSettings()
    
    // Row 3
    v = CHECK_VIS(25);
-   CreateColorRow("ChrtFg", "Chart Text", col1X, SCREEN_Y, g_ColorChartFg, v);
-   CreateColorRow("Txt", "Primary Text", col2X, SCREEN_Y, g_ColorText, v); // Moved Txt here
-   relY += rowH;
-   
-    // Row 4
-   v = CHECK_VIS(25);
-   CreateColorRow("Lbl", "Secondary Labels", col1X, SCREEN_Y, g_ColorLabel, v);
+   CreateColorRow("Txt", "Text Color", col1X, SCREEN_Y, g_ColorText, v); // Renamed to Text Color
    CreateColorRow("Green", "Buy (Long)", col2X, SCREEN_Y, g_ColorGreen, v);
    relY += rowH;
    
-   // Row 5
+    // Row 4
    v = CHECK_VIS(25);
    CreateColorRow("Red", "Sell (Short)", col1X, SCREEN_Y, g_ColorRed, v);
    CreateColorRow("EntLine", "Entry Line", col2X, SCREEN_Y, g_ColorEntryLine, v);

@@ -185,38 +185,38 @@ void CreateInfoPanel()
    CreateRect("Info_Stats_Bg", 0, 0, width - 40, 110, g_ColorInput, BORDER_FLAT); // Grouping Box
    ObjectSetInteger(0, PREFIX + "Info_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
 
-   CreateLabel("Info_Lbl_Balance", "BALANCE", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Balance", "BALANCE", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Balance", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold"); // Reduced to 9
    
-   CreateLabel("Info_Lbl_Equity", "EQUITY", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Equity", "EQUITY", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Equity", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_Margin", "MARGIN", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Margin", "MARGIN", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Margin", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_Deposit", "DEPOSIT", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Deposit", "DEPOSIT", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Deposit", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Withdraw", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Withdraw", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PnL", "PNL", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PnL", "PNL", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_PnL", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PerfP", "ROI", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PerfP", "ROI", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_PerfP", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_PerfR", "ROI", 0, 0, 7, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Info_Lbl_PerfR", "ROI", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_PerfR", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // 3. Separator Line
    CreateRect("Info_Sep", 0, 0, 100, 1, C'50,50,50', BORDER_FLAT);
    
    // 4. SubHeader
-   CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorLabel, "Trebuchet MS Bold");
+   CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorText, "Trebuchet MS Bold");
    
    // 5. No Orders Message
    CreateLabel("Info_NoOrd_Msg", "No active orders", 0, 0, 8, g_ColorText, "Trebuchet MS");

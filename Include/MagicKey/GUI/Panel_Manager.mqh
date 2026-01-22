@@ -161,7 +161,7 @@ void DrawSymbolList()
        
        CreateRect("ScrollThumb", trackX + 1, trackY + relativeY, scrollBarWidth - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
        ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_ZORDER, 11);
-       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorLabel); 
+       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorText); 
    }
    
    ChartRedraw();

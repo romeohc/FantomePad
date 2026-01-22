@@ -221,39 +221,39 @@ void CreatePanel()
    CreateLabel("Title", "Trading Panel", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Actif (Symbol) - MOVED TO MANAGER PANEL
-   // CreateLabel("Label_Symbol", "Symbol", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   // CreateLabel("Label_Symbol", "Symbol", 0, 0, 8, g_ColorText, "Trebuchet MS");
    // CreateButton("Btn_SymbolSelect", Symbol(), 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
    
    // 3. Type d'Ordre
-   // CreateLabel("Label_Type", "Order type", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   // CreateLabel("Label_Type", "Order type", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateButton("Btn_Type", OrderTypes[CurrentTypeIndex], 0, 0, PanelWidth - 40, 28, g_ColorInput, g_ColorText);
    ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // 4. Prix (Pending)
-   CreateLabel("Label_Price", "Entry price", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Label_Price", "Entry price", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_Price", DoubleToString(Ask, Digits), 0, 0, PanelWidth - 40, 28);
    
    // 5. SL & TP
-   CreateLabel("Label_SL", "Stop loss", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Label_SL", "Stop loss", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_SL", "0.00000", 0, 0, PanelWidth - 40, 28);
    
-   CreateLabel("Label_TP", "Take profit", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Label_TP", "Take profit", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_TP", "0.00000", 0, 0, PanelWidth - 40, 28);
    
    // 6. Risque
-   CreateLabel("Label_Risk", "Risk", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Label_Risk", "Risk", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_Risk", DoubleToString(g_DefaultRisk, 1), 0, 0, PanelWidth - 40, 28);
    
    // Bouton interactif pour changer le mode de risque (% <-> Devise)
    // On utilise un bouton pour faciliter le clic
-   CreateButton("Label_RiskPerc", "%", 0, 0, 40, 20, g_ColorInput, g_ColorLabel);
+   CreateButton("Label_RiskPerc", "%", 0, 0, 40, 20, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_BORDER_COLOR, g_ColorInput);
    ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_FONTSIZE, 9);
    ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_FONT, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
    
    // 7. Position
-   CreateLabel("Label_Lot", "Lots (size)", 0, 0, 8, g_ColorLabel, "Trebuchet MS");
+   CreateLabel("Label_Lot", "Lots (size)", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_Lot", "0.00", 0, 0, PanelWidth - 40, 28, true);
    
    // 8. Boutons

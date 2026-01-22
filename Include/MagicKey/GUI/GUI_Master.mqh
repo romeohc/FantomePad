@@ -815,17 +815,14 @@ void GUI_OnChartEvent(const int id,
               if(StringFind(g_ColorPickerTarget, "_Head") > 0)        g_ColorHeader = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_Input") > 0)       g_ColorInput = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_Txt") > 0)         g_ColorText = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_Lbl") > 0)         g_ColorLabel = (color)pickedCol;
+              // g_ColorLabel removed
               if(StringFind(g_ColorPickerTarget, "_Green") > 0)       g_ColorGreen = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_Red") > 0)         g_ColorRed = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_ChrtBg") > 0) {
                  g_ColorChartBg = (color)pickedCol;
                  ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
               }
-              if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
-                 g_ColorChartFg = (color)pickedCol;
-                 ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
-              }
+              // g_ColorChartFg removed
               if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
@@ -870,17 +867,14 @@ void GUI_OnChartEvent(const int id,
             if(StringFind(g_ColorPickerTarget, "_Head") > 0)        g_ColorHeader = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_Input") > 0)       g_ColorInput = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_Txt") > 0)         g_ColorText = (color)pickedCol;
-            if(StringFind(g_ColorPickerTarget, "_Lbl") > 0)         g_ColorLabel = (color)pickedCol;
+            // g_ColorLabel removed
             if(StringFind(g_ColorPickerTarget, "_Green") > 0)       g_ColorGreen = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_Red") > 0)         g_ColorRed = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_ChrtBg") > 0) {
                g_ColorChartBg = (color)pickedCol;
                ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
             }
-            if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
-                 g_ColorChartFg = (color)pickedCol;
-                 ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
-            }
+            // g_ColorChartFg removed
             if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
