@@ -24,27 +24,27 @@ void CreateManagerPanel()
    
    // Button 1: Trade Panel (Toggle Main)
    color bgTrade = IsMainPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, clrWhite);
+   CreateButton("Mgr_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
    
    // Button 2: Positions Panel (Toggle Positions)
    int currentX = startX + btnW + margin;
    color bgPos = IsPositionsPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Pos", "Pos", currentX, startY, btnW, btnH, bgPos, clrWhite);
+   CreateButton("Mgr_Btn_Pos", "Pos", currentX, startY, btnW, btnH, bgPos, g_ColorText);
 
    // Button 3: Info Panel (Toggle Account Info)
    currentX += btnW + margin;
    color bgInfo = IsInfoPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Info", "Info", currentX, startY, btnW, btnH, bgInfo, clrWhite);
+   CreateButton("Mgr_Btn_Info", "Info", currentX, startY, btnW, btnH, bgInfo, g_ColorText);
 
    // Button 4: History (New)
    currentX += btnW + margin;
    color bgHist = IsHistoryPanelVisible ? g_ColorGreen : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_History", "Hist", currentX, startY, btnW, btnH, bgHist, clrWhite);
+   CreateButton("Mgr_Btn_History", "Hist", currentX, startY, btnW, btnH, bgHist, g_ColorText);
    
    // Button 5: Settings (Toggle Config)
    currentX += btnW + margin;
    color bgSet = IsSettingsOpen ? g_ColorGreen : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Settings", "Set", currentX, startY, btnW, btnH, bgSet, clrWhite);
+   CreateButton("Mgr_Btn_Settings", "Set", currentX, startY, btnW, btnH, bgSet, g_ColorText);
 
    // Button 6: Symbol Select
    currentX += btnW + margin;
