@@ -249,8 +249,8 @@ void UpdateCalculatedLot()
          }
          else        
          {
-             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorBtnValid);
-             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
+             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorGreen);
+             ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BORDER_COLOR, g_ColorGreen);
           }
        }
        else // SELL BUTTON
@@ -262,8 +262,8 @@ void UpdateCalculatedLot()
           }
           else        
           {
-             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorBtnValid);
-             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
+             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorRed);
+             ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BORDER_COLOR, g_ColorRed);
           }
        }
    }
@@ -279,9 +279,15 @@ void UpdateCalculatedLot()
        }
        else
        {
-          // Utilise la couleur "Button Valid" générique pour l'action de validation
-          ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, g_ColorBtnValid);
-          ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
+           // Determine Color based on Pending Type
+           color actionCol = g_ColorBtnValid; // Fallback
+           // Buy Limit (1) or Buy Stop (3) -> Green
+           if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3) actionCol = g_ColorGreen;
+           // Sell Limit (2) or Sell Stop (4) -> Red
+           else if(CurrentTypeIndex == 2 || CurrentTypeIndex == 4) actionCol = g_ColorRed;
+
+           ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, actionCol);
+           ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BORDER_COLOR, actionCol);
        }
    }
    
