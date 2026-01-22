@@ -37,6 +37,8 @@ void GUI_OnInit()
    
    if(IsHistoryPanelVisible) ToggleHistoryPanel(true);
    else ToggleHistoryPanel(false);
+   
+   if(IsSettingsOpen) OpenSettings();
 }
 
 //+------------------------------------------------------------------+
@@ -677,6 +679,7 @@ void GUI_OnChartEvent(const int id,
          ToggleSettings();
          UpdateManagerPanel(); // Refresh button state
          EffectButton(sparam);
+         SaveConfigToFile();
          return;
       }
 

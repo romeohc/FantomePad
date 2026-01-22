@@ -107,6 +107,10 @@ void SaveConfigToFile()
       FileWrite(handle, "HistoryPanelX=" + IntegerToString(HistoryPanelX));
       FileWrite(handle, "HistoryPanelY=" + IntegerToString(HistoryPanelY));
       
+      FileWrite(handle, "IsSettingsOpen=" + IntegerToString(IsSettingsOpen));
+      FileWrite(handle, "SettingsX=" + IntegerToString(SettingsX));
+      FileWrite(handle, "SettingsY=" + IntegerToString(SettingsY));
+      
       FileClose(handle);
    }
 }
@@ -166,6 +170,10 @@ void LoadConfig()
             if(key == "IsHistoryPanelVisible") IsHistoryPanelVisible = (bool)StringToInteger(val);
             if(key == "HistoryPanelX") HistoryPanelX = (int)StringToInteger(val);
             if(key == "HistoryPanelY") HistoryPanelY = (int)StringToInteger(val);
+            
+            if(key == "IsSettingsOpen") IsSettingsOpen = (bool)StringToInteger(val);
+            if(key == "SettingsX") SettingsX = (int)StringToInteger(val);
+            if(key == "SettingsY") SettingsY = (int)StringToInteger(val);
          }
       }
       FileClose(handle);
