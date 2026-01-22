@@ -51,6 +51,31 @@ void GUI_OnTick()
 }
 
 //+------------------------------------------------------------------+
+//| SECURITY: PREVENT WINDOWS FROM GETTING LOST                      |
+//+------------------------------------------------------------------+
+void ApplyPanelSafety(int &x, int &y, int w, int h)
+{
+   int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+   int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
+   
+   // Si la fenêtre est PRESQUE totalement hors de l'écran (ex: s'il reste moins de 40px visibles)
+   // Cela évite de laisser une toute petite bande impossible à attraper.
+   int safetyMargin = 40;
+   bool offScreen = (x + w <= safetyMargin) || (x >= chartW - safetyMargin) || (y + h <= safetyMargin) || (y >= chartH - safetyMargin);
+   
+   if(offScreen)
+   {
+      // On recentre la fenêtre
+      x = (chartW / 2) - (w / 2);
+      y = (chartH / 2) - (h / 2);
+      
+      // Safety clamps
+      if(x < 0) x = 0;
+      if(y < 0) y = 0;
+   }
+}
+
+//+------------------------------------------------------------------+
 //| EVENT DISPATCHER                                                 |
 //+------------------------------------------------------------------+
 void GUI_OnChartEvent(const int id,
@@ -446,19 +471,48 @@ void GUI_OnChartEvent(const int id,
          
          if(IsDragging)
          {
+            // Calculate Height dynamically as done in Drag
+            long h = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
+            if(h < 50) h = 200;
+            
+            ApplyPanelSafety(PanelX, PanelY, PanelWidth, (int)h);
             IsDragging = false;
+            UpdateUIMode(); // Apply Position
          }
+         
          if(IsSettingsDragging)
          {
+            int h = 50 + SettingsViewportHeight;
+            ApplyPanelSafety(SettingsX, SettingsY, 340, h); 
             IsSettingsDragging = false;
+            OpenSettings(); // Apply Position
          }
+         
          if(IsInfoDragging)
          {
+            long h = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
+            if(h < 50) h = 150;
+            ApplyPanelSafety(InfoPanelX, InfoPanelY, 200, (int)h);
             IsInfoDragging = false;
+            UpdateInfoLayout(); // Apply Position
          }
+         
          if(IsPositionsDragging)
          {
+            long h = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
+            if(h < 50) h = 150;
+            ApplyPanelSafety(PositionsPanelX, PositionsPanelY, 280, (int)h);
             IsPositionsDragging = false;
+            UpdatePositionsLayout(); // Apply Position
+         }
+         
+         if(IsHistoryDragging)
+         {
+            long h = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
+            if(h < 50) h = 200;
+            ApplyPanelSafety(HistoryPanelX, HistoryPanelY, 800, (int)h);
+            IsHistoryDragging = false;
+            CreateHistoryPanel(); // Apply Position
          }
          
          if(wasDragging) SaveConfigToFile();
