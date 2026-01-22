@@ -115,9 +115,11 @@ void CreateHistoryPanel()
    int customInputHeight = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? 35 : 0;
    
    int topSectionHeight = headerHeight + toolbarHeight + customInputHeight;
+   int footerHeight = 40; // Fixed footer height
+   int footerMargin = 20; // Margin to separate list from footer
    
-   // 1. Fond & Header (Adjusted height)
-   CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + 45, g_ColorBg, BORDER_FLAT);
+   // 1. Fond & Header (Adjusted height to include Footer)
+   CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorHeader, BORDER_FLAT);
    CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, clrWhite, "Trebuchet MS Bold");
    
@@ -214,6 +216,9 @@ void CreateHistoryPanel()
    DrawHistoryScrollbar(startX, scrollY, width);
    
    ChartRedraw();
+
+   // 6. Footer (Totals) - Positioned with gap after viewport
+   DrawHistoryFooter(startX, startY + topSectionHeight + HistoryViewportHeight + footerMargin, width, footerHeight);
 }
 
 //+------------------------------------------------------------------+
@@ -372,6 +377,77 @@ void DrawHistoryScrollbar(int x, int y, int w)
 }
 
 //+------------------------------------------------------------------+
+//| DRAW FOOTER (TOTALS)                                             |
+//+------------------------------------------------------------------+
+void DrawHistoryFooter(int x, int y, int w, int h)
+{
+   // 1. Calculate Sums
+   double sumFees = 0.0;
+   double sumProf = 0.0;
+   double sumRetP = 0.0;
+   double sumRetR = 0.0;
+   
+   double bal = AccountBalance();
+   
+   int total = ArraySize(g_HistoryFilteredIndices);
+   for(int i=0; i<total; i++)
+   {
+      int ticketIndex = g_HistoryFilteredIndices[i];
+      if(OrderSelect(ticketIndex, SELECT_BY_POS, MODE_HISTORY))
+      {
+         double fees = OrderCommission() + OrderSwap();
+         double prof = OrderProfit() + fees; // Net Profit
+         
+         double retP = 0.0;
+         if(bal > 0) retP = (prof / bal) * 100.0;
+         
+         double retR = 0.0;
+         if(g_OneRPercent > 0) retR = retP / g_OneRPercent;
+         
+         sumFees += fees;
+         sumProf += prof;
+         sumRetP += retP;
+         sumRetR += retR;
+      }
+   }
+   
+   // 2. Draw Labels aligned with Headers
+   int paddingX = 20;
+   int colX = x + paddingX;
+   
+   int wTime  = 150;
+   int wType  = 100;
+   int wSym   = 100;
+   int wFees  = 100;
+   int wProf  = 120;
+   int wRetP  = 90;
+   
+   string sFees = DoubleToString(sumFees, 2);
+   string sProf = DoubleToString(sumProf, 2);
+   string sRetP = DoubleToString(sumRetP, 2) + "%";
+   string sRetR = DoubleToString(sumRetR, 2) + " R";
+   
+   color colProf = (sumProf >= 0) ? g_ColorGreen : g_ColorRed;
+   
+   // Separator Line (Top of footer)
+   CreateRect("Hist_Footer_Line", x, y, w, 1, g_ColorInput, BORDER_FLAT);
+   
+   // Footer Background (Optional, to distinguish area)
+   // CreateRect("Hist_Footer_Bg", x, y + 1, w, h - 1, g_ColorBg, BORDER_FLAT); 
+
+   int textY = y + 10; // Vertical centering for text
+
+   // Draw Totals
+   CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_Foot_Prof", sProf, colX + wTime + wType + wSym + wFees, textY, 8, colProf, "Trebuchet MS Bold");
+   CreateLabel("Hist_Foot_RetP", sRetP, colX + wTime + wType + wSym + wFees + wProf, textY, 8, colProf, "Trebuchet MS Bold");
+   CreateLabel("Hist_Foot_RetR", sRetR, colX + wTime + wType + wSym + wFees + wProf + wRetP, textY, 8, colProf, "Trebuchet MS Bold");
+   
+   // Label "TOTAL" aligned to LEFT
+   CreateLabel("Hist_Foot_Label", "TOTAL", x + 15, textY, 10, g_ColorLabel, "Trebuchet MS Bold");
+}
+
+//+------------------------------------------------------------------+
 //| TOGGLE                                                           |
 //+------------------------------------------------------------------+
 void ToggleHistoryPanel(bool visible)
@@ -387,6 +463,13 @@ void ToggleHistoryPanel(bool visible)
    SetObjVisible("Hist_H_Prof", visible);
    SetObjVisible("Hist_H_RetP", visible);
    SetObjVisible("Hist_H_RetR", visible);
+   
+   SetObjVisible("Hist_Footer_Line", visible);
+   SetObjVisible("Hist_Foot_Label", visible);
+   SetObjVisible("Hist_Foot_Fees", visible);
+   SetObjVisible("Hist_Foot_Prof", visible);
+   SetObjVisible("Hist_Foot_RetP", visible);
+   SetObjVisible("Hist_Foot_RetR", visible);
    
    SetObjVisible("Hist_ScrollTrack", visible);
    SetObjVisible("Hist_ScrollThumb", visible);
