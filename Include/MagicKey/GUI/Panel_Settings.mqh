@@ -151,7 +151,7 @@ void OpenSettings()
    // 1. RISK
    bool v = CHECK_VIS(25);
    string n = "Set_Lbl_Cat1";
-   if(v) { CreateLabel(n, "RISK MANAGEMENT", x + padX, SCREEN_Y, 9, C'100,100,100', "Trebuchet MS Bold"); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
+   if(v) { CreateLabel(n, "RISK MANAGEMENT", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold"); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
    else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 25;
    
@@ -240,55 +240,90 @@ void OpenSettings()
    v = CHECK_VIS(20);
    n = "Set_Lbl_Cat2";
    if(v) {
-       CreateLabel(n, "INTERFACE COLORS", x + padX, SCREEN_Y, 9, C'100,100,100', "Trebuchet MS Bold");
+       CreateLabel(n, "INTERFACE COLORS", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold");
        ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
-   relY += 30;
+   relY += 25;
    
    // Columns
    int col1X = x + padX;
    int col2X = x + (w/2) + 10;
    int rowH = 32;
    
-   // Helper to create Color Row
-   // Row 1
-   v = CHECK_VIS(25);
+   // --- SUB: UI THEME ---
+   v = CHECK_VIS(20);
+   n = "Set_Sub_UI";
+   if(v) {
+       CreateLabel(n, "General Theme", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 25;
+
+   // Theme Row 1
+   v = CHECK_VIS(rowH);
    CreateColorRow("Bg", "Panel Background", col1X, SCREEN_Y, g_ColorBg, v);
+   CreateColorRow("Txt", "Text Color", col2X, SCREEN_Y, g_ColorText, v);
    relY += rowH;
    
-   // Row 2
-   v = CHECK_VIS(25);
-   CreateColorRow("Input", "Field Background", col1X, SCREEN_Y, g_ColorInput, v);
-   CreateColorRow("ChrtBg", "Chart Background", col2X, SCREEN_Y, g_ColorChartBg, v);
-   relY += rowH;
-   
-   // Row 3
-   v = CHECK_VIS(25);
-   CreateColorRow("Txt", "Text Color", col1X, SCREEN_Y, g_ColorText, v); // Renamed to Text Color
-   CreateColorRow("Green", "Primary Color", col2X, SCREEN_Y, g_ColorGreen, v);
-   relY += rowH;
-   
-    // Row 4
-   v = CHECK_VIS(25);
-   CreateColorRow("Red", "Secondary Color", col1X, SCREEN_Y, g_ColorRed, v);
-   CreateColorRow("EntLine", "Entry Line", col2X, SCREEN_Y, g_ColorEntryLine, v);
-   relY += rowH;
-   
-   // Row 6
-   v = CHECK_VIS(25);
-   CreateColorRow("SLLine", "Stop Loss Line", col1X, SCREEN_Y, g_ColorSLLine, v);
-   CreateColorRow("TPLine", "Take Profit Line", col2X, SCREEN_Y, g_ColorTPLine, v);
+   // Theme Row 2
+   v = CHECK_VIS(rowH);
+   CreateColorRow("Input", "Input Fields", col1X, SCREEN_Y, g_ColorInput, v);
+   CreateColorRow("BtnInv", "Inactive Buttons", col2X, SCREEN_Y, g_ColorBtnInvalid, v);
+   relY += rowH + 10;
+
+   // --- SUB: CHART ---
+   v = CHECK_VIS(20);
+   n = "Set_Sub_Chart";
+   if(v) {
+       CreateLabel(n, "Chart & Candles", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 25;
+
+   // Chart Row 1
+   v = CHECK_VIS(rowH);
+   CreateColorRow("ChrtBg", "Chart Background", col1X, SCREEN_Y, g_ColorChartBg, v);
+   CreateColorRow("CUp", "Candle Bull (Up)", col2X, SCREEN_Y, g_ColorCandleUp, v);
    relY += rowH;
 
-   // Row 7
-   v = CHECK_VIS(25);
-   CreateColorRow("CUp", "Candle Up", col1X, SCREEN_Y, g_ColorCandleUp, v);
-   CreateColorRow("CDown", "Candle Down", col2X, SCREEN_Y, g_ColorCandleDown, v);
+   // Chart Row 2
+   v = CHECK_VIS(rowH);
+   CreateColorRow("CDown", "Candle Bear (Down)", col1X, SCREEN_Y, g_ColorCandleDown, v);
+   relY += rowH + 10;
+
+   // --- SUB: TRADING ---
+   v = CHECK_VIS(20);
+   n = "Set_Sub_Trade";
+   if(v) {
+       CreateLabel(n, "Trading Action", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 25;
+
+   // Trade Row 1
+   v = CHECK_VIS(rowH);
+   CreateColorRow("Green", "Buy / Primary", col1X, SCREEN_Y, g_ColorGreen, v);
+   CreateColorRow("Red", "Sell / Secondary", col2X, SCREEN_Y, g_ColorRed, v);
+   relY += rowH + 10;
+   
+   // --- SUB: LINES ---
+   v = CHECK_VIS(20);
+   n = "Set_Sub_Lines";
+   if(v) {
+       CreateLabel(n, "Order Lines", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 25;
+
+   // Lines Row 1
+   v = CHECK_VIS(rowH);
+   CreateColorRow("EntLine", "Entry Line", col1X, SCREEN_Y, g_ColorEntryLine, v);
+   CreateColorRow("TPLine", "Take Profit Line", col2X, SCREEN_Y, g_ColorTPLine, v);
    relY += rowH;
    
-   // Row 8
-   v = CHECK_VIS(25);
-   CreateColorRow("BtnInv", "Unselected Button", col1X, SCREEN_Y, g_ColorBtnInvalid, v); // Moved to col1X
+   // Lines Row 2
+   v = CHECK_VIS(rowH);
+   CreateColorRow("SLLine", "Stop Loss Line", col1X, SCREEN_Y, g_ColorSLLine, v);
    relY += rowH;
    
    // --- SCROLLBAR ---

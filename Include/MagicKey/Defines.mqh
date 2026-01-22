@@ -125,7 +125,7 @@ int    g_SettingsScrollY = 0;
 bool   IsSettingsScrollDragging = false;
 int    SettingsScrollDragY = 0;
 int    SettingsViewportHeight = 400; // Visible height for content
-int    SettingsContentHeight = 650;  // Total height of content (approx)
+int    SettingsContentHeight = 620;  // Total height of content (approx)
 
 // --- MOUSE TRACKING ---
 int    LastMouseX = -1;
