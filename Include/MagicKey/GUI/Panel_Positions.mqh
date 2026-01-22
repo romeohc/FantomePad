@@ -415,6 +415,10 @@ void UpdatePositionsValues()
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText);
              }
              
+             // Update Validate Button to Active
+             ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, g_ColorBtnValid);
+             ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, g_ColorBtnValid);
+             
              return; 
          }
       }
@@ -442,6 +446,10 @@ void UpdatePositionsValues()
    ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, "-");
    ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, "-");
    ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, g_ColorText);
+   
+   // Update Validate Button to Inactive
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, g_ColorBtnInvalid);
 }
 
 
