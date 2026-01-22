@@ -265,12 +265,12 @@ void OpenSettings()
    // Row 3
    v = CHECK_VIS(25);
    CreateColorRow("Txt", "Text Color", col1X, SCREEN_Y, g_ColorText, v); // Renamed to Text Color
-   CreateColorRow("Green", "Buy (Long)", col2X, SCREEN_Y, g_ColorGreen, v);
+   CreateColorRow("Green", "Primary Color", col2X, SCREEN_Y, g_ColorGreen, v);
    relY += rowH;
    
     // Row 4
    v = CHECK_VIS(25);
-   CreateColorRow("Red", "Sell (Short)", col1X, SCREEN_Y, g_ColorRed, v);
+   CreateColorRow("Red", "Secondary Color", col1X, SCREEN_Y, g_ColorRed, v);
    CreateColorRow("EntLine", "Entry Line", col2X, SCREEN_Y, g_ColorEntryLine, v);
    relY += rowH;
    
@@ -288,8 +288,7 @@ void OpenSettings()
    
    // Row 8
    v = CHECK_VIS(25);
-   CreateColorRow("BtnVal", "Button Valid", col1X, SCREEN_Y, g_ColorBtnValid, v);
-   CreateColorRow("BtnInv", "Button Invalid", col2X, SCREEN_Y, g_ColorBtnInvalid, v);
+   CreateColorRow("BtnInv", "Unselected Button", col1X, SCREEN_Y, g_ColorBtnInvalid, v); // Moved to col1X
    relY += rowH;
    
    // --- SCROLLBAR ---
