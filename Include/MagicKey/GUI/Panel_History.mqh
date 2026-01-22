@@ -65,6 +65,10 @@ void UpdateHistoryFilter()
              if(ct >= startLimit) match = true;
          }
          
+         // Fix: Exclude Balance/Credit operations (Type > 1) to prevent "Deposit" appearing as Profit
+         // We only want OP_BUY (0) and OP_SELL (1)
+         if(OrderType() > 1) match = false;
+         
          // Symbol Filter
          if(match && g_HistoryFilterSymbol != "")
          {
@@ -384,11 +388,8 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    // 1. Calculate Sums
    double sumFees = 0.0;
    double sumProf = 0.0;
-   double sumRetP = 0.0;
-   double sumRetR = 0.0;
    
-   double bal = AccountBalance();
-   
+   // We iterate the filtered list (visible items)
    int total = ArraySize(g_HistoryFilteredIndices);
    for(int i=0; i<total; i++)
    {
@@ -398,20 +399,27 @@ void DrawHistoryFooter(int x, int y, int w, int h)
          double fees = OrderCommission() + OrderSwap();
          double prof = OrderProfit() + fees; // Net Profit
          
-         double retP = 0.0;
-         if(bal > 0) retP = (prof / bal) * 100.0;
-         
-         double retR = 0.0;
-         if(g_OneRPercent > 0) retR = retP / g_OneRPercent;
-         
          sumFees += fees;
          sumProf += prof;
-         sumRetP += retP;
-         sumRetR += retR;
       }
    }
    
-   // 2. Draw Labels aligned with Headers
+   // 2. Global Return Calculations (Based on Total Profit, not sum of %)
+   double bal = AccountBalance();
+   double totalRetP = 0.0;
+   double totalRetR = 0.0;
+   
+   if(bal > 0)
+   {
+      totalRetP = (sumProf / bal) * 100.0;
+   }
+   
+   if(g_OneRPercent > 0)
+   {
+      totalRetR = totalRetP / g_OneRPercent;
+   }
+   
+   // 3. Draw Labels aligned with Headers
    int paddingX = 20;
    int colX = x + paddingX;
    
@@ -424,27 +432,24 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    
    string sFees = DoubleToString(sumFees, 2);
    string sProf = DoubleToString(sumProf, 2);
-   string sRetP = DoubleToString(sumRetP, 2) + "%";
-   string sRetR = DoubleToString(sumRetR, 2) + " R";
+   string sRetP = DoubleToString(totalRetP, 2) + "%";
+   string sRetR = DoubleToString(totalRetR, 2) + " R";
    
    color colProf = (sumProf >= 0) ? g_ColorGreen : g_ColorRed;
    
    // Separator Line (Top of footer)
    CreateRect("Hist_Footer_Line", x, y, w, 1, g_ColorInput, BORDER_FLAT);
    
-   // Footer Background (Optional, to distinguish area)
-   // CreateRect("Hist_Footer_Bg", x, y + 1, w, h - 1, g_ColorBg, BORDER_FLAT); 
-
    int textY = y + 10; // Vertical centering for text
 
-   // Draw Totals
-   CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorText, "Trebuchet MS Bold");
+   // Draw Totals columns
+   CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorLabel, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_Prof", sProf, colX + wTime + wType + wSym + wFees, textY, 8, colProf, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_RetP", sRetP, colX + wTime + wType + wSym + wFees + wProf, textY, 8, colProf, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_RetR", sRetR, colX + wTime + wType + wSym + wFees + wProf + wRetP, textY, 8, colProf, "Trebuchet MS Bold");
    
-   // Label "TOTAL" aligned to LEFT
-   CreateLabel("Hist_Foot_Label", "TOTAL", x + 15, textY, 10, g_ColorLabel, "Trebuchet MS Bold");
+   // Label "TOTAL" aligned to LEFT (Styled like headers: Size 8, Bold, ColorLabel)
+   CreateLabel("Hist_Foot_Label", "TOTAL", x + 15, textY, 8, g_ColorLabel, "Trebuchet MS Bold");
 }
 
 //+------------------------------------------------------------------+
