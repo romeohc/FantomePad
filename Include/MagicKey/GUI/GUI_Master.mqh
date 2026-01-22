@@ -868,12 +868,19 @@ void GUI_OnChartEvent(const int id,
               if(StringFind(g_ColorPickerTarget, "_LHov") > 0)        g_ColorListHover = (color)pickedCol;
               
               SaveConfigToFile();
-              CreatePanel();
-              CreateInfoPanel();
-              CreateManagerPanel(); // Refresh Manager Colors
-              CreatePositionsPanel(); // Refresh Positions Panel Colors
-              CreateHistoryPanel(); // Refresh History Panel Colors
-              UpdateUIMode();
+              // 1. Refresh Main Panel
+              CreatePanel(); 
+              if(IsMainPanelVisible) UpdateUIMode();
+              else ToggleMainPanel(false);
+              
+              // 2. Refresh Info Panel
+              CreateInfoPanel(); 
+              if(!IsInfoPanelVisible) ToggleInfoPanel(false);
+              
+              // 3. Refresh Other Panels
+              CreateManagerPanel();
+              CreatePositionsPanel(); 
+              CreateHistoryPanel();
               OpenSettings();
             }
             CloseColorPicker();
@@ -923,12 +930,21 @@ void GUI_OnChartEvent(const int id,
             if(StringFind(g_ColorPickerTarget, "_LHov") > 0)        g_ColorListHover = (color)pickedCol;
             
             SaveConfigToFile();
-            CreatePanel();  // Refresh Main Panel Colors
-            CreateInfoPanel(); // Refresh Info Panel Colors
-            CreateManagerPanel(); // Refresh Manager Colors
-            CreatePositionsPanel(); // Refresh Positions Panel Colors
-            CreateHistoryPanel(); // Refresh History Panel Colors
-            UpdateUIMode(); // Refresh Layout
+            
+            // 1. Refresh Main Panel
+            CreatePanel(); 
+            if(IsMainPanelVisible) UpdateUIMode();
+            else ToggleMainPanel(false); // Ensure phantom objects are hidden
+            
+            // 2. Refresh Info Panel
+            CreateInfoPanel(); 
+            if(!IsInfoPanelVisible) ToggleInfoPanel(false);
+            
+            // 3. Refresh Other Panels
+            CreateManagerPanel();
+            CreatePositionsPanel(); // Handles visibility internally
+            CreateHistoryPanel(); // Handles visibility internally
+            
             OpenSettings(); // Refresh Settings (incl. bg)
          }
          CloseColorPicker();
@@ -1258,7 +1274,8 @@ void GUI_OnChartEvent(const int id,
              // Si on est en mode %, on met à jour immédiatemment le panneau principal si on n'a pas modifié manuellement (optionnel, mais propre)
              // ici on redessine juste le panel par simplicité
              CreatePanel(); 
-             UpdateUIMode();
+             if(IsMainPanelVisible) UpdateUIMode();
+             else ToggleMainPanel(false);
           }
       }
       
@@ -1270,7 +1287,8 @@ void GUI_OnChartEvent(const int id,
              g_DefaultRiskMoney = r;
              SaveConfigToFile();
              CreatePanel(); 
-             UpdateUIMode();
+             if(IsMainPanelVisible) UpdateUIMode();
+             else ToggleMainPanel(false);
           }
       }
       
@@ -1282,7 +1300,8 @@ void GUI_OnChartEvent(const int id,
              g_DefaultRiskR = r;
              SaveConfigToFile();
              CreatePanel(); 
-             UpdateUIMode();
+             if(IsMainPanelVisible) UpdateUIMode();
+             else ToggleMainPanel(false);
           }
       }
       
@@ -1294,7 +1313,8 @@ void GUI_OnChartEvent(const int id,
              g_OneRPercent = r;
              SaveConfigToFile();
              CreatePanel(); 
-             UpdateUIMode();
+             if(IsMainPanelVisible) UpdateUIMode();
+             else ToggleMainPanel(false);
           }
       }
       
