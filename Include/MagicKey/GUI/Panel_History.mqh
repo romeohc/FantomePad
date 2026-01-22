@@ -125,7 +125,7 @@ void CreateHistoryPanel()
    // 1. Fond & Header (Adjusted height to include Footer)
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Filter Buttons Toolbar
    int btnY = startY + headerHeight + 5;
@@ -139,13 +139,13 @@ void CreateHistoryPanel()
    color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? ColorBtnActive : g_ColorInput;
    color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? ColorBtnActive : g_ColorInput;
    
-   CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, clrWhite);
+   CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, g_ColorText);
    curBtnX += btnW + gap;
-   CreateButton("Hist_Btn_Weekly", "Weekly", curBtnX, btnY, btnW, btnH, bgWeekly, clrWhite);
+   CreateButton("Hist_Btn_Weekly", "Weekly", curBtnX, btnY, btnW, btnH, bgWeekly, g_ColorText);
    curBtnX += btnW + gap;
-   CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, clrWhite);
+   CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, g_ColorText);
    curBtnX += btnW + gap;
-   CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, clrWhite);
+   CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, g_ColorText);
    
    // Symbol Filter UI (Right of buttons)
    int symX = curBtnX + btnW + 30;

@@ -870,6 +870,8 @@ void GUI_OnChartEvent(const int id,
               CreatePanel();
               CreateInfoPanel();
               CreateManagerPanel(); // Refresh Manager Colors
+              CreatePositionsPanel(); // Refresh Positions Panel Colors
+              CreateHistoryPanel(); // Refresh History Panel Colors
               UpdateUIMode();
               OpenSettings();
             }
@@ -922,6 +924,8 @@ void GUI_OnChartEvent(const int id,
             CreatePanel();  // Refresh Main Panel Colors
             CreateInfoPanel(); // Refresh Info Panel Colors
             CreateManagerPanel(); // Refresh Manager Colors
+            CreatePositionsPanel(); // Refresh Positions Panel Colors
+            CreateHistoryPanel(); // Refresh History Panel Colors
             UpdateUIMode(); // Refresh Layout
             OpenSettings(); // Refresh Settings (incl. bg)
          }

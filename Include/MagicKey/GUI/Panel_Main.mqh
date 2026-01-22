@@ -78,7 +78,7 @@ void UpdateUIMode()
    ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_TEXT, typeText);
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BGCOLOR, typeBgColor);
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BORDER_COLOR, typeBorderColor);
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_COLOR, clrWhite);
+   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_COLOR, g_ColorText);
    
    currentY += inputH + sectionGap;
    
@@ -218,7 +218,7 @@ void CreatePanel()
    // 1. Fond & Header
    CreateRect("Bg", 0, 0, PanelWidth, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Header", 0, 0, PanelWidth, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Title", "Trading Panel", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Title", "Trading Panel", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Actif (Symbol) - MOVED TO MANAGER PANEL
    // CreateLabel("Label_Symbol", "Symbol", 0, 0, 8, g_ColorText, "Trebuchet MS");
@@ -257,15 +257,15 @@ void CreatePanel()
    CreateEdit("Edit_Lot", "0.00", 0, 0, PanelWidth - 40, 28, true);
    
    // 8. Boutons
-   CreateButton("Btn_Sell", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, clrWhite); 
+   CreateButton("Btn_Sell", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, g_ColorText); 
    ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Sell", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   CreateButton("Btn_Buy", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, clrWhite);
+   CreateButton("Btn_Buy", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Buy", OBJPROP_FONT, "Trebuchet MS Bold");
 
-   CreateButton("Btn_Action", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, clrWhite);
+   CreateButton("Btn_Action", "VALIDATE", 0, 0, PanelWidth - 40, 45, g_ColorBtnValid, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Action", OBJPROP_FONT, "Trebuchet MS Bold");
 }

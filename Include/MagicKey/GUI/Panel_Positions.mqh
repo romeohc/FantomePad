@@ -181,7 +181,7 @@ void CreatePositionsPanel()
    // 1. Fond & Header
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Pos_Header", 0, 0, width, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Pos_Title", "Position Manager", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Pos_Title", "Position Manager", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Select Button
    CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);
@@ -260,7 +260,7 @@ void CreatePositionsPanel()
    CreateEdit("Pos_Edit_Close", "0", 0, 0, 45, 28);
    
    // 7. Validate
-   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 45, g_ColorBtnValid, clrWhite);
+   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 45, g_ColorBtnValid, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONT, "Trebuchet MS Bold");
 
