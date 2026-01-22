@@ -378,8 +378,12 @@ void CreateColorPicker()
    int inputSectionH = 30;
    int h = 25 + gridHeight + 15 + inputSectionH + 25;
    
-   int x = (chartW/2) - (w/2); 
-   int y = (chartH/2) - (h/2);
+   // Position over Settings Window
+   int settingsW = 340;
+   int settingsH = 50 + SettingsViewportHeight;
+   
+   int x = SettingsX + (settingsW / 2) - (w / 2);
+   int y = SettingsY + (settingsH / 2) - (h / 2);
    
    // Update Globals
    g_ColorPickerX = x;

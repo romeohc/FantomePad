@@ -106,6 +106,13 @@ void GUI_OnChartEvent(const int id,
       {
          CloseSymbolList();
       }
+      
+      // Close Color Picker on Chart Click
+      // We add a delay check to prevent closing immediately if the click was also an Object Click (which updates LastClickTime)
+      if(g_IsColorPickerOpen && (GetTickCount() - LastClickTime) > 100)
+      {
+         CloseColorPicker();
+      }
    }
    
    // --- GESTION DU HOVER ET DRAG ---
