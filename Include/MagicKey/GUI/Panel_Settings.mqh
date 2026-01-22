@@ -133,7 +133,7 @@ void OpenSettings()
    CreateRect("Set_Header", x, y, w, 50, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 110); // Elevated to cover scroll content
    
-   CreateLabel("Set_Title", "Settings", x + 20, y + 15, 12, clrWhite, "Trebuchet MS Bold");
+   CreateLabel("Set_Title", "Settings", x + 15, y + 15, 10, clrWhite, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + "Set_Title", OBJPROP_ZORDER, 111);
    
    // --- CONTENT GENERATION ---
