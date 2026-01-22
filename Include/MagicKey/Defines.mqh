@@ -135,6 +135,14 @@ int    ScrollDragY = 0;
 bool   g_BlockClick = false;
 uint   LastClickTime = 0;
 
+// --- COLOR PICKER GLOBALS ---
+bool   g_IsColorPickerOpen = false;
+int    g_ColorPickerX = 0;
+int    g_ColorPickerY = 0;
+int    g_ColorPickerW = 0;
+int    g_ColorPickerH = 0;
+color  g_ColorPalette[]; 
+
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
@@ -164,4 +172,22 @@ void InitGlobals()
    // Init default custom dates (last 7 days by default)
    g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;
    g_HistoryCustomEnd = TimeCurrent() + 24 * 3600;
+   
+   // Init Color Palette
+   color Defaults[] = {
+      // Darks
+      C'21,23,28', C'34,38,46', C'45,52,60', clrDimGray, clrBlack,
+      // Lights
+      clrWhite, clrWhiteSmoke, clrSilver, clrLightGray, clrAliceBlue,
+      // Greens
+      C'0,184,148', clrSeaGreen, clrMediumSeaGreen, clrLimeGreen, clrSpringGreen,
+      // Reds
+      C'214,48,49', clrCrimson, clrFireBrick, clrRed, clrTomato,
+      // Blues
+      C'0,90,180', clrRoyalBlue, clrDodgerBlue, clrCornflowerBlue, clrDeepSkyBlue,
+      // Extra
+      clrGold, clrOrange, clrOrchid, clrMagenta, clrSlateBlue
+   };
+   ArrayResize(g_ColorPalette, ArraySize(Defaults));
+   for(int i=0; i<ArraySize(Defaults); i++) g_ColorPalette[i] = Defaults[i];
 }

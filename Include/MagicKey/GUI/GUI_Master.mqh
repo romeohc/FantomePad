@@ -800,10 +800,27 @@ void GUI_OnChartEvent(const int id,
          return;
       }
        // 2. Clic sur le bouton de couleur personnalisée
+       // 2. Clic sur le bouton de couleur personnalisée
        if(sparam == PREFIX + "CP_Btn_Custom")
        {
            string hexStr = ObjectGetString(0, PREFIX + "CP_Edit_Custom", OBJPROP_TEXT);
            color pickedCol = HexStringToColor(hexStr);
+           
+           // --- ADD TO PALETTE IF NEW ---
+           bool exists = false;
+           for(int i=0; i<ArraySize(g_ColorPalette); i++) {
+              if(g_ColorPalette[i] == pickedCol) { exists = true; break; }
+           }
+           
+           if(!exists) {
+              int size = ArraySize(g_ColorPalette);
+              ArrayResize(g_ColorPalette, size + 1);
+              g_ColorPalette[size] = pickedCol;
+              
+              // Redraw Picker to show new color in list immediately
+              CreateColorPicker();
+              ChartRedraw();
+           }
            
            if(g_ColorPickerTarget != "")
            {
@@ -942,6 +959,17 @@ void GUI_OnChartEvent(const int id,
       {
          CloseSymbolList();
       }
+      
+      // 4. CLICK OUTSIDE CHECK (For Color Picker)
+       if(g_IsColorPickerOpen)
+       {
+           // If the clicked object is NOT part of the Color Picker
+           if(StringFind(sparam, PREFIX + "CP_") < 0)
+           {
+               CloseColorPicker();
+               // Do NOT return, as the user might have clicked on another valid button (like Buy/Sell)
+           }
+       }
 
       // --- FIN GESTION SÉLECTEUR ---
 
