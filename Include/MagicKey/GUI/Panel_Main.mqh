@@ -398,27 +398,31 @@ void ToggleMainPanel(bool visible)
    SetObjVisible("Bg", visible);
    SetObjVisible("Header", visible);
    SetObjVisible("Title", visible);
-   SetObjVisible("Header", visible);
-   SetObjVisible("Title", visible);
-   // SetObjVisible("Label_Symbol", visible);
-   // SetObjVisible("Btn_SymbolSelect", visible);
-   // SetObjVisible("Label_Type", visible);
    SetObjVisible("Btn_Type", visible);
    
-   // Conditional visibility objects - if hiding, hide all. 
-   // If showing, UpdateUIMode handles specific visibility logic (like Price field)
-   if(!visible)
+   if(visible)
    {
+      // If showing, we rely on UpdateUIMode to restore correct state
+      UpdateUIMode(); 
+   }
+   else
+   {
+      // If hiding, we must manually hide conditional elements
       SetObjVisible("Label_Price", false);
       SetObjVisible("Edit_Price", false);
       SetObjVisible("Btn_Buy", false);
       SetObjVisible("Btn_Sell", false);
       SetObjVisible("Btn_Action", false);
-   }
-   else
-   {
-      // If showing, we rely on UpdateUIMode to restore correct state
-      UpdateUIMode(); 
+      
+      // --- CLEANUP EXTRA CHART LINES ---
+      // When hiding, we must ensure "Ghost" lines are removed
+      ObjectDelete(0, PREFIX + "Line_SL");
+      ObjectDelete(0, PREFIX + "Line_TP");
+      ObjectDelete(0, PREFIX + "Line_Price");
+      
+      ObjectDelete(0, PREFIX + "Line_SL_Txt");
+      ObjectDelete(0, PREFIX + "Line_TP_Txt");
+      ObjectDelete(0, PREFIX + "Line_Price_Txt");
    }
    
    SetObjVisible("Label_SL", visible);
@@ -430,7 +434,4 @@ void ToggleMainPanel(bool visible)
    SetObjVisible("Label_RiskPerc", visible);
    SetObjVisible("Label_Lot", visible);
    SetObjVisible("Edit_Lot", visible);
-   
-   // If hiding, also close the list if open -> No longer linked to Main Panel
-   // if(!visible && IsListOpen) CloseSymbolList();
 }

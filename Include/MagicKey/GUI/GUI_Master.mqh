@@ -24,7 +24,19 @@ void GUI_OnInit()
    CreateManagerPanel(); 
    CreatePositionsPanel();
    CreateHistoryPanel();
-   UpdateUIMode(); 
+   
+   // Apply Loaded State
+   if(IsMainPanelVisible) UpdateUIMode();
+   else ToggleMainPanel(false);
+   
+   if(IsPositionsPanelVisible) TogglePositionsPanel(true);
+   else TogglePositionsPanel(false);
+   
+   if(IsInfoPanelVisible) ToggleInfoPanel(true);
+   else ToggleInfoPanel(false);
+   
+   if(IsHistoryPanelVisible) ToggleHistoryPanel(true);
+   else ToggleHistoryPanel(false);
 }
 
 //+------------------------------------------------------------------+
@@ -52,7 +64,9 @@ void GUI_OnChartEvent(const int id,
       CreateManagerPanel();
       CreatePositionsPanel();
       CreateHistoryPanel();
-      UpdateUIMode();
+      if(IsMainPanelVisible) UpdateUIMode();
+      else ToggleMainPanel(false);
+      
       if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
    }
    
@@ -292,28 +306,32 @@ void GUI_OnChartEvent(const int id,
          bool processedInfo = false;
          if(!processedSettings && !IsSettingsDragging && !IsDragging && !IsScrollDragging)
          {
-            if(!IsInfoDragging)
+            // CHANGED: Only process if Info Panel is visible
+            if(IsInfoPanelVisible)
             {
-               // Detection Info Panel
-               int infoW = 200;
-               long infoH = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
-               if(infoH < 50) infoH = 150;
-               
-               if(mouseX >= InfoPanelX && mouseX <= InfoPanelX + infoW && mouseY >= InfoPanelY && mouseY <= InfoPanelY + infoH)
+               if(!IsInfoDragging)
                {
-                  IsInfoDragging = true;
-                  InfoDragOffsetX = mouseX - InfoPanelX;
-                  InfoDragOffsetY = mouseY - InfoPanelY;
-                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                  // Detection Info Panel
+                  int infoW = 200;
+                  long infoH = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
+                  if(infoH < 50) infoH = 150;
+                  
+                  if(mouseX >= InfoPanelX && mouseX <= InfoPanelX + infoW && mouseY >= InfoPanelY && mouseY <= InfoPanelY + infoH)
+                  {
+                     IsInfoDragging = true;
+                     InfoDragOffsetX = mouseX - InfoPanelX;
+                     InfoDragOffsetY = mouseY - InfoPanelY;
+                     ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                  }
                }
-            }
-            
-            if(IsInfoDragging)
-            {
-               InfoPanelX = mouseX - InfoDragOffsetX;
-               InfoPanelY = mouseY - InfoDragOffsetY;
-               UpdateInfoLayout();
-               processedInfo = true;
+               
+               if(IsInfoDragging)
+               {
+                  InfoPanelX = mouseX - InfoDragOffsetX;
+                  InfoPanelY = mouseY - InfoDragOffsetY;
+                  UpdateInfoLayout();
+                  processedInfo = true;
+               }
             }
          }
 
@@ -321,56 +339,64 @@ void GUI_OnChartEvent(const int id,
          bool processedPos = false;
          if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !IsDragging && !IsScrollDragging)
          {
-            if(!IsPositionsDragging)
-            {
-               // Detection Positions Panel
-               int posW = 280; // Matches CreatePositionsPanel
-               long posH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
-               if(posH < 50) posH = 150;
-               
-               if(mouseX >= PositionsPanelX && mouseX <= PositionsPanelX + posW && mouseY >= PositionsPanelY && mouseY <= PositionsPanelY + posH)
-               {
-                  IsPositionsDragging = true;
-                  PositionsDragOffsetX = mouseX - PositionsPanelX;
-                  PositionsDragOffsetY = mouseY - PositionsPanelY;
-                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-               }
-            }
-            
-            if(IsPositionsDragging)
-            {
-               PositionsPanelX = mouseX - PositionsDragOffsetX;
-               PositionsPanelY = mouseY - PositionsDragOffsetY;
-               UpdatePositionsLayout();
-               processedPos = true;
-            }
+             // CHANGED: Only process if Positions Panel is visible
+             if(IsPositionsPanelVisible)
+             {
+                if(!IsPositionsDragging)
+                {
+                   // Detection Positions Panel
+                   int posW = 280; // Matches CreatePositionsPanel
+                   long posH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
+                   if(posH < 50) posH = 150;
+                   
+                   if(mouseX >= PositionsPanelX && mouseX <= PositionsPanelX + posW && mouseY >= PositionsPanelY && mouseY <= PositionsPanelY + posH)
+                   {
+                      IsPositionsDragging = true;
+                      PositionsDragOffsetX = mouseX - PositionsPanelX;
+                      PositionsDragOffsetY = mouseY - PositionsPanelY;
+                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                   }
+                }
+                
+                if(IsPositionsDragging)
+                {
+                   PositionsPanelX = mouseX - PositionsDragOffsetX;
+                   PositionsPanelY = mouseY - PositionsDragOffsetY;
+                   UpdatePositionsLayout();
+                   processedPos = true;
+                }
+             }
          }
 
           // --- 1.7 DRAG HISTORY PANEL ---
           bool processedHistory = false;
           if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !IsDragging && !IsScrollDragging && !IsHistoryScrollDragging)
           {
-             if(!IsHistoryDragging)
+             // CHANGED: Only process if History Panel is visible
+             if(IsHistoryPanelVisible)
              {
-                int histW = 800; // Matches CreateHistoryPanel
-                long histH = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
-                if(histH < 50) histH = 200;
-                
-                if(mouseX >= HistoryPanelX && mouseX <= HistoryPanelX + histW && mouseY >= HistoryPanelY && mouseY <= HistoryPanelY + histH)
-                {
-                   IsHistoryDragging = true;
-                   HistoryDragOffsetX = mouseX - HistoryPanelX;
-                   HistoryDragOffsetY = mouseY - HistoryPanelY;
-                   ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                }
-             }
-             
-             if(IsHistoryDragging)
-             {
-                HistoryPanelX = mouseX - HistoryDragOffsetX;
-                HistoryPanelY = mouseY - HistoryDragOffsetY;
-                CreateHistoryPanel(); // Updates position
-                processedHistory = true;
+                 if(!IsHistoryDragging)
+                 {
+                    int histW = 800; // Matches CreateHistoryPanel
+                    long histH = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
+                    if(histH < 50) histH = 200;
+                    
+                    if(mouseX >= HistoryPanelX && mouseX <= HistoryPanelX + histW && mouseY >= HistoryPanelY && mouseY <= HistoryPanelY + histH)
+                    {
+                       IsHistoryDragging = true;
+                       HistoryDragOffsetX = mouseX - HistoryPanelX;
+                       HistoryDragOffsetY = mouseY - HistoryPanelY;
+                       ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+                    }
+                 }
+                 
+                 if(IsHistoryDragging)
+                 {
+                    HistoryPanelX = mouseX - HistoryDragOffsetX;
+                    HistoryPanelY = mouseY - HistoryDragOffsetY;
+                    CreateHistoryPanel(); // Updates position
+                    processedHistory = true;
+                 }
              }
           }
          
@@ -414,6 +440,8 @@ void GUI_OnChartEvent(const int id,
       else
       {
          // MOUSE UP
+         bool wasDragging = (IsDragging || IsSettingsDragging || IsInfoDragging || IsPositionsDragging || IsHistoryDragging);
+         
          if(IsDragging)
          {
             IsDragging = false;
@@ -430,6 +458,8 @@ void GUI_OnChartEvent(const int id,
          {
             IsPositionsDragging = false;
          }
+         
+         if(wasDragging) SaveConfigToFile();
          if(IsScrollDragging)
          {
              IsScrollDragging = false;
@@ -602,8 +632,9 @@ void GUI_OnChartEvent(const int id,
       {
          IsMainPanelVisible = !IsMainPanelVisible;
          ToggleMainPanel(IsMainPanelVisible);
-         UpdateManagerPanel(); // Refresh button state (color)
+         UpdateManagerPanel(); 
          EffectButton(sparam);
+         SaveConfigToFile();
          return;
       }
       
@@ -612,8 +643,9 @@ void GUI_OnChartEvent(const int id,
       {
          IsPositionsPanelVisible = !IsPositionsPanelVisible;
          TogglePositionsPanel(IsPositionsPanelVisible);
-         UpdateManagerPanel(); // Refresh button state
+         UpdateManagerPanel(); 
          EffectButton(sparam);
+         SaveConfigToFile();
          return;
       }
 
@@ -622,8 +654,9 @@ void GUI_OnChartEvent(const int id,
       {
          IsInfoPanelVisible = !IsInfoPanelVisible;
          ToggleInfoPanel(IsInfoPanelVisible);
-         UpdateManagerPanel(); // Refresh button state
+         UpdateManagerPanel(); 
          EffectButton(sparam);
+         SaveConfigToFile();
          return;
       }
       
@@ -634,6 +667,7 @@ void GUI_OnChartEvent(const int id,
           ToggleHistoryPanel(IsHistoryPanelVisible);
           UpdateManagerPanel(); 
           EffectButton(sparam);
+          SaveConfigToFile();
           return;
        }
       

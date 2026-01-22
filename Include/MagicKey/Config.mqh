@@ -89,6 +89,24 @@ void SaveConfigToFile()
       FileWrite(handle, "ColorCandleDown=" + IntegerToString(g_ColorCandleDown));
       FileWrite(handle, "ColorListNormal=" + IntegerToString(g_ColorListNormal));
       FileWrite(handle, "ColorListHover=" + IntegerToString(g_ColorListHover));
+      
+      // Panel States & Positions
+      FileWrite(handle, "IsMainPanelVisible=" + IntegerToString(IsMainPanelVisible));
+      FileWrite(handle, "PanelX=" + IntegerToString(PanelX));
+      FileWrite(handle, "PanelY=" + IntegerToString(PanelY));
+      
+      FileWrite(handle, "IsPositionsPanelVisible=" + IntegerToString(IsPositionsPanelVisible));
+      FileWrite(handle, "PositionsPanelX=" + IntegerToString(PositionsPanelX));
+      FileWrite(handle, "PositionsPanelY=" + IntegerToString(PositionsPanelY));
+      
+      FileWrite(handle, "IsInfoPanelVisible=" + IntegerToString(IsInfoPanelVisible));
+      FileWrite(handle, "InfoPanelX=" + IntegerToString(InfoPanelX));
+      FileWrite(handle, "InfoPanelY=" + IntegerToString(InfoPanelY));
+      
+      FileWrite(handle, "IsHistoryPanelVisible=" + IntegerToString(IsHistoryPanelVisible));
+      FileWrite(handle, "HistoryPanelX=" + IntegerToString(HistoryPanelX));
+      FileWrite(handle, "HistoryPanelY=" + IntegerToString(HistoryPanelY));
+      
       FileClose(handle);
    }
 }
@@ -131,6 +149,23 @@ void LoadConfig()
             if(key == "ColorCandleDown") g_ColorCandleDown = (color)StringToInteger(val);
             if(key == "ColorListNormal") g_ColorListNormal = (color)StringToInteger(val);
             if(key == "ColorListHover")  g_ColorListHover  = (color)StringToInteger(val);
+            
+            // Panel States & Positions
+            if(key == "IsMainPanelVisible") IsMainPanelVisible = (bool)StringToInteger(val);
+            if(key == "PanelX") PanelX = (int)StringToInteger(val);
+            if(key == "PanelY") PanelY = (int)StringToInteger(val);
+            
+            if(key == "IsPositionsPanelVisible") IsPositionsPanelVisible = (bool)StringToInteger(val);
+            if(key == "PositionsPanelX") PositionsPanelX = (int)StringToInteger(val);
+            if(key == "PositionsPanelY") PositionsPanelY = (int)StringToInteger(val);
+            
+            if(key == "IsInfoPanelVisible") IsInfoPanelVisible = (bool)StringToInteger(val);
+            if(key == "InfoPanelX") InfoPanelX = (int)StringToInteger(val);
+            if(key == "InfoPanelY") InfoPanelY = (int)StringToInteger(val);
+            
+            if(key == "IsHistoryPanelVisible") IsHistoryPanelVisible = (bool)StringToInteger(val);
+            if(key == "HistoryPanelX") HistoryPanelX = (int)StringToInteger(val);
+            if(key == "HistoryPanelY") HistoryPanelY = (int)StringToInteger(val);
          }
       }
       FileClose(handle);
