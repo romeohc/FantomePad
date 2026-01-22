@@ -58,9 +58,9 @@ void DrawSettingsScrollbar(int x, int y)
    int trackH = SettingsViewportHeight;
    
    // 1. Track
-   CreateRect("Set_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Set_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_ZORDER, 115);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorHeader);
+   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    // 2. Thumb
    // Calculate Height Ratio
@@ -130,7 +130,7 @@ void OpenSettings()
    ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_WIDTH, 1);
    
    // --- HEADER ---
-   CreateRect("Set_Header", x, y, w, 50, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Set_Header", x, y, w, 50, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 110); // Elevated to cover scroll content
    
    CreateLabel("Set_Title", "Settings", x + 20, y + 15, 12, clrWhite, "Trebuchet MS Bold");
@@ -254,7 +254,6 @@ void OpenSettings()
    // Row 1
    v = CHECK_VIS(25);
    CreateColorRow("Bg", "Panel Background", col1X, SCREEN_Y, g_ColorBg, v);
-   CreateColorRow("Head", "Header Bar", col2X, SCREEN_Y, g_ColorHeader, v);
    relY += rowH;
    
    // Row 2

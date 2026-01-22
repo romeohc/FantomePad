@@ -180,7 +180,7 @@ void CreatePositionsPanel()
    
    // 1. Fond & Header
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
-   CreateRect("Pos_Header", 0, 0, width, 40, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Pos_Header", 0, 0, width, 40, g_ColorBg, BORDER_FLAT);
    CreateLabel("Pos_Title", "Position Manager", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Select Button
@@ -560,7 +560,7 @@ void DrawPositionList()
       int startY = (int)y + (int)h + 2; 
       CreateRect("PosListContainer", (int)x, startY - 2, (int)w, itemHeight + 4, g_ColorBg, BORDER_FLAT);
       ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
-      ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
+      ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
       
       CreateButton("PosListItem_None", "No Positions", (int)x + 2, startY, (int)w - 4, itemHeight, g_ColorInput, g_ColorLabel);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
@@ -586,7 +586,7 @@ void DrawPositionList()
    
    CreateRect("PosListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
-   ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
+   ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = (int)x + 2;
@@ -625,7 +625,7 @@ void DrawPositionList()
        int trackH = contentHeight;
        int trackY = startY;
        
-       CreateRect("PosListScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
+       CreateRect("PosListScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
        ObjectSetInteger(0, PREFIX + "PosListScrollTrack", OBJPROP_ZORDER, 16);
        
        double ratio = (double)visibleCount / (double)count;

@@ -217,7 +217,7 @@ void CreatePanel()
 {
    // 1. Fond & Header
    CreateRect("Bg", 0, 0, PanelWidth, 100, g_ColorBg, BORDER_FLAT); 
-   CreateRect("Header", 0, 0, PanelWidth, 40, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Header", 0, 0, PanelWidth, 40, g_ColorBg, BORDER_FLAT);
    CreateLabel("Title", "Trading Panel", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Actif (Symbol) - MOVED TO MANAGER PANEL

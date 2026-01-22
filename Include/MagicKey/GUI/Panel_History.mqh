@@ -124,7 +124,7 @@ void CreateHistoryPanel()
    
    // 1. Fond & Header (Adjusted height to include Footer)
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
-   CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorBg, BORDER_FLAT);
    CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Filter Buttons Toolbar

@@ -178,7 +178,7 @@ void CreateInfoPanel()
    
    // 1. Fond & Header
    CreateRect("Info_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
-   CreateRect("Info_Header", 0, 0, width, 45, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Info_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
    CreateLabel("Info_Title", "Account Overview", 0, 0, 10, clrWhite, "Trebuchet MS Bold");
    
    // 2. Account Data
@@ -213,7 +213,7 @@ void CreateInfoPanel()
    CreateLabel("Info_Val_PerfR", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // 3. Separator Line
-   CreateRect("Info_Sep", 0, 0, 100, 1, g_ColorHeader, BORDER_FLAT);
+   CreateRect("Info_Sep", 0, 0, 100, 1, C'50,50,50', BORDER_FLAT);
    
    // 4. SubHeader
    CreateLabel("Info_SubTitle_Pos", "Active Orders", 0, 0, 8, g_ColorLabel, "Trebuchet MS Bold");

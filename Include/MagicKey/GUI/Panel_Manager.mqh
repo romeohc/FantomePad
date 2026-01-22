@@ -113,7 +113,7 @@ void DrawSymbolList()
    CreateRect("ListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
    ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorHeader);
+   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = (int)x + 2;
@@ -145,7 +145,7 @@ void DrawSymbolList()
        int trackY = startY;
        
        // Track
-       CreateRect("ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorHeader, BORDER_FLAT);
+       CreateRect("ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
        ObjectSetInteger(0, PREFIX + "ScrollTrack", OBJPROP_ZORDER, 10);
        
        // Thumb
