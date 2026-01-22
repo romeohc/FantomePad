@@ -269,6 +269,11 @@ void OpenSettings()
    v = CHECK_VIS(rowH);
    CreateColorRow("Input", "Input Fields", col1X, SCREEN_Y, g_ColorInput, v);
    CreateColorRow("BtnInv", "Inactive Buttons", col2X, SCREEN_Y, g_ColorBtnInvalid, v);
+   relY += rowH;
+
+   // Theme Row 3
+   v = CHECK_VIS(rowH);
+   CreateColorRow("BtnAct", "Active Buttons", col1X, SCREEN_Y, g_ColorBtnActive, v);
    relY += rowH + 10;
 
    // --- SUB: CHART ---

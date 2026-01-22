@@ -134,10 +134,10 @@ void CreateHistoryPanel()
    int gap = 10;
    int curBtnX = startX + 15;
    
-   color bgDaily   = (g_HistoryFilterMode == H_FILTER_DAILY) ? ColorBtnActive : g_ColorInput;
-   color bgWeekly  = (g_HistoryFilterMode == H_FILTER_WEEKLY) ? ColorBtnActive : g_ColorInput;
-   color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? ColorBtnActive : g_ColorInput;
-   color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? ColorBtnActive : g_ColorInput;
+   color bgDaily   = (g_HistoryFilterMode == H_FILTER_DAILY) ? g_ColorBtnActive : g_ColorInput;
+   color bgWeekly  = (g_HistoryFilterMode == H_FILTER_WEEKLY) ? g_ColorBtnActive : g_ColorInput;
+   color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? g_ColorBtnActive : g_ColorInput;
+   color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? g_ColorBtnActive : g_ColorInput;
    
    CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, g_ColorText);
    curBtnX += btnW + gap;

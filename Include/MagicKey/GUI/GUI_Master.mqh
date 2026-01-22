@@ -852,6 +852,7 @@ void GUI_OnChartEvent(const int id,
               if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_BtnVal") > 0)      g_ColorBtnValid = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_BtnInv") > 0)      g_ColorBtnInvalid = (color)pickedCol;
+              if(StringFind(g_ColorPickerTarget, "_BtnAct") > 0)      g_ColorBtnActive  = (color)pickedCol;
               
               if(StringFind(g_ColorPickerTarget, "_CUp") > 0) {
                  g_ColorCandleUp = (color)pickedCol;
@@ -906,6 +907,7 @@ void GUI_OnChartEvent(const int id,
             if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_BtnVal") > 0)      g_ColorBtnValid = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_BtnInv") > 0)      g_ColorBtnInvalid = (color)pickedCol;
+            if(StringFind(g_ColorPickerTarget, "_BtnAct") > 0)      g_ColorBtnActive  = (color)pickedCol;
               
             if(StringFind(g_ColorPickerTarget, "_CUp") > 0) {
                  g_ColorCandleUp = (color)pickedCol;

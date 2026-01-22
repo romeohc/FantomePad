@@ -22,6 +22,7 @@ input color    ColorCandleUp = C'0,184,148'; // Candle Up
 input color    ColorCandleDown = C'214,48,49'; // Candle Down
 input color    ColorBtnValid = C'0,90,180';    // Button Valid (Functional)
 input color    ColorBtnInvalid = C'80,80,80';  // Button Invalid (Non-functional)
+input color    ColorBtnActive  = C'0,184,148'; // Active Button (Mint)
 input color    ColorEntryLine = clrWhite;      // Entry Line Color
 input color    ColorSLLine   = C'214,48,49';   // Stop Loss Line Color
 input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
@@ -29,7 +30,7 @@ input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
 //--- Couleurs pour la liste
 color ColorListNormal = C'34,38,46';   // Couleur normale item liste
 color ColorListHover  = C'45,52,60';   // Couleur au survol
-color ColorBtnActive  = C'0,184,148'; // Couleur bouton filtre actif
+
 
 //--- Préfixe pour tous les objets graphiques
 string PREFIX = "PTP_";
@@ -104,7 +105,7 @@ double   g_DefaultRiskR;
 double   g_OneRPercent;
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
-color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine;
+color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine, g_ColorBtnActive;
 color    g_ColorSLLine, g_ColorTPLine;
 color    g_ColorCandleUp, g_ColorCandleDown;
 color    g_ColorListNormal, g_ColorListHover;
@@ -159,6 +160,7 @@ void InitGlobals()
    g_ColorRed    = ColorRed;
    g_ColorBtnValid = ColorBtnValid;
    g_ColorBtnInvalid = ColorBtnInvalid;
+   g_ColorBtnActive  = ColorBtnActive;
    g_ColorChartBg= ColorChartBg;
    // g_ColorChartFg removed
    g_ColorEntryLine = ColorEntryLine;
