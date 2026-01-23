@@ -10,6 +10,37 @@ double g_LastPosSL = -1.0;
 double g_LastPosTP = -1.0;
 double g_LastPosEntry = -1.0;
 bool   g_PosBE_Active = false;
+int    g_PosPartialMode = 0; // 0, 25, 50, 100
+
+//+------------------------------------------------------------------+
+//| HELPER: VISUAL UPDATE FOR PARTIAL BUTTONS                        |
+//+------------------------------------------------------------------+
+void UpdatePartialButtonsVisuals()
+{
+   color activeCol = g_ColorBtnValid; // Fallback
+   if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+   {
+      int type = OrderType();
+      activeCol = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+   }
+
+   // Button 25
+   bool is25 = (g_PosPartialMode == 25);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, is25 ? activeCol : g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, is25 ? clrWhite : g_ColorText);
+   
+   // Button 50
+   bool is50 = (g_PosPartialMode == 50);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, is50 ? activeCol : g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, is50 ? clrWhite : g_ColorText);
+
+   // Button 100
+   bool is100 = (g_PosPartialMode == 100);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, is100 ? activeCol : g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, is100 ? clrWhite : g_ColorText);
+   
+   ChartRedraw();
+}
 
 //+------------------------------------------------------------------+
 //| MISE A JOUR DU LAYOUT (POSITIONNEMENT)                           |
@@ -381,6 +412,9 @@ void UpdatePositionsValues()
              if(ticketChanged)
              {
                  g_PosBE_Active = false;
+                 g_PosPartialMode = 0; // Reset Partial Mode
+                 UpdatePartialButtonsVisuals(); // Visually reset
+                 
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
              }
@@ -415,11 +449,38 @@ void UpdatePositionsValues()
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText);
              }
              
-             // Update Validate Button to Active
-             color valCol = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+             // Update Validate Button State
+             double userSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+             double userTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+             double userEntry = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
+             double userClose = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+             
+             bool isModified = false;
+             
+             if(MathAbs(userSL - sl) > Point) isModified = true;
+             if(MathAbs(userTP - tp) > Point) isModified = true;
+             
+             // Check Entry (Only for Pending Orders)
+             if(type > 1) 
+             {
+                 if(MathAbs(userEntry - open) > Point) isModified = true;
+             }
+             
+             // Check Partial Close
+             if(userClose > 0.001) isModified = true;
+             if(g_PosPartialMode > 0) isModified = true; // Button Active = Modified
+             if(g_PosBE_Active) isModified = true; // BE Active = Modified
+             
+             color valCol = g_ColorBtnInvalid;
+             if(isModified)
+             {
+                 valCol = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+             }
+             
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, valCol);
              
+             g_LastPosTicket = SelectedPositionTicket;
              return; 
          }
       }

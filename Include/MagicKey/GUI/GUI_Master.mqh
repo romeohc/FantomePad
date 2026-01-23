@@ -1037,18 +1037,61 @@ void GUI_OnChartEvent(const int id,
       }
       
       // --- PARTIAL CLOSE SHORTCUTS ---
-      if(sparam == PREFIX + "Pos_Btn_25") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "25");
-      if(sparam == PREFIX + "Pos_Btn_50") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "50");
-      if(sparam == PREFIX + "Pos_Btn_100") ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "100");
+      if(sparam == PREFIX + "Pos_Btn_25") 
+      {
+         if(g_PosPartialMode == 25) g_PosPartialMode = 0; // Toggle Off
+         else g_PosPartialMode = 25;
+         
+         ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset custom text
+         UpdatePartialButtonsVisuals();
+         UpdatePositionsValues(); // For Validate Button
+         EffectButton(sparam);
+      }
+      
+      if(sparam == PREFIX + "Pos_Btn_50") 
+      {
+         if(g_PosPartialMode == 50) g_PosPartialMode = 0; // Toggle Off
+         else g_PosPartialMode = 50;
+         
+         ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0");
+         UpdatePartialButtonsVisuals();
+         UpdatePositionsValues(); 
+         EffectButton(sparam);
+      }
+      
+      if(sparam == PREFIX + "Pos_Btn_100") 
+      {
+         if(g_PosPartialMode == 100) g_PosPartialMode = 0; // Toggle Off
+         else g_PosPartialMode = 100;
+         
+         ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0");
+         UpdatePartialButtonsVisuals();
+         UpdatePositionsValues(); 
+         EffectButton(sparam);
+      }
       
       // --- BE BUTTON LOGIC ---
       if(sparam == PREFIX + "Pos_Btn_BE")
       {
          g_PosBE_Active = !g_PosBE_Active;
          
-         color bg = g_PosBE_Active ? g_ColorBtnValid : g_ColorInput;
-         color txt = g_PosBE_Active ? clrWhite : g_ColorText;
+         // Color Logic for BE
+         color bg = g_ColorInput;
+         color txt = g_ColorText;
          
+         if(g_PosBE_Active)
+         {
+             if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+             {
+                 int type = OrderType();
+                 bg = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+                 txt = clrWhite;
+                 
+                 // Instant Text Update
+                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(OrderOpenPrice(), _Digits));
+             }
+         }
+
          ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, bg);
          ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, txt);
          
@@ -1066,6 +1109,10 @@ void GUI_OnChartEvent(const int id,
              {
                  // 1. HANDLE CLOSE
                  double pct = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+                 
+                 // Use Button Mode if text is empty/zero
+                 if(pct <= 0.001 && g_PosPartialMode > 0) pct = (double)g_PosPartialMode;
+                 
                  if(pct > 0)
                  {
                      double lots = OrderLots();
@@ -1102,6 +1149,9 @@ void GUI_OnChartEvent(const int id,
                      if(closed)
                      {
                          ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
+                         g_PosPartialMode = 0; 
+                         UpdatePartialButtonsVisuals();
+                         
                          if(toClose >= lots) 
                          {
                              SelectedPositionTicket = -1; // Fully Closed
@@ -1263,6 +1313,18 @@ void GUI_OnChartEvent(const int id,
    // --- SYNCHRONISATION PANEL -> GRAPHIQUE (Édition Texte) ---
    if(id == CHARTEVENT_OBJECT_ENDEDIT)
    {
+      // RESET PARTIAL BUTTONS IF CUSTOM TEXT ENTERED
+      if(sparam == PREFIX + "Pos_Edit_Close")
+      {
+         double val = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+         if(val > 0)
+         {
+             g_PosPartialMode = 0;
+             UpdatePartialButtonsVisuals();
+         }
+         UpdatePositionsValues(); // Check Modify Status for Validate Button
+      }
+   
       // INSTANT SAVE RISK
       if(sparam == PREFIX + "Set_Edit_Risk")
       {
