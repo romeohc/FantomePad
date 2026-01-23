@@ -884,7 +884,10 @@ void GUI_OnChartEvent(const int id,
                  g_ColorChartBg = (color)pickedCol;
                  ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
               }
-              // g_ColorChartFg removed
+              if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
+                  g_ColorChartFg = (color)pickedCol;
+                  ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
+              }
               if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
               if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
@@ -946,7 +949,10 @@ void GUI_OnChartEvent(const int id,
                g_ColorChartBg = (color)pickedCol;
                ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
             }
-            // g_ColorChartFg removed
+            if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
+               g_ColorChartFg = (color)pickedCol;
+               ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
+            }
             if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
             if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;

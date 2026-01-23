@@ -30,7 +30,7 @@ int OnInit()
    // --- ESTHÉTIQUE DU GRAPHIQUE ---
    ChartSetInteger(0, CHART_MODE, CHART_CANDLES);
    ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
-   ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorText);
+   ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
    ChartSetInteger(0, CHART_COLOR_CANDLE_BULL, g_ColorCandleUp);
    ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, g_ColorCandleDown);
    ChartSetInteger(0, CHART_COLOR_CHART_UP, g_ColorCandleUp);

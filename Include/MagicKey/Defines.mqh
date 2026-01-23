@@ -17,7 +17,7 @@ input color    ColorText   = C'224,228,230'; // Texte Principal (Off-White)
 input color    ColorGreen  = C'0,184,148';   // Vibrant Mint (Modern Buy)
 input color    ColorRed    = C'214,48,49';   // Vibrant Red (Modern Sell)
 input color    ColorChartBg= clrBlack;       // Chart Background
-// input color    ColorChartFg removed
+input color    ColorChartFg = clrWhite;      // Chart Axes/Text Color
 input color    ColorCandleUp = C'0,184,148'; // Candle Up
 input color    ColorCandleDown = C'214,48,49'; // Candle Down
 input color    ColorBtnValid = C'0,90,180';    // Button Valid (Functional)
@@ -105,6 +105,7 @@ double   g_DefaultRiskR;
 double   g_OneRPercent;
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
+color    g_ColorChartFg;
 color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine, g_ColorBtnActive;
 color    g_ColorSLLine, g_ColorTPLine;
 color    g_ColorCandleUp, g_ColorCandleDown;
@@ -162,7 +163,7 @@ void InitGlobals()
    g_ColorBtnInvalid = ColorBtnInvalid;
    g_ColorBtnActive  = ColorBtnActive;
    g_ColorChartBg= ColorChartBg;
-   // g_ColorChartFg removed
+   g_ColorChartFg = ColorChartFg;
    g_ColorEntryLine = ColorEntryLine;
    g_ColorSLLine = ColorSLLine;
    g_ColorTPLine = ColorTPLine;

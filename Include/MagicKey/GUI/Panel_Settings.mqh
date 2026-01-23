@@ -294,6 +294,7 @@ void OpenSettings()
    // Chart Row 2
    v = CHECK_VIS(rowH);
    CreateColorRow("CDown", "Candle Bear (Down)", col1X, SCREEN_Y, g_ColorCandleDown, v);
+   CreateColorRow("ChrtFg", "Axes Text Color", col2X, SCREEN_Y, g_ColorChartFg, v);
    relY += rowH + 10;
 
    // --- SUB: TRADING ---

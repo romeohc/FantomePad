@@ -82,7 +82,7 @@ void SaveConfigToFile()
       FileWrite(handle, "ColorBtnInvalid=" + IntegerToString(g_ColorBtnInvalid));
       FileWrite(handle, "ColorBtnActive=" + IntegerToString(g_ColorBtnActive));
       FileWrite(handle, "ColorChartBg=" + IntegerToString(g_ColorChartBg));
-      // FileWrite(handle, "ColorChartFg=" + IntegerToString(g_ColorChartFg)); // Removed
+      FileWrite(handle, "ColorChartFg=" + IntegerToString(g_ColorChartFg));
       FileWrite(handle, "ColorEntryLine=" + IntegerToString(g_ColorEntryLine));
       FileWrite(handle, "ColorSLLine=" + IntegerToString(g_ColorSLLine));
       FileWrite(handle, "ColorTPLine=" + IntegerToString(g_ColorTPLine));
@@ -147,7 +147,7 @@ void LoadConfig()
             if(key == "ColorBtnInvalid") g_ColorBtnInvalid = (color)StringToInteger(val);
             if(key == "ColorBtnActive")  g_ColorBtnActive  = (color)StringToInteger(val);
             if(key == "ColorChartBg")g_ColorChartBg= (color)StringToInteger(val);
-            // Removed ColorChartFg
+            if(key == "ColorChartFg")g_ColorChartFg= (color)StringToInteger(val);
             if(key == "ColorEntryLine")g_ColorEntryLine= (color)StringToInteger(val);
             if(key == "ColorSLLine")   g_ColorSLLine   = (color)StringToInteger(val);
             if(key == "ColorTPLine")   g_ColorTPLine   = (color)StringToInteger(val);
