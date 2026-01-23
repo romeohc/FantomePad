@@ -340,7 +340,7 @@ void ExecuteOrder(int cmd)
       Alert("Erreur sur ", symbol, ": ", GetLastError());
    else 
    {
-      PlaySound("ok.wav");
+      // PlaySound("ok.wav"); // Removed as requested
       
       // --- SÉCURITÉ ANTI-DOUBLON (RESET AUTOMATIQUE) ---
       ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, "0.00000");

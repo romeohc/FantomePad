@@ -1237,7 +1237,7 @@ void GUI_OnChartEvent(const int id,
                      }
                      else
                      {
-                         Alert("Close Error: " + IntegerToString(GetLastError()));
+                         // Alert("Close Error: " + IntegerToString(GetLastError()));
                      }
                  }
                  
@@ -1285,7 +1285,7 @@ void GUI_OnChartEvent(const int id,
                          }
                          else
                          {
-                             Alert("Modify Error: " + IntegerToString(GetLastError()));
+                             // Alert("Modify Error: " + IntegerToString(GetLastError()));
                          }
                      }
                  }
@@ -1334,7 +1334,7 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0) 
          {
-            Alert("STOP LOSS ET RISQUE REQUIS !");
+            // Alert("STOP LOSS ET RISQUE REQUIS !");
             return;
          }
          
@@ -1350,7 +1350,7 @@ void GUI_OnChartEvent(const int id,
 
          if(sl <= 0 || risk <= 0) 
          {
-            Alert("STOP LOSS ET RISQUE REQUIS !");
+            // Alert("STOP LOSS ET RISQUE REQUIS !");
             return;
          }
 
@@ -1367,7 +1367,7 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0 || price <= 0)
          {
-             Alert("PRIX, STOP LOSS ET RISQUE REQUIS !");
+             // Alert("PRIX, STOP LOSS ET RISQUE REQUIS !");
              return;
          }
       
