@@ -67,7 +67,7 @@ void UpdateInfoLayout()
    ObjectSetInteger(0, PREFIX + "Info_Header", OBJPROP_XSIZE, width);
    
    // --- ACCOUNT SECTION (GROUPED) ---
-   int statsBgH = 245; // Height increased to fit 5 rows (Balance, Eq/Ma, Dep/Wit, P&L/Perf%, PerfR)
+   int statsBgH = 200; // Reduced height to remove extra space (was 245)
    
    SetObjPosition("Info_Stats_Bg", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Info_Stats_Bg", OBJPROP_XSIZE, width - (paddingX*2));
@@ -406,5 +406,9 @@ void ToggleInfoPanel(bool visible)
       SetObjVisible("Info_Ord_Typ" + suffix, visible);
    }
    
-   if(visible) UpdateInfoLayout();
+   if(visible) 
+   {
+      UpdateInfoLayout();
+      UpdateInfoPanel();
+   }
 }
