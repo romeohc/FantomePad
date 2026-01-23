@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                                       Config.mqh |
-//|                                                MagicKey Project  |
+//|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
 #property strict
 
@@ -71,6 +71,7 @@ void SaveConfigToFile()
       FileWrite(handle, "DefaultRiskMoney=" + DoubleToString(g_DefaultRiskMoney, 2));
       FileWrite(handle, "DefaultRiskR=" + DoubleToString(g_DefaultRiskR, 2));
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
+      FileWrite(handle, "ManagerPosition=" + IntegerToString(g_ManagerPosition));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
       FileWrite(handle, "ColorHeader=" + IntegerToString(g_ColorHeader));
       FileWrite(handle, "ColorInput=" + IntegerToString(g_ColorInput));
@@ -136,6 +137,7 @@ void LoadConfig()
             if(key == "DefaultRiskMoney") g_DefaultRiskMoney = StringToDouble(val);
             if(key == "DefaultRiskR")     g_DefaultRiskR     = StringToDouble(val);
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
+            if(key == "ManagerPosition")  g_ManagerPosition  = (int)StringToInteger(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
             if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
             if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);

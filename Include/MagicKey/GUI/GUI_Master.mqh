@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                              GUI_Master.mqh      |
-//|                                                MagicKey Project  |
+//|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
 #property strict
 
@@ -724,6 +724,19 @@ void GUI_OnChartEvent(const int id,
       }
       
       // --- SETTINGS ---
+      if(sparam == PREFIX + "Set_Btn_MgrPos")
+      {
+          g_ManagerPosition++;
+          if(g_ManagerPosition > 5) g_ManagerPosition = 0;
+          
+          // Update Text
+          ObjectSetString(0, PREFIX + "Set_Btn_MgrPos", OBJPROP_TEXT, ManagerPositions[g_ManagerPosition]);
+          
+          // Update Real Panel
+          UpdateManagerPanel();
+          EffectButton(sparam);
+          return;
+      }
 
       
       // --- MANAGER PANEL EVENTS ---

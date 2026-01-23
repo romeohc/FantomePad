@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                                      Defines.mqh |
-//|                                                MagicKey Project  |
+//|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
 #property strict
 
@@ -9,6 +9,7 @@ input double   DefaultRisk = 1.0;      // Risque par défaut (%)
 input double   DefaultRiskMoney = 100.0; // Risque par défaut (Devise)
 input double   DefaultRiskR = 1.0;     // Risque par défaut (R)
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
+input int      DefaultManagerPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
 input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
@@ -42,6 +43,7 @@ int    CurrentTypeIndex = 0; // 0=Market, 1=BuyLim, 2=SellLim, 3=BuyStop, 4=Sell
 int    CurrentDirection = 0; // 0=Buy, 1=Sell (utilisé pour le cycle toggle)
 int    RiskMode   = 0; // 0=%, 1=Currency, 2=Risk R
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
+string ManagerPositions[] = {"Top Left", "Top Center", "Top Right", "Bottom Left", "Bottom Center", "Bottom Right"};
 int    PanelWidth  = 280; // Slightly wider for comfort
 bool   IsListOpen = false; // État de la liste déroulante
 bool   IsMainPanelVisible = true; // État de visibilité du Panel Principal
@@ -103,6 +105,7 @@ double   g_DefaultRisk;
 double   g_DefaultRiskMoney;
 double   g_DefaultRiskR;
 double   g_OneRPercent;
+int      g_ManagerPosition; // 0..5
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
 color    g_ColorChartFg;
@@ -152,6 +155,7 @@ void InitGlobals()
    g_DefaultRiskMoney = DefaultRiskMoney;
    g_DefaultRiskR = DefaultRiskR;
    g_OneRPercent = OneRPercent;
+   g_ManagerPosition = DefaultManagerPosition;
    g_ColorBg     = ColorBg;
    g_ColorHeader = ColorHeader;
    g_ColorInput  = ColorInput;

@@ -1,7 +1,7 @@
-# MagicKey Project - Documentation Technique pour IA & Développeurs
+# FantomePad Project - Documentation Technique pour IA & Développeurs
 
 ## 1. Contexte du Projet
-**MagicKey** est une solution complète écrite en **MQL4** visant à moderniser radicalement l'expérience de trading sur **MetaTrader 4**.
+**FantomePad** est une solution complète écrite en **MQL4** visant à moderniser radicalement l'expérience de trading sur **MetaTrader 4**.
 Le but est de remplacer l'interface native (vieillissante et peu ergonomique) par une interface graphique (GUI) moderne, esthétique ("Deep Dark Theme"), et fonctionnelle, permettant de tout gérer depuis le graphique : prise de position, calcul de lots, gestion des risques et configuration.
 
 ## 2. Architecture du Système

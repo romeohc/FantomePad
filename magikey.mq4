@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                                  magikey.mq4     |
-//|                                     Copyright 2024, ModernTrader |
+//|                                     Copyright 2026, FantomePad   |
 //|                                          Designed for Aesthetics |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2024, ModernTrader"
-#property link      "https://www.mql5.com"
+#property copyright "Copyright 2026, FantomePad"
+#property link      "https://fantomepad.com"
 #property version   "2.00"
 #property strict
 

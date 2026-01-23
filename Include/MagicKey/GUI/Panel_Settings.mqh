@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                              Panel_Settings.mqh  |
-//|                                                MagicKey Project  |
+//|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
 #property strict
 
@@ -228,6 +228,24 @@ void OpenSettings()
    }
    relY += 40;
    
+   // --- MANAGER POSITION ---
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_MgrPos"; string nb = "Set_Btn_MgrPos";
+   if(v) {
+       CreateLabel(n, "Panel Position", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       
+       CreateButton(nb, ManagerPositions[g_ManagerPosition], x + w - 140, SCREEN_Y, 120, 25, g_ColorInput, g_ColorText);
+       ObjectSetInteger(0, PREFIX + nb, OBJPROP_ZORDER, 102);
+       ObjectSetInteger(0, PREFIX + nb, OBJPROP_BORDER_COLOR, C'60,64,72');
+       SetObjVisible(nb, true);
+   } else {
+       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+       if(ObjectFind(0, PREFIX + nb) >= 0) SetObjVisible(nb, false);
+   }
+   relY += 30;
+
+   // Separator
    v = CHECK_VIS(1);
    n = "Set_Sep1";
    if(v) {
