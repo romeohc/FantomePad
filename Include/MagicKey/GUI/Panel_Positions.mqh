@@ -631,7 +631,7 @@ void DrawPositionList()
       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
       {
           int type = OrderType();
-          if(OrderSymbol() == Symbol() && (type == OP_BUY || type == OP_SELL || type == OP_BUYLIMIT || type == OP_SELLLIMIT || type == OP_BUYSTOP || type == OP_SELLSTOP))
+          if(type == OP_BUY || type == OP_SELL || type == OP_BUYLIMIT || type == OP_SELLLIMIT || type == OP_BUYSTOP || type == OP_SELLSTOP)
           {
              ArrayResize(tickets, count+1);
              tickets[count] = OrderTicket();
@@ -679,8 +679,8 @@ void DrawPositionList()
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = (int)x + 2;
    int currentY = startY;
-      for(int i = 0; i < visibleCount; i++)
-    {
+   for(int i = 0; i < visibleCount; i++)
+   {
       int dataIdx = g_PosListOffset + i;
       if(dataIdx >= count) break;
       
@@ -689,14 +689,14 @@ void DrawPositionList()
       {
          string typeStr = "";
          int type = OrderType();
-         if(type == OP_BUY) typeStr = "BUY MARKET";
-         else if(type == OP_SELL) typeStr = "SELL MARKET";
-         else if(type == OP_BUYLIMIT) typeStr = "BUY LIMIT";
-         else if(type == OP_SELLLIMIT) typeStr = "SELL LIMIT";
-         else if(type == OP_BUYSTOP) typeStr = "BUY STOP";
-         else if(type == OP_SELLSTOP) typeStr = "SELL STOP";
+         if(type == OP_BUY) typeStr = "BUY";
+         else if(type == OP_SELL) typeStr = "SELL";
+         else if(type == OP_BUYLIMIT) typeStr = "BUY LIM";
+         else if(type == OP_SELLLIMIT) typeStr = "SELL LIM";
+         else if(type == OP_BUYSTOP) typeStr = "BUY STP";
+         else if(type == OP_SELLSTOP) typeStr = "SELL STP";
 
-         string txt = typeStr + " " + DoubleToString(OrderLots(), 2);
+         string txt = OrderSymbol() + " " + typeStr + " " + DoubleToString(OrderLots(), 2);
          string btnName = "PosListItem_" + IntegerToString(tck);
          
          CreateButton(btnName, txt, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);

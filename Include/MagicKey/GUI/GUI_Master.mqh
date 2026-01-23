@@ -19,6 +19,13 @@
 //+------------------------------------------------------------------+
 void GUI_OnInit()
 {
+   if(GlobalVariableCheck("MagicKey_LastSelectedTicket"))
+   {
+      SelectedPositionTicket = (int)GlobalVariableGet("MagicKey_LastSelectedTicket");
+      GlobalVariableDel("MagicKey_LastSelectedTicket");
+      IsPositionsPanelVisible = true;
+   }
+
    CreatePanel();
    CreateInfoPanel();
    CreateManagerPanel(); 
@@ -1050,6 +1057,16 @@ void GUI_OnChartEvent(const int id,
          string prefix = PREFIX + "PosListItem_";
          string sTicket = StringSubstr(sparam, StringLen(prefix));
          SelectedPositionTicket = (int)StringToInteger(sTicket);
+         
+         // Auto Switch Chart Symbol
+         if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+         {
+            if(OrderSymbol() != Symbol())
+            {
+               GlobalVariableSet("MagicKey_LastSelectedTicket", (double)SelectedPositionTicket);
+               ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+            }
+         }
          
          ClosePositionList();
          UpdatePositionsValues(); 
