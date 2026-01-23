@@ -76,6 +76,37 @@ void ApplyPanelSafety(int &x, int &y, int w, int h)
 }
 
 //+------------------------------------------------------------------+
+//| HELPER: RETRIEVE ORIGINAL LOT SIZE (TRACE HISTORY)               |
+//+------------------------------------------------------------------+
+double GetOriginalLotSize(int ticket)
+{
+   if(!OrderSelect(ticket, SELECT_BY_TICKET)) return 0.0;
+   
+   double totalLots = OrderLots();
+   string comment = OrderComment();
+   
+   // Loop back through history to find parents
+   int safety = 0;
+   while(StringFind(comment, "from #") >= 0 && safety < 50)
+   {
+      int pos = StringFind(comment, "from #");
+      string sub = StringSubstr(comment, pos + 6);
+      int prevTicket = (int)StringToInteger(sub);
+      
+      if(OrderSelect(prevTicket, SELECT_BY_TICKET, MODE_HISTORY))
+      {
+         totalLots += OrderLots(); // Add the closed amount
+         comment = OrderComment();
+      }
+      else break;
+      
+      safety++;
+   }
+   
+   return totalLots;
+}
+
+//+------------------------------------------------------------------+
 //| EVENT DISPATCHER                                                 |
 //+------------------------------------------------------------------+
 void GUI_OnChartEvent(const int id,
@@ -1073,29 +1104,41 @@ void GUI_OnChartEvent(const int id,
       // --- BE BUTTON LOGIC ---
       if(sparam == PREFIX + "Pos_Btn_BE")
       {
-         g_PosBE_Active = !g_PosBE_Active;
-         
-         // Color Logic for BE
-         color bg = g_ColorInput;
-         color txt = g_ColorText;
-         
-         if(g_PosBE_Active)
+         if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
          {
-             if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+             // Check Eligibility (Profit/Loss)
+             int type = OrderType();
+             double open = OrderOpenPrice();
+             double current = (type == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+             
+             // Strict check: In Loss = cannot BE
+             bool inLoss = (type == OP_BUY && current < open) || (type == OP_SELL && current > open);
+             
+             if(inLoss) return; // Cannot activate if in loss
+             
+             // Toggle
+             g_PosBE_Active = !g_PosBE_Active;
+             
+             if(g_PosBE_Active)
              {
-                 int type = OrderType();
-                 bg = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
-                 txt = clrWhite;
+                 // Activate BE
+                 color bg = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
                  
-                 // Instant Text Update
-                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(OrderOpenPrice(), _Digits));
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, bg);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, clrWhite);
+                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(open, _Digits));
              }
+             else
+             {
+                 // Deactivate BE -> Restore Original SL
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(OrderStopLoss(), _Digits));
+             }
+             
+             UpdatePositionsValues(); // Trigger Validate Button Check
+             EffectButton(sparam);
          }
-
-         ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, bg);
-         ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, txt);
-         
-         EffectButton(sparam);
          return;
       }
       
@@ -1115,8 +1158,14 @@ void GUI_OnChartEvent(const int id,
                  
                  if(pct > 0)
                  {
-                     double lots = OrderLots();
-                     double toClose = lots * (pct / 100.0);
+                     double currentLots = OrderLots();
+                     double toClose = 0.0;
+                     
+                     // ALWAYS calc based on ORIGINAL lots (User Request)
+                     double originLots = GetOriginalLotSize(SelectedPositionTicket);
+                     if(originLots <= 0) originLots = currentLots; // Safety fallback
+                     
+                     toClose = originLots * (pct / 100.0);
                      
                      // Normalize Lots
                      double step = MarketInfo(OrderSymbol(), MODE_LOTSTEP);
@@ -1126,10 +1175,10 @@ void GUI_OnChartEvent(const int id,
                      toClose = MathFloor(toClose / step) * step;
                      
                      if(toClose < min) toClose = min; // At least close min
-                     if(toClose > lots) toClose = lots; // Max all
+                     if(toClose > currentLots) toClose = currentLots; // Max all
                      
                      // If 100%, ensure close all despite rounding issues
-                     if(pct >= 99.9) toClose = lots; 
+                     if(pct >= 99.9) toClose = currentLots; 
                      
                      // Close
                      int cmd = OrderType();
@@ -1152,7 +1201,7 @@ void GUI_OnChartEvent(const int id,
                          g_PosPartialMode = 0; 
                          UpdatePartialButtonsVisuals();
                          
-                         if(toClose >= lots) 
+                         if(toClose >= currentLots) 
                          {
                              SelectedPositionTicket = -1; // Fully Closed
                              UpdatePositionsValues();

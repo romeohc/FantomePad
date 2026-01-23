@@ -439,8 +439,8 @@ void UpdatePositionsValues()
              if(type <= 1) // Market Order (OP_BUY=0, OP_SELL=1)
              {
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, true);
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorBg); // Visually distinct
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText); // Visually distinct
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorBtnInvalid); // INACTIVE COLOR
+                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText); 
              }
              else // Pending Order
              {
@@ -448,6 +448,24 @@ void UpdatePositionsValues()
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorInput);
                  ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText);
              }
+             
+             // BE BUTTON STATE (IN LOSS CHECKS)
+             double current = (type == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+             bool inLoss = (type == OP_BUY && current < open) || (type == OP_SELL && current > open);
+             
+             if(inLoss)
+             {
+                 g_PosBE_Active = false; // Force Disable
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnInvalid); // INACTIVE COLOR
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText); 
+             }
+             else if(!g_PosBE_Active)
+             {
+                 // If eligible but not active, ensure inputs color (normal state)
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+             }
+             // If Active, color is handled by toggle logic (Green/Red) and preserved here implicitly
              
              // Update Validate Button State
              double userSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
