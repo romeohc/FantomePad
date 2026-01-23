@@ -1328,6 +1328,7 @@ void GUI_OnChartEvent(const int id,
       // Actions de Trading
       if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
       {
+         EffectButton(sparam);
          // Sécurité : Vérifier si le SL et Risk sont définis
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -1339,11 +1340,11 @@ void GUI_OnChartEvent(const int id,
          }
          
          ExecuteOrder(OP_BUY);
-         EffectButton(sparam);
       }
       
       if(sparam == PREFIX + "Btn_Sell" && CurrentTypeIndex == 0)
       {
+         EffectButton(sparam);
          // Sécurité : Vérifier si le SL et Risk sont définis
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -1355,11 +1356,11 @@ void GUI_OnChartEvent(const int id,
          }
 
          ExecuteOrder(OP_SELL);
-         EffectButton(sparam);
       }
 
       if(sparam == PREFIX + "Btn_Action" && CurrentTypeIndex > 0)
       {
+         EffectButton(sparam);
          // Sécurité : Validation complète pour Ordres Pending
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -1378,7 +1379,6 @@ void GUI_OnChartEvent(const int id,
          if(CurrentTypeIndex == 4) opCmd = OP_SELLSTOP;
          
          if(opCmd != -1) ExecuteOrder(opCmd);
-         EffectButton(sparam);
       }
    }
    
