@@ -93,25 +93,25 @@ void SaveConfigToFile()
       FileWrite(handle, "ColorListHover=" + IntegerToString(g_ColorListHover));
       
       // Panel States & Positions
-      FileWrite(handle, "IsMainPanelVisible=" + IntegerToString(IsMainPanelVisible));
-      FileWrite(handle, "PanelX=" + IntegerToString(PanelX));
-      FileWrite(handle, "PanelY=" + IntegerToString(PanelY));
+      FileWrite(handle, "IsMainPanelVisible=" + IntegerToString(g_PanelMain.IsVisible));
+      FileWrite(handle, "PanelX=" + IntegerToString(g_PanelMain.X));
+      FileWrite(handle, "PanelY=" + IntegerToString(g_PanelMain.Y));
       
-      FileWrite(handle, "IsPositionsPanelVisible=" + IntegerToString(IsPositionsPanelVisible));
-      FileWrite(handle, "PositionsPanelX=" + IntegerToString(PositionsPanelX));
-      FileWrite(handle, "PositionsPanelY=" + IntegerToString(PositionsPanelY));
+      FileWrite(handle, "IsPositionsPanelVisible=" + IntegerToString(g_PanelPositions.IsVisible));
+      FileWrite(handle, "PositionsPanelX=" + IntegerToString(g_PanelPositions.X));
+      FileWrite(handle, "PositionsPanelY=" + IntegerToString(g_PanelPositions.Y));
       
-      FileWrite(handle, "IsInfoPanelVisible=" + IntegerToString(IsInfoPanelVisible));
-      FileWrite(handle, "InfoPanelX=" + IntegerToString(InfoPanelX));
-      FileWrite(handle, "InfoPanelY=" + IntegerToString(InfoPanelY));
+      FileWrite(handle, "IsInfoPanelVisible=" + IntegerToString(g_PanelInfo.IsVisible));
+      FileWrite(handle, "InfoPanelX=" + IntegerToString(g_PanelInfo.X));
+      FileWrite(handle, "InfoPanelY=" + IntegerToString(g_PanelInfo.Y));
       
-      FileWrite(handle, "IsHistoryPanelVisible=" + IntegerToString(IsHistoryPanelVisible));
-      FileWrite(handle, "HistoryPanelX=" + IntegerToString(HistoryPanelX));
-      FileWrite(handle, "HistoryPanelY=" + IntegerToString(HistoryPanelY));
+      FileWrite(handle, "IsHistoryPanelVisible=" + IntegerToString(g_PanelHistory.IsVisible));
+      FileWrite(handle, "HistoryPanelX=" + IntegerToString(g_PanelHistory.X));
+      FileWrite(handle, "HistoryPanelY=" + IntegerToString(g_PanelHistory.Y));
       
-      FileWrite(handle, "IsSettingsOpen=" + IntegerToString(IsSettingsOpen));
-      FileWrite(handle, "SettingsX=" + IntegerToString(SettingsX));
-      FileWrite(handle, "SettingsY=" + IntegerToString(SettingsY));
+      FileWrite(handle, "IsSettingsOpen=" + IntegerToString(g_PanelSettings.IsVisible));
+      FileWrite(handle, "SettingsX=" + IntegerToString(g_PanelSettings.X));
+      FileWrite(handle, "SettingsY=" + IntegerToString(g_PanelSettings.Y));
       
       FileClose(handle);
    }
@@ -159,25 +159,25 @@ void LoadConfig()
             if(key == "ColorListHover")  g_ColorListHover  = (color)StringToInteger(val);
             
             // Panel States & Positions
-            if(key == "IsMainPanelVisible") IsMainPanelVisible = (bool)StringToInteger(val);
-            if(key == "PanelX") PanelX = (int)StringToInteger(val);
-            if(key == "PanelY") PanelY = (int)StringToInteger(val);
+            if(key == "IsMainPanelVisible") g_PanelMain.IsVisible = (bool)StringToInteger(val);
+            if(key == "PanelX") g_PanelMain.X = (int)StringToInteger(val);
+            if(key == "PanelY") g_PanelMain.Y = (int)StringToInteger(val);
             
-            if(key == "IsPositionsPanelVisible") IsPositionsPanelVisible = (bool)StringToInteger(val);
-            if(key == "PositionsPanelX") PositionsPanelX = (int)StringToInteger(val);
-            if(key == "PositionsPanelY") PositionsPanelY = (int)StringToInteger(val);
+            if(key == "IsPositionsPanelVisible") g_PanelPositions.IsVisible = (bool)StringToInteger(val);
+            if(key == "PositionsPanelX") g_PanelPositions.X = (int)StringToInteger(val);
+            if(key == "PositionsPanelY") g_PanelPositions.Y = (int)StringToInteger(val);
             
-            if(key == "IsInfoPanelVisible") IsInfoPanelVisible = (bool)StringToInteger(val);
-            if(key == "InfoPanelX") InfoPanelX = (int)StringToInteger(val);
-            if(key == "InfoPanelY") InfoPanelY = (int)StringToInteger(val);
+            if(key == "IsInfoPanelVisible") g_PanelInfo.IsVisible = (bool)StringToInteger(val);
+            if(key == "InfoPanelX") g_PanelInfo.X = (int)StringToInteger(val);
+            if(key == "InfoPanelY") g_PanelInfo.Y = (int)StringToInteger(val);
             
-            if(key == "IsHistoryPanelVisible") IsHistoryPanelVisible = (bool)StringToInteger(val);
-            if(key == "HistoryPanelX") HistoryPanelX = (int)StringToInteger(val);
-            if(key == "HistoryPanelY") HistoryPanelY = (int)StringToInteger(val);
+            if(key == "IsHistoryPanelVisible") g_PanelHistory.IsVisible = (bool)StringToInteger(val);
+            if(key == "HistoryPanelX") g_PanelHistory.X = (int)StringToInteger(val);
+            if(key == "HistoryPanelY") g_PanelHistory.Y = (int)StringToInteger(val);
             
-            if(key == "IsSettingsOpen") IsSettingsOpen = (bool)StringToInteger(val);
-            if(key == "SettingsX") SettingsX = (int)StringToInteger(val);
-            if(key == "SettingsY") SettingsY = (int)StringToInteger(val);
+            if(key == "IsSettingsOpen") g_PanelSettings.IsVisible = (bool)StringToInteger(val);
+            if(key == "SettingsX") g_PanelSettings.X = (int)StringToInteger(val);
+            if(key == "SettingsY") g_PanelSettings.Y = (int)StringToInteger(val);
          }
       }
       FileClose(handle);

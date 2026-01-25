@@ -44,10 +44,6 @@ void UpdateHistoryFilter()
    }
    
    // Loop and Filter
-   // Reserve potentially needed memory to speed up?
-   // ArrayResize(g_HistoryFilteredIndices, total); 
-   // But we'll push back.
-   
    int count = 0;
    for(int i=0; i<total; i++)
    {
@@ -85,7 +81,7 @@ void UpdateHistoryFilter()
    }
    
    // Reset scroll if needed
-   // g_HistoryScrollY = 0; // Maybe not force reset if just updating? But safe.
+   // g_ScrollHistory.ScrollY = 0; // Maybe not force reset if just updating? But safe.
 }
 
 //+------------------------------------------------------------------+
@@ -94,7 +90,7 @@ void UpdateHistoryFilter()
 void SetHistoryFilter(ENUM_HISTORY_FILTER mode)
 {
     g_HistoryFilterMode = mode;
-    g_HistoryScrollY = 0; // Reset scroll on view change
+    g_ScrollHistory.ScrollY = 0; // Reset scroll on view change
     UpdateHistoryFilter();
     CreateHistoryPanel(); // Redraw
 }
@@ -105,14 +101,14 @@ void SetHistoryFilter(ENUM_HISTORY_FILTER mode)
 //+------------------------------------------------------------------+
 void CreateHistoryPanel()
 {
-   if(!IsHistoryPanelVisible) return;
+   if(!g_PanelHistory.IsVisible) return;
    
    int width = 800; // Largeur
    int rowHeight = 30; 
    int headerHeight = 40;
    
-   int startX = HistoryPanelX;
-   int startY = HistoryPanelY;
+   int startX = g_PanelHistory.X;
+   int startY = g_PanelHistory.Y;
    
    // --- Calculate Dynamic Offsets ---
    int toolbarHeight = 35;
@@ -123,7 +119,7 @@ void CreateHistoryPanel()
    int footerMargin = 20; // Margin to separate list from footer
    
    // 1. Fond & Header (Adjusted height to include Footer)
-   CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + HistoryViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
+   CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorBg, BORDER_FLAT);
    CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, g_ColorText, "Trebuchet MS Bold");
    
@@ -158,10 +154,6 @@ void CreateHistoryPanel()
        int inpY = btnY + btnH + 5;
        
        // Centering relative to the buttons (Total Buttons Width ~350px, Starts at startX + 15)
-       // Center of buttons = startX + 15 + 175 = startX + 190.
-       // Content Width approx: Lbl(35) + Inp(100) + Gap(20) + Lbl(25) + Inp(100) = 280px.
-       // StartX for Content = (startX + 190) - (280/2) = startX + 50.
-       
        int cursorX = startX + 50;
        int inpW = 100;
        
@@ -172,8 +164,6 @@ void CreateHistoryPanel()
        
        CreateLabel("Hist_Lbl_To", "To:", cursorX, inpY+3, 8, g_ColorText);
        CreateEdit("Hist_Input_End", TimeToString(g_HistoryCustomEnd, TIME_DATE), cursorX + 25, inpY, inpW, 25);
-       
-       // Apply button removed as requested (Auto-apply on edit)
    }
    else
    {
@@ -195,7 +185,6 @@ void CreateHistoryPanel()
    int wFees  = 100;
    int wProf  = 120;
    int wRetP  = 90;
-   // wRetR (Rest)
    
    CreateLabel("Hist_H_Time", "TIME", colX, colY, 8, g_ColorText, "Trebuchet MS Bold");
    CreateLabel("Hist_H_Type", "TYPE", colX + wTime, colY, 8, g_ColorText, "Trebuchet MS Bold");
@@ -214,15 +203,13 @@ void CreateHistoryPanel()
    DrawHistoryContent(startX, contentY, width, rowHeight);
    
    // 5. Scrollbar
-   // Adjust Scrollbar Y and H? 
-   // Scrollbar should be aligned with content area
    int scrollY = contentY;
    DrawHistoryScrollbar(startX, scrollY, width);
    
    ChartRedraw();
 
    // 6. Footer (Totals) - Positioned with gap after viewport
-   DrawHistoryFooter(startX, startY + topSectionHeight + HistoryViewportHeight + footerMargin, width, footerHeight);
+   DrawHistoryFooter(startX, startY + topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin, width, footerHeight);
 }
 
 //+------------------------------------------------------------------+
@@ -239,15 +226,15 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
 
    // Use Filtered Indices
    int total = ArraySize(g_HistoryFilteredIndices);
-   HistoryContentHeight = total * rowH;
+   g_ScrollHistory.ContentHeight = total * rowH;
    
-   int maxVisibleRows = HistoryViewportHeight / rowH;
+   int maxVisibleRows = g_ScrollHistory.ViewportHeight / rowH;
    
    // Calculate start index based on scroll pixel offset
    int startIdx = 0;
-   if(HistoryContentHeight > HistoryViewportHeight)
+   if(g_ScrollHistory.ContentHeight > g_ScrollHistory.ViewportHeight)
    {
-      startIdx = g_HistoryScrollY / rowH;
+      startIdx = g_ScrollHistory.ScrollY / rowH;
    }
    
    // Clamp
@@ -268,9 +255,6 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    for(int i = 0; i < maxVisibleRows; i++)
    {
        int logicalIndex = startIdx + i;
-       // We want Newest First (Total-1 down to 0) from the filtered list?
-       // g_HistoryFilteredIndices stores indices in ascending order (OLD -> NEW) usually if loop was 0..Total
-       // So we want the end of the array.
        int arrayIndex = total - 1 - logicalIndex;
        
        if(arrayIndex < 0) break;
@@ -303,7 +287,6 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            string profStr = DoubleToString(prof, 2);
            
            // Return % Calculation relative to CURRENT Balance (Estimation)
-           // ideally it should be relative to Balance AT OPEN, but complex to query. Current balance is standard approx.
            double bal = AccountBalance(); 
            double retPrc = 0.0;
            if(bal > 0) retPrc = (prof / bal) * 100.0;
@@ -348,32 +331,35 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
 void DrawHistoryScrollbar(int x, int y, int w)
 {
    int trackW = 12;
-   int trackH = HistoryViewportHeight;
+   int trackH = g_ScrollHistory.ViewportHeight;
    int trackX = x + w - trackW - 5;
    int trackY = y;
    
    CreateRect("Hist_ScrollTrack", trackX, trackY, trackW, trackH, g_ColorInput, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
    
-   int contentH = HistoryContentHeight;
-   if(contentH <= HistoryViewportHeight) contentH = HistoryViewportHeight + 1; 
+   int contentH = g_ScrollHistory.ContentHeight;
+   if(contentH <= g_ScrollHistory.ViewportHeight) contentH = g_ScrollHistory.ViewportHeight + 1; 
    
-   double ratio = (double)HistoryViewportHeight / (double)contentH;
+   double ratio = (double)g_ScrollHistory.ViewportHeight / (double)contentH;
    if(ratio > 1.0) ratio = 1.0;
    
    int thumbH = (int)(trackH * ratio);
    if(thumbH < 20) thumbH = 20;
    
-   int maxScroll = contentH - HistoryViewportHeight;
+   int maxScroll = contentH - g_ScrollHistory.ViewportHeight;
    if(maxScroll < 0) maxScroll = 0;
    
    int thumbY = trackY;
    if(maxScroll > 0)
    {
-       double scrollPrc = (double)g_HistoryScrollY / (double)maxScroll;
+       double scrollPrc = (double)g_ScrollHistory.ScrollY / (double)maxScroll;
        int availableTrack = trackH - thumbH;
        thumbY = trackY + (int)(scrollPrc * availableTrack);
    }
+   
+   // Remember Scroll Anchor for Dragging
+   g_ScrollHistory.DragAnchorY = thumbY; 
    
    CreateRect("Hist_ScrollThumb", trackX + 1, thumbY, trackW - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                  magikey.mq4     |
+//|                                                  fantomepad.mq4  |
 //|                                     Copyright 2026, FantomePad   |
 //|                                          Designed for Aesthetics |
 //+------------------------------------------------------------------+
@@ -9,9 +9,9 @@
 #property strict
 
 // Include Modular Logic
-#include "Include/MagicKey/Defines.mqh"
-#include "Include/MagicKey/Config.mqh"
-#include "Include/MagicKey/GUI/GUI_Master.mqh"
+#include "Include/FantomePad/Core/Defines.mqh"
+#include "Include/FantomePad/Core/Config.mqh"
+#include "Include/FantomePad/GUI/GUI_Master.mqh"
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |

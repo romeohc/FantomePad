@@ -6,10 +6,160 @@
 
 // Forward declaration if needed, but in MQL4 includes are flat.
 // We assume Defines and GUI components are available or we manipulate objects by name.
+#include <stdlib.mqh> 
+
+//+------------------------------------------------------------------+
+//| ERROR HANDLING HELPER                                            |
+//+------------------------------------------------------------------+
+// --- SAFE TRADE CONSTANTS ---
+#define MAX_RETRIES 3
+#define RETRY_DELAY 100 // ms
+
+// --- SAFE ORDER EXECUTION ---
+int SafeOrderSend(string symbol, int cmd, double volume, double price, int slippage, double sl, double tp, string comment, int magic, datetime expiration, color clr)
+{
+   int ticket = -1;
+   int error = 0;
+   
+   for(int i = 0; i < MAX_RETRIES; i++)
+   {
+      // Always refresh rates before trading in a loop/retry
+      RefreshRates();
+      
+      // Update Price if Market Order (to avoid Requote on retry)
+      if(cmd == OP_BUY)       price = MarketInfo(symbol, MODE_ASK);
+      if(cmd == OP_SELL)      price = MarketInfo(symbol, MODE_BID);
+      
+      // Normalize
+      price = NormalizeDouble(price, (int)MarketInfo(symbol, MODE_DIGITS));
+      
+      // Check Free Margin (Optional but good)
+      // ...
+      
+      ticket = OrderSend(symbol, cmd, volume, price, slippage, sl, tp, comment, magic, expiration, clr);
+      
+      if(ticket >= 0) return ticket; // Success
+      
+      error = GetLastError();
+      
+      // Retryable Errors
+      if(error == 135 || error == 136 || error == 137 || error == 138 || error == 146) // Price Changed, Off Quotes, Busy, Requote, Context Busy
+      {
+         Sleep(RETRY_DELAY);
+         continue; 
+      }
+      else
+      {
+         // Fatal Error
+         break;
+      }
+   }
+   
+   HandleTradeError(error, "SafeOrderSend Failed");
+   return -1;
+}
+
+bool SafeOrderClose(int ticket, double lots, double price, int slippage, color clr)
+{
+   bool result = false;
+   int error = 0;
+   
+   for(int i = 0; i < MAX_RETRIES; i++)
+   {
+      RefreshRates();
+      
+      // Update Close Price
+      if(OrderSelect(ticket, SELECT_BY_TICKET))
+      {
+         if(OrderType() == OP_BUY) price = MarketInfo(OrderSymbol(), MODE_BID);
+         else                      price = MarketInfo(OrderSymbol(), MODE_ASK);
+      }
+      else return false; // Ticket gone?
+      
+      result = OrderClose(ticket, lots, price, slippage, clr);
+      
+      if(result) return true;
+      
+      error = GetLastError();
+      if(error == 135 || error == 136 || error == 137 || error == 138 || error == 146)
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+      else break;
+   }
+   
+   HandleTradeError(error, "SafeOrderClose Failed");
+   return false;
+}
+
+bool SafeOrderModify(int ticket, double price, double sl, double tp, datetime expiration, color clr)
+{
+   bool result = false;
+   int error = 0;
+   
+   for(int i = 0; i < MAX_RETRIES; i++)
+   {
+      // No need to refresh rates for Modify unless we are moving Entry of Pending
+      // But checking context busy is good.
+      if(IsTradeContextBusy()) 
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+      
+      result = OrderModify(ticket, price, sl, tp, expiration, clr);
+      
+      if(result) return true;
+      
+      error = GetLastError();
+      // Error 1 = No Change (Technically a success for us, silence it)
+      if(error == 1) return true; 
+      
+      if(error == 136 || error == 137 || error == 146) // Busy, Off quotes
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+      else break;
+   }
+   
+   HandleTradeError(error, "SafeOrderModify Failed");
+   return false;
+}
+
+void HandleTradeError(int error, string extraMsg="")
+{
+   string desc = ErrorDescription(error);
+   string fullMsg = "Error " + IntegerToString(error) + ": " + desc;
+   if(extraMsg != "") fullMsg += " (" + extraMsg + ")";
+   
+   Print(fullMsg);
+   
+   // Set Toast Global (picked up by GUI)
+   g_ToastMsg = fullMsg;
+   g_ToastColor = g_ColorRed;
+   g_ToastStartTime = GetTickCount();
+}
+
+void HandleTradeMessage(string msg, color col)
+{
+   Print(msg);
+   g_ToastMsg = msg;
+   g_ToastColor = col;
+   g_ToastStartTime = GetTickCount();
+}
 
 //+------------------------------------------------------------------+
 //| GESTION DES LIGNES GRAPHIQUES                                    |
 //+------------------------------------------------------------------+
+int GetSlippagePoints(int slippagePips)
+{
+   int digits = (int)MarketInfo(Symbol(), MODE_DIGITS);
+   if(digits == 3 || digits == 5) return slippagePips * 10;
+   return slippagePips;
+}
+
 void UpdateSingleLine(string lineSuffix, string editSuffix, color col)
 {
    string editName = PREFIX + editSuffix;
@@ -69,56 +219,58 @@ void UpdateChartLines()
 
 void CreateHLine(string name, double price, color col, int style, int width, string labelText = "")
 {
-   if(ObjectCreate(0, name, OBJ_HLINE, 0, 0, price))
+   if(ObjectFind(0, name) < 0)
    {
-      ObjectSetInteger(0, name, OBJPROP_COLOR, col);
-      ObjectSetInteger(0, name, OBJPROP_STYLE, style);
-      ObjectSetInteger(0, name, OBJPROP_WIDTH, width);
-      ObjectSetInteger(0, name, OBJPROP_BACK, true);
+      ObjectCreate(0, name, OBJ_HLINE, 0, 0, price);
       ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, name, OBJPROP_BACK, true);
    }
    
+   // Update Line Props
+   double curPrice = ObjectGetDouble(0, name, OBJPROP_PRICE1);
+   if(MathAbs(curPrice - price) > Point) ObjectSetDouble(0, name, OBJPROP_PRICE1, price);
+   
+   ObjectSetInteger(0, name, OBJPROP_COLOR, col);
+   ObjectSetInteger(0, name, OBJPROP_STYLE, style);
+   ObjectSetInteger(0, name, OBJPROP_WIDTH, width);
+   
+   string txtName = name + "_Txt";
    if(labelText != "")
    {
-      string txtName = name + "_Txt";
-      // Positionnement avec un petit décalage par rapport au bord gauche
+      // Positionnement intelligent
       int firstBar = (int)ChartGetInteger(0, CHART_FIRST_VISIBLE_BAR);
-      int offset = 3; // On décale de 3 bougies vers la droite pour l'espace
+      int offset = 3; 
       if(firstBar < offset) offset = 0;
-      
       datetime txtTime = iTime(Symbol(), Period(), firstBar - offset);
       
-      if(ObjectCreate(0, txtName, OBJ_TEXT, 0, txtTime, price))
+      if(ObjectFind(0, txtName) < 0)
       {
-         ObjectSetString(0, txtName, OBJPROP_TEXT, labelText);
-         ObjectSetInteger(0, txtName, OBJPROP_COLOR, col); // Utilise la couleur de la ligne (Rouge/Vert/Blanc)
+         ObjectCreate(0, txtName, OBJ_TEXT, 0, txtTime, price);
          ObjectSetInteger(0, txtName, OBJPROP_FONTSIZE, 9);
          ObjectSetString(0, txtName, OBJPROP_FONT, "Arial Bold");
          ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_LEFT_LOWER);
          ObjectSetInteger(0, txtName, OBJPROP_BACK, false);
          ObjectSetInteger(0, txtName, OBJPROP_SELECTABLE, false);
       }
-      else
-      {
-         // Mise à jour de la position et du texte pour rester synchronisé (prix/scroll)
-         ObjectSetDouble(0, txtName, OBJPROP_PRICE1, price);
-         ObjectSetInteger(0, txtName, OBJPROP_TIME1, (long)txtTime);
-         ObjectSetString(0, txtName, OBJPROP_TEXT, labelText);
-         ObjectSetInteger(0, txtName, OBJPROP_COLOR, col);
-      }
+      
+      // Always Update Text Props
+      ObjectSetDouble(0, txtName, OBJPROP_PRICE1, price);
+      ObjectSetInteger(0, txtName, OBJPROP_TIME1, (long)txtTime);
+      ObjectSetString(0, txtName, OBJPROP_TEXT, labelText);
+      ObjectSetInteger(0, txtName, OBJPROP_COLOR, col);
+   }
+   else
+   {
+       // If empty label, ensure text object is gone
+       if(ObjectFind(0, txtName) >= 0) ObjectDelete(0, txtName);
    }
 }
 
 void UpdateOpenOrderLines()
 {
-   // Supprimer les anciennes lignes pour rafraîchir
-   for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
-   {
-      string name = ObjectName(0, i);
-      if(StringFind(name, PREFIX + "Open_") >= 0) ObjectDelete(0, name);
-   }
-
-   // Parcourir tous les ordres ouverts et pending
+   string activeTickets = "|";
+   
+   // 1. Update/Create Active Lines
    for(int i = 0; i < OrdersTotal(); i++)
    {
       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
@@ -126,6 +278,8 @@ void UpdateOpenOrderLines()
          if(OrderSymbol() == Symbol())
          {
             int ticket = OrderTicket();
+            activeTickets += IntegerToString(ticket) + "|";
+            
             double op = OrderOpenPrice();
             double sl = OrderStopLoss();
             double tp = OrderTakeProfit();
@@ -137,14 +291,43 @@ void UpdateOpenOrderLines()
             string tPrefix = PREFIX + "Open_" + IntegerToString(ticket);
             int d = (int)MarketInfo(Symbol(), MODE_DIGITS);
             
-            // 1. Ligne d'Entrée (Blanche, Label "BUY/SELL - Prix")
             CreateHLine(tPrefix + "_Ent", op, clrWhite, STYLE_DOT, 1, entryLabel + " - " + DoubleToString(op, d));
             
-            // 2. Ligne Stop Loss (Rouge, Label "SL - Prix")
             if(sl > 0) CreateHLine(tPrefix + "_SL", sl, g_ColorSLLine, STYLE_DOT, 1, "SL - " + DoubleToString(sl, d));
+            else {
+                if(ObjectFind(0, tPrefix + "_SL") >= 0) ObjectDelete(0, tPrefix + "_SL");
+                if(ObjectFind(0, tPrefix + "_SL_Txt") >= 0) ObjectDelete(0, tPrefix + "_SL_Txt");
+            }
             
-            // 3. Ligne Take Profit (Verte, Label "TP - Prix")
             if(tp > 0) CreateHLine(tPrefix + "_TP", tp, g_ColorTPLine, STYLE_DOT, 1, "TP - " + DoubleToString(tp, d));
+            else {
+                if(ObjectFind(0, tPrefix + "_TP") >= 0) ObjectDelete(0, tPrefix + "_TP");
+                if(ObjectFind(0, tPrefix + "_TP_Txt") >= 0) ObjectDelete(0, tPrefix + "_TP_Txt");
+            }
+         }
+      }
+   }
+   
+   // 2. Cleanup Orphans
+   int total = ObjectsTotal(0, -1, -1);
+   for(int i = total - 1; i >= 0; i--)
+   {
+      string name = ObjectName(0, i);
+      if(StringFind(name, PREFIX + "Open_") >= 0)
+      {
+         // Split: PTP_Open_TICKET_...
+         string parts[];
+         ushort sep = StringGetCharacter("_", 0);
+         StringSplit(name, sep, parts);
+         
+         // parts[0]=PTP, parts[1]=Open, parts[2]=Ticket
+         if(ArraySize(parts) >= 3)
+         {
+            string t = parts[2];
+            if(StringFind(activeTickets, "|" + t + "|") < 0)
+            {
+               ObjectDelete(0, name);
+            }
          }
       }
    }
@@ -187,7 +370,7 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
    else // Percentage (RiskMode == 0)
    {
       // Risque exprimé en pourcentage du solde
-      riskMoney = AccountBalance() * (riskValue / 100.0);
+      riskMoney = AccountEquity() * (riskValue / 100.0);
    }
    
    // Distance SL en points
@@ -319,7 +502,13 @@ void ExecuteOrder(int cmd)
    
    // Use calculated volume
    double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
-   if(volume <= 0) volume = 0.01; // Safety fallback 
+   
+   // Hardened Validation: Reject invalid volume
+   if(volume <= 0) 
+   {
+      HandleTradeMessage("Invalid Volume (" + DoubleToString(volume, 2) + ")", g_ColorRed);
+      return; 
+   } 
    double price  = 0;
    
    double ask = MarketInfo(symbol, MODE_ASK);
@@ -334,10 +523,11 @@ void ExecuteOrder(int cmd)
    sl    = NormalizeDouble(sl, (int)digits);
    tp    = NormalizeDouble(tp, (int)digits);
    
-   int ticket = OrderSend(symbol, cmd, volume, price, 10, sl, tp, "ProPanel", 0, 0, clrNONE);
+   int slippagePoints = GetSlippagePoints(MaxSlippage); // Use MaxSlippage input
+   int ticket = SafeOrderSend(symbol, cmd, volume, price, slippagePoints, sl, tp, "ProPanel", MagicNumber, 0, clrNONE);
    
    if(ticket < 0) 
-      Alert("Erreur sur ", symbol, ": ", GetLastError());
+      { /* HandleTradeError called inside SafeOrderSend */ }
    else 
    {
       // PlaySound("ok.wav"); // Removed as requested

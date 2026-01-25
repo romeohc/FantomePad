@@ -47,8 +47,8 @@ void UpdatePartialButtonsVisuals()
 //+------------------------------------------------------------------+
 void UpdatePositionsLayout()
 {
-   int startX = PositionsPanelX;
-   int startY = PositionsPanelY;
+   int startX = g_PanelPositions.X;
+   int startY = g_PanelPositions.Y;
    int width  = 280; 
    int paddingX = 20;
    
@@ -91,7 +91,7 @@ void UpdatePositionsLayout()
    // Profit (Right Aligned visually or 2nd Col)
    SetObjPosition("Pos_Lbl_Profit", startGridX + colW, startGridY);
    SetObjPosition("Pos_Val_Profit", startGridX + colW, startGridY + 15);
-
+   
    // ROW 2: PROFIT R | PROFIT %
    int row2Y = startGridY + 40;
    SetObjPosition("Pos_Lbl_ProfitR", startGridX, row2Y);
@@ -295,7 +295,7 @@ void CreatePositionsPanel()
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONT, "Trebuchet MS Bold");
 
-   if(IsPositionsPanelVisible)
+   if(g_PanelPositions.IsVisible)
    {
       UpdatePositionsLayout();
       UpdatePositionsValues();
@@ -311,7 +311,7 @@ void CreatePositionsPanel()
 //+------------------------------------------------------------------+
 void UpdatePositionsValues()
 {
-   if(!IsPositionsPanelVisible) return;
+   if(!g_PanelPositions.IsVisible) return;
    
    if(SelectedPositionTicket != -1)
    {
@@ -387,7 +387,6 @@ void UpdatePositionsValues()
              ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, sRiskR);
              ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, sRiskPrc);
              // Removed Pos_Val_RiskR and Money separate updates
-
              
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              

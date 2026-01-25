@@ -7,6 +7,11 @@
 // GLOBAL pour suivre le nombre d'ordres affichés
 int g_LastInfoOrderCount = 0;
 
+// Optimization: Cache history stats to avoid O(N) loop every tick
+int    g_LastHistoryTotal = -1;
+double g_CachedDeposit    = 0.0;
+double g_CachedWithdraw   = 0.0;
+
 string GetOrderTypeStrShort(int type)
 {
    switch(type)
@@ -48,8 +53,8 @@ void GetAccountHistoryStats(double &outDeposit, double &outWithdraw)
 //+------------------------------------------------------------------+
 void UpdateInfoLayout()
 {
-   int startX = InfoPanelX;
-   int startY = InfoPanelY;
+   int startX = g_PanelInfo.X;
+   int startY = g_PanelInfo.Y;
    int width  = 260; // Wider Panel for better spacing
    
    int paddingX = 20;
@@ -120,7 +125,6 @@ void UpdateInfoLayout()
    
    // Adjust height if needed or keep standard
    int row5Y = row4Y + 45; // Just for consistency logic if we added more
-
    
    currentY += statsBgH + 15;
    
@@ -129,7 +133,6 @@ void UpdateInfoLayout()
    ObjectSetInteger(0, PREFIX + "Info_Sep", OBJPROP_XSIZE, width - (paddingX*2));
    
    currentY += 15;
-
    
    // --- POSITIONS HEADER ---
    SetObjPosition("Info_SubTitle_Pos", startX + paddingX, currentY);
@@ -200,9 +203,6 @@ void CreateInfoPanel()
    CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_Withdraw", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
-   CreateLabel("Info_Lbl_Withdraw", "WITHDRAW", 0, 0, 7, g_ColorText, "Trebuchet MS");
-   CreateLabel("Info_Val_Withdraw", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
-   
    CreateLabel("Info_Lbl_PnL", "PNL", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Info_Val_PnL", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
@@ -230,7 +230,7 @@ void CreateInfoPanel()
 //+------------------------------------------------------------------+
 void UpdateInfoPanel()
 {
-   if(!IsInfoPanelVisible) return;
+   if(!g_PanelInfo.IsVisible) return;
 
    string currency = AccountCurrency();
    
@@ -248,7 +248,17 @@ void UpdateInfoPanel()
    
    // --- DEPOSIT / WITHDRAW UPDATE ---
    double deps = 0, wits = 0;
-   GetAccountHistoryStats(deps, wits);
+   
+   // OPTIMIZATION: Only recalculate if history count changed
+   int currentHistoryTotal = OrdersHistoryTotal();
+   if(currentHistoryTotal != g_LastHistoryTotal)
+   {
+      GetAccountHistoryStats(g_CachedDeposit, g_CachedWithdraw);
+      g_LastHistoryTotal = currentHistoryTotal;
+   }
+   
+   deps = g_CachedDeposit;
+   wits = g_CachedWithdraw;
    
    string sDeps = DoubleToString(deps, 2);
    string sWits = DoubleToString(wits, 2);
@@ -372,11 +382,6 @@ void ToggleInfoPanel(bool visible)
    SetObjVisible("Info_Val_Equity", visible);
    SetObjVisible("Info_Lbl_Margin", visible);
    SetObjVisible("Info_Val_Margin", visible);
-   SetObjVisible("Info_Lbl_Deposit", visible);
-   SetObjVisible("Info_Val_Deposit", visible);
-   SetObjVisible("Info_Lbl_Withdraw", visible);
-   SetObjVisible("Info_Val_Withdraw", visible);
-   
    SetObjVisible("Info_Lbl_Deposit", visible);
    SetObjVisible("Info_Val_Deposit", visible);
    SetObjVisible("Info_Lbl_Withdraw", visible);

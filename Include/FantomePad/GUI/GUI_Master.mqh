@@ -5,8 +5,8 @@
 #property strict
 
 // Includes
-#include "Components.mqh"
-#include "../Trade.mqh"       // Needs access to AutoSwitchOrderType
+#include "Components/Components.mqh"
+#include "../Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
 #include "Panel_Main.mqh"
 #include "Panel_Settings.mqh"
 #include "Panel_Info.mqh"
@@ -19,11 +19,11 @@
 //+------------------------------------------------------------------+
 void GUI_OnInit()
 {
-   if(GlobalVariableCheck("MagicKey_LastSelectedTicket"))
+   if(GlobalVariableCheck("FantomePad_LastSelectedTicket"))
    {
-      SelectedPositionTicket = (int)GlobalVariableGet("MagicKey_LastSelectedTicket");
-      GlobalVariableDel("MagicKey_LastSelectedTicket");
-      IsPositionsPanelVisible = true;
+      SelectedPositionTicket = (int)GlobalVariableGet("FantomePad_LastSelectedTicket");
+      GlobalVariableDel("FantomePad_LastSelectedTicket");
+      g_PanelPositions.IsVisible = true;
    }
 
    CreatePanel();
@@ -33,19 +33,81 @@ void GUI_OnInit()
    CreateHistoryPanel();
    
    // Apply Loaded State
-   if(IsMainPanelVisible) UpdateUIMode();
+   CreatePositionsPanel();
+   CreateHistoryPanel();
+   
+   // Apply Loaded State
+   if(g_PanelMain.IsVisible) UpdateUIMode();
    else ToggleMainPanel(false);
    
-   if(IsPositionsPanelVisible) TogglePositionsPanel(true);
+   if(g_PanelPositions.IsVisible) TogglePositionsPanel(true);
    else TogglePositionsPanel(false);
    
-   if(IsInfoPanelVisible) ToggleInfoPanel(true);
+   if(g_PanelInfo.IsVisible) ToggleInfoPanel(true);
    else ToggleInfoPanel(false);
    
-   if(IsHistoryPanelVisible) ToggleHistoryPanel(true);
+   if(g_PanelHistory.IsVisible) ToggleHistoryPanel(true);
    else ToggleHistoryPanel(false);
    
-   if(IsSettingsOpen) OpenSettings();
+   if(g_PanelSettings.IsVisible) OpenSettings();
+}
+
+//+------------------------------------------------------------------+
+//| TOAST NOTIFICATION SYSTEM                                        |
+//+------------------------------------------------------------------+
+void UpdateToastNotification() 
+{
+   string bgName = PREFIX + "Toast_Bg";
+   string txtName = PREFIX + "Toast_Txt";
+   
+   if(g_ToastMsg == "") 
+   {
+      if(ObjectFind(0, bgName) >= 0) ObjectDelete(0, bgName);
+      if(ObjectFind(0, txtName) >= 0) ObjectDelete(0, txtName);
+      return;
+   }
+   
+   // Check Timeout (5 seconds)
+   if(GetTickCount() - g_ToastStartTime > 5000) 
+   {
+      g_ToastMsg = "";
+      ChartRedraw();
+      return;
+   }
+   
+   // Draw Logic
+   int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+   int w = 450; // Wide enough
+   int h = 35;
+   int x = (chartW - w) / 2;
+   int y = 20; // Top margin
+   
+   // Create or Update BG
+   if(ObjectFind(0, bgName) < 0) 
+   {
+      CreateRect(bgName, x, y, w, h, g_ToastColor, BORDER_FLAT);
+      ObjectSetInteger(0, bgName, OBJPROP_ZORDER, 100); // High z-order
+   }
+   
+   ObjectSetInteger(0, bgName, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, bgName, OBJPROP_YDISTANCE, y);
+   ObjectSetInteger(0, bgName, OBJPROP_XSIZE, w);
+   ObjectSetInteger(0, bgName, OBJPROP_BGCOLOR, g_ToastColor);
+   ObjectSetInteger(0, bgName, OBJPROP_BORDER_COLOR, g_ToastColor);
+   
+   // Create or Update Text
+   if(ObjectFind(0, txtName) < 0) 
+   {
+      CreateLabel(txtName, g_ToastMsg, x + (w/2), y + 7, 10, clrWhite, "Arial Bold");
+      ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_UPPER);
+      ObjectSetInteger(0, txtName, OBJPROP_ZORDER, 101);
+   }
+   // Center Text setup
+   ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, x + (w/2));
+   ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, y + 7);
+   ObjectSetString(0, txtName, OBJPROP_TEXT, g_ToastMsg);
+   
+   ChartRedraw();
 }
 
 //+------------------------------------------------------------------+
@@ -53,8 +115,14 @@ void GUI_OnInit()
 //+------------------------------------------------------------------+
 void GUI_OnTick()
 {
+   // Throttle UI updates to save CPU (500ms)
+   static uint lastUpdate = 0;
+   if(GetTickCount() - lastUpdate < 500) return; 
+   lastUpdate = GetTickCount();
+
    UpdateInfoPanel();
    UpdatePositionsValues();
+   UpdateToastNotification();
 }
 
 //+------------------------------------------------------------------+
@@ -114,6 +182,76 @@ double GetOriginalLotSize(int ticket)
 }
 
 //+------------------------------------------------------------------+
+//| HELPER: REFRESH ALL PANELS                                       |
+//+------------------------------------------------------------------+
+void RefreshAllPanels()
+{
+    CreatePanel(); 
+    if(g_PanelMain.IsVisible) UpdateUIMode();
+    else ToggleMainPanel(false);
+    
+    CreateInfoPanel(); 
+    if(!g_PanelInfo.IsVisible) ToggleInfoPanel(false);
+    
+    CreateManagerPanel();
+    CreatePositionsPanel();
+    CreateHistoryPanel();
+    
+    if(g_PanelSettings.IsVisible) OpenSettings();
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: APPLY COLOR CHANGE                                       |
+//+------------------------------------------------------------------+
+void ApplyColorChange(color pickedCol)
+{
+    if(g_ColorPickerTarget != "")
+    {
+       ObjectSetInteger(0, g_ColorPickerTarget, OBJPROP_BGCOLOR, pickedCol);
+       ObjectSetInteger(0, g_ColorPickerTarget, OBJPROP_BORDER_COLOR, pickedCol);
+       
+       if(StringFind(g_ColorPickerTarget, "_Bg") > 0)          g_ColorBg = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_Head") > 0)        g_ColorHeader = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_Input") > 0)       g_ColorInput = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_Txt") > 0)         g_ColorText = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_Green") > 0)       g_ColorGreen = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_Red") > 0)         g_ColorRed = (color)pickedCol;
+       
+       if(StringFind(g_ColorPickerTarget, "_ChrtBg") > 0) {
+          g_ColorChartBg = (color)pickedCol;
+          ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
+       }
+       if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
+           g_ColorChartFg = (color)pickedCol;
+           ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
+       }
+       
+       if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_BtnVal") > 0)      g_ColorBtnValid = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_BtnInv") > 0)      g_ColorBtnInvalid = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_BtnAct") > 0)      g_ColorBtnActive  = (color)pickedCol;
+       
+       if(StringFind(g_ColorPickerTarget, "_CUp") > 0) {
+          g_ColorCandleUp = (color)pickedCol;
+          ChartSetInteger(0, CHART_COLOR_CANDLE_BULL, g_ColorCandleUp);
+          ChartSetInteger(0, CHART_COLOR_CHART_UP, g_ColorCandleUp);
+       }
+       if(StringFind(g_ColorPickerTarget, "_CDown") > 0) {
+          g_ColorCandleDown = (color)pickedCol;
+          ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, g_ColorCandleDown);
+          ChartSetInteger(0, CHART_COLOR_CHART_DOWN, g_ColorCandleDown);
+       }
+       if(StringFind(g_ColorPickerTarget, "_LNorm") > 0)       g_ColorListNormal = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_LHov") > 0)        g_ColorListHover = (color)pickedCol;
+       
+       SaveConfigToFile();
+       RefreshAllPanels();
+    }
+}
+
+//+------------------------------------------------------------------+
 //| EVENT DISPATCHER                                                 |
 //+------------------------------------------------------------------+
 void GUI_OnChartEvent(const int id,
@@ -129,10 +267,10 @@ void GUI_OnChartEvent(const int id,
       CreateManagerPanel();
       CreatePositionsPanel();
       CreateHistoryPanel();
-      if(IsMainPanelVisible) UpdateUIMode();
+      if(g_PanelMain.IsVisible) UpdateUIMode();
       else ToggleMainPanel(false);
       
-      if(IsSettingsOpen) OpenSettings(); // Redraw settings if open
+      if(g_PanelSettings.IsVisible) OpenSettings(); // Redraw settings if open
    }
    
    // --- CLIC SUR LE GRAPHIQUE (VIDE) ---
@@ -185,326 +323,116 @@ void GUI_OnChartEvent(const int id,
          g_BlockClick = false; // Reset safety block on new press
          
          // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
-         if(IsDragging || IsSettingsDragging || IsScrollDragging || IsSettingsScrollDragging || IsHistoryDragging || IsHistoryScrollDragging || isOverList)
+         bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging;
+         if(anyDrag || isOverList)
          {
              ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
          }
       
          // --- 0. DRAG SCROLLBAR (SYMBOL LIST) ---
-         if(IsListOpen)
+         if(IsListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !g_ScrollSettings.IsDragging)
          {
-             if(!IsScrollDragging && !IsDragging && !IsSettingsDragging && !IsSettingsScrollDragging)
-             {
-                 // Check start drag
-                 long tx = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_XDISTANCE);
-                 long ty = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YDISTANCE);
-                 long tw = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_XSIZE);
-                 long th = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YSIZE);
-                 
-                 // Expanded hit area for easier grabbing
-                 if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
-                 {
-                     IsScrollDragging = true;
-                     ScrollDragY = mouseY;
-                     ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                 }
-             }
+             int total = SymbolsTotal(true);
+             int trackH = (int)ObjectGetInteger(0, PREFIX + "ScrollTrack", OBJPROP_YSIZE);
+             int maxScroll = total - VisibleListItems;
+             if(maxScroll < 0) maxScroll = 0;
              
-             if(IsScrollDragging)
+             if(HandleScrollDrag(IsScrollDragging, ScrollDragY, g_SymbolListOffset, mouseX, mouseY, "ScrollThumb", trackH, maxScroll))
              {
-                 int deltaY = mouseY - ScrollDragY;
-                 if(deltaY != 0)
-                 {
-                     // Calculate movement ratio
-                     long trackH = ObjectGetInteger(0, PREFIX + "ScrollTrack", OBJPROP_YSIZE);
-                     long thumbH = ObjectGetInteger(0, PREFIX + "ScrollThumb", OBJPROP_YSIZE);
-                     int availableTrack = (int)(trackH - thumbH);
-                     
-                     if(availableTrack > 0)
-                     {
-                         int total = SymbolsTotal(true);
-                         int maxOffset = total - VisibleListItems; // Approx
-                         if (maxOffset < 0) maxOffset = 0;
-                         
-                         double moveRatio = (double)deltaY / (double)availableTrack;
-                         int offsetChange = (int)(moveRatio * maxOffset);
-                         
-                         if(MathAbs(offsetChange) >= 1)
-                         {
-                             g_SymbolListOffset += offsetChange;
-                             ScrollDragY = mouseY; // Reset anchor
-                             DrawSymbolList(); // This ensures clamps are applied
-                         }
-                     }
-                 }
+                 DrawSymbolList();
              }
          }
          
          // --- 0.5 DRAG SCROLLBAR (SETTINGS) ---
-         if(IsSettingsOpen)
+         if(g_PanelSettings.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging)
          {
-             if(!IsSettingsScrollDragging && !IsDragging && !IsSettingsDragging && !IsScrollDragging)
-             {
-                  long tx = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_XDISTANCE);
-                  long ty = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YDISTANCE);
-                  long tw = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_XSIZE);
-                  long th = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YSIZE);
-                  
-                  if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
-                  {
-                      IsSettingsScrollDragging = true;
-                      SettingsScrollDragY = mouseY;
-                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                  }
-             }
+             int maxScroll = g_ScrollSettings.ContentHeight - g_ScrollSettings.ViewportHeight;
+             if(maxScroll < 0) maxScroll = 0;
              
-             if(IsSettingsScrollDragging)
+             if(HandleScrollDrag(g_ScrollSettings.IsDragging, g_ScrollSettings.DragAnchorY, g_ScrollSettings.ScrollY, mouseX, mouseY, "Set_ScrollThumb", g_ScrollSettings.ViewportHeight, maxScroll))
              {
-                 int deltaY = mouseY - SettingsScrollDragY;
-                 if(deltaY != 0)
-                 {
-                     long trackH = SettingsViewportHeight;
-                     long thumbH = ObjectGetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_YSIZE);
-                     int availableTrack = (int)(trackH - thumbH);
-                     
-                     if(availableTrack > 0)
-                     {
-                         int maxScroll = SettingsContentHeight - SettingsViewportHeight;
-                         if(maxScroll < 0) maxScroll = 0;
-                         
-                         double moveRatio = (double)deltaY / (double)availableTrack;
-                         int offsetChange = (int)(moveRatio * maxScroll);
-                         
-                         if(MathAbs(offsetChange) >= 1)
-                         {
-                             g_SettingsScrollY += offsetChange;
-                             if(g_SettingsScrollY < 0) g_SettingsScrollY = 0;
-                             if(g_SettingsScrollY > maxScroll) g_SettingsScrollY = maxScroll;
-                             
-                             SettingsScrollDragY = mouseY;
-                             OpenSettings();
-                         }
-                     }
-                 }
+                 OpenSettings();
              }
          }
          
          // --- 0.6 DRAG SCROLLBAR (HISTORY) ---
-         if(IsHistoryPanelVisible)
+         if(g_PanelHistory.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_PanelHistory.IsDragging)
          {
-             if(!IsHistoryScrollDragging && !IsDragging && !IsSettingsDragging && !IsScrollDragging && !IsSettingsScrollDragging && !IsHistoryDragging)
-             {
-                  long tx = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_XDISTANCE);
-                  long ty = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YDISTANCE);
-                  long tw = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_XSIZE);
-                  long th = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YSIZE);
-                  
-                  if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
-                  {
-                      IsHistoryScrollDragging = true;
-                      HistoryScrollDragY = mouseY;
-                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                  }
-             }
+             int maxScroll = g_ScrollHistory.ContentHeight - g_ScrollHistory.ViewportHeight;
+             if(maxScroll < 0) maxScroll = 0;
              
-             if(IsHistoryScrollDragging)
+             if(HandleScrollDrag(g_ScrollHistory.IsDragging, g_ScrollHistory.DragAnchorY, g_ScrollHistory.ScrollY, mouseX, mouseY, "Hist_ScrollThumb", g_ScrollHistory.ViewportHeight, maxScroll))
              {
-                 int deltaY = mouseY - HistoryScrollDragY;
-                 if(deltaY != 0)
-                 {
-                     long trackH = HistoryViewportHeight;
-                     long thumbH = ObjectGetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_YSIZE);
-                     int availableTrack = (int)(trackH - thumbH);
-                     
-                     if(availableTrack > 0)
-                     {
-                         int maxScroll = HistoryContentHeight - HistoryViewportHeight;
-                         if(maxScroll < 0) maxScroll = 0;
-                         
-                         double moveRatio = (double)deltaY / (double)availableTrack;
-                         int offsetChange = (int)(moveRatio * maxScroll);
-                         
-                         if(MathAbs(offsetChange) >= 1)
-                         {
-                             g_HistoryScrollY += offsetChange;
-                             if(g_HistoryScrollY < 0) g_HistoryScrollY = 0;
-                             if(g_HistoryScrollY > maxScroll) g_HistoryScrollY = maxScroll;
-                             
-                             HistoryScrollDragY = mouseY;
-                             CreateHistoryPanel(); // Redraws content
-                         }
-                     }
-                 }
+                 CreateHistoryPanel();
              }
          }
       
-         // --- 1. DRAG SETTINGS PANEL ---
-         bool processedSettings = false;
-         if(IsSettingsOpen && !IsDragging && !IsScrollDragging && !IsSettingsScrollDragging)
+         // --- PANELS DRAG ---
+         bool processed = false;
+         
+         // 1. SETTINGS PANEL
+         if(g_PanelSettings.IsVisible && !g_PanelMain.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging)
          {
-            if(!IsSettingsDragging)
+             // Initialisation position si nécessaire
+             if(g_PanelSettings.X == -1)
+             {
+                int cw = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+                int ch = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
+                g_PanelSettings.X = (cw/2) - (300/2);
+                g_PanelSettings.Y = (ch/2) - (350/2);
+             }
+             
+             if(HandlePanelDrag(g_PanelSettings.IsDragging, g_PanelSettings.X, g_PanelSettings.Y, g_PanelSettings.DragOffsetX, g_PanelSettings.DragOffsetY, mouseX, mouseY, 340, 50 + g_ScrollSettings.ViewportHeight))
+             {
+                OpenSettings();
+                processed = true;
+             }
+         }
+         
+         // 2. INFO PANEL
+         if(!processed && g_PanelInfo.IsVisible && !g_PanelSettings.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging)
+         {
+              if(HandlePanelDrag(g_PanelInfo.IsDragging, g_PanelInfo.X, g_PanelInfo.Y, g_PanelInfo.DragOffsetX, g_PanelInfo.DragOffsetY, mouseX, mouseY, 200, 150, "Info_Bg"))
+              {
+                  UpdateInfoLayout();
+                  processed = true;
+              }
+         }
+
+         // 3. POSITIONS PANEL
+         if(!processed && g_PanelPositions.IsVisible && !g_PanelSettings.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging)
+         {
+             if(HandlePanelDrag(g_PanelPositions.IsDragging, g_PanelPositions.X, g_PanelPositions.Y, g_PanelPositions.DragOffsetX, g_PanelPositions.DragOffsetY, mouseX, mouseY, 280, 150, "Pos_Bg"))
+             {
+                 UpdatePositionsLayout();
+                 processed = true;
+             }
+         }
+
+         // 4. HISTORY PANEL
+         if(!processed && g_PanelHistory.IsVisible && !g_PanelSettings.IsDragging && !g_PanelPositions.IsDragging && !g_PanelInfo.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging && !g_ScrollHistory.IsDragging)
+         {
+             if(HandlePanelDrag(g_PanelHistory.IsDragging, g_PanelHistory.X, g_PanelHistory.Y, g_PanelHistory.DragOffsetX, g_PanelHistory.DragOffsetY, mouseX, mouseY, 800, 200, "Hist_Bg"))
+             {
+                 CreateHistoryPanel();
+                 processed = true;
+             }
+         }
+         
+         // 5. MAIN PANEL
+         if(!processed && !g_PanelSettings.IsDragging && !g_PanelInfo.IsDragging && !g_PanelPositions.IsDragging && !g_PanelHistory.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging)
+         {
+            // Initialisation position si nécessaire
+            if(g_PanelMain.X == -1)
             {
-               // Initialisation position si nécessaire (sécurité)
-               if(SettingsX == -1)
-               {
-                  int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
-                  int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
-                  SettingsX = (chartW/2) - (300/2);
-                  SettingsY = (chartH/2) - (350/2);
-               }
-               
-               // Detection Settings Panel (Full Window)
-               int settingsW = 340;
-               int settingsH = 50 + SettingsViewportHeight;
-               if(mouseX >= SettingsX && mouseX <= SettingsX + settingsW && mouseY >= SettingsY && mouseY <= SettingsY + settingsH)
-               {
-                  IsSettingsDragging = true;
-                  SettingsDragOffsetX = mouseX - SettingsX;
-                  SettingsDragOffsetY = mouseY - SettingsY;
-                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-               }
+               int cw = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+               int ch = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
+               g_PanelMain.X = (cw / 2) - (g_PanelMain.Width / 2);
+               g_PanelMain.Y = (ch / 2) - (200);
             }
             
-            if(IsSettingsDragging)
+            if(HandlePanelDrag(g_PanelMain.IsDragging, g_PanelMain.X, g_PanelMain.Y, g_PanelMain.DragOffsetX, g_PanelMain.DragOffsetY, mouseX, mouseY, g_PanelMain.Width, 200, "Bg"))
             {
-               SettingsX = mouseX - SettingsDragOffsetX;
-               SettingsY = mouseY - SettingsDragOffsetY;
-               OpenSettings(); // Redessine le panel settings
-               processedSettings = true;
-            }
-         }
-         
-         // --- 1.5 DRAG INFO PANEL ---
-         bool processedInfo = false;
-         if(!processedSettings && !IsSettingsDragging && !IsDragging && !IsScrollDragging)
-         {
-            // CHANGED: Only process if Info Panel is visible
-            if(IsInfoPanelVisible)
-            {
-               if(!IsInfoDragging)
-               {
-                  // Detection Info Panel
-                  int infoW = 200;
-                  long infoH = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
-                  if(infoH < 50) infoH = 150;
-                  
-                  if(mouseX >= InfoPanelX && mouseX <= InfoPanelX + infoW && mouseY >= InfoPanelY && mouseY <= InfoPanelY + infoH)
-                  {
-                     IsInfoDragging = true;
-                     InfoDragOffsetX = mouseX - InfoPanelX;
-                     InfoDragOffsetY = mouseY - InfoPanelY;
-                     ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                  }
-               }
-               
-               if(IsInfoDragging)
-               {
-                  InfoPanelX = mouseX - InfoDragOffsetX;
-                  InfoPanelY = mouseY - InfoDragOffsetY;
-                  UpdateInfoLayout();
-                  processedInfo = true;
-               }
-            }
-         }
-
-         // --- 1.6 DRAG POSITIONS PANEL ---
-         bool processedPos = false;
-         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !IsDragging && !IsScrollDragging)
-         {
-             // CHANGED: Only process if Positions Panel is visible
-             if(IsPositionsPanelVisible)
-             {
-                if(!IsPositionsDragging)
-                {
-                   // Detection Positions Panel
-                   int posW = 280; // Matches CreatePositionsPanel
-                   long posH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
-                   if(posH < 50) posH = 150;
-                   
-                   if(mouseX >= PositionsPanelX && mouseX <= PositionsPanelX + posW && mouseY >= PositionsPanelY && mouseY <= PositionsPanelY + posH)
-                   {
-                      IsPositionsDragging = true;
-                      PositionsDragOffsetX = mouseX - PositionsPanelX;
-                      PositionsDragOffsetY = mouseY - PositionsPanelY;
-                      ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                   }
-                }
-                
-                if(IsPositionsDragging)
-                {
-                   PositionsPanelX = mouseX - PositionsDragOffsetX;
-                   PositionsPanelY = mouseY - PositionsDragOffsetY;
-                   UpdatePositionsLayout();
-                   processedPos = true;
-                }
-             }
-         }
-
-          // --- 1.7 DRAG HISTORY PANEL ---
-          bool processedHistory = false;
-          if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !IsDragging && !IsScrollDragging && !IsHistoryScrollDragging)
-          {
-             // CHANGED: Only process if History Panel is visible
-             if(IsHistoryPanelVisible)
-             {
-                 if(!IsHistoryDragging)
-                 {
-                    int histW = 800; // Matches CreateHistoryPanel
-                    long histH = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
-                    if(histH < 50) histH = 200;
-                    
-                    if(mouseX >= HistoryPanelX && mouseX <= HistoryPanelX + histW && mouseY >= HistoryPanelY && mouseY <= HistoryPanelY + histH)
-                    {
-                       IsHistoryDragging = true;
-                       HistoryDragOffsetX = mouseX - HistoryPanelX;
-                       HistoryDragOffsetY = mouseY - HistoryPanelY;
-                       ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-                    }
-                 }
-                 
-                 if(IsHistoryDragging)
-                 {
-                    HistoryPanelX = mouseX - HistoryDragOffsetX;
-                    HistoryPanelY = mouseY - HistoryDragOffsetY;
-                    CreateHistoryPanel(); // Updates position
-                    processedHistory = true;
-                 }
-             }
-          }
-         
-         // --- 2. DRAG MAIN PANEL ---
-         if(!processedSettings && !IsSettingsDragging && !processedInfo && !IsInfoDragging && !processedPos && !IsPositionsDragging && !processedHistory && !IsHistoryDragging && !IsScrollDragging && !IsSettingsScrollDragging && !IsHistoryScrollDragging)
-         {
-            if(!IsDragging)
-            {
-               // Calculer la position actuelle (soit fixée, soit centrée par défaut)
-               int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
-               int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
-               int curX = (PanelX == -1) ? (chartW / 2) - (PanelWidth / 2) : PanelX;
-               int curY = (PanelY == -1) ? (chartH / 2) - (200) : PanelY;
-   
-               // On récupère la hauteur dynamique du fond
-               long bgH = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
-               if(bgH < 50) bgH = 200; // Fallback safety
-               
-               // On vérifie si on est sur le Panel pour commencer le drag (Header OU Body)
-               if(mouseX >= curX && mouseX <= curX + PanelWidth && mouseY >= curY && mouseY <= curY + bgH)
-               {
-                  IsDragging = true;
-                  PanelX = curX; // On fixe la position
-                  PanelY = curY;
-                  DragOffsetX = mouseX - PanelX;
-                  DragOffsetY = mouseY - PanelY;
-                  
-                  // Bloquer le défilement du graphique pendant le drag
-                  ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
-               }
-            }
-            else
-            {
-               // On est en train de dragger
-               PanelX = mouseX - DragOffsetX;
-               PanelY = mouseY - DragOffsetY;
                UpdateUIMode();
             }
          }
@@ -512,51 +440,51 @@ void GUI_OnChartEvent(const int id,
       else
       {
          // MOUSE UP
-         bool wasDragging = (IsDragging || IsSettingsDragging || IsInfoDragging || IsPositionsDragging || IsHistoryDragging);
+         bool wasDragging = (g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging);
          
-         if(IsDragging)
+         if(g_PanelMain.IsDragging)
          {
             // Calculate Height dynamically as done in Drag
             long h = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
             if(h < 50) h = 200;
             
-            ApplyPanelSafety(PanelX, PanelY, PanelWidth, (int)h);
-            IsDragging = false;
+            ApplyPanelSafety(g_PanelMain.X, g_PanelMain.Y, g_PanelMain.Width, (int)h);
+            g_PanelMain.IsDragging = false;
             UpdateUIMode(); // Apply Position
          }
          
-         if(IsSettingsDragging)
+         if(g_PanelSettings.IsDragging)
          {
-            int h = 50 + SettingsViewportHeight;
-            ApplyPanelSafety(SettingsX, SettingsY, 340, h); 
-            IsSettingsDragging = false;
+            int h = 50 + g_ScrollSettings.ViewportHeight;
+            ApplyPanelSafety(g_PanelSettings.X, g_PanelSettings.Y, 340, h); 
+            g_PanelSettings.IsDragging = false;
             OpenSettings(); // Apply Position
          }
          
-         if(IsInfoDragging)
+         if(g_PanelInfo.IsDragging)
          {
             long h = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
             if(h < 50) h = 150;
-            ApplyPanelSafety(InfoPanelX, InfoPanelY, 200, (int)h);
-            IsInfoDragging = false;
+            ApplyPanelSafety(g_PanelInfo.X, g_PanelInfo.Y, 200, (int)h);
+            g_PanelInfo.IsDragging = false;
             UpdateInfoLayout(); // Apply Position
          }
          
-         if(IsPositionsDragging)
+         if(g_PanelPositions.IsDragging)
          {
             long h = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
             if(h < 50) h = 150;
-            ApplyPanelSafety(PositionsPanelX, PositionsPanelY, 280, (int)h);
-            IsPositionsDragging = false;
+            ApplyPanelSafety(g_PanelPositions.X, g_PanelPositions.Y, 280, (int)h);
+            g_PanelPositions.IsDragging = false;
             UpdatePositionsLayout(); // Apply Position
          }
          
-         if(IsHistoryDragging)
+         if(g_PanelHistory.IsDragging)
          {
             long h = ObjectGetInteger(0, PREFIX + "Hist_Bg", OBJPROP_YSIZE);
             if(h < 50) h = 200;
-            ApplyPanelSafety(HistoryPanelX, HistoryPanelY, 800, (int)h);
-            IsHistoryDragging = false;
+            ApplyPanelSafety(g_PanelHistory.X, g_PanelHistory.Y, 800, (int)h);
+            g_PanelHistory.IsDragging = false;
             CreateHistoryPanel(); // Apply Position
          }
          
@@ -566,15 +494,15 @@ void GUI_OnChartEvent(const int id,
              IsScrollDragging = false;
              g_BlockClick = true; // Block subsequent click event from this release
          }
-         if(IsSettingsScrollDragging)
+         if(g_ScrollSettings.IsDragging)
          {
-             IsSettingsScrollDragging = false;
+             g_ScrollSettings.IsDragging = false;
              g_BlockClick = true;
          }
-         if(IsHistoryDragging) IsHistoryDragging = false;
-         if(IsHistoryScrollDragging)
+         if(g_PanelHistory.IsDragging) g_PanelHistory.IsDragging = false; // Redundant safety
+         if(g_ScrollHistory.IsDragging)
          {
-            IsHistoryScrollDragging = false;
+            g_ScrollHistory.IsDragging = false;
             g_BlockClick = true;
          }
          
@@ -582,6 +510,17 @@ void GUI_OnChartEvent(const int id,
          if(!isOverList) 
          {
              ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
+             // Reset static state tracker (declared in Mouse Move, but we can't access it here easily without moving it global)
+             // Workaround: We force it to true, so next Mouse Move cycle will re-evaluate correctly 
+             // (It will see !shouldDisableScroll and if lastScrollState was false, it sets true. If we force true here, we might desync)
+             // However, since static vars are local to function, we can't touch it.
+             // Best approach: Move "lastScrollState" to global scope or similar.
+             // OR: Since this is Mouse Up, just force it nicely. The Mouse Move logic will "heal" itself on next move.
+             // But to be consistent, we should rely on Mouse Move loop or make the variable global.
+             // For now, let's leave it as is, but we must acknowledge the "lastScrollState" won't know we reset it.
+             // Wait, if we reset it here, on next Mouse Move, "lastScrollState" inside that function thinks it's still FALSE.
+             // So !shouldDisableScroll is true, !lastScrollState is true -> It will set True again. No harm done.
+             // Redundant call but safe.
          }
          else
          {
@@ -591,7 +530,7 @@ void GUI_OnChartEvent(const int id,
          ChartRedraw();
       }
 
-      if(IsListOpen && !IsDragging && !IsSettingsDragging && !IsScrollDragging)
+      if(IsListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging)
       {
          // On boucle uniquement sur les items visibles pour optimiser
          for(int i = 0; i < VisibleListItems; i++)
@@ -618,7 +557,7 @@ void GUI_OnChartEvent(const int id,
       }
 
       // --- HOVER ACTIVE ORDERS (INFO PANEL) ---
-      if(IsInfoPanelVisible && !IsDragging && !IsSettingsDragging && !IsScrollDragging && !IsInfoDragging)
+      if(g_PanelInfo.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelInfo.IsDragging)
       {
           bool redraw = false;
           for(int i=0; i<g_LastInfoOrderCount; i++)
@@ -744,8 +683,8 @@ void GUI_OnChartEvent(const int id,
       // 1. Toggle Trading Panel
       if(sparam == PREFIX + "Mgr_Btn_Main")
       {
-         IsMainPanelVisible = !IsMainPanelVisible;
-         ToggleMainPanel(IsMainPanelVisible);
+         g_PanelMain.IsVisible = !g_PanelMain.IsVisible;
+         ToggleMainPanel(g_PanelMain.IsVisible);
          UpdateManagerPanel(); 
          EffectButton(sparam);
          SaveConfigToFile();
@@ -755,8 +694,8 @@ void GUI_OnChartEvent(const int id,
       // 2. Button Positions Panel (Toggle Positions)
       if(sparam == PREFIX + "Mgr_Btn_Pos")
       {
-         IsPositionsPanelVisible = !IsPositionsPanelVisible;
-         TogglePositionsPanel(IsPositionsPanelVisible);
+         g_PanelPositions.IsVisible = !g_PanelPositions.IsVisible;
+         TogglePositionsPanel(g_PanelPositions.IsVisible);
          UpdateManagerPanel(); 
          EffectButton(sparam);
          SaveConfigToFile();
@@ -766,8 +705,8 @@ void GUI_OnChartEvent(const int id,
       // 3. Toggle Info Panel
       if(sparam == PREFIX + "Mgr_Btn_Info")
       {
-         IsInfoPanelVisible = !IsInfoPanelVisible;
-         ToggleInfoPanel(IsInfoPanelVisible);
+         g_PanelInfo.IsVisible = !g_PanelInfo.IsVisible;
+         ToggleInfoPanel(g_PanelInfo.IsVisible);
          UpdateManagerPanel(); 
          EffectButton(sparam);
          SaveConfigToFile();
@@ -777,8 +716,8 @@ void GUI_OnChartEvent(const int id,
       // 3.5 History Panel
       if(sparam == PREFIX + "Mgr_Btn_History")
        {
-          IsHistoryPanelVisible = !IsHistoryPanelVisible;
-          ToggleHistoryPanel(IsHistoryPanelVisible);
+          g_PanelHistory.IsVisible = !g_PanelHistory.IsVisible;
+          ToggleHistoryPanel(g_PanelHistory.IsVisible);
           UpdateManagerPanel(); 
           EffectButton(sparam);
           SaveConfigToFile();
@@ -880,65 +819,9 @@ void GUI_OnChartEvent(const int id,
               ChartRedraw();
            }
            
-           if(g_ColorPickerTarget != "")
-           {
-              ObjectSetInteger(0, g_ColorPickerTarget, OBJPROP_BGCOLOR, pickedCol);
-              ObjectSetInteger(0, g_ColorPickerTarget, OBJPROP_BORDER_COLOR, pickedCol);
-              
-              // --- INSTANT SAVE ---
-              if(StringFind(g_ColorPickerTarget, "_Bg") > 0)          g_ColorBg = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_Head") > 0)        g_ColorHeader = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_Input") > 0)       g_ColorInput = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_Txt") > 0)         g_ColorText = (color)pickedCol;
-              // g_ColorLabel removed
-              if(StringFind(g_ColorPickerTarget, "_Green") > 0)       g_ColorGreen = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_Red") > 0)         g_ColorRed = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_ChrtBg") > 0) {
-                 g_ColorChartBg = (color)pickedCol;
-                 ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
-              }
-              if(StringFind(g_ColorPickerTarget, "_ChrtFg") > 0) {
-                  g_ColorChartFg = (color)pickedCol;
-                  ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
-              }
-              if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_BtnVal") > 0)      g_ColorBtnValid = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_BtnInv") > 0)      g_ColorBtnInvalid = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_BtnAct") > 0)      g_ColorBtnActive  = (color)pickedCol;
-              
-              if(StringFind(g_ColorPickerTarget, "_CUp") > 0) {
-                 g_ColorCandleUp = (color)pickedCol;
-                 ChartSetInteger(0, CHART_COLOR_CANDLE_BULL, g_ColorCandleUp);
-                 ChartSetInteger(0, CHART_COLOR_CHART_UP, g_ColorCandleUp);
-              }
-              if(StringFind(g_ColorPickerTarget, "_CDown") > 0) {
-                 g_ColorCandleDown = (color)pickedCol;
-                 ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, g_ColorCandleDown);
-                 ChartSetInteger(0, CHART_COLOR_CHART_DOWN, g_ColorCandleDown);
-              }
-              if(StringFind(g_ColorPickerTarget, "_LNorm") > 0)       g_ColorListNormal = (color)pickedCol;
-              if(StringFind(g_ColorPickerTarget, "_LHov") > 0)        g_ColorListHover = (color)pickedCol;
-              
-              SaveConfigToFile();
-              // 1. Refresh Main Panel
-              CreatePanel(); 
-              if(IsMainPanelVisible) UpdateUIMode();
-              else ToggleMainPanel(false);
-              
-              // 2. Refresh Info Panel
-              CreateInfoPanel(); 
-              if(!IsInfoPanelVisible) ToggleInfoPanel(false);
-              
-              // 3. Refresh Other Panels
-              CreateManagerPanel();
-              CreatePositionsPanel(); 
-              CreateHistoryPanel();
-              OpenSettings();
-            }
-            CloseColorPicker();
-            return;
+           ApplyColorChange(pickedCol);
+           CloseColorPicker();
+           return;
        }
 
        // 3. Click on a Color Picker Item -> Apply & Close
@@ -990,12 +873,12 @@ void GUI_OnChartEvent(const int id,
             
             // 1. Refresh Main Panel
             CreatePanel(); 
-            if(IsMainPanelVisible) UpdateUIMode();
+            if(g_PanelMain.IsVisible) UpdateUIMode();
             else ToggleMainPanel(false); // Ensure phantom objects are hidden
             
             // 2. Refresh Info Panel
             CreateInfoPanel(); 
-            if(!IsInfoPanelVisible) ToggleInfoPanel(false);
+            if(!g_PanelInfo.IsVisible) ToggleInfoPanel(false);
             
             // 3. Refresh Other Panels
             CreateManagerPanel();
@@ -1082,7 +965,7 @@ void GUI_OnChartEvent(const int id,
          {
             if(OrderSymbol() != Symbol())
             {
-               GlobalVariableSet("MagicKey_LastSelectedTicket", (double)SelectedPositionTicket);
+               GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
                ChartSetSymbolPeriod(0, OrderSymbol(), Period());
             }
          }
@@ -1229,7 +1112,7 @@ void GUI_OnChartEvent(const int id,
                      else // Market Order
                      {
                         double closePrice = (cmd == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
-                        closed = OrderClose(SelectedPositionTicket, toClose, closePrice, 10, clrGray);
+                        closed = SafeOrderClose(SelectedPositionTicket, toClose, 0, 10, clrGray); // Use SafeOrderClose with auto-price (0)
                      }
                      if(closed)
                      {
@@ -1281,7 +1164,7 @@ void GUI_OnChartEvent(const int id,
 
                      if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point || MathAbs(inputOpen - currentOpen) > Point)
                      {
-                         bool res = OrderModify(SelectedPositionTicket, inputOpen, inputSL, inputTP, (datetime)0, clrBlue);
+                         bool res = SafeOrderModify(SelectedPositionTicket, inputOpen, inputSL, inputTP, (datetime)0, clrBlue);
                          if(res)
                          {
                              g_LastPosSL = inputSL;
@@ -1342,13 +1225,15 @@ void GUI_OnChartEvent(const int id,
       if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
       {
          EffectButton(sparam);
+         UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+         
          // Sécurité : Vérifier si le SL et Risk sont définis
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
          
          if(sl <= 0 || risk <= 0) 
          {
-            // Alert("STOP LOSS ET RISQUE REQUIS !");
+            HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
             return;
          }
          
@@ -1358,13 +1243,15 @@ void GUI_OnChartEvent(const int id,
       if(sparam == PREFIX + "Btn_Sell" && CurrentTypeIndex == 0)
       {
          EffectButton(sparam);
+         UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+         
          // Sécurité : Vérifier si le SL et Risk sont définis
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
 
          if(sl <= 0 || risk <= 0) 
          {
-            // Alert("STOP LOSS ET RISQUE REQUIS !");
+            HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
             return;
          }
 
@@ -1374,6 +1261,8 @@ void GUI_OnChartEvent(const int id,
       if(sparam == PREFIX + "Btn_Action" && CurrentTypeIndex > 0)
       {
          EffectButton(sparam);
+         UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+         
          // Sécurité : Validation complète pour Ordres Pending
          double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
          double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -1381,7 +1270,7 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0 || price <= 0)
          {
-             // Alert("PRIX, STOP LOSS ET RISQUE REQUIS !");
+             HandleTradeMessage("PRICE, STOP LOSS AND RISK REQUIRED!", g_ColorRed);
              return;
          }
       
@@ -1421,7 +1310,7 @@ void GUI_OnChartEvent(const int id,
              // Si on est en mode %, on met à jour immédiatemment le panneau principal si on n'a pas modifié manuellement (optionnel, mais propre)
              // ici on redessine juste le panel par simplicité
              CreatePanel(); 
-             if(IsMainPanelVisible) UpdateUIMode();
+             if(g_PanelMain.IsVisible) UpdateUIMode();
              else ToggleMainPanel(false);
           }
       }
@@ -1434,7 +1323,7 @@ void GUI_OnChartEvent(const int id,
              g_DefaultRiskMoney = r;
              SaveConfigToFile();
              CreatePanel(); 
-             if(IsMainPanelVisible) UpdateUIMode();
+             if(g_PanelMain.IsVisible) UpdateUIMode();
              else ToggleMainPanel(false);
           }
       }
@@ -1447,7 +1336,7 @@ void GUI_OnChartEvent(const int id,
              g_DefaultRiskR = r;
              SaveConfigToFile();
              CreatePanel(); 
-             if(IsMainPanelVisible) UpdateUIMode();
+             if(g_PanelMain.IsVisible) UpdateUIMode();
              else ToggleMainPanel(false);
           }
       }
@@ -1460,7 +1349,7 @@ void GUI_OnChartEvent(const int id,
              g_OneRPercent = r;
              SaveConfigToFile();
              CreatePanel(); 
-             if(IsMainPanelVisible) UpdateUIMode();
+             if(g_PanelMain.IsVisible) UpdateUIMode();
              else ToggleMainPanel(false);
           }
       }

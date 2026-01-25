@@ -96,3 +96,91 @@ void EffectButton(string name)
    ObjectSetInteger(0, name, OBJPROP_STATE, false);
    ChartRedraw();
 }
+
+//+------------------------------------------------------------------+
+//| GENERIC DRAG HANDLER                                             |
+//+------------------------------------------------------------------+
+bool HandlePanelDrag(bool &isDragging, int &panelX, int &panelY, int &dragOffsetX, int &dragOffsetY, 
+                     int mouseX, int mouseY, int panelW, int panelH, string bgName = "")
+{
+   if(!isDragging)
+   {
+      // Check Hit Test
+      // If bgName is provided, we can use it to get dynamic height
+      int h = panelH;
+      if(bgName != "")
+      {
+          long dynH = ObjectGetInteger(0, PREFIX + bgName, OBJPROP_YSIZE);
+          if(dynH > 50) h = (int)dynH;
+      }
+      
+      if(mouseX >= panelX && mouseX <= panelX + panelW && mouseY >= panelY && mouseY <= panelY + h)
+      {
+         isDragging = true;
+         dragOffsetX = mouseX - panelX;
+         dragOffsetY = mouseY - panelY;
+         ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+         return true;
+      }
+   }
+   else
+   {
+      // Update Position
+      panelX = mouseX - dragOffsetX;
+      panelY = mouseY - dragOffsetY;
+      return true;
+   }
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| GENERIC SCROLL HANDLER                                           |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| GENERIC SCROLL HANDLER (Unit Agnostic)                           |
+//+------------------------------------------------------------------+
+bool HandleScrollDrag(bool &isDragging, int &scrollDragY, int &currentScrollY, 
+                      int mouseX, int mouseY, string thumbName, int trackHeight, int maxScroll)
+{
+    if(!isDragging)
+    {
+         long tx = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_XDISTANCE);
+         long ty = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YDISTANCE);
+         long tw = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_XSIZE);
+         long th = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YSIZE);
+         
+         if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
+         {
+             isDragging = true;
+             scrollDragY = mouseY;
+             ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+             return true; 
+         }
+    }
+    else
+    {
+         int deltaY = mouseY - scrollDragY;
+         if(deltaY != 0)
+         {
+             long thumbH = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YSIZE);
+             int availableTrack = (int)(trackHeight - thumbH);
+             
+             if(availableTrack > 0)
+             {
+                 double moveRatio = (double)deltaY / (double)availableTrack;
+                 int offsetChange = (int)(moveRatio * maxScroll);
+                 
+                 if(MathAbs(offsetChange) >= 1)
+                 {
+                     currentScrollY += offsetChange;
+                     if(currentScrollY < 0) currentScrollY = 0;
+                     if(currentScrollY > maxScroll) currentScrollY = maxScroll;
+                     
+                     scrollDragY = mouseY; 
+                     return true; 
+                 }
+             }
+         }
+    }
+    return false;
+}

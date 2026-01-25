@@ -8,8 +8,8 @@
 bool IsItemVisible(int relY, int h)
 {
    // Visible window relative to content start (0)
-   int viewTop = g_SettingsScrollY;
-   int viewBottom = g_SettingsScrollY + SettingsViewportHeight;
+   int viewTop = g_ScrollSettings.ScrollY;
+   int viewBottom = g_ScrollSettings.ScrollY + g_ScrollSettings.ViewportHeight;
    
    // Item range
    int itemTop = relY;
@@ -55,7 +55,7 @@ void DrawSettingsScrollbar(int x, int y)
    int scrollBarWidth = 10;
    int trackX = x + 340 - scrollBarWidth - 2; // Right aligned with slight padding
    int trackY = y + 50;
-   int trackH = SettingsViewportHeight;
+   int trackH = g_ScrollSettings.ViewportHeight;
    
    // 1. Track
    CreateRect("Set_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
@@ -65,8 +65,8 @@ void DrawSettingsScrollbar(int x, int y)
    // 2. Thumb
    // Calculate Height Ratio
    // If ContentHeight <= Viewport, Thumb = Track
-   int contentH = MathMax(SettingsContentHeight, 1);
-   double ratio = (double)SettingsViewportHeight / (double)contentH;
+   int contentH = MathMax(g_ScrollSettings.ContentHeight, 1);
+   double ratio = (double)g_ScrollSettings.ViewportHeight / (double)contentH;
    if(ratio > 1.0) ratio = 1.0;
    
    int thumbH = (int)(trackH * ratio);
@@ -75,21 +75,19 @@ void DrawSettingsScrollbar(int x, int y)
    // Position
    // ScrollY goes from 0 to (ContentH - ViewportH)
    // ThumbY goes from 0 to (TrackH - ThumbH)
-   int maxScroll = contentH - SettingsViewportHeight;
+   int maxScroll = contentH - g_ScrollSettings.ViewportHeight;
    if(maxScroll <= 0) maxScroll = 1;
    
    int maxThumb = trackH - thumbH;
    
-   double p = (double)g_SettingsScrollY / (double)maxScroll;
+   double p = (double)g_ScrollSettings.ScrollY / (double)maxScroll;
    if(p < 0) p = 0; 
    if(p > 1) p = 1;
    
    int thumbY = trackY + (int)(p * maxThumb);
    
-   // Use CreateButton to ensure it is interactive/detectable if needed, or Rect to match exact look.
-   // Panel_Main uses CreateRect. Since our interaction logic in GUI_Master is coordinate based, Rect is fine.
-   // But Panel_Settings used Button before. Let's use Button simply for consistency in this file,
-   // BUT style it to look like the Rect (Flat, specific color).
+   // Remember Anchor for Dragging logic
+   g_ScrollSettings.DragAnchorY = thumbY;
    
    CreateButton("Set_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorText, clrNONE);
    ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_ZORDER, 116);
@@ -98,7 +96,7 @@ void DrawSettingsScrollbar(int x, int y)
 
 void CloseSettings()
 {
-   IsSettingsOpen = false;
+   g_PanelSettings.IsVisible = false;
    // Delete all Settings objects
    ObjectsDeleteAll(0, PREFIX + "Set_");
    ChartRedraw();
@@ -106,22 +104,22 @@ void CloseSettings()
 
 void OpenSettings()
 {
-   IsSettingsOpen = true;
+   g_PanelSettings.IsVisible = true;
    
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
    int w = 340; 
-   int h = 50 + SettingsViewportHeight; // Header + Viewport
+   int h = 50 + g_ScrollSettings.ViewportHeight; // Header + Viewport
    
-   if(SettingsX == -1)
+   if(g_PanelSettings.X == -1)
    {
-      SettingsX = (chartW/2) - (w/2);
-      SettingsY = (chartH/2) - (h/2);
+      g_PanelSettings.X = (chartW/2) - (w/2);
+      g_PanelSettings.Y = (chartH/2) - (h/2);
    }
    
-   int x = SettingsX;
-   int y = SettingsY;
+   int x = g_PanelSettings.X;
+   int y = g_PanelSettings.Y;
    
    // --- BACKGROUND ---
    CreateRect("Set_Bg", x, y, w, h, g_ColorBg, BORDER_FLAT);
@@ -146,7 +144,7 @@ void OpenSettings()
    
    // Helper lambda substitution
    #define CHECK_VIS(h) IsItemVisible(relY, h)
-   #define SCREEN_Y (contentStartScreenY + relY - g_SettingsScrollY)
+   #define SCREEN_Y (contentStartScreenY + relY - g_ScrollSettings.ScrollY)
    
    // 1. RISK
    bool v = CHECK_VIS(25);
@@ -353,20 +351,16 @@ void OpenSettings()
    // --- SCROLLBAR ---
    DrawSettingsScrollbar(x, y);
    
-   // --- OVERLAY FOR CLIPPING (Visual Fix for Header) ---
-   // Top Header is already Z=105, Items are Z=102. So Header covers items scrolling up.
-   // But we need to cover items scrolling DOWN past the bottom?
-   // Create a "Footer" mask if needed, but better to just use visibility check which we did.
-   // Note: Items partiality is handled by "CHECK_VIS". If bottom of item > viewBottom, it returns false (hidden).
-   // So items will pop out when fully visible. That's safer for now.
+   // Update Content Height global
+   g_ScrollSettings.ContentHeight = relY;
 }
 
 void ToggleSettings()
 {
-   if(IsSettingsOpen) CloseSettings();
+   if(g_PanelSettings.IsVisible) CloseSettings();
    else 
    {
-      g_SettingsScrollY = 0;
+      g_ScrollSettings.ScrollY = 0;
       OpenSettings();
    }
 }
@@ -404,10 +398,10 @@ void CreateColorPicker()
    
    // Position over Settings Window
    int settingsW = 340;
-   int settingsH = 50 + SettingsViewportHeight;
+   int settingsH = 50 + g_ScrollSettings.ViewportHeight;
    
-   int x = SettingsX + (settingsW / 2) - (w / 2);
-   int y = SettingsY + (settingsH / 2) - (h / 2);
+   int x = g_PanelSettings.X + (settingsW / 2) - (w / 2);
+   int y = g_PanelSettings.Y + (settingsH / 2) - (h / 2);
    
    // Update Globals
    g_ColorPickerX = x;

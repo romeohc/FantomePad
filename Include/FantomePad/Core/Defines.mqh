@@ -10,6 +10,7 @@ input double   DefaultRiskMoney = 100.0; // Risque par défaut (Devise)
 input double   DefaultRiskR = 1.0;     // Risque par défaut (R)
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
 input int      DefaultManagerPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
+input int      MagicNumber = 123456;   // Magic Number for trade identification
 input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
@@ -27,6 +28,7 @@ input color    ColorBtnActive  = C'0,184,148'; // Active Button (Mint)
 input color    ColorEntryLine = clrWhite;      // Entry Line Color
 input color    ColorSLLine   = C'214,48,49';   // Stop Loss Line Color
 input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
+input int      MaxSlippage   = 10;             // Max Slippage (Pips)
 
 //--- Couleurs pour la liste
 color ColorListNormal = C'34,38,46';   // Couleur normale item liste
@@ -35,62 +37,58 @@ color ColorListHover  = C'45,52,60';   // Couleur au survol
 
 //--- Préfixe pour tous les objets graphiques
 string PREFIX = "PTP_";
-string ConfigFileName = "MagicKey_Config.txt";
+string ConfigFileName = "FantomePad_Config.txt";
+
+//--- STRUCTS FOR STATE MANAGEMENT (Phase 2.2)
+struct TPanelState {
+   int X;
+   int Y;
+   int Width;
+   int Height;
+   bool IsVisible;
+   bool IsDragging;
+   int DragOffsetX;
+   int DragOffsetY;
+};
+
+struct TScrollState {
+   int ScrollY;
+   bool IsDragging;
+   int DragAnchorY;
+   int ViewportHeight;
+   int ContentHeight;
+};
 
 //--- États globaux
 int    CurrentTypeIndex = 0; // 0=Market, 1=BuyLim, 2=SellLim, 3=BuyStop, 4=SellStop
-
 int    CurrentDirection = 0; // 0=Buy, 1=Sell (utilisé pour le cycle toggle)
 int    RiskMode   = 0; // 0=%, 1=Currency, 2=Risk R
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
 string ManagerPositions[] = {"Top Left", "Top Center", "Top Right", "Bottom Left", "Bottom Center", "Bottom Right"};
-int    PanelWidth  = 280; // Slightly wider for comfort
+
+// --- PANEL STATE INSTANCES ---
+TPanelState g_PanelMain;
+TPanelState g_PanelInfo;
+TPanelState g_PanelPositions;
+TPanelState g_PanelHistory;
+TPanelState g_PanelSettings;
+TPanelState g_PanelManager;
+
+// --- SCROLL STATE INSTANCES ---
+TScrollState g_ScrollSettings;
+TScrollState g_ScrollHistory;
+
+// --- LIST GLOBALS ---
 bool   IsListOpen = false; // État de la liste déroulante
-bool   IsMainPanelVisible = true; // État de visibilité du Panel Principal
-bool   IsInfoPanelVisible = true; // État de visibilité du Panel Info
 int    VisibleListItems = 0; // Nombre d'items affichés dans la liste
 int    g_SymbolListOffset = 0; // Scroll offset for symbol list
 int    g_SymbolListMaxVisible = 20; // Max visible items in symbol list
-int    PanelX = -1;          // Position X du panel (-1 = centré)
-int    PanelY = -1;          // Position Y du panel (-1 = centré)
-bool   IsDragging = false;   // État du drag-and-drop
-int    DragOffsetX = 0;      // Offset X pour le drag
-int    DragOffsetY = 0;      // Offset Y pour le drag
 
-
-// --- INFO PANEL GLOBALS ---
-int    InfoPanelX = 20;      // Position X du panel info (Coin gauche par défaut)
-int    InfoPanelY = 70;      // Position Y du panel info (Decalé sous le Manager)
-bool   IsInfoDragging = false;
-int    InfoDragOffsetX = 0;
-int    InfoDragOffsetY = 0;
-
-// --- POSITIONS PANEL GLOBALS ---
-bool   IsPositionsPanelVisible = false;
-int    PositionsPanelX = 260; // Default position
-int    PositionsPanelY = 70;
-bool   IsPositionsDragging = false;
-int    PositionsDragOffsetX = 0;
-int    PositionsDragOffsetY = 0;
+// --- POSITIONS SPECIFIC ---
 int    SelectedPositionTicket = -1; // -1 = None
 bool   IsPosListOpen = false;
 int    g_PosListOffset = 0;
 int    g_PosListMaxVisible = 10;
-
-
-
-// --- HISTORY PANEL GLOBALS ---
-bool   IsHistoryPanelVisible = false;
-int    HistoryPanelX = 50; 
-int    HistoryPanelY = 100;
-bool   IsHistoryDragging = false;
-int    HistoryDragOffsetX = 0;
-int    HistoryDragOffsetY = 0;
-int    g_HistoryScrollY = 0;
-bool   IsHistoryScrollDragging = false;
-int    HistoryScrollDragY = 0;
-int    HistoryViewportHeight = 400; // Visible height
-int    HistoryContentHeight = 0;    // Calculated content height
 
 // --- HISTORY FILTER GLOBALS ---
 enum ENUM_HISTORY_FILTER { H_FILTER_DAILY, H_FILTER_WEEKLY, H_FILTER_MONTHLY, H_FILTER_CUSTOM };
@@ -114,28 +112,12 @@ color    g_ColorSLLine, g_ColorTPLine;
 color    g_ColorCandleUp, g_ColorCandleDown;
 color    g_ColorListNormal, g_ColorListHover;
 
-bool     IsSettingsOpen = false;
 string   g_ColorPickerTarget = ""; // Target button to update
-
-// --- SETTINGS DRAG GLOBALS ---
-// --- SETTINGS DRAG GLOBALS ---
-int    SettingsX = -1;
-int    SettingsY = -1;
-bool   IsSettingsDragging = false;
-int    SettingsDragOffsetX = 0;
-int    SettingsDragOffsetY = 0;
-
-// --- SETTINGS SCROLL GLOBALS ---
-int    g_SettingsScrollY = 0;
-bool   IsSettingsScrollDragging = false;
-int    SettingsScrollDragY = 0;
-int    SettingsViewportHeight = 400; // Visible height for content
-int    SettingsContentHeight = 620;  // Total height of content (approx)
 
 // --- MOUSE TRACKING ---
 int    LastMouseX = -1;
 int    LastMouseY = -1;
-bool   IsScrollDragging = false;
+bool   IsScrollDragging = false; // Symbol List Scroll
 int    ScrollDragY = 0;
 bool   g_BlockClick = false;
 uint   LastClickTime = 0;
@@ -148,9 +130,41 @@ int    g_ColorPickerW = 0;
 int    g_ColorPickerH = 0;
 color  g_ColorPalette[]; 
 
+// --- TOAST NOTIFICATION GLOBALS ---
+string g_ToastMsg = "";
+uint   g_ToastStartTime = 0;
+color  g_ToastColor = C'214,48,49'; // Red by default 
+
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
+   // Init State Structs
+   g_PanelMain.Width = 280; // Default
+   g_PanelMain.IsVisible = true;
+   g_PanelMain.X = -1;
+   g_PanelMain.Y = -1;
+   
+   g_PanelInfo.IsVisible = true;
+   g_PanelInfo.X = 20;
+   g_PanelInfo.Y = 70;
+   
+   g_PanelPositions.IsVisible = false;
+   g_PanelPositions.X = 260; // Default
+   g_PanelPositions.Y = 70;
+   
+   g_PanelHistory.IsVisible = false;
+   g_PanelHistory.X = 50;
+   g_PanelHistory.Y = 100;
+   
+   g_PanelSettings.IsVisible = false;
+   g_PanelSettings.X = -1;
+   g_PanelSettings.Y = -1;
+   
+   g_ScrollSettings.ViewportHeight = 400;
+   g_ScrollSettings.ContentHeight = 620; 
+   g_ScrollHistory.ViewportHeight = 400;
+   g_ScrollHistory.ContentHeight = 0;
+
    g_DefaultRisk = DefaultRisk;
    g_DefaultRiskMoney = DefaultRiskMoney;
    g_DefaultRiskR = DefaultRiskR;

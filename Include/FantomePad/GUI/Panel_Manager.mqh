@@ -4,14 +4,14 @@
 //+------------------------------------------------------------------+
 #property strict
 
-// --- Manager Panel Globals ---
-int MgrPanelX = 0; // Dynamic
-int MgrPanelY = 0; // Dynamic
-int MgrPanelW = 560; // Exact width for symmetry: 5 (margin) + 5*85 + 100 + 5*5 (gaps) + 5 (margin) = 5+425+100+25+5 = 560
-int MgrPanelH = 40;
+// --- Manager Panel Globals moved to TPanelState g_PanelManager ---
 
 void CreateManagerPanel()
 {
+   // Init Dimensions
+   g_PanelManager.Width = 560; // Exact width for symmetry
+   g_PanelManager.Height = 40;
+
    // Dynamic Positioning
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
@@ -22,75 +22,75 @@ void CreateManagerPanel()
    
    if(g_ManagerPosition == 0) // TL
    {
-       MgrPanelX = marginX;
-       MgrPanelY = marginY;
+       g_PanelManager.X = marginX;
+       g_PanelManager.Y = marginY;
    }
    else if(g_ManagerPosition == 1) // TC
    {
-       MgrPanelX = (chartW / 2) - (MgrPanelW / 2);
-       MgrPanelY = marginY;
+       g_PanelManager.X = (chartW / 2) - (g_PanelManager.Width / 2);
+       g_PanelManager.Y = marginY;
    }
    else if(g_ManagerPosition == 2) // TR
    {
-       MgrPanelX = chartW - MgrPanelW - marginX;
-       MgrPanelY = marginY;
+       g_PanelManager.X = chartW - g_PanelManager.Width - marginX;
+       g_PanelManager.Y = marginY;
    }
    else if(g_ManagerPosition == 3) // BL
    {
-       MgrPanelX = marginX;
-       MgrPanelY = chartH - MgrPanelH - marginY;
+       g_PanelManager.X = marginX;
+       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY;
    }
    else if(g_ManagerPosition == 4) // BC
    {
-       MgrPanelX = (chartW / 2) - (MgrPanelW / 2);
-       MgrPanelY = chartH - MgrPanelH - marginY; // Reduced margin to 10px from 40px
+       g_PanelManager.X = (chartW / 2) - (g_PanelManager.Width / 2);
+       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY; // Reduced margin to 10px from 40px
    }
    else if(g_ManagerPosition == 5) // BR
    {
-       MgrPanelX = chartW - MgrPanelW - marginX;
-       MgrPanelY = chartH - MgrPanelH - marginY;
+       g_PanelManager.X = chartW - g_PanelManager.Width - marginX;
+       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY;
    }
    
    // Safety
-   if(MgrPanelX < 0) MgrPanelX = 0;
-   if(MgrPanelY < 0) MgrPanelY = 0;
+   if(g_PanelManager.X < 0) g_PanelManager.X = 0;
+   if(g_PanelManager.Y < 0) g_PanelManager.Y = 0;
 
    // Background (Fixed position, no drag logic implied)
-   CreateRect("Mgr_Bg", MgrPanelX, MgrPanelY, MgrPanelW, MgrPanelH, g_ColorBg, BORDER_FLAT);
+   CreateRect("Mgr_Bg", g_PanelManager.X, g_PanelManager.Y, g_PanelManager.Width, g_PanelManager.Height, g_ColorBg, BORDER_FLAT);
 
    // Buttons Layout
    int btnW = 85; // Increased width for text
    int btnH = 24;
    int margin = 5;
-   int startX = MgrPanelX + margin;
-   int startY = MgrPanelY + 8; // Vertically centered approx
+   int startX = g_PanelManager.X + margin;
+   int startY = g_PanelManager.Y + 8; // Vertically centered approx
    
    // Button 1: Trade Panel (Toggle Main)
-   color bgTrade = IsMainPanelVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
+   color bgTrade = g_PanelMain.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // Button 2: Positions Panel (Toggle Positions) -> "Manager"
    int currentX = startX + btnW + margin;
-   color bgPos = IsPositionsPanelVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
+   color bgPos = g_PanelPositions.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Pos", "Manager", currentX, startY, btnW, btnH, bgPos, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 3: Info Panel (Toggle Account Info) -> "Account"
    currentX += btnW + margin;
-   color bgInfo = IsInfoPanelVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
+   color bgInfo = g_PanelInfo.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Info", "Account", currentX, startY, btnW, btnH, bgInfo, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_Info", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 4: History -> "History"
    currentX += btnW + margin;
-   color bgHist = IsHistoryPanelVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
+   color bgHist = g_PanelHistory.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_History", "History", currentX, startY, btnW, btnH, bgHist, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_History", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // Button 5: Settings (Toggle Config) -> "Settings"
    currentX += btnW + margin;
-   color bgSet = IsSettingsOpen ? g_ColorBtnActive : g_ColorBtnInvalid;
+   color bgSet = g_PanelSettings.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Mgr_Btn_Settings", "Settings", currentX, startY, btnW, btnH, bgSet, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
 
@@ -113,17 +113,13 @@ void UpdateManagerPanel()
 void CloseSymbolList()
 {
    // Supprime tous les objets de liste
-   for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
-   {
-      string name = ObjectName(0, i);
-      if(StringFind(name, PREFIX + "ListItem_") >= 0 || 
-         name == PREFIX + "ScrollTrack" || 
-         name == PREFIX + "ScrollThumb" ||
-         name == PREFIX + "ListContainer") 
-      {
-         ObjectDelete(0, name);
-      }
-   }
+   // Optimized Deletion
+   ObjectsDeleteAll(0, PREFIX + "ListItem_");
+   
+   // Clean up specific container elements
+   if(ObjectFind(0, PREFIX + "ScrollTrack") >= 0) ObjectDelete(0, PREFIX + "ScrollTrack");
+   if(ObjectFind(0, PREFIX + "ScrollThumb") >= 0) ObjectDelete(0, PREFIX + "ScrollThumb");
+   if(ObjectFind(0, PREFIX + "ListContainer") >= 0) ObjectDelete(0, PREFIX + "ListContainer");
    
    IsListOpen = false;
    VisibleListItems = 0;
