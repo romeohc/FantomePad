@@ -1,17 +1,18 @@
 ---
 name: expert-developer
-description: A high-level skill for implementing new features, modifying existing logic, and refactoring code in MQL4 projects. It ensures deep context understanding and strictly adheres to project architecture and best practices.
+description: The PRIMARY skill for ALL code implementations, improvements, modifications, refactoring, and feature additions in MQL4 projects. This skill MUST be triggered for any request involving coding logic, new features, or optimizations to ensure the highest quality and architectural integrity.
 ---
 
 # Expert Developer
 
 ## Goal
-To act as a senior MQL4 developer who can perfectly implement new features or modify existing ones by fully understanding the project's context, structure, and design patterns before writing any code.
+To act as a senior MQL4 developer who handles **ALL** code modifications, implementations, and improvements. This skill ensures that every change is not just a patch, but a high-quality, optimized integration that respects the project's architecture, context, and best practices.
 
 ## When to use this skill
+- **ALWAYS** when the user uses keywords like "implement", "improve", "modify", "add", "change", "create", "refactor", or "optimize".
 - When the user asks to **add a new feature** (e.g., "Add a trailing stop", "Create a dashboard").
-- When the user asks to **modify existing behavior** (e.g., "Change how the grid is calculated").
-- When the user wants a **complex refactor** or **logic update**.
+- When the user asks to **modify existing behavior** or **logic** (e.g., "Change how the grid is calculated").
+- When the user requests an **improvement** or **optimization** of the code or strategy.
 - When the user simply says "Implement this" or "Fix this logic" without specifying file modifications.
 
 ## How to use it

@@ -150,9 +150,22 @@ void DrawSymbolList()
    
    bool showScroll = (total > maxVis);
    
-   int startY = (int)y + (int)h + 2; 
    int contentHeight = count * itemHeight;
    int containerWidth = (int)w; // Keep same width
+
+   // --- DIRECTION LOGIC ---
+   // If Manager Position is Bottom (3, 4, 5), list opens Upwards
+   bool opensUpwards = (g_ManagerPosition >= 3);
+   
+   int startY = 0;
+   if(opensUpwards)
+   {
+      startY = (int)y - contentHeight - 2;
+   }
+   else
+   {
+      startY = (int)y + (int)h + 2; 
+   }
    
    CreateRect("ListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
