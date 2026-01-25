@@ -14,6 +14,16 @@
 #include "Panel_Positions.mqh"
 #include "Panel_History.mqh"
 
+// --- FORWARD DECLARATIONS (Cross-Panel Dependencies) ---
+void ApplyColorChange(color pickedCol);
+void UpdateManagerPanel();
+void RefreshAllPanels();
+void ToggleMainPanel(bool visible);
+void TogglePositionsPanel(bool visible);
+void ToggleInfoPanel(bool visible);
+void ToggleHistoryPanel(bool visible);
+void ToggleSettings();
+
 //+------------------------------------------------------------------+
 //| INITIALISATION GUI GLOBALE                                       |
 //+------------------------------------------------------------------+
@@ -125,30 +135,7 @@ void GUI_OnTick()
    UpdateToastNotification();
 }
 
-//+------------------------------------------------------------------+
-//| SECURITY: PREVENT WINDOWS FROM GETTING LOST                      |
-//+------------------------------------------------------------------+
-void ApplyPanelSafety(int &x, int &y, int w, int h)
-{
-   int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
-   int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
-   
-   // Si la fenêtre est PRESQUE totalement hors de l'écran (ex: s'il reste moins de 40px visibles)
-   // Cela évite de laisser une toute petite bande impossible à attraper.
-   int safetyMargin = 40;
-   bool offScreen = (x + w <= safetyMargin) || (x >= chartW - safetyMargin) || (y + h <= safetyMargin) || (y >= chartH - safetyMargin);
-   
-   if(offScreen)
-   {
-      // On recentre la fenêtre
-      x = (chartW / 2) - (w / 2);
-      y = (chartH / 2) - (h / 2);
-      
-      // Safety clamps
-      if(x < 0) x = 0;
-      if(y < 0) y = 0;
-   }
-}
+
 
 //+------------------------------------------------------------------+
 //| HELPER: RETRIEVE ORIGINAL LOT SIZE (TRACE HISTORY)               |

@@ -358,9 +358,6 @@ void DrawHistoryScrollbar(int x, int y, int w)
        thumbY = trackY + (int)(scrollPrc * availableTrack);
    }
    
-   // Remember Scroll Anchor for Dragging
-   g_ScrollHistory.DragAnchorY = thumbY; 
-   
    CreateRect("Hist_ScrollThumb", trackX + 1, thumbY, trackW - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);

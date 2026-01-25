@@ -6,11 +6,12 @@
 
 // --- Manager Panel Globals moved to TPanelState g_PanelManager ---
 
+
 void CreateManagerPanel()
 {
    // Init Dimensions
    g_PanelManager.Width = 560; // Exact width for symmetry
-   g_PanelManager.Height = 40;
+   g_PanelManager.Height = 35; // Reduced from 65 (removed Beta Label)
 
    // Dynamic Positioning
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
@@ -57,13 +58,16 @@ void CreateManagerPanel()
 
    // Background (Fixed position, no drag logic implied)
    CreateRect("Mgr_Bg", g_PanelManager.X, g_PanelManager.Y, g_PanelManager.Width, g_PanelManager.Height, g_ColorBg, BORDER_FLAT);
+   
+   // --- BETA LABEL REMOVED ---
+   if(ObjectFind(0, PREFIX + "Mgr_Lbl_Beta") >= 0) ObjectDelete(0, PREFIX + "Mgr_Lbl_Beta");
 
    // Buttons Layout
    int btnW = 85; // Increased width for text
    int btnH = 24;
    int margin = 5;
    int startX = g_PanelManager.X + margin;
-   int startY = g_PanelManager.Y + 8; // Vertically centered approx
+   int startY = g_PanelManager.Y + 6; // Shifted up from 30
    
    // Button 1: Trade Panel (Toggle Main)
    color bgTrade = g_PanelMain.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
