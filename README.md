@@ -33,8 +33,6 @@ The project follows a strict **Modular Monolith** architecture to ensure maintai
 ```text
 MQL4/Experts/FantomePad/
 ├── fantomepad.mq4           # Entry Point (OnInit, OnTick, OnChartEvent)
-├── SECURITY_AUDIT.md        # Security Analysis & Vulnerability Report
-├── SECURITY_FIX_GUIDE.md    # Remediation Steps for Security
 └── Include/FantomePad/      # Core Logic Library
     ├── Core/                # Global Definitions & Configuration
     │   ├── Defines.mqh      # Constants, Colors (Theming), Structs
