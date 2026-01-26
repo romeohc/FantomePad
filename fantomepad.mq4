@@ -27,6 +27,9 @@ int OnInit()
    // 3. Setup Chart event handling
    ChartSetInteger(0, CHART_EVENT_MOUSE_MOVE, true);
    
+   // Enable high-frequency timer for reactive UI (AutoTrading state)
+   EventSetMillisecondTimer(200);
+   
    // --- ESTHÉTIQUE DU GRAPHIQUE ---
    ChartSetInteger(0, CHART_MODE, CHART_CANDLES);
    ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
@@ -58,6 +61,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
+   EventKillTimer();
    ObjectsDeleteAll(0, PREFIX);
 }
 
@@ -76,6 +80,15 @@ void OnTick()
    }
    
    GUI_OnTick();
+}
+
+//+------------------------------------------------------------------+
+//| Expert timer function                                            |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+   GUI_OnTick(); // Keep tick logic alive if market is slow (optional, but good for clock)
+   GUI_OnTimer();
 }
 
 //+------------------------------------------------------------------+

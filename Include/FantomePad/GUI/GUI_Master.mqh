@@ -133,6 +133,15 @@ void GUI_OnTick()
    UpdateInfoPanel();
    UpdatePositionsValues();
    UpdateToastNotification();
+   // Warning update moved to Timer for responsiveness
+}
+
+//+------------------------------------------------------------------+
+//| EVENT TIMER (HIGH FREQUENCY UPDATE)                              |
+//+------------------------------------------------------------------+
+void GUI_OnTimer()
+{
+   UpdateAutoTradingWarning();
 }
 
 
