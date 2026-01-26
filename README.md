@@ -8,20 +8,16 @@
 
 ## 1. Project Vision: The "OS within an App"
 
-**FantomePad** is not just an Expert Advisor. It is a comprehensive **GUI Overhaul and Trade Execution System** designed to sit on top of the archaic MetaTrader 4 engine.
+**PhantomPad** is a high-performance GUI overlay for MetaTrader 4, engineered to transcend the limitations of the archaic 2005 interface. It transforms the terminal into a modern, fluid environment where the user interacts exclusively with a custom "Mini OS" rendered directly on the chart canvas.
 
-### The Problem
-MT4 is powerful but its UX/UI is stuck in 2005.
-*   **Friction:** Execution is slow (multiple clicks, separate windows).
-*   **Visuals:** Cluttered, dated, and uninspiring.
-*   **Disconnect:** No physical connection between the trader's intent and the terminal.
+### The Core Pillars
+*   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows (Trading, Positions, History, Settings) that remember their state across sessions, creating a seamless "desktop" experience within MT4.
+*   **Hardware (The Pad):** Future-proof integration with a physical macropad for **"Blind Execution,"** enabling traders to execute complex orders via tactile shortcuts without ever touching a mouse.
 
-### The Solution
-We are building a **Modular Monolith** that acts as a new Operating System within the chart window.
-1.  **Software Layer:** A custom-built, high-performance GUI engine rendering a modern "Glassmorphism" interface directly on the chart canvas.
-2.  **Hardware Layer (The PhantomPad):** A physical macropad fully integrated with the EA via DLL/Shortcuts, allowing "Blind Execution" (Trading without looking at the mouse).
-
-**The End State:** The user maximizes the chart window, hides all MT4 toolbars/terminals, and interacts *exclusively* through the FantomePad interface.
+### Key Objectives
+*   **Eliminate Friction:** Automated risk management (real-time lot sizing based on % or cash risk) and one-click execution to save critical seconds.
+*   **Premium Aesthetics:** A "Deep Dark" design system with vibrant accents (Mint Green/Vibrant Red), moving away from "standard toolbars" towards a professional, high-tier SaaS aesthetic.
+*   **Sovereignty:** The end goal is for users to maximize their charts, hide all MT4 UI elements, and operate entirely through the PhantomPad ecosystem.
 
 ---
 
