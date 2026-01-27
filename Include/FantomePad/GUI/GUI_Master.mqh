@@ -26,6 +26,9 @@ void GUI_OnInit()
       SelectedPositionTicket = (int)GlobalVariableGet("FantomePad_LastSelectedTicket");
       GlobalVariableDel("FantomePad_LastSelectedTicket");
       g_PanelPositions.IsVisible = true;
+      
+      // --- INSTANT LINES UPDATE (FIXES LATENCY ON SYMBOL CHANGE) ---
+      UpdateOpenOrderLines();
    }
 
    CreatePanel();
@@ -302,7 +305,7 @@ void GUI_OnChartEvent(const int id,
          g_BlockClick = false; // Reset safety block on new press
          
          // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
-         bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging;
+         bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollInfoOrders.IsDragging;
          if(anyDrag || isOverList)
          {
              ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
@@ -343,6 +346,25 @@ void GUI_OnChartEvent(const int id,
              if(HandleScrollDrag(g_ScrollHistory.IsDragging, g_ScrollHistory.DragAnchorY, g_ScrollHistory.ScrollY, mouseX, mouseY, "Hist_ScrollThumb", g_ScrollHistory.ViewportHeight, maxScroll))
              {
                  CreateHistoryPanel();
+             }
+         }
+         
+         // --- 0.7 DRAG SCROLLBAR (INFO ORDERS) ---
+         if(g_PanelInfo.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging && !g_PanelInfo.IsDragging)
+         {
+             int maxScroll = g_TotalInfoOrderCount - g_InfoOrdersMaxVisible;
+             if(maxScroll < 0) maxScroll = 0;
+             
+             // Calculate track height for orders scrollbar
+             int rowH = 28;
+             int gapY = 4;
+             int visibleCount = (g_TotalInfoOrderCount > g_InfoOrdersMaxVisible) ? g_InfoOrdersMaxVisible : g_TotalInfoOrderCount;
+             int trackH = visibleCount * (rowH + gapY) - gapY;
+             if(trackH < 20) trackH = 20;
+             
+             if(HandleScrollDrag(g_ScrollInfoOrders.IsDragging, g_ScrollInfoOrders.DragAnchorY, g_InfoOrdersScrollOffset, mouseX, mouseY, "Info_Ord_ScrollThumb", trackH, maxScroll))
+             {
+                 UpdateInfoLayout();
              }
          }
       
@@ -484,6 +506,11 @@ void GUI_OnChartEvent(const int id,
             g_ScrollHistory.IsDragging = false;
             g_BlockClick = true;
          }
+         if(g_ScrollInfoOrders.IsDragging)
+         {
+            g_ScrollInfoOrders.IsDragging = false;
+            g_BlockClick = true;
+         }
          
          // Re-enable chart scroll ONLY if not over list and not in other modal state
          if(!isOverList) 
@@ -598,6 +625,48 @@ void GUI_OnChartEvent(const int id,
               // However, since we handled it, the user sees the list scroll.
           }
       }
+      
+      // --- MOUSE WHEEL FOR INFO ORDERS ---
+      if(g_PanelInfo.IsVisible && g_TotalInfoOrderCount > g_InfoOrdersMaxVisible)
+      {
+          // Check if mouse is over the orders list area in Info Panel
+          // We check if there's a scrollbar visible (meaning > 3 orders)
+          if(ObjectFind(0, PREFIX + "Info_Ord_ScrollTrack") >= 0)
+          {
+              long trackX = ObjectGetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_XDISTANCE);
+              long trackY = ObjectGetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_YDISTANCE);
+              long trackH = ObjectGetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_YSIZE);
+              
+              // Use the first order card to determine the list area
+              if(ObjectFind(0, PREFIX + "Info_Ord_Bg_0") >= 0)
+              {
+                  long ordX = ObjectGetInteger(0, PREFIX + "Info_Ord_Bg_0", OBJPROP_XDISTANCE);
+                  long ordY = ObjectGetInteger(0, PREFIX + "Info_Ord_Bg_0", OBJPROP_YDISTANCE);
+                  long ordW = ObjectGetInteger(0, PREFIX + "Info_Ord_Bg_0", OBJPROP_XSIZE);
+                  
+                  // Check if mouse is over the orders list area (including scrollbar)
+                  int scrollAreaWidth = 260 - 40; // panel width - padding*2
+                  if(LastMouseX >= ordX && LastMouseX <= ordX + scrollAreaWidth && 
+                     LastMouseY >= ordY && LastMouseY <= ordY + trackH + 10)
+                  {
+                      int delta = (int)dparam;
+                      int maxOffset = g_TotalInfoOrderCount - g_InfoOrdersMaxVisible;
+                      
+                      if(delta > 0) // SCROLL UP
+                      {
+                          if(g_InfoOrdersScrollOffset > 0) g_InfoOrdersScrollOffset--;
+                      }
+                      else // SCROLL DOWN
+                      {
+                          if(g_InfoOrdersScrollOffset < maxOffset) g_InfoOrdersScrollOffset++;
+                      }
+                      
+                      UpdateInfoLayout();
+                      UpdateInfoPanel();
+                  }
+              }
+          }
+      }
    }
 
    // Gestion des clics boutons
@@ -683,6 +752,22 @@ void GUI_OnChartEvent(const int id,
           return;
       }
 
+      if(sparam == PREFIX + "Set_Btn_ShowPosLines")
+      {
+          g_ShowPositionLines = !g_ShowPositionLines;
+          
+          // Update Text/Visuals
+          string t2 = g_ShowPositionLines ? "ON" : "OFF";
+          color b2 = g_ShowPositionLines ? g_ColorBtnActive : g_ColorInput;
+          ObjectSetString(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_TEXT, t2);
+          ObjectSetInteger(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_BGCOLOR, b2);
+          
+          UpdateOpenOrderLines(); // Refresh the open position lines
+          EffectButton(sparam);
+          SaveConfigToFile();
+          return;
+      }
+
       
       // --- MANAGER PANEL EVENTS ---
       
@@ -743,23 +828,71 @@ void GUI_OnChartEvent(const int id,
       // --- CLICK ON ACTIVE ORDER (INFO PANEL) ---
       if(StringFind(sparam, PREFIX + "Info_Ord_") >= 0)
       {
-          string symObj = sparam;
-          // Normalise to Symbol Object to extract text
-          // We look for _Bg_ or _Typ_ because the suffix comes with an underscore (e.g. _0)
-          // and the prefix part ends with underscore (Ord_). 
-          // Pattern is: ...Info_Ord_Bg_X
+          // Extract visual index from object name
+          // Pattern: PTP_Info_Ord_Bg_X or PTP_Info_Ord_Sym_X or PTP_Info_Ord_Typ_X
+          int visualIdx = -1;
           
-          if(StringFind(symObj, "_Bg_") > 0) StringReplace(symObj, "_Bg_", "_Sym_");
-          else if(StringFind(symObj, "_Typ_") > 0) StringReplace(symObj, "_Typ_", "_Sym_");
-          
-          string symbol = ObjectGetString(0, symObj, OBJPROP_TEXT);
-          
-          // Switch Chart if different
-          if(symbol != "" && symbol != Symbol())
+          // Find the underscore before the index
+          int lastUnder = -1;
+          for(int c = StringLen(sparam) - 1; c >= 0; c--)
           {
-             ChartSetSymbolPeriod(0, symbol, Period());
-             // Note: Changing symbol triggers EA reload
+             if(StringGetCharacter(sparam, c) == '_')
+             {
+                lastUnder = c;
+                break;
+             }
           }
+          
+          if(lastUnder > 0)
+          {
+             string idxStr = StringSubstr(sparam, lastUnder + 1);
+             visualIdx = (int)StringToInteger(idxStr);
+          }
+          
+          // Get ticket from global array
+          int ticket = -1;
+          if(visualIdx >= 0 && visualIdx < ArraySize(g_InfoOrdersTickets))
+          {
+             ticket = g_InfoOrdersTickets[visualIdx];
+          }
+          
+          if(ticket > 0 && OrderSelect(ticket, SELECT_BY_TICKET))
+          {
+             string symbol = OrderSymbol();
+             
+             // 1. Select this order in Position Manager
+             SelectedPositionTicket = ticket;
+             
+             // 2. Open Position Manager if not already visible
+             if(!g_PanelPositions.IsVisible)
+             {
+                g_PanelPositions.IsVisible = true;
+                TogglePositionsPanel(true);
+                UpdateManagerPanel(); // Update Manager Panel button states
+                SaveConfigToFile();
+             }
+             else
+             {
+                // Just update the values since we changed the selected ticket
+                UpdatePositionsValues();
+             }
+             
+             // 3. Switch Chart if different symbol
+             if(symbol != "" && symbol != Symbol())
+             {
+                // Save ticket to global variable so it persists after EA reload
+                GlobalVariableSet("FantomePad_LastSelectedTicket", (double)ticket);
+                ChartSetSymbolPeriod(0, symbol, Period());
+                // Note: Changing symbol triggers EA reload
+             }
+              else
+              {
+                 // Same symbol: Update lines immediately (INSTANT UX)
+                 UpdateOpenOrderLines();
+                 ChartRedraw();
+              }
+          }
+          
           return;
       }
 
@@ -974,6 +1107,11 @@ void GUI_OnChartEvent(const int id,
                GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
                ChartSetSymbolPeriod(0, OrderSymbol(), Period());
             }
+             else
+             {
+                // Same symbol: Update lines immediately (INSTANT UX)
+                UpdateOpenOrderLines();
+             }
          }
          
          ClosePositionList();

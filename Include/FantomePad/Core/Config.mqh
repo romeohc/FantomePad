@@ -71,6 +71,7 @@ void SaveConfigToFile()
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
       FileWrite(handle, "ManagerPosition=" + IntegerToString(g_ManagerPosition));
       FileWrite(handle, "ShowOrderLines=" + IntegerToString(g_ShowOrderLines));
+      FileWrite(handle, "ShowPositionLines=" + IntegerToString(g_ShowPositionLines));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
       FileWrite(handle, "ColorHeader=" + IntegerToString(g_ColorHeader));
       FileWrite(handle, "ColorInput=" + IntegerToString(g_ColorInput));
@@ -143,6 +144,7 @@ void LoadConfig()
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
             if(key == "ManagerPosition")  g_ManagerPosition  = (int)StringToInteger(val);
             if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
+            if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
             if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
             if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);

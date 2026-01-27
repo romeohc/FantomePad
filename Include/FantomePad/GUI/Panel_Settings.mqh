@@ -188,6 +188,26 @@ void OpenSettings()
    }
    relY += 30;
 
+   // --- SHOW POSITION LINES (Open Trades Entry/SL/TP) ---
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_ShowPosLines"; string nb3 = "Set_Btn_ShowPosLines";
+   if(v) {
+       CreateLabel(n, "Show Position Lines", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+
+       string txtPosLines = g_ShowPositionLines ? "ON" : "OFF";
+       color bgPosLines = g_ShowPositionLines ? g_ColorBtnActive : g_ColorInput;
+       
+       CreateButton(nb3, txtPosLines, x + w - 80, SCREEN_Y, 60, 25, bgPosLines, g_ColorText);
+       ObjectSetInteger(0, PREFIX + nb3, OBJPROP_ZORDER, 102);
+       ObjectSetInteger(0, PREFIX + nb3, OBJPROP_BORDER_COLOR, C'60,64,72');
+       SetObjVisible(nb3, true);
+   } else {
+       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+       if(ObjectFind(0, PREFIX + nb3) >= 0) SetObjVisible(nb3, false);
+   }
+   relY += 30;
+
    // Separator
    v = CHECK_VIS(1);
    n = "Set_Sep_Gen";

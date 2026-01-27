@@ -6,6 +6,8 @@
 
 // GLOBAL pour suivre le nombre d'ordres affichés
 int g_LastInfoOrderCount = 0;
+int g_TotalInfoOrderCount = 0; // Total orders (including non-visible due to scroll)
+int g_InfoOrdersTickets[];     // Tickets of currently visible orders (for click handling)
 
 // Optimization: Cache history stats to avoid O(N) loop every tick
 int    g_LastHistoryTotal = -1;
@@ -49,6 +51,63 @@ void GetAccountHistoryStats(double &outDeposit, double &outWithdraw)
 }
 
 //+------------------------------------------------------------------+
+//| HELPER: DRAW ORDERS SCROLLBAR                                    |
+//+------------------------------------------------------------------+
+void DrawInfoOrdersScrollbar(int trackX, int trackY, int trackH, int totalOrders, int maxVisible)
+{
+   int scrollBarWidth = 8;
+   
+   // 1. Track Background
+   if(ObjectFind(0, PREFIX + "Info_Ord_ScrollTrack") < 0)
+   {
+      CreateRect("Info_Ord_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
+   }
+   SetObjPosition("Info_Ord_ScrollTrack", trackX, trackY);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_XSIZE, scrollBarWidth);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_YSIZE, trackH);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_BGCOLOR, g_ColorBg);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollTrack", OBJPROP_ZORDER, 16);
+   
+   // 2. Thumb
+   double ratio = (double)maxVisible / (double)totalOrders;
+   if(ratio > 1.0) ratio = 1.0;
+   
+   int thumbH = (int)(trackH * ratio);
+   if(thumbH < 20) thumbH = 20; // Min size
+   
+   // Position
+   int maxScroll = totalOrders - maxVisible;
+   if(maxScroll <= 0) maxScroll = 1;
+   
+   double p = (double)g_InfoOrdersScrollOffset / (double)maxScroll;
+   if(p < 0) p = 0;
+   if(p > 1) p = 1;
+   
+   int thumbY = trackY + (int)(p * (trackH - thumbH));
+   
+   if(ObjectFind(0, PREFIX + "Info_Ord_ScrollThumb") < 0)
+   {
+      CreateButton("Info_Ord_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorText, clrNONE);
+   }
+   SetObjPosition("Info_Ord_ScrollThumb", trackX + 1, thumbY);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollThumb", OBJPROP_XSIZE, scrollBarWidth - 2);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollThumb", OBJPROP_YSIZE, thumbH);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Info_Ord_ScrollThumb", OBJPROP_ZORDER, 17);
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: HIDE ORDERS SCROLLBAR                                    |
+//+------------------------------------------------------------------+
+void HideInfoOrdersScrollbar()
+{
+   SetObjVisible("Info_Ord_ScrollTrack", false);
+   SetObjVisible("Info_Ord_ScrollThumb", false);
+}
+
+//+------------------------------------------------------------------+
 //| MISE A JOUR DU LAYOUT (POSITIONNEMENT)                           |
 //+------------------------------------------------------------------+
 void UpdateInfoLayout()
@@ -60,6 +119,7 @@ void UpdateInfoLayout()
    int paddingX = 20;
    int rowH     = 28; // Height of an order row
    int gapY     = 4;  // Gap between rows
+   int scrollBarWidth = 8;
    
    int currentY = startY + 50; 
    
@@ -138,28 +198,69 @@ void UpdateInfoLayout()
    SetObjPosition("Info_SubTitle_Pos", startX + paddingX, currentY);
    currentY += 20;
    
+   // --- ORDERS LIST CONTAINER (Fixed Size when scrolling) ---
+   int ordersListY = currentY;
+   bool needsScroll = (g_TotalInfoOrderCount > g_InfoOrdersMaxVisible);
+   int visibleCount = needsScroll ? g_InfoOrdersMaxVisible : g_TotalInfoOrderCount;
+   int itemWidth = needsScroll ? (width - (paddingX*2) - scrollBarWidth - 4) : (width - (paddingX*2));
+   
+   // Clamp scroll offset
+   if(needsScroll)
+   {
+      int maxOffset = g_TotalInfoOrderCount - g_InfoOrdersMaxVisible;
+      if(g_InfoOrdersScrollOffset > maxOffset) g_InfoOrdersScrollOffset = maxOffset;
+      if(g_InfoOrdersScrollOffset < 0) g_InfoOrdersScrollOffset = 0;
+   }
+   else
+   {
+      g_InfoOrdersScrollOffset = 0;
+   }
+   
    // --- POSITIONS LIST ---
-   for(int i=0; i<g_LastInfoOrderCount; i++)
+   // We iterate through visible items only (based on scroll offset)
+   for(int i=0; i<visibleCount; i++)
    {
       string suffix = "_" + IntegerToString(i);
       
       // Background Card
       SetObjPosition("Info_Ord_Bg" + suffix, startX + paddingX, currentY);
-      ObjectSetInteger(0, PREFIX + "Info_Ord_Bg" + suffix, OBJPROP_XSIZE, width - (paddingX*2));
+      ObjectSetInteger(0, PREFIX + "Info_Ord_Bg" + suffix, OBJPROP_XSIZE, itemWidth);
       ObjectSetInteger(0, PREFIX + "Info_Ord_Bg" + suffix, OBJPROP_YSIZE, rowH);
       
       // Symbol (Left)
       SetObjPosition("Info_Ord_Sym" + suffix, startX + paddingX + 8, currentY + 6);
       
-      // Type (Right)
-      // Note: Alignment is tricky without width calculation, so we manually position far right
-      // Ideally we would right align, but simple positioning:
-      SetObjPosition("Info_Ord_Typ" + suffix, startX + width - paddingX - 70, currentY + 7);
+      // Type (Right) - Adjust position based on scroll area
+      int typeX = needsScroll ? (startX + width - paddingX - scrollBarWidth - 75) : (startX + width - paddingX - 70);
+      SetObjPosition("Info_Ord_Typ" + suffix, typeX, currentY + 7);
       
       currentY += rowH + gapY;
    }
    
-   if(g_LastInfoOrderCount == 0)
+   // Hide extra items beyond visible count
+   for(int k=visibleCount; k<g_LastInfoOrderCount; k++)
+   {
+      string suffix = "_" + IntegerToString(k);
+      SetObjVisible("Info_Ord_Bg" + suffix, false);
+      SetObjVisible("Info_Ord_Sym" + suffix, false);
+      SetObjVisible("Info_Ord_Typ" + suffix, false);
+   }
+   
+   // --- SCROLLBAR ---
+   if(needsScroll && g_PanelInfo.IsVisible)
+   {
+      int trackH = visibleCount * (rowH + gapY) - gapY;
+      int trackX = startX + width - paddingX - scrollBarWidth;
+      DrawInfoOrdersScrollbar(trackX, ordersListY, trackH, g_TotalInfoOrderCount, g_InfoOrdersMaxVisible);
+      SetObjVisible("Info_Ord_ScrollTrack", true);
+      SetObjVisible("Info_Ord_ScrollThumb", true);
+   }
+   else
+   {
+      HideInfoOrdersScrollbar();
+   }
+   
+   if(g_TotalInfoOrderCount == 0)
    {
       SetObjPosition("Info_NoOrd_Msg", startX + paddingX, currentY);
       currentY += 20;
@@ -300,12 +401,56 @@ void UpdateInfoPanel()
    ObjectSetInteger(0, PREFIX + "Info_Val_Balance", OBJPROP_COLOR, g_ColorText);
    
    // --- ORDER LIST UPDATES ---
+   // First pass: Count total orders and collect tickets
    int total = OrdersTotal();
-   int visualIndex = 0;
+   int tickets[];
+   int orderCount = 0;
    
    for(int i=0; i<total; i++)
    {
       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+      {
+         ArrayResize(tickets, orderCount + 1);
+         tickets[orderCount] = OrderTicket();
+         orderCount++;
+      }
+   }
+   
+   g_TotalInfoOrderCount = orderCount;
+   
+   // Clamp scroll offset
+   bool needsScroll = (orderCount > g_InfoOrdersMaxVisible);
+   if(needsScroll)
+   {
+      int maxOffset = orderCount - g_InfoOrdersMaxVisible;
+      if(g_InfoOrdersScrollOffset > maxOffset) g_InfoOrdersScrollOffset = maxOffset;
+      if(g_InfoOrdersScrollOffset < 0) g_InfoOrdersScrollOffset = 0;
+   }
+   else
+   {
+      g_InfoOrdersScrollOffset = 0;
+   }
+   
+   // Calculate visible range
+   int visibleStart = g_InfoOrdersScrollOffset;
+   int visibleEnd = needsScroll ? (g_InfoOrdersScrollOffset + g_InfoOrdersMaxVisible) : orderCount;
+   if(visibleEnd > orderCount) visibleEnd = orderCount;
+   
+   // Prepare global tickets array for click handling
+   int visibleCount = visibleEnd - visibleStart;
+   ArrayResize(g_InfoOrdersTickets, visibleCount);
+   
+   int visualIndex = 0;
+   
+   for(int j=visibleStart; j<visibleEnd; j++)
+   {
+      int tck = tickets[j];
+      
+      // Store ticket in global array for click identification
+      if(visualIndex < visibleCount)
+         g_InfoOrdersTickets[visualIndex] = tck;
+      
+      if(OrderSelect(tck, SELECT_BY_TICKET))
       {
          // DATA
          string typeStr = GetOrderTypeStrShort(OrderType());
@@ -339,7 +484,7 @@ void UpdateInfoPanel()
    }
    
    // Handle "No active orders" visibility
-   if(visualIndex == 0)
+   if(orderCount == 0)
    {
       SetObjVisible("Info_NoOrd_Msg", true);
    }
@@ -349,11 +494,23 @@ void UpdateInfoPanel()
    }
    
    // Clean up stale objects (Bg + Sym + Typ)
-   if(visualIndex < g_LastInfoOrderCount)
+   // Only hide items beyond the visible count
+   int prevDisplayed = g_LastInfoOrderCount;
+   for(int k=visualIndex; k<prevDisplayed; k++)
    {
-      for(int k=visualIndex; k<g_LastInfoOrderCount; k++)
+      string suffix = "_" + IntegerToString(k);
+      SetObjVisible("Info_Ord_Bg" + suffix, false);
+      SetObjVisible("Info_Ord_Sym" + suffix, false);
+      SetObjVisible("Info_Ord_Typ" + suffix, false);
+   }
+   
+   // Delete objects for items way beyond current total to save memory
+   int maxKept = MathMax(g_InfoOrdersMaxVisible, prevDisplayed);
+   for(int k=maxKept; k<prevDisplayed + 10; k++)
+   {
+      string suffix = "_" + IntegerToString(k);
+      if(ObjectFind(0, PREFIX + "Info_Ord_Bg" + suffix) >= 0)
       {
-         string suffix = "_" + IntegerToString(k);
          ObjectDelete(0, PREFIX + "Info_Ord_Bg" + suffix);
          ObjectDelete(0, PREFIX + "Info_Ord_Sym" + suffix);
          ObjectDelete(0, PREFIX + "Info_Ord_Typ" + suffix);
@@ -397,18 +554,31 @@ void ToggleInfoPanel(bool visible)
    SetObjVisible("Info_Sep", visible);
    SetObjVisible("Info_SubTitle_Pos", visible);
    
-   if(visible && g_LastInfoOrderCount == 0)
+   if(visible && g_TotalInfoOrderCount == 0)
        SetObjVisible("Info_NoOrd_Msg", true);
    else
        SetObjVisible("Info_NoOrd_Msg", false);
    
    // Position Lines
-   for(int i=0; i<g_LastInfoOrderCount; i++)
+   int visibleCount = (g_TotalInfoOrderCount > g_InfoOrdersMaxVisible) ? g_InfoOrdersMaxVisible : g_TotalInfoOrderCount;
+   for(int i=0; i<visibleCount; i++)
    {
       string suffix = "_" + IntegerToString(i);
       SetObjVisible("Info_Ord_Bg" + suffix, visible);
       SetObjVisible("Info_Ord_Sym" + suffix, visible);
       SetObjVisible("Info_Ord_Typ" + suffix, visible);
+   }
+   
+   // Handle scrollbar visibility
+   bool needsScroll = (g_TotalInfoOrderCount > g_InfoOrdersMaxVisible);
+   if(visible && needsScroll)
+   {
+      SetObjVisible("Info_Ord_ScrollTrack", true);
+      SetObjVisible("Info_Ord_ScrollThumb", true);
+   }
+   else
+   {
+      HideInfoOrdersScrollbar();
    }
    
    if(visible) 

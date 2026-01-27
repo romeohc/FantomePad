@@ -283,6 +283,23 @@ void CreateHLine(string name, double price, color col, int style, int width, str
 
 void UpdateOpenOrderLines()
 {
+   // Check if position lines display is disabled
+   if(!g_ShowPositionLines)
+   {
+      // Remove all open position lines
+      int total = ObjectsTotal(0, -1, -1);
+      for(int i = total - 1; i >= 0; i--)
+      {
+         string name = ObjectName(0, i);
+         if(StringFind(name, PREFIX + "Open_") >= 0)
+         {
+            ObjectDelete(0, name);
+         }
+      }
+      ChartRedraw();
+      return;
+   }
+   
    string activeTickets = "|";
    
    // 1. Update/Create Active Lines

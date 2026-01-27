@@ -75,6 +75,11 @@ TPanelState g_PanelManager;
 // --- SCROLL STATE INSTANCES ---
 TScrollState g_ScrollSettings;
 TScrollState g_ScrollHistory;
+TScrollState g_ScrollInfoOrders; // Scroll for Active Orders in Info Panel
+
+// --- INFO ORDERS SCROLL GLOBALS ---
+int g_InfoOrdersScrollOffset = 0;   // Current scroll offset for orders list
+int g_InfoOrdersMaxVisible = 3;     // Max visible orders before scroll appears
 
 // --- LIST GLOBALS ---
 bool   IsListOpen = false; // État de la liste déroulante
@@ -110,6 +115,7 @@ color    g_ColorListNormal, g_ColorListHover;
 
 string   g_ColorPickerTarget = ""; // Target button to update
 bool     g_ShowOrderLines;       // Toggle for Order Lines visibility
+bool     g_ShowPositionLines;    // Toggle for Open Position Lines visibility (Entry/SL/TP)
 
 // --- MOUSE TRACKING ---
 int    LastMouseX = -1;
@@ -186,6 +192,7 @@ void InitGlobals()
    g_ColorListHover = ColorListHover;
    
    g_ShowOrderLines = true; // Default to ON
+   g_ShowPositionLines = true; // Default to ON
 
    // Init default custom dates (last 7 days by default)
    g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;
