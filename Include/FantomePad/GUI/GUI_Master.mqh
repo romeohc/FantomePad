@@ -691,6 +691,15 @@ void GUI_OnChartEvent(const int id,
            ChartRedraw();
            return;
        }
+       
+       // --- POSITION VALIDATION ERROR CLOSE BUTTON ---
+       if(sparam == PREFIX + "PosValErr_Close")
+       {
+           HidePosValidationError();
+           ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+           ChartRedraw();
+           return;
+       }
    
       // --- TOGGLE RISK MODE (% / CURRENCY) ---
       if(sparam == PREFIX + "Label_RiskPerc")
@@ -1207,6 +1216,67 @@ void GUI_OnChartEvent(const int id,
       if(sparam == PREFIX + "Pos_Btn_Validate")
       {
          EffectButton(sparam);
+         
+         // --- VALIDATION CHECKS ---
+         // 1. Check if position is selected
+         if(SelectedPositionTicket == -1)
+         {
+             ShowPosValidationError("No position selected!");
+             ChartRedraw();
+             return;
+         }
+         
+         // 2. Check if order can be selected
+         if(!OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+         {
+             ShowPosValidationError("Position not found!");
+             ChartRedraw();
+             return;
+         }
+         
+         // 3. Check if order is still open
+         if(OrderCloseTime() != 0)
+         {
+             ShowPosValidationError("Position is already closed!");
+             SelectedPositionTicket = -1;
+             UpdatePositionsValues();
+             ChartRedraw();
+             return;
+         }
+         
+         // 4. Check if any modifications were made
+         double currentSL = OrderStopLoss();
+         double currentTP = OrderTakeProfit();
+         double currentOpen = OrderOpenPrice();
+         int orderType = OrderType();
+         
+         double userSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+         double userTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+         double userEntry = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
+         double userClose = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+         double pctFromText = userClose;
+         
+         // Use Button Mode if text is empty/zero
+         if(pctFromText <= 0.001 && g_PosPartialMode > 0) pctFromText = (double)g_PosPartialMode;
+         
+         bool isModified = false;
+         
+         if(MathAbs(userSL - currentSL) > Point) isModified = true;
+         if(MathAbs(userTP - currentTP) > Point) isModified = true;
+         if(orderType > 1 && MathAbs(userEntry - currentOpen) > Point) isModified = true;
+         if(pctFromText > 0.001) isModified = true;
+         if(g_PosBE_Active) isModified = true;
+         
+         if(!isModified)
+         {
+             ShowPosValidationError("No modifications to apply!");
+             ChartRedraw();
+             return;
+         }
+         
+         // --- VALIDATION PASSED - HIDE ERROR AND PROCEED ---
+         HidePosValidationError();
+         
          if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
          {
              if(OrderCloseTime() == 0) // Must be open
