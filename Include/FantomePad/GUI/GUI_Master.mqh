@@ -12,7 +12,7 @@
 #include "Panel_Info.mqh"
 #include "Panel_Manager.mqh"
 #include "Panel_Positions.mqh"
-#include "Panel_History.mqh"
+#include "History/Panel_History.mqh"
 
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
