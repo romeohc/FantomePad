@@ -8,7 +8,7 @@
 #include "Components/Components.mqh"
 #include "../Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
 #include "Panel_Main.mqh"
-#include "Panel_Settings.mqh"
+#include "Settings/Panel_Settings.mqh"
 #include "Account/Panel_Account.mqh"
 #include "Panel_Manager.mqh"
 #include "Panel_Positions.mqh"
