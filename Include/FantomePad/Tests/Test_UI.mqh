@@ -8,7 +8,7 @@ void Cleanup_UI()
    // Close all panels
    g_PanelMain.IsVisible = false;
    g_PanelPositions.IsVisible = false;
-   g_PanelInfo.IsVisible = false;
+   g_PanelAccount.IsVisible = false;
    g_PanelHistory.IsVisible = false;
    g_PanelSettings.IsVisible = false;
    

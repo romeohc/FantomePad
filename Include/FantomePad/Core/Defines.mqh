@@ -68,7 +68,7 @@ string ManagerPositions[] = {"Top Left", "Top Center", "Top Right", "Bottom Left
 
 // --- PANEL STATE INSTANCES ---
 TPanelState g_PanelMain;
-TPanelState g_PanelInfo;
+TPanelState g_PanelAccount;
 TPanelState g_PanelPositions;
 TPanelState g_PanelHistory;
 TPanelState g_PanelSettings;
@@ -77,11 +77,11 @@ TPanelState g_PanelManager;
 // --- SCROLL STATE INSTANCES ---
 TScrollState g_ScrollSettings;
 TScrollState g_ScrollHistory;
-TScrollState g_ScrollInfoOrders; // Scroll for Active Orders in Info Panel
+TScrollState g_ScrollAccountOrders; // Scroll for Active Orders in Account Panel
 
-// --- INFO ORDERS SCROLL GLOBALS ---
-int g_InfoOrdersScrollOffset = 0;   // Current scroll offset for orders list
-int g_InfoOrdersMaxVisible = 3;     // Max visible orders before scroll appears
+// --- ACCOUNT ORDERS SCROLL GLOBALS ---
+int g_AccountOrdersScrollOffset = 0;   // Current scroll offset for orders list
+int g_AccountOrdersMaxVisible = 3;     // Max visible orders before scroll appears
 
 // --- LIST GLOBALS ---
 bool   IsListOpen = false; // État de la liste déroulante
@@ -153,9 +153,9 @@ void InitGlobals()
    g_PanelMain.X = -1;
    g_PanelMain.Y = -1;
    
-   g_PanelInfo.IsVisible = true;
-   g_PanelInfo.X = 20;
-   g_PanelInfo.Y = 70;
+   g_PanelAccount.IsVisible = true;
+   g_PanelAccount.X = 20;
+   g_PanelAccount.Y = 70;
    
    g_PanelPositions.IsVisible = false;
    g_PanelPositions.X = 260; // Default

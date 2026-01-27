@@ -50,13 +50,13 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
       ChartRedraw();
    }
 
-   // --- HOVER ACTIVE ORDERS (INFO PANEL) ---
-   if(g_PanelInfo.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelInfo.IsDragging)
+   // --- HOVER ACTIVE ORDERS (ACCOUNT PANEL) ---
+   if(g_PanelAccount.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelAccount.IsDragging)
    {
        bool redraw = false;
-       for(int i=0; i<g_LastInfoOrderCount; i++)
+       for(int i=0; i<g_LastAccountOrderCount; i++)
        {
-          string cardName = PREFIX + "Info_Ord_Bg_" + IntegerToString(i);
+          string cardName = PREFIX + "Account_Ord_Bg_" + IntegerToString(i);
           // Check if object exists (safety)
           if(ObjectFind(0, cardName) < 0) continue;
           

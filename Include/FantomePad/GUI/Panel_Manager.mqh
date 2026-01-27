@@ -142,11 +142,11 @@ void CreateManagerPanel()
    CreateButton("Mgr_Btn_Pos", "Manager", currentX, startY, btnW, btnH, bgPos, g_ColorText);
    ObjectSetString(0, PREFIX + "Mgr_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
 
-   // Button 3: Info Panel (Toggle Account Info) -> "Account"
+   // Button 3: Account Panel (Toggle Account Info) -> "Account"
    currentX += btnW + margin;
-   color bgInfo = g_PanelInfo.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Info", "Account", currentX, startY, btnW, btnH, bgInfo, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_Info", OBJPROP_FONT, "Trebuchet MS Bold");
+   color bgAccount = g_PanelAccount.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
+   CreateButton("Mgr_Btn_Account", "Account", currentX, startY, btnW, btnH, bgAccount, g_ColorText);
+   ObjectSetString(0, PREFIX + "Mgr_Btn_Account", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 4: History -> "History"
    currentX += btnW + margin;

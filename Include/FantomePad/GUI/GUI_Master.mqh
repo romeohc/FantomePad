@@ -9,7 +9,7 @@
 #include "../Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
 #include "Panel_Main.mqh"
 #include "Panel_Settings.mqh"
-#include "Panel_Info.mqh"
+#include "Account/Panel_Account.mqh"
 #include "Panel_Manager.mqh"
 #include "Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
@@ -32,7 +32,7 @@ void GUI_OnInit()
    }
 
    CreatePanel();
-   CreateInfoPanel();
+   CreateAccountPanel();
    CreateManagerPanel(); 
    CreatePositionsPanel();
    CreateHistoryPanel();
@@ -52,8 +52,8 @@ void GUI_OnInit()
    if(g_PanelPositions.IsVisible) TogglePositionsPanel(true);
    else TogglePositionsPanel(false);
    
-   if(g_PanelInfo.IsVisible) ToggleInfoPanel(true);
-   else ToggleInfoPanel(false);
+   if(g_PanelAccount.IsVisible) ToggleAccountPanel(true);
+   else ToggleAccountPanel(false);
    
    if(g_PanelHistory.IsVisible) ToggleHistoryPanel(true);
    else ToggleHistoryPanel(false);
@@ -86,7 +86,7 @@ void GUI_OnTick()
    if(GetTickCount() - lastUpdate < 500) return; 
    lastUpdate = GetTickCount();
 
-   UpdateInfoPanel();
+   UpdateAccountPanel();
    UpdatePositionsValues();
    // UpdateToastNotification(); // Removed 
    // Warning update moved to Timer for responsiveness
@@ -142,8 +142,8 @@ void RefreshAllPanels()
     if(g_PanelMain.IsVisible) UpdateUIMode();
     else ToggleMainPanel(false);
     
-    CreateInfoPanel(); 
-    if(!g_PanelInfo.IsVisible) ToggleInfoPanel(false);
+    CreateAccountPanel(); 
+    if(!g_PanelAccount.IsVisible) ToggleAccountPanel(false);
     
     CreateManagerPanel();
     CreatePositionsPanel();

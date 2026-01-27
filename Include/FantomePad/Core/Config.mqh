@@ -101,9 +101,9 @@ void SaveConfigToFile()
       FileWrite(handle, "PositionsPanelX=" + IntegerToString(g_PanelPositions.X));
       FileWrite(handle, "PositionsPanelY=" + IntegerToString(g_PanelPositions.Y));
       
-      FileWrite(handle, "IsInfoPanelVisible=" + IntegerToString(g_PanelInfo.IsVisible));
-      FileWrite(handle, "InfoPanelX=" + IntegerToString(g_PanelInfo.X));
-      FileWrite(handle, "InfoPanelY=" + IntegerToString(g_PanelInfo.Y));
+      FileWrite(handle, "IsAccountPanelVisible=" + IntegerToString(g_PanelAccount.IsVisible));
+      FileWrite(handle, "AccountPanelX=" + IntegerToString(g_PanelAccount.X));
+      FileWrite(handle, "AccountPanelY=" + IntegerToString(g_PanelAccount.Y));
       
       FileWrite(handle, "IsHistoryPanelVisible=" + IntegerToString(g_PanelHistory.IsVisible));
       FileWrite(handle, "HistoryPanelX=" + IntegerToString(g_PanelHistory.X));
@@ -174,9 +174,9 @@ void LoadConfig()
             if(key == "PositionsPanelX") g_PanelPositions.X = (int)StringToInteger(val);
             if(key == "PositionsPanelY") g_PanelPositions.Y = (int)StringToInteger(val);
             
-            if(key == "IsInfoPanelVisible") g_PanelInfo.IsVisible = (bool)StringToInteger(val);
-            if(key == "InfoPanelX") g_PanelInfo.X = (int)StringToInteger(val);
-            if(key == "InfoPanelY") g_PanelInfo.Y = (int)StringToInteger(val);
+            if(key == "IsAccountPanelVisible") g_PanelAccount.IsVisible = (bool)StringToInteger(val);
+            if(key == "AccountPanelX") g_PanelAccount.X = (int)StringToInteger(val);
+            if(key == "AccountPanelY") g_PanelAccount.Y = (int)StringToInteger(val);
             
             if(key == "IsHistoryPanelVisible") g_PanelHistory.IsVisible = (bool)StringToInteger(val);
             if(key == "HistoryPanelX") g_PanelHistory.X = (int)StringToInteger(val);

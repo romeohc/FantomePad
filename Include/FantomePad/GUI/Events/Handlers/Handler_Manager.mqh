@@ -29,11 +29,11 @@ bool Handle_Manager_Events(string sparam)
       return true;
    }
 
-   // 3. Toggle Info Panel
-   if(sparam == PREFIX + "Mgr_Btn_Info")
+   // 3. Toggle Account Panel
+   if(sparam == PREFIX + "Mgr_Btn_Account")
    {
-      g_PanelInfo.IsVisible = !g_PanelInfo.IsVisible;
-      ToggleInfoPanel(g_PanelInfo.IsVisible);
+      g_PanelAccount.IsVisible = !g_PanelAccount.IsVisible;
+      ToggleAccountPanel(g_PanelAccount.IsVisible);
       UpdateManagerPanel(); 
       EffectButton(sparam);
       SaveConfigToFile();
@@ -60,12 +60,12 @@ bool Handle_Manager_Events(string sparam)
       SaveConfigToFile();
       return true;
    }
-
-   // --- CLICK ON ACTIVE ORDER (INFO PANEL) ---
-   if(StringFind(sparam, PREFIX + "Info_Ord_") >= 0)
+ 
+   // --- CLICK ON ACTIVE ORDER (ACCOUNT PANEL) ---
+   if(StringFind(sparam, PREFIX + "Account_Ord_") >= 0)
    {
        // Extract visual index from object name
-       // Pattern: PTP_Info_Ord_Bg_X or PTP_Info_Ord_Sym_X or PTP_Info_Ord_Typ_X
+       // Pattern: PTP_Account_Ord_Bg_X or PTP_Account_Ord_Sym_X or PTP_Account_Ord_Typ_X
        int visualIdx = -1;
        
        // Find the underscore before the index
@@ -87,9 +87,9 @@ bool Handle_Manager_Events(string sparam)
        
        // Get ticket from global array
        int ticket = -1;
-       if(visualIdx >= 0 && visualIdx < ArraySize(g_InfoOrdersTickets))
+       if(visualIdx >= 0 && visualIdx < ArraySize(g_AccountOrdersTickets))
        {
-          ticket = g_InfoOrdersTickets[visualIdx];
+          ticket = g_AccountOrdersTickets[visualIdx];
        }
        
        if(ticket > 0 && OrderSelect(ticket, SELECT_BY_TICKET))

@@ -26,7 +26,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
 
-    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollInfoOrders.IsDragging;
+    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging;
     if(anyDrag || isOverList)
     {
         ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
@@ -70,22 +70,22 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
     
-    // --- 0.7 DRAG SCROLLBAR (INFO ORDERS) ---
-    if(g_PanelInfo.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging && !g_PanelInfo.IsDragging)
+    // --- 0.7 DRAG SCROLLBAR (ACCOUNT ORDERS) ---
+    if(g_PanelAccount.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging && !g_PanelAccount.IsDragging)
     {
-        int maxScroll = g_TotalInfoOrderCount - g_InfoOrdersMaxVisible;
+        int maxScroll = g_TotalAccountOrderCount - g_AccountOrdersMaxVisible;
         if(maxScroll < 0) maxScroll = 0;
         
         // Calculate track height for orders scrollbar
         int rowH = 28;
         int gapY = 4;
-        int visibleCount = (g_TotalInfoOrderCount > g_InfoOrdersMaxVisible) ? g_InfoOrdersMaxVisible : g_TotalInfoOrderCount;
+        int visibleCount = (g_TotalAccountOrderCount > g_AccountOrdersMaxVisible) ? g_AccountOrdersMaxVisible : g_TotalAccountOrderCount;
         int trackH = visibleCount * (rowH + gapY) - gapY;
         if(trackH < 20) trackH = 20;
         
-        if(HandleScrollDrag(g_ScrollInfoOrders.IsDragging, g_ScrollInfoOrders.DragAnchorY, g_InfoOrdersScrollOffset, mouseX, mouseY, "Info_Ord_ScrollThumb", trackH, maxScroll))
+        if(HandleScrollDrag(g_ScrollAccountOrders.IsDragging, g_ScrollAccountOrders.DragAnchorY, g_AccountOrdersScrollOffset, mouseX, mouseY, "Account_Ord_ScrollThumb", trackH, maxScroll))
         {
-            UpdateInfoLayout();
+            UpdateAccountLayout();
         }
     }
  
@@ -111,12 +111,12 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
     
-    // 2. INFO PANEL
-    if(!processed && g_PanelInfo.IsVisible && !g_PanelSettings.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging)
+    // 2. ACCOUNT PANEL
+    if(!processed && g_PanelAccount.IsVisible && !g_PanelSettings.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging)
     {
-         if(HandlePanelDrag(g_PanelInfo.IsDragging, g_PanelInfo.X, g_PanelInfo.Y, g_PanelInfo.DragOffsetX, g_PanelInfo.DragOffsetY, mouseX, mouseY, 200, 150, "Info_Bg"))
+         if(HandlePanelDrag(g_PanelAccount.IsDragging, g_PanelAccount.X, g_PanelAccount.Y, g_PanelAccount.DragOffsetX, g_PanelAccount.DragOffsetY, mouseX, mouseY, 200, 150, "Account_Bg"))
          {
-             UpdateInfoLayout();
+             UpdateAccountLayout();
              processed = true;
          }
     }
@@ -132,7 +132,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
     }
 
     // 4. HISTORY PANEL
-    if(!processed && g_PanelHistory.IsVisible && !g_PanelSettings.IsDragging && !g_PanelPositions.IsDragging && !g_PanelInfo.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging && !g_ScrollHistory.IsDragging)
+    if(!processed && g_PanelHistory.IsVisible && !g_PanelSettings.IsDragging && !g_PanelPositions.IsDragging && !g_PanelAccount.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging && !g_ScrollHistory.IsDragging)
     {
         if(HandlePanelDrag(g_PanelHistory.IsDragging, g_PanelHistory.X, g_PanelHistory.Y, g_PanelHistory.DragOffsetX, g_PanelHistory.DragOffsetY, mouseX, mouseY, 800, 200, "Hist_Bg"))
         {
@@ -142,7 +142,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
     }
     
     // 5. MAIN PANEL
-    if(!processed && !g_PanelSettings.IsDragging && !g_PanelInfo.IsDragging && !g_PanelPositions.IsDragging && !g_PanelHistory.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging)
+    if(!processed && !g_PanelSettings.IsDragging && !g_PanelAccount.IsDragging && !g_PanelPositions.IsDragging && !g_PanelHistory.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging)
     {
        // Initialisation position si nécessaire
        if(g_PanelMain.X == -1)
@@ -179,7 +179,7 @@ void ProcessDragEnd()
        }
    }
 
-   bool wasDragging = (g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelInfo.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging);
+   bool wasDragging = (g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging);
    
    if(g_PanelMain.IsDragging)
    {
@@ -200,13 +200,13 @@ void ProcessDragEnd()
       OpenSettings(); // Apply Position
    }
    
-   if(g_PanelInfo.IsDragging)
+   if(g_PanelAccount.IsDragging)
    {
-      long h = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
+      long h = ObjectGetInteger(0, PREFIX + "Account_Bg", OBJPROP_YSIZE);
       if(h < 50) h = 150;
-      ApplyPanelSafety(g_PanelInfo.X, g_PanelInfo.Y, 200, (int)h);
-      g_PanelInfo.IsDragging = false;
-      UpdateInfoLayout(); // Apply Position
+      ApplyPanelSafety(g_PanelAccount.X, g_PanelAccount.Y, 200, (int)h);
+      g_PanelAccount.IsDragging = false;
+      UpdateAccountLayout(); // Apply Position
    }
    
    if(g_PanelPositions.IsDragging)
@@ -244,9 +244,9 @@ void ProcessDragEnd()
       g_ScrollHistory.IsDragging = false;
       g_BlockClick = true;
    }
-   if(g_ScrollInfoOrders.IsDragging)
+   if(g_ScrollAccountOrders.IsDragging)
    {
-      g_ScrollInfoOrders.IsDragging = false;
+      g_ScrollAccountOrders.IsDragging = false;
       g_BlockClick = true;
    }
    

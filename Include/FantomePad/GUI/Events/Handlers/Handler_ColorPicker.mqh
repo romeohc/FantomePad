@@ -92,9 +92,9 @@ bool Handle_ColorPicker_Events(string sparam)
          if(g_PanelMain.IsVisible) UpdateUIMode();
          else ToggleMainPanel(false); // Ensure phantom objects are hidden
          
-         // 2. Refresh Info Panel
-         CreateInfoPanel(); 
-         if(!g_PanelInfo.IsVisible) ToggleInfoPanel(false);
+         // 2. Refresh Account Panel
+         CreateAccountPanel(); 
+         if(!g_PanelAccount.IsVisible) ToggleAccountPanel(false);
          
          // 3. Refresh Other Panels
          CreateManagerPanel();

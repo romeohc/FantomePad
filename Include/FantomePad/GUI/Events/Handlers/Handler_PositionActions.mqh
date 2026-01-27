@@ -206,7 +206,7 @@ bool Handle_PositionActions_Events(string sparam)
                       UpdateOpenOrderLines(); // <--- INSTANT LINES UPDATE (FIXES LATENCY)
                       UpdateCalculatedLot();  // <--- RECALC NEW LOTS (EQUITY CHANGED)
                       
-                      if(g_PanelInfo.IsVisible) CreateInfoPanel();       // <--- UPDATE BALANCE/EQUITY
+                      if(g_PanelAccount.IsVisible) CreateAccountPanel();       // <--- UPDATE BALANCE/EQUITY
                       if(g_PanelHistory.IsVisible) CreateHistoryPanel(); // <--- UPDATE HISTORY
                       
                       if(toClose >= currentLots) 

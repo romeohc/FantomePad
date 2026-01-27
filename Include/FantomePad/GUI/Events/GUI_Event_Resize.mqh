@@ -15,10 +15,10 @@ void OnEvent_Resize()
        ApplyPanelSafety(g_PanelMain.X, g_PanelMain.Y, g_PanelMain.Width, (int)h);
    }
    
-   if(g_PanelInfo.IsVisible) {
-       long h = ObjectGetInteger(0, PREFIX + "Info_Bg", OBJPROP_YSIZE);
+   if(g_PanelAccount.IsVisible) {
+       long h = ObjectGetInteger(0, PREFIX + "Account_Bg", OBJPROP_YSIZE);
        if(h < 50) h = 150;
-       ApplyPanelSafety(g_PanelInfo.X, g_PanelInfo.Y, 200, (int)h);
+       ApplyPanelSafety(g_PanelAccount.X, g_PanelAccount.Y, 200, (int)h);
    }
    
    if(g_PanelPositions.IsVisible) {
@@ -39,7 +39,7 @@ void OnEvent_Resize()
    }
 
    CreatePanel();
-   CreateInfoPanel();
+   CreateAccountPanel();
    CreateManagerPanel();
    CreatePositionsPanel();
    CreateHistoryPanel();

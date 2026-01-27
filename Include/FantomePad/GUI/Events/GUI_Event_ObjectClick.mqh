@@ -36,7 +36,7 @@ void OnEvent_ObjectClick(string sparam)
     // 2. Settings Logic (Risk Mode, Toggles)
     if(Handle_Settings_Events(sparam)) return;
     
-    // 3. Manager Panel Logic (Open/Close Panels, Info Click)
+    // 3. Manager Panel Logic (Open/Close Panels, Account Click)
     if(Handle_Manager_Events(sparam)) return;
 
     // 4. History Logic (Filters)
