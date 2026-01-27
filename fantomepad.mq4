@@ -42,6 +42,9 @@ int OnInit()
    ChartSetInteger(0, CHART_SHOW_OHLC, false);
    ChartSetInteger(0, CHART_SHOW_ONE_CLICK, false);
    
+   // Ensure UI is drawn ON TOP of the candles (Fix for transparency issue)
+   ChartSetInteger(0, CHART_FOREGROUND, false);
+   
    // Désactiver les niveaux de trade natifs pour utiliser nos couleurs personnalisées
    ChartSetInteger(0, CHART_SHOW_TRADE_LEVELS, false);
    ChartSetInteger(0, CHART_SHOW_BID_LINE, false);

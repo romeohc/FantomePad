@@ -48,6 +48,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, color bg
    ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    ObjectSetInteger(0, objName, OBJPROP_STATE, false);
    ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
+   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void CreateLabel(string name, string text, int x, int y, int fontsize, color col, string font="Trebuchet MS")
@@ -87,6 +88,7 @@ void CreateEdit(string name, string text, int x, int y, int w, int h, bool readO
    ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); // Flat look
    ObjectSetInteger(0, objName, OBJPROP_READONLY, readOnly);
+   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void EffectButton(string name)
