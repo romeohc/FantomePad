@@ -7,12 +7,12 @@
 // Includes
 #include "Components/Components.mqh"
 #include "../Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
-#include "Panel_Main.mqh"
-#include "Panel_Settings.mqh"
-#include "Panel_Info.mqh"
-#include "Panel_Manager.mqh"
-#include "Panel_Positions.mqh"
-#include "Panel_History.mqh"
+#include "Panels/Panel_Main.mqh"
+#include "Panels/Panel_Settings.mqh"
+#include "Panels/Panel_Info.mqh"
+#include "Panels/Panel_Manager.mqh"
+#include "Panels/Panel_Positions.mqh"
+#include "Panels/Panel_History.mqh"
 
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
