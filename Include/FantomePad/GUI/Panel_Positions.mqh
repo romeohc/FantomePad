@@ -47,8 +47,8 @@ void UpdatePartialButtonsVisuals()
 //+------------------------------------------------------------------+
 void UpdatePositionsLayout()
 {
-   int startX = g_PanelPositions.X;
-   int startY = g_PanelPositions.Y;
+   int startX = (int)g_PanelPositions.X;
+   int startY = (int)g_PanelPositions.Y;
    int width  = 280; 
    int paddingX = 20;
    
@@ -182,8 +182,8 @@ void UpdatePositionsLayout()
    
    pcX += pcBtnW + 5;
    SetObjPosition("Pos_Edit_Close", pcX, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_XSIZE, pcBtnW);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_YSIZE, inputH);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_XSIZE, (long)pcBtnW);
+   ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_YSIZE, (long)inputH);
    
    currentY += inputH + (sectionGap * 1.5); 
    
@@ -659,7 +659,7 @@ void DrawPositionList()
    int itemHeight = 25;
    int scrollBarWidth = 10;
    
-   int maxVis = g_PosListMaxVisible;
+   int maxVis = (int)g_PosListMaxVisible;
    int visibleCount = (count > maxVis) ? maxVis : count;
    
    if(g_PosListOffset > count - visibleCount) g_PosListOffset = count - visibleCount;
@@ -680,7 +680,7 @@ void DrawPositionList()
    int currentY = startY;
    for(int i = 0; i < visibleCount; i++)
    {
-      int dataIdx = g_PosListOffset + i;
+      int dataIdx = (int)g_PosListOffset + i;
       if(dataIdx >= count) break;
       
       int tck = tickets[dataIdx];

@@ -184,63 +184,10 @@ void OpenSettings()
    else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 25;
    
-   v = CHECK_VIS(25);
-   n = "Set_Lbl_Risk"; string ne = "Set_Edit_Risk";
-   if(v) {
-      CreateLabel(n, "Default Risk (%)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
-      CreateEdit(ne, DoubleToString(g_DefaultRisk, 1), x + w - 80, SCREEN_Y, 60, 25);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
-      SetObjVisible(ne, true);
-   } else {
-      if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
-      if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
-   }
-   relY += 30;
+   // Removed Default Risk %, Money, R as requested.
    
    v = CHECK_VIS(25);
-   n = "Set_Lbl_RiskMoney"; ne = "Set_Edit_RiskMoney";
-   string currency = AccountCurrency();
-   if(v) {
-      CreateLabel(n, "Default Risk (" + currency + ")", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
-      CreateEdit(ne, DoubleToString(g_DefaultRiskMoney, 2), x + w - 80, SCREEN_Y, 60, 25);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
-      SetObjVisible(ne, true);
-   } else {
-      if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
-      if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
-   }
-   relY += 30;
-   
-   v = CHECK_VIS(25);
-   n = "Set_Lbl_RiskR"; ne = "Set_Edit_RiskR";
-   if(v) {
-      CreateLabel(n, "Default Risk (R)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-      ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
-      CreateEdit(ne, DoubleToString(g_DefaultRiskR, 2), x + w - 80, SCREEN_Y, 60, 25);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
-      ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
-      SetObjVisible(ne, true);
-   } else {
-       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
-       if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
-   }
-   relY += 30;
-   
-   v = CHECK_VIS(25);
-   n = "Set_Lbl_OneRPercent"; ne = "Set_Edit_OneRPercent";
+   n = "Set_Lbl_OneRPercent"; string ne = "Set_Edit_OneRPercent";
    if(v) {
        CreateLabel(n, "1R Value (%)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
        ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
@@ -592,21 +539,8 @@ bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dpara
    // 3. EDIT EVENTS
    if(id == CHARTEVENT_OBJECT_ENDEDIT)
    {
-       if(sparam == PREFIX + "Set_Edit_Risk") {
-           double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_Risk", OBJPROP_TEXT));
-           if(r > 0) { g_DefaultRisk = r; SaveConfigToFile(); RefreshAllPanels(); }
-           return true;
-       }
-       if(sparam == PREFIX + "Set_Edit_RiskMoney") {
-           double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_TEXT));
-           if(r > 0) { g_DefaultRiskMoney = r; SaveConfigToFile(); RefreshAllPanels(); }
-           return true;
-       }
-       if(sparam == PREFIX + "Set_Edit_RiskR") {
-           double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskR", OBJPROP_TEXT));
-           if(r > 0) { g_DefaultRiskR = r; SaveConfigToFile(); RefreshAllPanels(); }
-           return true;
-       }
+       // Removed Default Risk Handlers
+       
        if(sparam == PREFIX + "Set_Edit_OneRPercent") {
            double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_TEXT));
            if(r > 0) { g_OneRPercent = r; SaveConfigToFile(); RefreshAllPanels(); }

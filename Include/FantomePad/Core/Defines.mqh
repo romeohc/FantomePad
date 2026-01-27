@@ -5,9 +5,7 @@
 #property strict
 
 //--- Inputs externes (Configuration de base)
-input double   DefaultRisk = 1.0;      // Risque par défaut (%)
-input double   DefaultRiskMoney = 100.0; // Risque par défaut (Devise)
-input double   DefaultRiskR = 1.0;     // Risque par défaut (R)
+// Default Risk inputs removed
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
 input int      DefaultManagerPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
 input int      MagicNumber = 123456;   // Magic Number for trade identification
@@ -99,9 +97,7 @@ datetime g_HistoryCustomEnd = 0;
 string g_HistoryFilterSymbol = ""; // Symbol filter string
 
 // --- SETTINGS GLOBALS ---
-double   g_DefaultRisk;
-double   g_DefaultRiskMoney;
-double   g_DefaultRiskR;
+// Default Risk Globals removed
 double   g_OneRPercent;
 int      g_ManagerPosition; // 0..5
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
@@ -165,9 +161,7 @@ void InitGlobals()
    g_ScrollHistory.ViewportHeight = 400;
    g_ScrollHistory.ContentHeight = 0;
 
-   g_DefaultRisk = DefaultRisk;
-   g_DefaultRiskMoney = DefaultRiskMoney;
-   g_DefaultRiskR = DefaultRiskR;
+   // Default Risk Init removed
    g_OneRPercent = OneRPercent;
    g_ManagerPosition = DefaultManagerPosition;
    g_ColorBg     = ColorBg;

@@ -14,15 +14,7 @@
 #include "Panel_Positions.mqh"
 #include "Panel_History.mqh"
 
-// --- FORWARD DECLARATIONS (Cross-Panel Dependencies) ---
-void ApplyColorChange(color pickedCol);
-void UpdateManagerPanel();
-void RefreshAllPanels();
-void ToggleMainPanel(bool visible);
-void TogglePositionsPanel(bool visible);
-void ToggleInfoPanel(bool visible);
-void ToggleHistoryPanel(bool visible);
-void ToggleSettings();
+// --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
 //+------------------------------------------------------------------+
 //| INITIALISATION GUI GLOBALE                                       |
@@ -47,7 +39,11 @@ void GUI_OnInit()
    CreateHistoryPanel();
    
    // Apply Loaded State
-   if(g_PanelMain.IsVisible) UpdateUIMode();
+   if(g_PanelMain.IsVisible) 
+   {
+      UpdateUIMode();
+      ApplyDefaultTradeValues(); // Force update defaults on Init (Symbol change)
+   }
    else ToggleMainPanel(false);
    
    if(g_PanelPositions.IsVisible) TogglePositionsPanel(true);
@@ -670,15 +666,15 @@ void GUI_OnChartEvent(const int id,
          // RESET to Default Value
          if(RiskMode == 1) // Currency
          {
-            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskMoney, 2));
+            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
          }
          else if(RiskMode == 2) // R
          {
-             ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskR, 2));
+             ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
          }
          else // %
          {
-            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRisk, 1));
+            ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
          }
          
          UpdateUIMode();
@@ -1326,46 +1322,7 @@ void GUI_OnChartEvent(const int id,
       }
    
       // INSTANT SAVE RISK
-      if(sparam == PREFIX + "Set_Edit_Risk")
-      {
-          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_Risk", OBJPROP_TEXT));
-          if(r > 0) 
-          {
-             g_DefaultRisk = r;
-             SaveConfigToFile();
-             // Si on est en mode %, on met à jour immédiatemment le panneau principal si on n'a pas modifié manuellement (optionnel, mais propre)
-             // ici on redessine juste le panel par simplicité
-             CreatePanel(); 
-             if(g_PanelMain.IsVisible) UpdateUIMode();
-             else ToggleMainPanel(false);
-          }
-      }
-      
-      if(sparam == PREFIX + "Set_Edit_RiskMoney")
-      {
-          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskMoney", OBJPROP_TEXT));
-          if(r > 0) 
-          {
-             g_DefaultRiskMoney = r;
-             SaveConfigToFile();
-             CreatePanel(); 
-             if(g_PanelMain.IsVisible) UpdateUIMode();
-             else ToggleMainPanel(false);
-          }
-      }
-      
-      if(sparam == PREFIX + "Set_Edit_RiskR")
-      {
-          double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_RiskR", OBJPROP_TEXT));
-          if(r > 0) 
-          {
-             g_DefaultRiskR = r;
-             SaveConfigToFile();
-             CreatePanel(); 
-             if(g_PanelMain.IsVisible) UpdateUIMode();
-             else ToggleMainPanel(false);
-          }
-      }
+       // REMOVED DEFAULT RISK HANDLERS
       
       if(sparam == PREFIX + "Set_Edit_OneRPercent")
       {

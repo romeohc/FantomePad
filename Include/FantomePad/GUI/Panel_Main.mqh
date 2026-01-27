@@ -238,7 +238,7 @@ void CreatePanel()
    
    // 6. Risque
    CreateLabel("Label_Risk", "Risk", 0, 0, 8, g_ColorText, "Trebuchet MS");
-   CreateEdit("Edit_Risk", DoubleToString(g_DefaultRisk, 1), 0, 0, g_PanelMain.Width - 40, 28);
+   CreateEdit("Edit_Risk", "0", 0, 0, g_PanelMain.Width - 40, 28);
    
    // Bouton interactif pour changer le mode de risque (% <-> Devise)
    // On utilise un bouton pour faciliter le clic
@@ -385,6 +385,90 @@ void AutoSwitchOrderType()
 }
 
 //+------------------------------------------------------------------+
+//| APPLY DEFAULT VALUES (Entry/SL/TP)                               |
+//+------------------------------------------------------------------+
+void ApplyDefaultTradeValues()
+{
+   string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+   if(symbol == "") symbol = Symbol();
+   
+   double bid = MarketInfo(symbol, MODE_BID);
+   double ask = MarketInfo(symbol, MODE_ASK);
+   double point = MarketInfo(symbol, MODE_POINT);
+   int digits = (int)MarketInfo(symbol, MODE_DIGITS);
+   
+   // Safety against zero dividing or weird symbols
+   if(point == 0) return;
+   
+   // Default distances (in points)
+   // We use sensible defaults: SL=300pts (30 pips), TP=600pts (60 pips), Entry Offset=200pts (20 pips)
+   double distSL = 300 * point;
+   double distTP = 600 * point;
+   double distEntry = 200 * point;
+   
+   double entry = 0, sl = 0, tp = 0;
+   
+   // 1. Determine Entry
+   if(CurrentTypeIndex == 0) // Market
+   {
+       // No Entry Price Input for Market
+       if(CurrentDirection == 0) entry = ask; // Buy
+       else                      entry = bid; // Sell
+   }
+   else if(CurrentTypeIndex == 1) // Buy Limit (Below Ask)
+   {
+       entry = ask - distEntry;
+   }
+   else if(CurrentTypeIndex == 2) // Sell Limit (Above Bid)
+   {
+       entry = bid + distEntry;
+   }
+   else if(CurrentTypeIndex == 3) // Buy Stop (Above Ask)
+   {
+       entry = ask + distEntry;
+   }
+   else if(CurrentTypeIndex == 4) // Sell Stop (Below Bid)
+   {
+       entry = bid - distEntry;
+   }
+   
+   // 2. Determine SL / TP based on Entry and Direction
+   int dir = CurrentDirection;
+   
+   // For Pending, overwrite direction based on Type (Buy Limit/Stop -> Buy, Sell Limit/Stop -> Sell)
+   if(CurrentTypeIndex > 0)
+   {
+       if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3) dir = 0; // Buy Pending
+       else dir = 1; // Sell Pending
+   }
+   
+   if(dir == 0) // BUY
+   {
+       sl = entry - distSL;
+       tp = entry + distTP;
+   }
+   else // SELL
+   {
+       sl = entry + distSL;
+       tp = entry - distTP;
+   }
+   
+   // 3. Apply to Interface
+   // Only update Entry field if NOT Market
+   if(CurrentTypeIndex != 0)
+   {
+       ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(entry, digits));
+   }
+   
+   ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
+   ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
+   
+   // 4. Update Lines
+   UpdateChartLines();
+   UpdateCalculatedLot(); // Refresh Risk Calc
+}
+
+//+------------------------------------------------------------------+
 //| VISIBILITY CONTROL                                               |
 //+------------------------------------------------------------------+
 void ToggleMainPanel(bool visible)
@@ -398,6 +482,7 @@ void ToggleMainPanel(bool visible)
    {
       // If showing, we rely on UpdateUIMode to restore correct state
       UpdateUIMode(); 
+      ApplyDefaultTradeValues(); // Apply Defaults on Open 
    }
    else
    {
@@ -487,9 +572,9 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
           RiskMode++;
           if(RiskMode > 2) RiskMode = 0;
           
-          if(RiskMode == 1)      ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskMoney, 2));
-          else if(RiskMode == 2) ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRiskR, 2));
-          else                   ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(g_DefaultRisk, 1));
+          if(RiskMode == 1)      ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+          else if(RiskMode == 2) ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+          else                   ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
           
           UpdateUIMode();
           UpdateCalculatedLot();
@@ -505,6 +590,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
           else CurrentTypeIndex++;
           
           UpdateUIMode(); 
+          ApplyDefaultTradeValues(); // Apply Defaults on Type Change 
           UpdateCalculatedLot();
           ChartRedraw();
           return true;
@@ -584,6 +670,10 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
        
        if(changed)
        {
+           // Force Apply Defaults for direct shortcuts 7 and 8 too
+           // (Logic below handles 57 toggle, but we want 55/56 to trigger defaults too)
+           // We do it by letting the 'changed' block run and adding the call there.
+
           if(lparam == 57)
           {
              if(CurrentDirection == 0) {
@@ -597,6 +687,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
              }
           }
           UpdateUIMode();
+          ApplyDefaultTradeValues(); // Apply Defaults on Shortcut Change
           UpdateCalculatedLot();
           ChartRedraw();
           return true;
