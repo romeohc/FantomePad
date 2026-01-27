@@ -8,7 +8,9 @@
 // Default Risk inputs removed
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
 input int      DefaultManagerPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
-input int      MagicNumber = 123456;   // Magic Number for trade identification
+// IMPORTANT: Change this MagicNumber if running multiple instances of FantomePad!
+// Each EA instance MUST have a unique MagicNumber to avoid trade conflicts.
+input int      MagicNumber = 123456;   // Magic Number for trade identification (MUST BE UNIQUE PER INSTANCE)
 input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
 input color    ColorHeader = C'14,16,19';  // Header Darker
 input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements

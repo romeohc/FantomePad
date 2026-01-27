@@ -1319,7 +1319,7 @@ void GUI_OnChartEvent(const int id,
                      {
                         // For pending orders, "Close" means Delete. 
                         // We ignore the percentage (toClose), assuming user wants to remove the order.
-                        closed = OrderDelete(SelectedPositionTicket, clrGray);
+                        closed = SafeOrderDelete(SelectedPositionTicket, clrGray);
                      }
                      else // Market Order
                      {

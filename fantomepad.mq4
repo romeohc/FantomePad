@@ -18,6 +18,25 @@
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   // --- INPUT VALIDATION (SECURITY) ---
+   if(MaxSlippage < 0)
+   {
+      Alert("FantomePad Error: MaxSlippage cannot be negative. Using default (10).");
+   }
+   
+   if(OneRPercent <= 0)
+   {
+      Alert("FantomePad Error: OneRPercent must be greater than 0. Using default (2.0).");
+   }
+   
+   if(MagicNumber <= 0)
+   {
+      Alert("FantomePad Error: MagicNumber must be a positive integer.");
+      return INIT_PARAMETERS_INCORRECT;
+   }
+   
+   // --- END VALIDATION ---
+
    // 1. Initialiser les globales depuis les Inputs
    InitGlobals();
    

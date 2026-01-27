@@ -33,8 +33,52 @@ int SafeOrderSend(string symbol, int cmd, double volume, double price, int slipp
       // Normalize
       price = NormalizeDouble(price, (int)MarketInfo(symbol, MODE_DIGITS));
       
-      // Check Free Margin (Optional but good)
-      // ...
+      // --- FREE MARGIN CHECK (CRITICAL SECURITY) ---
+      double requiredMargin = 0.0;
+      if(cmd == OP_BUY || cmd == OP_SELL)
+      {
+         // Calculate required margin for this order
+         // Using broker's margin requirement calculation
+         requiredMargin = MarketInfo(symbol, MODE_MARGINREQUIRED) * volume;
+         
+         // Add safety buffer (10% extra)
+         requiredMargin *= 1.10;
+         
+         if(AccountFreeMargin() < requiredMargin)
+         {
+            HandleTradeError(134, "Insufficient Free Margin (Need: " + DoubleToString(requiredMargin, 2) + ", Have: " + DoubleToString(AccountFreeMargin(), 2) + ")");
+            return -1; // Abort immediately, no retries
+         }
+      }
+
+      // --- STOPLEVEL VALIDATION (CRITICAL SECURITY) ---
+      int stopLevel = (int)MarketInfo(symbol, MODE_STOPLEVEL);
+      if(stopLevel > 0)
+      {
+         double minDist = stopLevel * MarketInfo(symbol, MODE_POINT);
+         
+         // Check SL distance
+         if(sl > 0)
+         {
+            double slDist = MathAbs(price - sl);
+            if(slDist < minDist)
+            {
+               HandleTradeError(130, "StopLoss too close (Min: " + DoubleToString(minDist, (int)MarketInfo(symbol, MODE_DIGITS)) + " pts)");
+               return -1; // Abort, this error is not retryable
+            }
+         }
+         
+         // Check TP distance
+         if(tp > 0)
+         {
+            double tpDist = MathAbs(price - tp);
+            if(tpDist < minDist)
+            {
+               HandleTradeError(130, "TakeProfit too close (Min: " + DoubleToString(minDist, (int)MarketInfo(symbol, MODE_DIGITS)) + " pts)");
+               return -1; // Abort, this error is not retryable
+            }
+         }
+      }
       
       ticket = OrderSend(symbol, cmd, volume, price, slippage, sl, tp, comment, magic, expiration, clr);
       
@@ -125,6 +169,42 @@ bool SafeOrderModify(int ticket, double price, double sl, double tp, datetime ex
    }
    
    HandleTradeError(error, "SafeOrderModify Failed");
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| SAFE ORDER DELETE (With Retry Mechanism)                          |
+//+------------------------------------------------------------------+
+bool SafeOrderDelete(int ticket, color clr = clrNONE)
+{
+   bool result = false;
+   int error = 0;
+   
+   for(int i = 0; i < MAX_RETRIES; i++)
+   {
+      // Check context
+      if(IsTradeContextBusy()) 
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+      
+      result = OrderDelete(ticket, clr);
+      
+      if(result) return true;
+      
+      error = GetLastError();
+      
+      // Retryable Errors for Delete
+      if(error == 146 || error == 4108) // Context Busy, Invalid ticket
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+      else break; // Fatal error
+   }
+   
+   HandleTradeError(error, "SafeOrderDelete Failed for ticket #" + IntegerToString(ticket));
    return false;
 }
 
