@@ -5,6 +5,44 @@
 #property strict
 
 //+------------------------------------------------------------------+
+//| VISIBLE CHART PRICE RANGE HELPER                                 |
+//+------------------------------------------------------------------+
+// Gets the price range currently visible on the chart.
+// Used to position order lines so they remain visible to the user.
+void GetVisibleChartPriceRange(double &priceMin, double &priceMax)
+{
+   // Get the visible bar range
+   int firstVisibleBar = (int)ChartGetInteger(0, CHART_FIRST_VISIBLE_BAR);
+   int barsVisible = (int)ChartGetInteger(0, CHART_WIDTH_IN_BARS);
+   
+   // Calculate the last visible bar index (bars are counted from current=0)
+   int lastVisibleBar = firstVisibleBar - barsVisible;
+   if(lastVisibleBar < 0) lastVisibleBar = 0;
+   
+   // Scan visible bars to find high/low
+   double highest = -1e10;
+   double lowest  = 1e10;
+   
+   for(int i = lastVisibleBar; i <= firstVisibleBar && i < Bars; i++)
+   {
+      double h = iHigh(Symbol(), Period(), i);
+      double l = iLow(Symbol(), Period(), i);
+      if(h > highest) highest = h;
+      if(l < lowest)  lowest = l;
+   }
+   
+   // Fallback if no bars
+   if(highest < lowest)
+   {
+      highest = Ask + 100 * Point;
+      lowest = Bid - 100 * Point;
+   }
+   
+   priceMin = lowest;
+   priceMax = highest;
+}
+
+//+------------------------------------------------------------------+
 //| MOTEUR DE LAYOUT DYNAMIQUE                                       |
 //+------------------------------------------------------------------+
 void UpdateUIMode()
@@ -387,6 +425,8 @@ void AutoSwitchOrderType()
 //+------------------------------------------------------------------+
 //| APPLY DEFAULT VALUES (Entry/SL/TP)                               |
 //+------------------------------------------------------------------+
+// This function now uses the visible chart range to calculate distances
+// so that Order Lines (Entry, SL, TP) are ALWAYS visible on the chart.
 void ApplyDefaultTradeValues()
 {
    string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
@@ -400,11 +440,32 @@ void ApplyDefaultTradeValues()
    // Safety against zero dividing or weird symbols
    if(point == 0) return;
    
-   // Default distances (in points)
-   // We use sensible defaults: SL=300pts (30 pips), TP=600pts (60 pips), Entry Offset=200pts (20 pips)
-   double distSL = 300 * point;
-   double distTP = 600 * point;
-   double distEntry = 200 * point;
+   // --- DYNAMIC DISTANCE CALCULATION BASED ON VISIBLE CHART ---
+   // Get the visible price range
+   double priceMin, priceMax;
+   GetVisibleChartPriceRange(priceMin, priceMax);
+   
+   double visibleRange = priceMax - priceMin;
+   
+   // Define proportions of the visible range for each distance
+   // We use fractions of the visible range to ensure lines stay on screen
+   // Entry offset: ~5% of visible range (for pending orders)
+   // SL: ~15% of visible range from entry  
+   // TP: ~25% of visible range from entry
+   double proportionEntry = 0.05;
+   double proportionSL = 0.15;
+   double proportionTP = 0.25;
+   
+   // Calculate dynamic distances
+   double distEntry = visibleRange * proportionEntry;
+   double distSL = visibleRange * proportionSL;  
+   double distTP = visibleRange * proportionTP;
+   
+   // Minimum floor to avoid too-small distances (at least 10 pips = 100 points on 5-digit)
+   double minDist = 100 * point;
+   if(distEntry < minDist) distEntry = minDist;
+   if(distSL < minDist * 2) distSL = minDist * 2;
+   if(distTP < minDist * 3) distTP = minDist * 3;
    
    double entry = 0, sl = 0, tp = 0;
    
@@ -453,6 +514,39 @@ void ApplyDefaultTradeValues()
        tp = entry - distTP;
    }
    
+   // --- CLAMP TO VISIBLE RANGE ---
+   // Ensure all prices stay within the visible chart area with some margin
+   double margin = visibleRange * 0.05; // 5% margin from edges
+   double clampMin = priceMin + margin;
+   double clampMax = priceMax - margin;
+   
+   // Clamp Entry (for pending orders)
+   if(CurrentTypeIndex != 0)
+   {
+       if(entry < clampMin) entry = clampMin;
+       if(entry > clampMax) entry = clampMax;
+   }
+   
+   // Recalculate SL/TP based on potentially clamped entry
+   if(dir == 0) // BUY
+   {
+       sl = entry - distSL;
+       tp = entry + distTP;
+   }
+   else // SELL
+   {
+       sl = entry + distSL;
+       tp = entry - distTP;
+   }
+   
+   // Clamp SL
+   if(sl < clampMin) sl = clampMin;
+   if(sl > clampMax) sl = clampMax;
+   
+   // Clamp TP
+   if(tp < clampMin) tp = clampMin;
+   if(tp > clampMax) tp = clampMax;
+   
    // 3. Apply to Interface
    // Only update Entry field if NOT Market
    if(CurrentTypeIndex != 0)
@@ -466,6 +560,100 @@ void ApplyDefaultTradeValues()
    // 4. Update Lines
    UpdateChartLines();
    UpdateCalculatedLot(); // Refresh Risk Calc
+}
+
+//+------------------------------------------------------------------+
+//| SHOW VALIDATION ERROR MESSAGE                                    |
+//+------------------------------------------------------------------+
+// Displays an error message in a red cell below the trading panel
+// with white text and a close button (X) in the top right corner.
+void ShowValidationError(string message)
+{
+   g_ValidationErrorMsg = message;
+   g_ValidationErrorVisible = true;
+   
+   // Calculate position (below the main panel)
+   int panelX = g_PanelMain.X;
+   int panelY = g_PanelMain.Y;
+   
+   // Get actual panel height
+   long panelH = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
+   if(panelH < 50) panelH = 300; // Fallback
+   
+   int errorX = panelX;
+   int errorY = (int)(panelY + panelH + 10); // 10px gap below panel
+   int errorW = g_PanelMain.Width;
+   int errorH = 45; // Height of error message box
+   
+   // 1. Background (Red)
+   string bgName = PREFIX + "ValErr_Bg";
+   if(ObjectFind(0, bgName) < 0) ObjectCreate(0, bgName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, bgName, OBJPROP_XDISTANCE, errorX);
+   ObjectSetInteger(0, bgName, OBJPROP_YDISTANCE, errorY);
+   ObjectSetInteger(0, bgName, OBJPROP_XSIZE, errorW);
+   ObjectSetInteger(0, bgName, OBJPROP_YSIZE, errorH);
+   ObjectSetInteger(0, bgName, OBJPROP_BGCOLOR, C'180,45,50'); // Dark Red
+   ObjectSetInteger(0, bgName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+   ObjectSetInteger(0, bgName, OBJPROP_BORDER_COLOR, C'220,60,60'); // Lighter red border
+   ObjectSetInteger(0, bgName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, bgName, OBJPROP_BACK, false);
+   ObjectSetInteger(0, bgName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, bgName, OBJPROP_ZORDER, 100);
+   
+   // 2. Error Text (White, centered)
+   string txtName = PREFIX + "ValErr_Txt";
+   if(ObjectFind(0, txtName) < 0) ObjectCreate(0, txtName, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, errorX + 15);
+   ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, errorY + 14);
+   ObjectSetString(0, txtName, OBJPROP_TEXT, message);
+   ObjectSetString(0, txtName, OBJPROP_FONT, "Trebuchet MS Bold");
+   ObjectSetInteger(0, txtName, OBJPROP_FONTSIZE, 9);
+   ObjectSetInteger(0, txtName, OBJPROP_COLOR, clrWhite);
+   ObjectSetInteger(0, txtName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, txtName, OBJPROP_BACK, false);
+   ObjectSetInteger(0, txtName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, txtName, OBJPROP_ZORDER, 101);
+   
+   // 3. Close Button (X) in top right corner
+   string closeName = PREFIX + "ValErr_Close";
+   if(ObjectFind(0, closeName) < 0) ObjectCreate(0, closeName, OBJ_BUTTON, 0, 0, 0);
+   ObjectSetInteger(0, closeName, OBJPROP_XDISTANCE, errorX + errorW - 30);
+   ObjectSetInteger(0, closeName, OBJPROP_YDISTANCE, errorY + 8);
+   ObjectSetInteger(0, closeName, OBJPROP_XSIZE, 22);
+   ObjectSetInteger(0, closeName, OBJPROP_YSIZE, 22);
+   ObjectSetString(0, closeName, OBJPROP_TEXT, "X");
+   ObjectSetString(0, closeName, OBJPROP_FONT, "Arial Bold");
+   ObjectSetInteger(0, closeName, OBJPROP_FONTSIZE, 10);
+   ObjectSetInteger(0, closeName, OBJPROP_COLOR, clrWhite);
+   ObjectSetInteger(0, closeName, OBJPROP_BGCOLOR, C'150,35,40'); // Darker red for button
+   ObjectSetInteger(0, closeName, OBJPROP_BORDER_COLOR, C'150,35,40');
+   ObjectSetInteger(0, closeName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, closeName, OBJPROP_BACK, false);
+   ObjectSetInteger(0, closeName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, closeName, OBJPROP_ZORDER, 102);
+   
+   ChartRedraw();
+}
+
+//+------------------------------------------------------------------+
+//| HIDE VALIDATION ERROR MESSAGE                                    |
+//+------------------------------------------------------------------+
+// Closes and removes the validation error message display
+void HideValidationError()
+{
+   g_ValidationErrorMsg = "";
+   g_ValidationErrorVisible = false;
+   
+   // Delete all error message objects
+   string bgName = PREFIX + "ValErr_Bg";
+   string txtName = PREFIX + "ValErr_Txt";
+   string closeName = PREFIX + "ValErr_Close";
+   
+   if(ObjectFind(0, bgName) >= 0) ObjectDelete(0, bgName);
+   if(ObjectFind(0, txtName) >= 0) ObjectDelete(0, txtName);
+   if(ObjectFind(0, closeName) >= 0) ObjectDelete(0, closeName);
+   
+   ChartRedraw();
 }
 
 //+------------------------------------------------------------------+
@@ -492,6 +680,9 @@ void ToggleMainPanel(bool visible)
       SetObjVisible("Btn_Buy", false);
       SetObjVisible("Btn_Sell", false);
       SetObjVisible("Btn_Action", false);
+      
+      // --- CLEANUP VALIDATION ERROR ---
+      HideValidationError();
       
       // --- CLEANUP EXTRA CHART LINES ---
       // When hiding, we must ensure "Ghost" lines are removed

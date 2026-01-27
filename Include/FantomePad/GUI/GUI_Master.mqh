@@ -683,16 +683,14 @@ void GUI_OnChartEvent(const int id,
            return;
        }
        
-       // --- TOAST CLOSE (REMOVED) ---
-       /*
-       if(sparam == PREFIX + "Toast_BtnClose")
+       // --- VALIDATION ERROR CLOSE BUTTON ---
+       if(sparam == PREFIX + "ValErr_Close")
        {
-           g_ToastMsg = "";
-           UpdateToastNotification(); 
+           HideValidationError();
+           ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
            ChartRedraw();
            return;
        }
-       */
    
       // --- TOGGLE RISK MODE (% / CURRENCY) ---
       if(sparam == PREFIX + "Label_RiskPerc")
@@ -1385,10 +1383,17 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0) 
          {
-            // HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+            // Build specific error message
+            string errMsg = "";
+            if(sl <= 0 && risk <= 0) errMsg = "Stop Loss & Risk required!";
+            else if(sl <= 0) errMsg = "Stop Loss required!";
+            else errMsg = "Risk required!";
+            
+            ShowValidationError(errMsg);
             return;
          }
          
+         HideValidationError(); // Clear any previous error on success
          ExecuteOrder(OP_BUY);
       }
       
@@ -1403,10 +1408,17 @@ void GUI_OnChartEvent(const int id,
 
          if(sl <= 0 || risk <= 0) 
          {
-            // HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+            // Build specific error message
+            string errMsg = "";
+            if(sl <= 0 && risk <= 0) errMsg = "Stop Loss & Risk required!";
+            else if(sl <= 0) errMsg = "Stop Loss required!";
+            else errMsg = "Risk required!";
+            
+            ShowValidationError(errMsg);
             return;
          }
 
+         HideValidationError(); // Clear any previous error on success
          ExecuteOrder(OP_SELL);
       }
 
@@ -1422,10 +1434,17 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0 || price <= 0)
          {
-             // HandleTradeMessage("PRICE, STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+             // Build specific error message for pending orders
+             string missing = "";
+             if(price <= 0) missing = "Entry Price";
+             if(sl <= 0) missing = (missing == "") ? "Stop Loss" : missing + ", SL";
+             if(risk <= 0) missing = (missing == "") ? "Risk" : missing + ", Risk";
+             
+             ShowValidationError(missing + " required!");
              return;
          }
       
+         HideValidationError(); // Clear any previous error on success
          int opCmd = -1;
          if(CurrentTypeIndex == 1) opCmd = OP_BUYLIMIT;
          if(CurrentTypeIndex == 2) opCmd = OP_SELLLIMIT;

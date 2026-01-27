@@ -138,6 +138,10 @@ string g_ToastMsg = "";
 uint   g_ToastStartTime = 0;
 color  g_ToastColor = C'214,48,49'; // Red by default 
 
+// --- VALIDATION ERROR MESSAGE GLOBALS ---
+string g_ValidationErrorMsg = "";     // Current error message to display
+bool   g_ValidationErrorVisible = false; // Is the error message currently visible
+
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
