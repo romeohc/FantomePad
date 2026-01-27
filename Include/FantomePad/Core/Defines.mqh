@@ -109,6 +109,7 @@ color    g_ColorCandleUp, g_ColorCandleDown;
 color    g_ColorListNormal, g_ColorListHover;
 
 string   g_ColorPickerTarget = ""; // Target button to update
+bool     g_ShowOrderLines;       // Toggle for Order Lines visibility
 
 // --- MOUSE TRACKING ---
 int    LastMouseX = -1;
@@ -183,6 +184,8 @@ void InitGlobals()
    g_ColorCandleDown = ColorCandleDown;
    g_ColorListNormal = ColorListNormal;
    g_ColorListHover = ColorListHover;
+   
+   g_ShowOrderLines = true; // Default to ON
 
    // Init default custom dates (last 7 days by default)
    g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;

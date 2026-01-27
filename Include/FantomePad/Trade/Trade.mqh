@@ -200,6 +200,21 @@ void UpdateSingleLine(string lineSuffix, string editSuffix, color col)
 
 void UpdateChartLines()
 {
+   if(!g_ShowOrderLines)
+   {
+       // If lines are disabled, ensure they are removed
+       if(ObjectFind(0, PREFIX + "Line_SL") >= 0) ObjectDelete(0, PREFIX + "Line_SL");
+       if(ObjectFind(0, PREFIX + "Line_TP") >= 0) ObjectDelete(0, PREFIX + "Line_TP");
+       if(ObjectFind(0, PREFIX + "Line_Price") >= 0) ObjectDelete(0, PREFIX + "Line_Price");
+       
+       if(ObjectFind(0, PREFIX + "Line_SL_Txt") >= 0) ObjectDelete(0, PREFIX + "Line_SL_Txt");
+       if(ObjectFind(0, PREFIX + "Line_TP_Txt") >= 0) ObjectDelete(0, PREFIX + "Line_TP_Txt");
+       if(ObjectFind(0, PREFIX + "Line_Price_Txt") >= 0) ObjectDelete(0, PREFIX + "Line_Price_Txt");
+       
+       ChartRedraw();
+       return;
+   }
+
    UpdateSingleLine("Line_SL", "Edit_SL", g_ColorSLLine);
    UpdateSingleLine("Line_TP", "Edit_TP", g_ColorTPLine);
    
@@ -540,7 +555,8 @@ void ExecuteOrder(int cmd)
       // Reset du Prix d'entrée
       ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, "0.00000");
       
-      UpdateChartLines();
+      UpdateChartLines(); // Update lines for the "next" trade (clears them basically or resets)
+      UpdateOpenOrderLines(); // <--- INSTANT UPDATE OF OPEN TRADES (FIXES LATENCY)
       UpdateCalculatedLot(); 
       ChartRedraw();
    }

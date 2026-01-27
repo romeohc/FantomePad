@@ -168,6 +168,26 @@ void OpenSettings()
    }
    relY += 30;
 
+   // --- SHOW ORDER LINES ---
+   v = CHECK_VIS(25);
+   n = "Set_Lbl_ShowLines"; string nb2 = "Set_Btn_ShowLines";
+   if(v) {
+       CreateLabel(n, "Show Order Lines", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+
+       string txtLines = g_ShowOrderLines ? "ON" : "OFF";
+       color bgLines = g_ShowOrderLines ? g_ColorBtnActive : g_ColorInput;
+       
+       CreateButton(nb2, txtLines, x + w - 80, SCREEN_Y, 60, 25, bgLines, g_ColorText);
+       ObjectSetInteger(0, PREFIX + nb2, OBJPROP_ZORDER, 102);
+       ObjectSetInteger(0, PREFIX + nb2, OBJPROP_BORDER_COLOR, C'60,64,72');
+       SetObjVisible(nb2, true);
+   } else {
+       if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+       if(ObjectFind(0, PREFIX + nb2) >= 0) SetObjVisible(nb2, false);
+   }
+   relY += 30;
+
    // Separator
    v = CHECK_VIS(1);
    n = "Set_Sep_Gen";
@@ -401,16 +421,29 @@ void CreateColorPicker()
     // --- Custom Color Section ---
     int customY = startY + gridHeight + 15;
     
-    // Modern Input
-    CreateEdit("CP_Edit_Custom", "#FFFFFF", startX, customY, 130, 30);
+    int inputW = 100;
+    int btnW = 60;
+    int spacing = 10;
+    
+    // Centering the group (input + button)
+    // total group width = inputW + spacing + btnW
+    int groupW = inputW + spacing + btnW;
+    int groupX = x + (w - groupW) / 2;
+    
+    // Input
+    CreateEdit("CP_Edit_Custom", "#FFFFFF", groupX, customY, inputW, 30);
     ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ZORDER, 201);
     ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BGCOLOR, g_ColorInput);
     ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_COLOR, g_ColorText);
     ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BORDER_COLOR, C'60,64,72');
     ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ALIGN, ALIGN_CENTER);
-   ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONTSIZE, 8);
-    ObjectSetString(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONT, "Trebuchet MS Bold");
+    
+    // Button
+    CreateButton("CP_Btn_Custom", "ADD", groupX + inputW + spacing, customY, btnW, 30, g_ColorBtnActive, g_ColorText);
+    ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_ZORDER, 201);
     ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_BORDER_COLOR, C'0,122,255');
+    ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONTSIZE, 8);
+    ObjectSetString(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONT, "Trebuchet MS Bold");
 }
 
 //+------------------------------------------------------------------+
@@ -511,6 +544,7 @@ bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dpara
                    int size = ArraySize(g_ColorPalette);
                    ArrayResize(g_ColorPalette, size + 1);
                    g_ColorPalette[size] = pickedCol;
+                   SaveConfigToFile(); // Save updated palette
                    CreateColorPicker(); ChartRedraw();
                }
                

@@ -70,6 +70,7 @@ void SaveConfigToFile()
       // Changed: Default Risks removed
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
       FileWrite(handle, "ManagerPosition=" + IntegerToString(g_ManagerPosition));
+      FileWrite(handle, "ShowOrderLines=" + IntegerToString(g_ShowOrderLines));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
       FileWrite(handle, "ColorHeader=" + IntegerToString(g_ColorHeader));
       FileWrite(handle, "ColorInput=" + IntegerToString(g_ColorInput));
@@ -111,6 +112,14 @@ void SaveConfigToFile()
       FileWrite(handle, "SettingsX=" + IntegerToString(g_PanelSettings.X));
       FileWrite(handle, "SettingsY=" + IntegerToString(g_PanelSettings.Y));
       
+      // Save Palette
+      string palStr = "";
+      for(int i=0; i<ArraySize(g_ColorPalette); i++) {
+         if(i > 0) palStr += ",";
+         palStr += IntegerToString(g_ColorPalette[i]);
+      }
+      FileWrite(handle, "UserPalette=" + palStr);
+      
       FileClose(handle);
    }
 }
@@ -133,6 +142,7 @@ void LoadConfig()
             
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
             if(key == "ManagerPosition")  g_ManagerPosition  = (int)StringToInteger(val);
+            if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
             if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
             if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);
@@ -173,6 +183,14 @@ void LoadConfig()
             if(key == "IsSettingsOpen") g_PanelSettings.IsVisible = (bool)StringToInteger(val);
             if(key == "SettingsX") g_PanelSettings.X = (int)StringToInteger(val);
             if(key == "SettingsY") g_PanelSettings.Y = (int)StringToInteger(val);
+            
+            if(key == "UserPalette") {
+               string cols[];
+               if(StringSplit(val, ',', cols) > 0) {
+                  ArrayResize(g_ColorPalette, ArraySize(cols));
+                  for(int i=0; i<ArraySize(cols); i++) g_ColorPalette[i] = (color)StringToInteger(cols[i]);
+               }
+            }
          }
       }
       FileClose(handle);

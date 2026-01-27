@@ -59,61 +59,18 @@ void GUI_OnInit()
 }
 
 //+------------------------------------------------------------------+
-//| TOAST NOTIFICATION SYSTEM                                        |
+//| TOAST NOTIFICATION SYSTEM (REMOVED)                              |
 //+------------------------------------------------------------------+
 void UpdateToastNotification() 
 {
+   // Logic removed as requested
    string bgName = PREFIX + "Toast_Bg";
    string txtName = PREFIX + "Toast_Txt";
+   string closeName = PREFIX + "Toast_BtnClose";
    
-   if(g_ToastMsg == "") 
-   {
-      if(ObjectFind(0, bgName) >= 0) ObjectDelete(0, bgName);
-      if(ObjectFind(0, txtName) >= 0) ObjectDelete(0, txtName);
-      return;
-   }
-   
-   // Check Timeout (5 seconds)
-   if(GetTickCount() - g_ToastStartTime > 5000) 
-   {
-      g_ToastMsg = "";
-      ChartRedraw();
-      return;
-   }
-   
-   // Draw Logic
-   int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
-   int w = 450; // Wide enough
-   int h = 35;
-   int x = (chartW - w) / 2;
-   int y = 20; // Top margin
-   
-   // Create or Update BG
-   if(ObjectFind(0, bgName) < 0) 
-   {
-      CreateRect(bgName, x, y, w, h, g_ToastColor, BORDER_FLAT);
-      ObjectSetInteger(0, bgName, OBJPROP_ZORDER, 100); // High z-order
-   }
-   
-   ObjectSetInteger(0, bgName, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, bgName, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, bgName, OBJPROP_XSIZE, w);
-   ObjectSetInteger(0, bgName, OBJPROP_BGCOLOR, g_ToastColor);
-   ObjectSetInteger(0, bgName, OBJPROP_BORDER_COLOR, g_ToastColor);
-   
-   // Create or Update Text
-   if(ObjectFind(0, txtName) < 0) 
-   {
-      CreateLabel(txtName, g_ToastMsg, x + (w/2), y + 7, 10, clrWhite, "Arial Bold");
-      ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_UPPER);
-      ObjectSetInteger(0, txtName, OBJPROP_ZORDER, 101);
-   }
-   // Center Text setup
-   ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, x + (w/2));
-   ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, y + 7);
-   ObjectSetString(0, txtName, OBJPROP_TEXT, g_ToastMsg);
-   
-   ChartRedraw();
+   if(ObjectFind(0, bgName) >= 0) ObjectDelete(0, bgName);
+   if(ObjectFind(0, txtName) >= 0) ObjectDelete(0, txtName);
+   if(ObjectFind(0, closeName) >= 0) ObjectDelete(0, closeName);
 }
 
 //+------------------------------------------------------------------+
@@ -128,7 +85,7 @@ void GUI_OnTick()
 
    UpdateInfoPanel();
    UpdatePositionsValues();
-   UpdateToastNotification();
+   // UpdateToastNotification(); // Removed 
    // Warning update moved to Timer for responsiveness
 }
 
@@ -656,6 +613,17 @@ void GUI_OnChartEvent(const int id,
            ChartRedraw();
            return;
        }
+       
+       // --- TOAST CLOSE (REMOVED) ---
+       /*
+       if(sparam == PREFIX + "Toast_BtnClose")
+       {
+           g_ToastMsg = "";
+           UpdateToastNotification(); 
+           ChartRedraw();
+           return;
+       }
+       */
    
       // --- TOGGLE RISK MODE (% / CURRENCY) ---
       if(sparam == PREFIX + "Label_RiskPerc")
@@ -696,6 +664,22 @@ void GUI_OnChartEvent(const int id,
           // Update Real Panel
           UpdateManagerPanel();
           EffectButton(sparam);
+          return;
+      }
+
+      if(sparam == PREFIX + "Set_Btn_ShowLines")
+      {
+          g_ShowOrderLines = !g_ShowOrderLines;
+          
+          // Update Text/Visuals
+          string t = g_ShowOrderLines ? "ON" : "OFF";
+          color b = g_ShowOrderLines ? g_ColorBtnActive : g_ColorInput;
+          ObjectSetString(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_TEXT, t);
+          ObjectSetInteger(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_BGCOLOR, b);
+          
+          UpdateChartLines(); 
+          EffectButton(sparam);
+          SaveConfigToFile();
           return;
       }
 
@@ -1142,6 +1126,12 @@ void GUI_OnChartEvent(const int id,
                          g_PosPartialMode = 0; 
                          UpdatePartialButtonsVisuals();
                          
+                         UpdateOpenOrderLines(); // <--- INSTANT LINES UPDATE (FIXES LATENCY)
+                         UpdateCalculatedLot();  // <--- RECALC NEW LOTS (EQUITY CHANGED)
+                         
+                         if(g_PanelInfo.IsVisible) CreateInfoPanel();       // <--- UPDATE BALANCE/EQUITY
+                         if(g_PanelHistory.IsVisible) CreateHistoryPanel(); // <--- UPDATE HISTORY
+                         
                          if(toClose >= currentLots) 
                          {
                              SelectedPositionTicket = -1; // Fully Closed
@@ -1192,6 +1182,8 @@ void GUI_OnChartEvent(const int id,
                              g_LastPosSL = inputSL;
                              g_LastPosTP = inputTP;
                              g_LastPosEntry = inputOpen;
+                             
+                             UpdateOpenOrderLines(); // <--- INSTANT LINES UPDATE
                              
                              // Reset BE State
                              if(g_PosBE_Active)
@@ -1255,7 +1247,7 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0) 
          {
-            HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+            // HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
             return;
          }
          
@@ -1273,7 +1265,7 @@ void GUI_OnChartEvent(const int id,
 
          if(sl <= 0 || risk <= 0) 
          {
-            HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+            // HandleTradeMessage("STOP LOSS AND RISK REQUIRED!", g_ColorRed);
             return;
          }
 
@@ -1292,7 +1284,7 @@ void GUI_OnChartEvent(const int id,
          
          if(sl <= 0 || risk <= 0 || price <= 0)
          {
-             HandleTradeMessage("PRICE, STOP LOSS AND RISK REQUIRED!", g_ColorRed);
+             // HandleTradeMessage("PRICE, STOP LOSS AND RISK REQUIRED!", g_ColorRed);
              return;
          }
       
