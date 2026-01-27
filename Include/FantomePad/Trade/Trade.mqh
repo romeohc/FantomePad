@@ -2,7 +2,11 @@
 //|                                                        Trade.mqh |
 //|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
+#ifndef _TRADE_MQH_
+#define _TRADE_MQH_
 #property strict
+
+#include "../Core/Defines.mqh"
 
 // Forward declaration if needed, but in MQL4 includes are flat.
 // We assume Defines and GUI components are available or we manipulate objects by name.
@@ -658,5 +662,7 @@ void ExecuteOrder(int cmd)
       ChartRedraw();
    }
 }
+#endif
+
 
 

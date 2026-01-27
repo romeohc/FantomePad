@@ -2,6 +2,8 @@
 //|                                                       Config.mqh |
 //|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
+#ifndef _CONFIG_MQH_
+#define _CONFIG_MQH_
 #property strict
 
 // Helpers
@@ -198,3 +200,4 @@ void LoadConfig()
       FileClose(handle);
    }
 }
+#endif

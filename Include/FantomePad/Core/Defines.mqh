@@ -2,6 +2,8 @@
 //|                                                      Defines.mqh |
 //|                                              FantomePad Project  |
 //+------------------------------------------------------------------+
+#ifndef _DEFINES_MQH_
+#define _DEFINES_MQH_
 #property strict
 
 //--- Inputs externes (Configuration de base)
@@ -222,3 +224,4 @@ void InitGlobals()
    ArrayResize(g_ColorPalette, ArraySize(Defaults));
    for(int i=0; i<ArraySize(Defaults); i++) g_ColorPalette[i] = Defaults[i];
 }
+#endif

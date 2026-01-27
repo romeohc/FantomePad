@@ -1,10 +1,17 @@
 //+------------------------------------------------------------------+
 //|                                                   Components.mqh |
-//|                                                FantomePad Project  |
+//|                                                FantomePad Project |
 //+------------------------------------------------------------------+
+#ifndef _COMPONENTS_MQH_
+#define _COMPONENTS_MQH_
 #property strict
 
-// Helpers Graphiques
+// Relative path to avoid dependency on global include paths
+#include "../../Core/Defines.mqh"
+
+//+------------------------------------------------------------------+
+//| Helpers Graphiques                                               |
+//+------------------------------------------------------------------+
 void SetObjPosition(string name, int x, int y)
 {
    ObjectSetInteger(0, PREFIX + name, OBJPROP_XDISTANCE, x);
@@ -44,7 +51,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, color bg
    ObjectSetInteger(0, objName, OBJPROP_COLOR, txtColor);
    ObjectSetString(0, objName, OBJPROP_TEXT, text);
    ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
-   ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10); // Slightly larger
+   ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10); 
    ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    ObjectSetInteger(0, objName, OBJPROP_STATE, false);
    ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
@@ -78,15 +85,13 @@ void CreateEdit(string name, string text, int x, int y, int w, int h, bool readO
    ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, g_ColorInput);
    ObjectSetInteger(0, objName, OBJPROP_COLOR, g_ColorText);
    
-   // On ne définit le texte que si l'objet vient d'être créé
-   // afin de ne pas écraser la saisie de l'utilisateur lors d'un rafraîchissement
    if(!exists) ObjectSetString(0, objName, OBJPROP_TEXT, text);
    
    ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
    ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10);
    ObjectSetInteger(0, objName, OBJPROP_ALIGN, ALIGN_CENTER);
    ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); // Flat look
+   ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); 
    ObjectSetInteger(0, objName, OBJPROP_READONLY, readOnly);
    ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
@@ -100,85 +105,79 @@ void EffectButton(string name)
 }
 
 //+------------------------------------------------------------------+
-//| GENERIC DRAG HANDLER                                             |
+//| GENERIC DRAG HANDLER                                              |
 //+------------------------------------------------------------------+
-bool HandlePanelDrag(bool &isDragging, int &panelX, int &panelY, int &dragOffsetX, int &dragOffsetY, 
-                     int mouseX, int mouseY, int panelW, int panelH, string bgName = "")
+bool HandlePanelDrag(bool &dragging_state, int &pos_x, int &pos_y, int &offset_x, int &offset_y, 
+                     int mouse_x, int mouse_y, int panel_w, int panel_h, string background_name = "")
 {
-   if(!isDragging)
+   if(!dragging_state)
    {
-      // Check Hit Test
-      // If bgName is provided, we can use it to get dynamic height
-      int h = panelH;
-      if(bgName != "")
+      int current_height = panel_h;
+      if(background_name != "")
       {
-          long dynH = ObjectGetInteger(0, PREFIX + bgName, OBJPROP_YSIZE);
-          if(dynH > 50) h = (int)dynH;
+          long dynamic_h = ObjectGetInteger(0, PREFIX + background_name, OBJPROP_YSIZE);
+          if(dynamic_h > 50) current_height = (int)dynamic_h;
       }
       
-      if(mouseX >= panelX && mouseX <= panelX + panelW && mouseY >= panelY && mouseY <= panelY + h)
+      if(mouse_x >= pos_x && mouse_x <= pos_x + panel_w && mouse_y >= pos_y && mouse_y <= pos_y + current_height)
       {
-         isDragging = true;
-         dragOffsetX = mouseX - panelX;
-         dragOffsetY = mouseY - panelY;
+         dragging_state = true;
+         offset_x = mouse_x - pos_x;
+         offset_y = mouse_y - pos_y;
          ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
          return true;
       }
    }
    else
    {
-      // Update Position
-      panelX = mouseX - dragOffsetX;
-      panelY = mouseY - dragOffsetY;
+      pos_x = mouse_x - offset_x;
+      pos_y = mouse_y - offset_y;
       return true;
    }
    return false;
 }
 
 //+------------------------------------------------------------------+
-//| GENERIC SCROLL HANDLER                                           |
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
 //| GENERIC SCROLL HANDLER (Unit Agnostic)                           |
 //+------------------------------------------------------------------+
-bool HandleScrollDrag(bool &isDragging, int &scrollDragY, int &currentScrollY, 
-                      int mouseX, int mouseY, string thumbName, int trackHeight, int maxScroll)
+bool HandleScrollDrag(bool &scroll_dragging, int &scroll_anchor_y, int &scroll_current_y, 
+                      int mouse_x, int mouse_y, string thumb_name, int track_h, int max_scroll_val)
 {
-    if(!isDragging)
+    if(!scroll_dragging)
     {
-         long tx = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_XDISTANCE);
-         long ty = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YDISTANCE);
-         long tw = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_XSIZE);
-         long th = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YSIZE);
+         long tx = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XDISTANCE);
+         long ty = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YDISTANCE);
+         long tw = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XSIZE);
+         long th = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
          
-         if(mouseX >= tx - 5 && mouseX <= tx + tw + 5 && mouseY >= ty && mouseY <= ty + th)
+         if(mouse_x >= tx - 5 && mouse_x <= tx + tw + 5 && mouse_y >= ty && mouse_y <= ty + th)
          {
-             isDragging = true;
-             scrollDragY = mouseY;
+             scroll_dragging = true;
+             scroll_anchor_y = mouse_y;
              ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
              return true; 
          }
     }
     else
     {
-         int deltaY = mouseY - scrollDragY;
-         if(deltaY != 0)
+         int delta_y = mouse_y - scroll_anchor_y;
+         if(delta_y != 0)
          {
-             long thumbH = ObjectGetInteger(0, PREFIX + thumbName, OBJPROP_YSIZE);
-             int availableTrack = (int)(trackHeight - thumbH);
+             long thumb_h = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
+             int track_avail = (int)(track_h - thumb_h);
              
-             if(availableTrack > 0)
+             if(track_avail > 0)
              {
-                 double moveRatio = (double)deltaY / (double)availableTrack;
-                 int offsetChange = (int)(moveRatio * maxScroll);
+                 double move_per = (double)delta_y / (double)track_avail;
+                 int offset_delta = (int)(move_per * max_scroll_val);
                  
-                 if(MathAbs(offsetChange) >= 1)
+                 if(MathAbs(offset_delta) >= 1)
                  {
-                     currentScrollY += offsetChange;
-                     if(currentScrollY < 0) currentScrollY = 0;
-                     if(currentScrollY > maxScroll) currentScrollY = maxScroll;
+                     scroll_current_y += offset_delta;
+                     if(scroll_current_y < 0) scroll_current_y = 0;
+                     if(scroll_current_y > max_scroll_val) scroll_current_y = max_scroll_val;
                      
-                     scrollDragY = mouseY; 
+                     scroll_anchor_y = mouse_y; 
                      return true; 
                  }
              }
@@ -190,24 +189,22 @@ bool HandleScrollDrag(bool &isDragging, int &scrollDragY, int &currentScrollY,
 //+------------------------------------------------------------------+
 //| SECURITY: PREVENT WINDOWS FROM GETTING LOST                      |
 //+------------------------------------------------------------------+
-void ApplyPanelSafety(int &x, int &y, int w, int h)
+void ApplyPanelSafety(int &safe_x, int &safe_y, int safe_w, int safe_h)
 {
-   int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
-   int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
+   int chart_width = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+   int chart_height = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
-   // Si la fenêtre est PRESQUE totalement hors de l'écran (ex: s'il reste moins de 40px visibles)
-   // Cela évite de laisser une toute petite bande impossible à attraper.
-   int safetyMargin = 40;
-   bool offScreen = (x + w <= safetyMargin) || (x >= chartW - safetyMargin) || (y + h <= safetyMargin) || (y >= chartH - safetyMargin);
+   int margin_px = 40;
+   bool is_out = (safe_x + safe_w <= margin_px) || (safe_x >= chart_width - margin_px) || (safe_y + safe_h <= margin_px) || (safe_y >= chart_height - margin_px);
    
-   if(offScreen)
+   if(is_out)
    {
-      // On recentre la fenêtre
-      x = (chartW / 2) - (w / 2);
-      y = (chartH / 2) - (h / 2);
+      safe_x = (chart_width / 2) - (safe_w / 2);
+      safe_y = (chart_height / 2) - (safe_h / 2);
       
-      // Safety clamps
-      if(x < 0) x = 0;
-      if(y < 0) y = 0;
+      if(safe_x < 0) safe_x = 0;
+      if(safe_y < 0) safe_y = 0;
    }
 }
+
+#endif
