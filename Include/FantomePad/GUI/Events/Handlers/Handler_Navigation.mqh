@@ -95,10 +95,10 @@ bool Handle_Navigation_Events(string sparam)
        {
           string symbol = OrderSymbol();
           
-          // 1. Select this order in Position Navigation
+          // 1. Select this order in Position Manager
           SelectedPositionTicket = ticket;
           
-          // 2. Open Position Navigation if not already visible
+          // 2. Open Position Manager if not already visible
           if(!g_PanelPositions.IsVisible)
           {
              g_PanelPositions.IsVisible = true;

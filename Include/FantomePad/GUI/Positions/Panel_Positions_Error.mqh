@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 //| SHOW POSITION VALIDATION ERROR MESSAGE                           |
 //+------------------------------------------------------------------+
-// Displays an error message in a red cell below the Position Navigation panel
+// Displays an error message in a red cell below the Position Manager panel
 // with white text and a close button (X) in the top right corner.
 void ShowPosValidationError(string message)
 {
@@ -21,7 +21,7 @@ void ShowPosValidationError(string message)
    
    int errorX = panelX;
    int errorY = (int)(panelY + panelH + 10); // 10px gap below panel
-   int errorW = 280; // Same width as Position Navigation
+   int errorW = 280; // Same width as Position Manager
    int errorH = 45; // Height of error message box
    
    // 1. Background (Red)

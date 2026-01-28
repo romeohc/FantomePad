@@ -141,7 +141,7 @@ void UpdatePositionsLayout()
    ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_XSIZE, (long)pcBtnW);
    ObjectSetInteger(0, PREFIX + "Pos_Edit_Close", OBJPROP_YSIZE, (long)inputH);
    
-   currentY += inputH + (sectionGap * 1.5); 
+   currentY += (int)(inputH + (sectionGap * 1.5)); 
    
    // Validate
    SetObjPosition("Pos_Btn_Validate", startX + paddingX, currentY);
@@ -168,7 +168,7 @@ void CreatePositionsPanel()
    // 1. Fond & Header
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Pos_Header", 0, 0, width, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Pos_Title", "Position Navigation", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Pos_Title", "Position Manager", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Select Button
    CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);

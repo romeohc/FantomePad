@@ -230,9 +230,9 @@ bool Handle_PositionActions_Events(string sparam)
               // Re-read incase partial close changed something (unlikely for SL/TP values but good practice)
               if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
               {
-                  double currentSL = OrderStopLoss();
-                  double currentTP = OrderTakeProfit();
-                  double currentOpen = OrderOpenPrice();
+                  currentSL = OrderStopLoss();
+                  currentTP = OrderTakeProfit();
+                  currentOpen = OrderOpenPrice();
                   
                   double inputSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
                   double inputTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));

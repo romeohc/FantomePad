@@ -31,32 +31,39 @@ MQL4/Experts/FantomePad/
 ├── fantomepad.mq4           # Entry Point (OnInit, OnTick, OnChartEvent)
 └── Include/FantomePad/      # Core Logic Library
     ├── Core/                # Global Definitions & Configuration
-    │   ├── Defines.mqh      # Constants, Colors (Theming), Structs
+    │   ├── Defines.mqh      # Constants, Colors, Structs, Global State
     │   └── Config.mqh       # Save/Load State Logic (File I/O)
-    ├── GUI/                 # Custom Graphics Engine
-    │   ├── GUI_Master.mqh   # Event Dispatcher, Redraw Loop, Coordinator
-    │   ├── Components/      # Primitives (Buttons, Panels, Labels)
-    │   ├── Panel_Main.mqh   # Execution Dashboard (Buy/Sell)
-    │   ├── Panel_Manager.mqh# Open Positions List (Grid View)
-    │   └── ... (Other Panels: History, Settings, Info, Positions)
-    └── Trade/               # Execution Logic
-        └── Trade.mqh        # OrderSend Wrappers, Risk Calc, Error Handling
+    ├── GUI/                 # Custom Graphics Engine (Modular)
+    │   ├── GUI_Master.mqh   # Main Coordinator & Bridge to MQL4 Events
+    │   ├── Components/      # UI Primitives (Buttons, Panels, Labels)
+    │   ├── Events/          # Event Dispatchers (Click, Drag, Key, etc.)
+    │   │   └── Handlers/    # High-level event logic for specific features
+    │   ├── Account/         # Account Info Panel Module
+    │   ├── History/         # Trade History Panel Module
+    │   ├── Main/            # Trading Panel Module (Risk, Buy/Sell)
+    │   ├── Navigation/      # Sidebar/Menu Navigation Module
+    │   ├── Positions/       # Trade Manager Panel Module
+    │   └── Settings/        # Theming & Global Settings Module
+    ├── Trade/               # Execution & Risk Logic (Modular)
+    │   ├── Trade.mqh        # Main Trading Interface
+    │   ├── Trade_Calculations.mqh # Lot Sizing, RR, Risk Math
+    │   └── Trade_Execution.mqh    # OrderSend Wrappers & Error Handling
+    └── Tests/               # Automated Unit/Integration Tests
 ```
 
 ### 2.2. The Custom GUI Engine (`Include/FantomePad/GUI/`)
-Unlike standard MQL4 panels (which are limited), we implement a **Virtual Window Manager**:
-*   **State Management:** Each Window (Panel) is defined by a `TPanelState` struct (Visible, X, Y, Width, Dragging).
-*   **Event Loop (`GUI_Master.mqh`):** The `OnChartEvent` from the main file is piped directly here. It handles:
-    *   **Routing:** `sparam` (ObjName) is parsed to route clicks to specific handlers.
-    *   **Dragging:** Custom logic for moving windows smoothly without lag.
-    *   **Safety:** `ApplyPanelSafety()` prevents windows from being dragged off-screen.
-*   **Theming:** Centralized in `Defines.mqh` (`g_ColorBg`, `g_ColorGreen`, etc.). Changing one constant updates the entire UI.
+The GUI engine uses a **Virtual Window Manager** with a highly modular design:
+*   **Event Delegation:** `GUI_Master.mqh` intercepts `OnChartEvent` and routes it to specialized event files in `GUI/Events/` (e.g., `GUI_Event_Click.mqh`). This keeps the master file clean and focused on coordination.
+*   **Modular Panels:** Each UI feature (Main, Account, Positions) is encapsulated in its own directory. A typical panel module contains:
+    *   `Panel_*.mqh`: The main entry point for the module.
+    *   `Panel_*_UI.mqh` / `Panel_*_Layout.mqh`: View definitions and layout logic.
+    *   `Panel_*_Logic.mqh`: Business logic specific to the panel.
+*   **State Management:** Each Window (Panel) is defined by a `TPanelState` struct in `Defines.mqh` (Visible, X, Y, Width, Dragging).
+*   **Centralized Handlers:** Complex interactions that cross panel boundaries or require specific trade logic are managed in `GUI/Events/Handlers/`.
 
 ### 2.3. The Trading Core (`Include/FantomePad/Trade/`)
-*   **Risk Calculation:** real-time calculation of lot sizes based on:
-    *   **Balance %:** (e.g. 1% Risk).
-    *   **Fixed Money:** (e.g. $100 Risk).
-    *   **Fixed R:** (Ratio-based).
+*   **Modularity:** Logic is split into calculations, execution, and visual trade lines.
+*   **Risk Calculation:** Real-time calculation of lot sizes based on balance %, fixed money, or fixed R.
 *   **Execution:** Wrapper functions around `OrderSend` that handle Retries, Slippage, and ECN compatibility.
 
 ---
@@ -71,27 +78,28 @@ Unlike standard MQL4 panels (which are limited), we implement a **Virtual Window
 
 ### 3.2. Persistence System
 *   **File:** `FantomePad_Config.txt` (in `MQL4/Files/`).
-*   **Mechanism:** `SaveConfig` / `LoadConfig` serialize the UI state (Window positions, Visibility). This ensures the "Desktop" arrangement remains after restarting MT4.
+*   **Mechanism:** `SaveConfig` / `LoadConfig` in `Core/Config.mqh` serialize the UI state. This ensures the "Desktop" arrangement remains after restarting MT4.
 
 ### 3.3. Security & Stability
-Refer to `SECURITY_AUDIT.md` for known vectors.
-*   **Input Validation:** All user inputs (Risk parameters) are sanitized.
-*   **Order Integrity:** Magic Number (`123456`) identifies FantomePad trades.
-*   **Zero-Lag Optimization:** `OnTick` is throttled for UI updates (e.g., every 500ms) to preserve CPU for trade execution.
+*   **Input Validation:** All user inputs (Risk parameters) are sanitized via dedicated handlers.
+*   **Order Integrity:** Unique Magic Numbers identify FantomePad trades.
+*   **Performance:** `OnTick` is throttled for UI updates (500ms) to preserve CPU for trade execution. `OnTimer` handles high-frequency UI warnings.
 
 ---
 
 ## 4. Development Guidelines
 
-### Adding a New Panel
-1.  **Define Struct:** Add `TPanelState g_PanelNew` in `Defines.mqh`.
-2.  **Create Logic:** Create `Include/FantomePad/GUI/Panel_New.mqh` with `CreateNewPanel()` function.
-3.  **Register:** Add `CreateNewPanel()` to `GUI_OnInit()` and `RefreshAllPanels()` in `GUI_Master.mqh`.
-4.  **Route Events:** Add proper `if(sparam == ...)` handling in `GUI_OnChartEvent`.
+### Adding a New Feature/Panel
+1.  **Module Creation:** Create a new folder in `Include/FantomePad/GUI/`.
+2.  **Define State:** If it needs persistence, add relevant fields to `Defines.mqh` and update `Config.mqh`.
+3.  **Implement UI:** Use `Components.mqh` primitives to build the interface within your module.
+4.  **Register:** Link the new panel in `GUI_Master.mqh` (`GUI_OnInit` and `RefreshAllPanels`).
+5.  **Event Handling:** Add/Update handlers in `GUI/Events/Handlers/` if your feature requires complex interaction logic.
 
 ### Design Philosophy
-*   **"Aesthetics First":** If it looks like default MT4, it's wrong. Use `g_ColorChartBg` (Dark) and custom `OBJ_RECT_LABEL` objects.
-*   **"Speed Second":** Reduce click depth. One click to confirm, zero clicks to calculate.
+*   **"Aesthetics First":** Maintain the "Deep Dark" professional aesthetic using `Defines.mqh` color tokens.
+*   **Strict Modularity:** Keep layout/UI separate from logic. Files should remain under 500 lines.
+*   **Zero-Lag Optimization:** Throttling in `OnTick` and efficient event routing are mandatory.
 
 ---
 

@@ -136,10 +136,10 @@ void CreateNavigationPanel()
    CreateButton("Nav_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
    ObjectSetString(0, PREFIX + "Nav_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   // Button 2: Positions Panel (Toggle Positions) -> "Navigation"
+   // Button 2: Positions Panel (Toggle Positions) -> "Position"
    int currentX = startX + btnW + margin;
    color bgPos = g_PanelPositions.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Nav_Btn_Pos", "Navigation", currentX, startY, btnW, btnH, bgPos, g_ColorText);
+   CreateButton("Nav_Btn_Pos", "Position", currentX, startY, btnW, btnH, bgPos, g_ColorText);
    ObjectSetString(0, PREFIX + "Nav_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 3: Account Panel (Toggle Account Info) -> "Account"
