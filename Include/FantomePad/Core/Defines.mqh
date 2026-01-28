@@ -39,7 +39,7 @@ color ColorListHover  = C'45,52,60';   // Couleur au survol
 
 //--- Préfixe pour tous les objets graphiques
 string PREFIX = "PTP_";
-string ConfigFileName = "FantomePad_Config.txt";
+string ConfigFileName = "FantomePad_Config2.txt";
 
 //--- STRUCTS FOR STATE MANAGEMENT (Phase 2.2)
 struct TPanelState {
@@ -146,10 +146,18 @@ color  g_ToastColor = C'214,48,49'; // Red by default
 string g_ValidationErrorMsg = "";     // Current error message to display
 bool   g_ValidationErrorVisible = false; // Is the error message currently visible
 
+// --- ONBOARDING GLOBALS ---
+bool   g_IsFirstRun = false;
+TPanelState g_PanelOnboarding;
+
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
    // Init State Structs
+   g_PanelOnboarding.Width = 400;
+   g_PanelOnboarding.Height = 250;
+   g_PanelOnboarding.IsVisible = false;
+   
    g_PanelMain.Width = 280; // Default
    g_PanelMain.IsVisible = true;
    g_PanelMain.X = -1;
@@ -170,6 +178,8 @@ void InitGlobals()
    g_PanelSettings.IsVisible = false;
    g_PanelSettings.X = -1;
    g_PanelSettings.Y = -1;
+   
+   g_PanelNavigation.IsVisible = false; // Hidden by default during initial load
    
    g_ScrollSettings.ViewportHeight = 400;
    g_ScrollSettings.ContentHeight = 620; 

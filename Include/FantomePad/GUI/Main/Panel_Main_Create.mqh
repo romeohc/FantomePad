@@ -17,7 +17,7 @@ void CreatePanel()
 {
    CreateRect("Bg", 0, 0, g_PanelMain.Width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Header", 0, 0, g_PanelMain.Width, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Title", "Trading Panel", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Title", "Trade", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    CreateButton("Btn_Type", OrderTypes[CurrentTypeIndex], 0, 0, g_PanelMain.Width - 40, 28, g_ColorInput, g_ColorText);
    ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_FONT, "Trebuchet MS Bold");

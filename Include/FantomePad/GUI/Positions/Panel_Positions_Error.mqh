@@ -21,7 +21,7 @@ void ShowPosValidationError(string message)
    
    int errorX = panelX;
    int errorY = (int)(panelY + panelH + 10); // 10px gap below panel
-   int errorW = 280; // Same width as Position Manager
+   int errorW = 280; // Same width as Position Panel
    int errorH = 45; // Height of error message box
    
    // 1. Background (Red)

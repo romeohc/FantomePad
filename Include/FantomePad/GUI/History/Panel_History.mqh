@@ -29,7 +29,7 @@ void CreateHistoryPanel()
    // 1. Fond & Header
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
    CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Hist_Title", "Transaction History", startX + 15, startY + 10, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Hist_Title", "History", startX + 15, startY + 10, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Toolbar
    DrawHistoryToolbar(startX, startY, headerHeight);

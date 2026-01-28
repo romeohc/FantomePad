@@ -6,7 +6,7 @@ bool Handle_Navigation_Events(string sparam)
 {
    // --- NAVIGATION PANEL EVENTS ---
    
-   // 1. Toggle Trading Panel
+   // 1. Toggle Trade Panel
    if(sparam == PREFIX + "Nav_Btn_Main")
    {
       g_PanelMain.IsVisible = !g_PanelMain.IsVisible;
@@ -95,10 +95,10 @@ bool Handle_Navigation_Events(string sparam)
        {
           string symbol = OrderSymbol();
           
-          // 1. Select this order in Position Manager
+          // 1. Select this order in Position Panel
           SelectedPositionTicket = ticket;
           
-          // 2. Open Position Manager if not already visible
+          // 2. Open Position Panel if not already visible
           if(!g_PanelPositions.IsVisible)
           {
              g_PanelPositions.IsVisible = true;

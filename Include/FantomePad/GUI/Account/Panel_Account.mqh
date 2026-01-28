@@ -19,7 +19,7 @@ void CreateAccountPanel()
    // 1. Fond & Header
    CreateRect("Account_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Account_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Account_Title", "Account Overview", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("Account_Title", "Account", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Account Data
    CreateRect("Account_Stats_Bg", 0, 0, width - 40, 110, g_ColorInput, BORDER_FLAT); // Grouping Box

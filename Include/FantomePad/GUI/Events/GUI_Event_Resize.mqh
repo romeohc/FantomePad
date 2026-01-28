@@ -8,6 +8,14 @@
 //+------------------------------------------------------------------+
 void OnEvent_Resize()
 {
+   // --- ONBOARDING RESIZE ---
+   if(g_IsFirstRun)
+   {
+      CreateOnboardingUI();
+      ShowOnboarding(true);
+      return;
+   }
+
    // --- SAFETY CHECK: Recenter panels if hidden by resize ---
    if(g_PanelMain.IsVisible) {
        long h = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);

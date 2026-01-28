@@ -29,6 +29,13 @@ void OnEvent_ObjectClick(string sparam)
         ChartRedraw();
         return;
     }
+
+    // 0. Onboarding logic
+    if(sparam == PREFIX + "Onboarding_BtnStart")
+    {
+        OnClick_OnboardingStart();
+        return;
+    }
     
     // 1. Validation Logic (Errors)
     if(Handle_Validation_Events(sparam)) return;

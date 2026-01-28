@@ -57,17 +57,24 @@ int OnInit()
    ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, g_ColorCandleDown);
    ChartSetInteger(0, CHART_COLOR_CHART_UP, g_ColorCandleUp);
    ChartSetInteger(0, CHART_COLOR_CHART_DOWN, g_ColorCandleDown);
+   
+   // Nettoyage visuel complet
    ChartSetInteger(0, CHART_SHOW_GRID, false);
+   ChartSetInteger(0, CHART_SHOW_PERIOD_SEP, false);
+   ChartSetInteger(0, CHART_SHOW_VOLUMES, false);
    ChartSetInteger(0, CHART_SHOW_OHLC, false);
    ChartSetInteger(0, CHART_SHOW_ONE_CLICK, false);
    
-   // Ensure UI is drawn ON TOP of the candles (Fix for transparency issue)
+   // Ensure UI is drawn ON TOP of the candles (Fix for transparency/z-order issue)
    ChartSetInteger(0, CHART_FOREGROUND, false);
    
    // Désactiver les niveaux de trade natifs pour utiliser nos couleurs personnalisées
    ChartSetInteger(0, CHART_SHOW_TRADE_LEVELS, false);
    ChartSetInteger(0, CHART_SHOW_BID_LINE, false);
    ChartSetInteger(0, CHART_SHOW_ASK_LINE, false);
+   
+   // Rendu immédiat pour éviter les clignotements au chargement
+   ChartRedraw();
    
    // 4. Lancer l'interface graphique via le Master Controller
    GUI_OnInit();

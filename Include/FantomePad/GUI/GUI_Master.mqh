@@ -13,6 +13,7 @@
 #include "Navigation/Panel_Navigation.mqh"
 #include "Positions/Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
+#include "Onboarding/Panel_Onboarding.mqh"
 
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
@@ -31,34 +32,34 @@ void GUI_OnInit()
       UpdateOpenOrderLines();
    }
 
-   CreatePanel();
-   CreateAccountPanel();
-   CreateNavigationPanel(); 
-   CreatePositionsPanel();
-   CreateHistoryPanel();
-   
-   // Apply Loaded State
-   CreatePositionsPanel();
-   CreateHistoryPanel();
-   
-   // Apply Loaded State
-   if(g_PanelMain.IsVisible) 
+   // 1. Onboarding Logic: Only show during the first execution
+   if(g_IsFirstRun)
    {
-      UpdateUIMode();
-      ApplyDefaultTradeValues(); // Force update defaults on Init (Symbol change)
+      CreateOnboardingUI();
+      ShowOnboarding(true);
+      
+      // Force hide standard panels for a clean onboarding experience
+      ToggleMainPanel(false);
+      ToggleAccountPanel(false);
+      TogglePositionsPanel(false);
+      ToggleHistoryPanel(false);
+      
+      // Hide navigation specifically (prefix cleanup)
+      ObjectsDeleteAll(0, PREFIX + "Nav_");
+      return; 
    }
-   else ToggleMainPanel(false);
+   else 
+   {
+      // CLEANUP: Ensure onboarding objects are removed if it's not the first run
+      // This prevents the onboarding from popping up on symbol or account changes
+      ObjectsDeleteAll(0, PREFIX + "Onboarding_");
+   }
+
+   // 2. Full UI Refresh (Handles Create + Toggle for all panels)
+   RefreshAllPanels();
    
-   if(g_PanelPositions.IsVisible) TogglePositionsPanel(true);
-   else TogglePositionsPanel(false);
-   
-   if(g_PanelAccount.IsVisible) ToggleAccountPanel(true);
-   else ToggleAccountPanel(false);
-   
-   if(g_PanelHistory.IsVisible) ToggleHistoryPanel(true);
-   else ToggleHistoryPanel(false);
-   
-   if(g_PanelSettings.IsVisible) OpenSettings();
+   // 3. Specific startup logic
+   if(g_PanelMain.IsVisible) ApplyDefaultTradeValues();
 }
 
 //+------------------------------------------------------------------+
@@ -81,6 +82,8 @@ void UpdateToastNotification()
 //+------------------------------------------------------------------+
 void GUI_OnTick()
 {
+   if(g_IsFirstRun) return; // Guard: No updates during onboarding
+   
    // Throttle UI updates to save CPU (500ms)
    static uint lastUpdate = 0;
    if(GetTickCount() - lastUpdate < 500) return; 
@@ -97,6 +100,7 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
+   if(g_IsFirstRun) return; // Guard: No updates during onboarding
    UpdateAutoTradingWarning();
 }
 
@@ -138,18 +142,36 @@ double GetOriginalLotSize(int ticket)
 //+------------------------------------------------------------------+
 void RefreshAllPanels()
 {
-    CreatePanel(); 
-    if(g_PanelMain.IsVisible) UpdateUIMode();
-    else ToggleMainPanel(false);
-    
-    CreateAccountPanel(); 
-    if(!g_PanelAccount.IsVisible) ToggleAccountPanel(false);
-    
+    // 1. Navigation (Master Controller)
     CreateNavigationPanel();
-    CreatePositionsPanel();
-    CreateHistoryPanel();
+    // Navigation is always visible if EA is running, but let's be explicit
+    SetObjVisible("Nav_Bg", true);
+    SetObjVisible("Nav_Btn_Main", true);
+    SetObjVisible("Nav_Btn_Pos", true);
+    SetObjVisible("Nav_Btn_Account", true);
+    SetObjVisible("Nav_Btn_History", true);
+    SetObjVisible("Nav_Btn_Settings", true);
+    SetObjVisible("Btn_SymbolSelect", true);
+
+    // 2. Trade Panel
+    CreatePanel(); 
+    ToggleMainPanel(g_PanelMain.IsVisible);
     
+    // 3. Account Panel
+    CreateAccountPanel(); 
+    ToggleAccountPanel(g_PanelAccount.IsVisible);
+    
+    // 4. Positions Panel
+    CreatePositionsPanel();
+    TogglePositionsPanel(g_PanelPositions.IsVisible);
+    
+    // 5. History Panel
+    CreateHistoryPanel();
+    ToggleHistoryPanel(g_PanelHistory.IsVisible);
+    
+    // 6. Settings Panel
     if(g_PanelSettings.IsVisible) OpenSettings();
+    else ObjectsDeleteAll(0, PREFIX + "Settings_");
 }
 
 //+------------------------------------------------------------------+
@@ -223,6 +245,22 @@ void GUI_OnChartEvent(const int id,
                       const double &dparam,
                       const string &sparam)
 {
+   // --- ONBOARDING GUARD ---
+   // If it's the first run, we only allow onboarding button clicks and chart resize events.
+   // This prevents other panels from surfacing accidentally due to drag/clicks.
+   if(g_IsFirstRun)
+   {
+      if(id == CHARTEVENT_OBJECT_CLICK && sparam == PREFIX + "Onboarding_BtnStart")
+      {
+         OnEvent_ObjectClick(sparam);
+      }
+      if(id == CHARTEVENT_CHART_CHANGE)
+      {
+         OnEvent_Resize();
+      }
+      return; // Block all other events during onboarding
+   }
+
    // 1. CHART RESIZE
    if(id == CHARTEVENT_CHART_CHANGE)
    {
