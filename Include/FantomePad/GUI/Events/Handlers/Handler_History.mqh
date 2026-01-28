@@ -9,24 +9,28 @@ bool Handle_History_Events(string sparam)
    if(sparam == PREFIX + "Hist_Btn_Daily")
    {
       SetHistoryFilter(H_FILTER_DAILY);
+      CreateHistoryPanel();
       EffectButton(sparam);
       return true;
    }
    if(sparam == PREFIX + "Hist_Btn_Weekly")
    {
       SetHistoryFilter(H_FILTER_WEEKLY);
+      CreateHistoryPanel();
       EffectButton(sparam);
       return true;
    }
    if(sparam == PREFIX + "Hist_Btn_Monthly")
    {
       SetHistoryFilter(H_FILTER_MONTHLY);
+      CreateHistoryPanel();
       EffectButton(sparam);
       return true;
    }
    if(sparam == PREFIX + "Hist_Btn_Custom")
    {
       SetHistoryFilter(H_FILTER_CUSTOM);
+      CreateHistoryPanel();
       EffectButton(sparam);
       return true;
    }

@@ -24,11 +24,11 @@ void Test_UiToggle_Main()
    // Ensure Closed initially
    g_PanelMain.IsVisible = false;
    
-   // Simulate Click on Manager Button "Main"
+   // Simulate Click on Navigation Button "Main"
    // We invoke the Event Dispatcher directly but need variables for references
    long lparam = 0;
    double dparam = 0.0;
-   string sparam = PREFIX + "Mgr_Btn_Main";
+   string sparam = PREFIX + "Nav_Btn_Main";
    GUI_OnChartEvent(CHARTEVENT_OBJECT_CLICK, lparam, dparam, sparam);
    
    // Assert State Change
@@ -47,7 +47,7 @@ void Test_UiToggle_Positions()
    
    long lparam = 0;
    double dparam = 0.0;
-   string sparam = PREFIX + "Mgr_Btn_Pos";
+   string sparam = PREFIX + "Nav_Btn_Pos";
    GUI_OnChartEvent(CHARTEVENT_OBJECT_CLICK, lparam, dparam, sparam);
    
    AssertTrue(g_PanelPositions.IsVisible, "Positions Panel Open");
@@ -66,7 +66,7 @@ void Test_UiToggle_Settings()
    // Simulate click on Settings button
    long lparam = 0;
    double dparam = 0.0;
-   string sparam = PREFIX + "Mgr_Btn_Settings";
+   string sparam = PREFIX + "Nav_Btn_Settings";
    GUI_OnChartEvent(CHARTEVENT_OBJECT_CLICK, lparam, dparam, sparam);
    
    AssertTrue(g_PanelSettings.IsVisible, "Settings Panel Open");

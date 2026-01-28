@@ -10,8 +10,8 @@
 #include "Main/Panel_Main.mqh"
 #include "Settings/Panel_Settings.mqh"
 #include "Account/Panel_Account.mqh"
-#include "Panel_Manager.mqh"
-#include "Panel_Positions.mqh"
+#include "Navigation/Panel_Navigation.mqh"
+#include "Positions/Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
 
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
@@ -33,7 +33,7 @@ void GUI_OnInit()
 
    CreatePanel();
    CreateAccountPanel();
-   CreateManagerPanel(); 
+   CreateNavigationPanel(); 
    CreatePositionsPanel();
    CreateHistoryPanel();
    
@@ -145,7 +145,7 @@ void RefreshAllPanels()
     CreateAccountPanel(); 
     if(!g_PanelAccount.IsVisible) ToggleAccountPanel(false);
     
-    CreateManagerPanel();
+    CreateNavigationPanel();
     CreatePositionsPanel();
     CreateHistoryPanel();
     

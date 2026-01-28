@@ -6,7 +6,7 @@
 // Includes specialized event handlers
 #include "Handlers/Handler_Validation.mqh"
 #include "Handlers/Handler_Settings.mqh"
-#include "Handlers/Handler_Manager.mqh"
+#include "Handlers/Handler_Navigation.mqh"
 #include "Handlers/Handler_History.mqh"
 #include "Handlers/Handler_SymbolList.mqh"
 #include "Handlers/Handler_ColorPicker.mqh"
@@ -36,8 +36,8 @@ void OnEvent_ObjectClick(string sparam)
     // 2. Settings Logic (Risk Mode, Toggles)
     if(Handle_Settings_Events(sparam)) return;
     
-    // 3. Manager Panel Logic (Open/Close Panels, Account Click)
-    if(Handle_Manager_Events(sparam)) return;
+    // 3. Navigation Panel Logic (Open/Close Panels, Account Click)
+    if(Handle_Navigation_Events(sparam)) return;
 
     // 4. History Logic (Filters)
     if(Handle_History_Events(sparam)) return;

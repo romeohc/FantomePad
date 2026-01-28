@@ -9,7 +9,7 @@
 //--- Inputs externes (Configuration de base)
 // Default Risk inputs removed
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
-input int      DefaultManagerPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
+input int      DefaultNavigationPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
 // IMPORTANT: Change this MagicNumber if running multiple instances of FantomePad!
 // Each EA instance MUST have a unique MagicNumber to avoid trade conflicts.
 input int      MagicNumber = 123456;   // Magic Number for trade identification (MUST BE UNIQUE PER INSTANCE)
@@ -66,7 +66,7 @@ int    CurrentTypeIndex = 0; // 0=Market, 1=BuyLim, 2=SellLim, 3=BuyStop, 4=Sell
 int    CurrentDirection = 0; // 0=Buy, 1=Sell (utilisé pour le cycle toggle)
 int    RiskMode   = 0; // 0=%, 1=Currency, 2=Risk R
 string OrderTypes[] = {"MARKET ORDER", "BUY LIMIT", "SELL LIMIT", "BUY STOP", "SELL STOP"};
-string ManagerPositions[] = {"Top Left", "Top Center", "Top Right", "Bottom Left", "Bottom Center", "Bottom Right"};
+string NavigationPositions[] = {"Top Left", "Top Center", "Top Right", "Bottom Left", "Bottom Center", "Bottom Right"};
 
 // --- PANEL STATE INSTANCES ---
 TPanelState g_PanelMain;
@@ -74,7 +74,7 @@ TPanelState g_PanelAccount;
 TPanelState g_PanelPositions;
 TPanelState g_PanelHistory;
 TPanelState g_PanelSettings;
-TPanelState g_PanelManager;
+TPanelState g_PanelNavigation;
 
 // --- SCROLL STATE INSTANCES ---
 TScrollState g_ScrollSettings;
@@ -108,7 +108,7 @@ string g_HistoryFilterSymbol = ""; // Symbol filter string
 // --- SETTINGS GLOBALS ---
 // Default Risk Globals removed
 double   g_OneRPercent;
-int      g_ManagerPosition; // 0..5
+int      g_NavigationPosition; // 0..5
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
 color    g_ColorChartFg;
@@ -178,7 +178,7 @@ void InitGlobals()
 
    // Default Risk Init removed
    g_OneRPercent = OneRPercent;
-   g_ManagerPosition = DefaultManagerPosition;
+   g_NavigationPosition = DefaultNavigationPosition;
    g_ColorBg     = ColorBg;
    g_ColorHeader = ColorHeader;
    g_ColorInput  = ColorInput;

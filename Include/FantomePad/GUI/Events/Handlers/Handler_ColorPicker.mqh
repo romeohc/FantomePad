@@ -97,7 +97,7 @@ bool Handle_ColorPicker_Events(string sparam)
          if(!g_PanelAccount.IsVisible) ToggleAccountPanel(false);
          
          // 3. Refresh Other Panels
-         CreateManagerPanel();
+         CreateNavigationPanel();
          CreatePositionsPanel(); // Handles visibility internally
          CreateHistoryPanel(); // Handles visibility internally
          

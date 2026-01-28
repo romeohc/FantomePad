@@ -40,7 +40,7 @@ void OnEvent_Resize()
 
    CreatePanel();
    CreateAccountPanel();
-   CreateManagerPanel();
+   CreateNavigationPanel();
    CreatePositionsPanel();
    CreateHistoryPanel();
    if(g_PanelMain.IsVisible) UpdateUIMode();

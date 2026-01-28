@@ -71,7 +71,7 @@ void SaveConfigToFile()
       // Format: Key=Value
       // Changed: Default Risks removed
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
-      FileWrite(handle, "ManagerPosition=" + IntegerToString(g_ManagerPosition));
+      FileWrite(handle, "NavigationPosition=" + IntegerToString(g_NavigationPosition));
       FileWrite(handle, "ShowOrderLines=" + IntegerToString(g_ShowOrderLines));
       FileWrite(handle, "ShowPositionLines=" + IntegerToString(g_ShowPositionLines));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
@@ -144,7 +144,7 @@ void LoadConfig()
             string val = sep[1];
             
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
-            if(key == "ManagerPosition")  g_ManagerPosition  = (int)StringToInteger(val);
+            if(key == "NavigationPosition")  g_NavigationPosition  = (int)StringToInteger(val);
             if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
             if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);

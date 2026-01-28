@@ -5,7 +5,7 @@
 #property strict
 
 //+------------------------------------------------------------------+
-//| EVENT MANAGER                                                    |
+//| EVENT NAVIGATION                                                 |
 //+------------------------------------------------------------------+
 bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam)
 {
@@ -69,12 +69,12 @@ bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dpara
    if(id == CHARTEVENT_OBJECT_CLICK)
    {
        // Basic Settings Buttons
-       if(sparam == PREFIX + "Set_Btn_MgrPos")
+       if(sparam == PREFIX + "Set_Btn_NavPos")
        {
-           g_ManagerPosition++;
-           if(g_ManagerPosition > 5) g_ManagerPosition = 0;
-           ObjectSetString(0, PREFIX + "Set_Btn_MgrPos", OBJPROP_TEXT, ManagerPositions[g_ManagerPosition]);
-           UpdateManagerPanel(); 
+           g_NavigationPosition++;
+           if(g_NavigationPosition > 5) g_NavigationPosition = 0;
+           ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
+           UpdateNavigationPanel(); 
            EffectButton(sparam);
            return true; 
        }

@@ -11,7 +11,7 @@
 // Implementation of Main Panel Event handling
 
 //+------------------------------------------------------------------+
-//| EVENT MANAGER                                                    |
+//| EVENT NAVIGATION                                                    |
 //+------------------------------------------------------------------+
 bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam)
 {

@@ -65,12 +65,12 @@ void OpenSettings()
 
    // --- PANEL POSITION ---
    v = CHECK_VIS(25);
-   n = "Set_Lbl_MgrPos"; string nb = "Set_Btn_MgrPos";
+   n = "Set_Lbl_NavPos"; string nb = "Set_Btn_NavPos";
    if(v) {
        CreateLabel(n, "Panel Position", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
        ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
        
-       CreateButton(nb, ManagerPositions[g_ManagerPosition], x + w - 140, SCREEN_Y, 120, 25, g_ColorInput, g_ColorText);
+       CreateButton(nb, NavigationPositions[g_NavigationPosition], x + w - 140, SCREEN_Y, 120, 25, g_ColorInput, g_ColorText);
        ObjectSetInteger(0, PREFIX + nb, OBJPROP_ZORDER, 102); 
        SetObjVisible(nb, true);
    } else {

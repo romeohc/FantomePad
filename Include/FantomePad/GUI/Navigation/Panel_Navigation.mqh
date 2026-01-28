@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
-//|                                           Panel_Manager.mqh      |
+//|                                           Panel_Navigation.mqh   |
 //|                                           FantomePad Project     |
 //+------------------------------------------------------------------+
 #property strict
 
-// --- Manager Panel Globals moved to TPanelState g_PanelManager ---
+// --- Navigation Panel Globals moved to TPanelState g_PanelNavigation ---
 
 
 
@@ -14,26 +14,26 @@
 //+------------------------------------------------------------------+
 void UpdateAutoTradingWarning()
 {
-    string bgName = PREFIX + "Mgr_Warn_Bg";
-    string txtName = PREFIX + "Mgr_Warn_Txt";
+    string bgName = PREFIX + "Nav_Warn_Bg";
+    string txtName = PREFIX + "Nav_Warn_Txt";
     
     // Check if AutoTrading is allowed globally
     if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
     {
        // Position Logic
-       int panelCenterX = g_PanelManager.X + (g_PanelManager.Width / 2);
+       int panelCenterX = g_PanelNavigation.X + (g_PanelNavigation.Width / 2);
        int rectW = 150;
        int rectH = 20;
        int rectX = panelCenterX - (rectW / 2);
-       int rectY = g_PanelManager.Y - 25;
+       int rectY = g_PanelNavigation.Y - 25;
        
        // Safety: Put below if too close to top
-       if(rectY < 5) rectY = g_PanelManager.Y + g_PanelManager.Height + 5; 
+       if(rectY < 5) rectY = g_PanelNavigation.Y + g_PanelNavigation.Height + 5; 
        
        // 1. Draw Background (Red Cell)
        if(ObjectFind(0, bgName) < 0)
        {
-           CreateRect("Mgr_Warn_Bg", rectX, rectY, rectW, rectH, g_ColorRed, BORDER_FLAT);
+           CreateRect("Nav_Warn_Bg", rectX, rectY, rectW, rectH, g_ColorRed, BORDER_FLAT);
            ObjectSetInteger(0, bgName, OBJPROP_ZORDER, 100);
        }
        else
@@ -48,7 +48,7 @@ void UpdateAutoTradingWarning()
        // 2. Draw Text (White, No Emoji)
        if(ObjectFind(0, txtName) < 0)
        {
-           CreateLabel("Mgr_Warn_Txt", "AutoTrading Disabled", panelCenterX, rectY + 2, 8, clrWhite, "Trebuchet MS Bold");
+           CreateLabel("Nav_Warn_Txt", "AutoTrading Disabled", panelCenterX, rectY + 2, 8, clrWhite, "Trebuchet MS Bold");
            ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_UPPER);
            ObjectSetInteger(0, txtName, OBJPROP_ZORDER, 101);
        }
@@ -69,11 +69,11 @@ void UpdateAutoTradingWarning()
     }
 }
 
-void CreateManagerPanel()
+void CreateNavigationPanel()
 {
    // Init Dimensions
-   g_PanelManager.Width = 560; // Exact width for symmetry
-   g_PanelManager.Height = 35; // Reduced from 65 (removed Beta Label)
+   g_PanelNavigation.Width = 560; // Exact width for symmetry
+   g_PanelNavigation.Height = 35; // Reduced from 65 (removed Beta Label)
 
    // Dynamic Positioning
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
@@ -83,82 +83,82 @@ void CreateManagerPanel()
    int marginY = 30; // Increased spacing from edges
    int marginX = 30;
    
-   if(g_ManagerPosition == 0) // TL
+   if(g_NavigationPosition == 0) // TL
    {
-       g_PanelManager.X = marginX;
-       g_PanelManager.Y = marginY;
+       g_PanelNavigation.X = marginX;
+       g_PanelNavigation.Y = marginY;
    }
-   else if(g_ManagerPosition == 1) // TC
+   else if(g_NavigationPosition == 1) // TC
    {
-       g_PanelManager.X = (chartW / 2) - (g_PanelManager.Width / 2);
-       g_PanelManager.Y = marginY;
+       g_PanelNavigation.X = (chartW / 2) - (g_PanelNavigation.Width / 2);
+       g_PanelNavigation.Y = marginY;
    }
-   else if(g_ManagerPosition == 2) // TR
+   else if(g_NavigationPosition == 2) // TR
    {
-       g_PanelManager.X = chartW - g_PanelManager.Width - marginX;
-       g_PanelManager.Y = marginY;
+       g_PanelNavigation.X = chartW - g_PanelNavigation.Width - marginX;
+       g_PanelNavigation.Y = marginY;
    }
-   else if(g_ManagerPosition == 3) // BL
+   else if(g_NavigationPosition == 3) // BL
    {
-       g_PanelManager.X = marginX;
-       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY;
+       g_PanelNavigation.X = marginX;
+       g_PanelNavigation.Y = chartH - g_PanelNavigation.Height - marginY;
    }
-   else if(g_ManagerPosition == 4) // BC
+   else if(g_NavigationPosition == 4) // BC
    {
-       g_PanelManager.X = (chartW / 2) - (g_PanelManager.Width / 2);
-       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY; // Reduced margin to 10px from 40px
+       g_PanelNavigation.X = (chartW / 2) - (g_PanelNavigation.Width / 2);
+       g_PanelNavigation.Y = chartH - g_PanelNavigation.Height - marginY; // Reduced margin to 10px from 40px
    }
-   else if(g_ManagerPosition == 5) // BR
+   else if(g_NavigationPosition == 5) // BR
    {
-       g_PanelManager.X = chartW - g_PanelManager.Width - marginX;
-       g_PanelManager.Y = chartH - g_PanelManager.Height - marginY;
+       g_PanelNavigation.X = chartW - g_PanelNavigation.Width - marginX;
+       g_PanelNavigation.Y = chartH - g_PanelNavigation.Height - marginY;
    }
    
    // Safety
-   if(g_PanelManager.X < 0) g_PanelManager.X = 0;
-   if(g_PanelManager.Y < 0) g_PanelManager.Y = 0;
+   if(g_PanelNavigation.X < 0) g_PanelNavigation.X = 0;
+   if(g_PanelNavigation.Y < 0) g_PanelNavigation.Y = 0;
 
    // Background (Fixed position, no drag logic implied)
-   CreateRect("Mgr_Bg", g_PanelManager.X, g_PanelManager.Y, g_PanelManager.Width, g_PanelManager.Height, g_ColorBg, BORDER_FLAT);
+   CreateRect("Nav_Bg", g_PanelNavigation.X, g_PanelNavigation.Y, g_PanelNavigation.Width, g_PanelNavigation.Height, g_ColorBg, BORDER_FLAT);
    
    // --- BETA LABEL REMOVED ---
-   if(ObjectFind(0, PREFIX + "Mgr_Lbl_Beta") >= 0) ObjectDelete(0, PREFIX + "Mgr_Lbl_Beta");
+   if(ObjectFind(0, PREFIX + "Nav_Lbl_Beta") >= 0) ObjectDelete(0, PREFIX + "Nav_Lbl_Beta");
 
    // Buttons Layout
    int btnW = 85; // Increased width for text
    int btnH = 24;
    int margin = 5;
-   int startX = g_PanelManager.X + margin;
-   int startY = g_PanelManager.Y + 6; // Shifted up from 30
+   int startX = g_PanelNavigation.X + margin;
+   int startY = g_PanelNavigation.Y + 6; // Shifted up from 30
    
    // Button 1: Trade Panel (Toggle Main)
    color bgTrade = g_PanelMain.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
+   CreateButton("Nav_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
+   ObjectSetString(0, PREFIX + "Nav_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   // Button 2: Positions Panel (Toggle Positions) -> "Manager"
+   // Button 2: Positions Panel (Toggle Positions) -> "Navigation"
    int currentX = startX + btnW + margin;
    color bgPos = g_PanelPositions.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Pos", "Manager", currentX, startY, btnW, btnH, bgPos, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
+   CreateButton("Nav_Btn_Pos", "Navigation", currentX, startY, btnW, btnH, bgPos, g_ColorText);
+   ObjectSetString(0, PREFIX + "Nav_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 3: Account Panel (Toggle Account Info) -> "Account"
    currentX += btnW + margin;
    color bgAccount = g_PanelAccount.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Account", "Account", currentX, startY, btnW, btnH, bgAccount, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_Account", OBJPROP_FONT, "Trebuchet MS Bold");
+   CreateButton("Nav_Btn_Account", "Account", currentX, startY, btnW, btnH, bgAccount, g_ColorText);
+   ObjectSetString(0, PREFIX + "Nav_Btn_Account", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 4: History -> "History"
    currentX += btnW + margin;
    color bgHist = g_PanelHistory.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_History", "History", currentX, startY, btnW, btnH, bgHist, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_History", OBJPROP_FONT, "Trebuchet MS Bold");
+   CreateButton("Nav_Btn_History", "History", currentX, startY, btnW, btnH, bgHist, g_ColorText);
+   ObjectSetString(0, PREFIX + "Nav_Btn_History", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // Button 5: Settings (Toggle Config) -> "Settings"
    currentX += btnW + margin;
    color bgSet = g_PanelSettings.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
-   CreateButton("Mgr_Btn_Settings", "Settings", currentX, startY, btnW, btnH, bgSet, g_ColorText);
-   ObjectSetString(0, PREFIX + "Mgr_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
+   CreateButton("Nav_Btn_Settings", "Settings", currentX, startY, btnW, btnH, bgSet, g_ColorText);
+   ObjectSetString(0, PREFIX + "Nav_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 6: Symbol Select
    currentX += btnW + margin;
@@ -169,9 +169,9 @@ void CreateManagerPanel()
 }
 
 // Logic to clean up if needed provided here, though GUI_Master handles most redraws
-void UpdateManagerPanel()
+void UpdateNavigationPanel()
 {
-   CreateManagerPanel();
+   CreateNavigationPanel();
 }
 
 //+------------------------------------------------------------------+
@@ -221,8 +221,8 @@ void DrawSymbolList()
    int containerWidth = (int)w; // Keep same width
 
    // --- DIRECTION LOGIC ---
-   // If Manager Position is Bottom (3, 4, 5), list opens Upwards
-   bool opensUpwards = (g_ManagerPosition >= 3);
+   // If Navigation Position is Bottom (3, 4, 5), list opens Upwards
+   bool opensUpwards = (g_NavigationPosition >= 3);
    
    int startY = 0;
    if(opensUpwards)

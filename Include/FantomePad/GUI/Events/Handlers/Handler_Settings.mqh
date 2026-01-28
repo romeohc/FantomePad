@@ -33,16 +33,16 @@ bool Handle_Settings_Events(string sparam)
    }
    
    // --- SETTINGS ---
-   if(sparam == PREFIX + "Set_Btn_MgrPos")
+   if(sparam == PREFIX + "Set_Btn_NavPos")
    {
-       g_ManagerPosition++;
-       if(g_ManagerPosition > 5) g_ManagerPosition = 0;
+       g_NavigationPosition++;
+       if(g_NavigationPosition > 5) g_NavigationPosition = 0;
        
        // Update Text
-       ObjectSetString(0, PREFIX + "Set_Btn_MgrPos", OBJPROP_TEXT, ManagerPositions[g_ManagerPosition]);
+       ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
        
        // Update Real Panel
-       UpdateManagerPanel();
+       UpdateNavigationPanel();
        EffectButton(sparam);
        return true;
    }

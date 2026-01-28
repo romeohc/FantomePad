@@ -4,8 +4,6 @@
 //+------------------------------------------------------------------+
 #property strict
 
-// Forward Declaration
-void CreateHistoryPanel();
 
 //+------------------------------------------------------------------+
 //| HELPER: APPLY FILTER LOGIC                                       |
@@ -86,5 +84,4 @@ void SetHistoryFilter(ENUM_HISTORY_FILTER mode)
     g_HistoryFilterMode = mode;
     g_ScrollHistory.ScrollY = 0; // Reset scroll on view change
     UpdateHistoryFilter();
-    CreateHistoryPanel(); // Redraw
 }

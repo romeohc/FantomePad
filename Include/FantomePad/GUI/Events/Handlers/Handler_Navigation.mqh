@@ -1,61 +1,60 @@
-//+------------------------------------------------------------------+
-//|                                              Handler_Manager.mqh |
+//|                                              Handler_Navigation.mqh |
 //+------------------------------------------------------------------+
 #property strict
 
-bool Handle_Manager_Events(string sparam)
+bool Handle_Navigation_Events(string sparam)
 {
-   // --- MANAGER PANEL EVENTS ---
+   // --- NAVIGATION PANEL EVENTS ---
    
    // 1. Toggle Trading Panel
-   if(sparam == PREFIX + "Mgr_Btn_Main")
+   if(sparam == PREFIX + "Nav_Btn_Main")
    {
       g_PanelMain.IsVisible = !g_PanelMain.IsVisible;
       ToggleMainPanel(g_PanelMain.IsVisible);
-      UpdateManagerPanel(); 
+      UpdateNavigationPanel(); 
       EffectButton(sparam);
       SaveConfigToFile();
       return true;
    }
    
    // 2. Button Positions Panel (Toggle Positions)
-   if(sparam == PREFIX + "Mgr_Btn_Pos")
+   if(sparam == PREFIX + "Nav_Btn_Pos")
    {
       g_PanelPositions.IsVisible = !g_PanelPositions.IsVisible;
       TogglePositionsPanel(g_PanelPositions.IsVisible);
-      UpdateManagerPanel(); 
+      UpdateNavigationPanel(); 
       EffectButton(sparam);
       SaveConfigToFile();
       return true;
    }
 
    // 3. Toggle Account Panel
-   if(sparam == PREFIX + "Mgr_Btn_Account")
+   if(sparam == PREFIX + "Nav_Btn_Account")
    {
       g_PanelAccount.IsVisible = !g_PanelAccount.IsVisible;
       ToggleAccountPanel(g_PanelAccount.IsVisible);
-      UpdateManagerPanel(); 
+      UpdateNavigationPanel(); 
       EffectButton(sparam);
       SaveConfigToFile();
       return true;
    }
    
    // 3.5 History Panel
-   if(sparam == PREFIX + "Mgr_Btn_History")
+   if(sparam == PREFIX + "Nav_Btn_History")
     {
        g_PanelHistory.IsVisible = !g_PanelHistory.IsVisible;
        ToggleHistoryPanel(g_PanelHistory.IsVisible);
-       UpdateManagerPanel(); 
+       UpdateNavigationPanel(); 
        EffectButton(sparam);
        SaveConfigToFile();
        return true;
     }
    
    // 3. Toggle Settings (Shortcut)
-   if(sparam == PREFIX + "Mgr_Btn_Settings")
+   if(sparam == PREFIX + "Nav_Btn_Settings")
    {
       ToggleSettings();
-      UpdateManagerPanel(); // Refresh button state
+      UpdateNavigationPanel(); // Refresh button state
       EffectButton(sparam);
       SaveConfigToFile();
       return true;
@@ -96,15 +95,15 @@ bool Handle_Manager_Events(string sparam)
        {
           string symbol = OrderSymbol();
           
-          // 1. Select this order in Position Manager
+          // 1. Select this order in Position Navigation
           SelectedPositionTicket = ticket;
           
-          // 2. Open Position Manager if not already visible
+          // 2. Open Position Navigation if not already visible
           if(!g_PanelPositions.IsVisible)
           {
              g_PanelPositions.IsVisible = true;
              TogglePositionsPanel(true);
-             UpdateManagerPanel(); // Update Manager Panel button states
+             UpdateNavigationPanel(); // Update Navigation Panel button states
              SaveConfigToFile();
           }
           else
