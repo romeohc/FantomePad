@@ -71,6 +71,7 @@ void SaveConfigToFile()
       // Format: Key=Value
       // Changed: Default Risks removed
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
+      FileWrite(handle, "MaxRiskPercent=" + DoubleToString(g_MaxRiskPercent, 2));
       FileWrite(handle, "NavigationPosition=" + IntegerToString(g_NavigationPosition));
       FileWrite(handle, "ShowOrderLines=" + IntegerToString(g_ShowOrderLines));
       FileWrite(handle, "ShowPositionLines=" + IntegerToString(g_ShowPositionLines));
@@ -149,6 +150,7 @@ void LoadConfig()
             string val = sep[1];
             
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
+            if(key == "MaxRiskPercent")   g_MaxRiskPercent   = StringToDouble(val);
             if(key == "NavigationPosition")  g_NavigationPosition  = (int)StringToInteger(val);
             if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
             if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);

@@ -9,7 +9,7 @@
 //+------------------------------------------------------------------+
 void UpdatePartialButtonsVisuals()
 {
-   color activeCol = g_ColorBtnValid; // Fallback
+   color activeCol = g_ColorBtnActive; // Fallback
    if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
    {
       int type = OrderType();

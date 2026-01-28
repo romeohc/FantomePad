@@ -24,7 +24,8 @@ void ExecuteOrder(int cmd)
    
    if(volume <= 0) 
    {
-      HandleTradeMessage("Invalid Volume (" + DoubleToString(volume, 2) + ")", g_ColorRed);
+      string errorMsg = "Lot size too small! Increase risk or tighten SL.";
+      HandleTradeMessage(errorMsg, g_ColorRed);
       return; 
    } 
    
@@ -38,6 +39,21 @@ void ExecuteOrder(int cmd)
    price = NormalizeDouble(price, (int)digits);
    sl    = NormalizeDouble(sl, (int)digits);
    tp    = NormalizeDouble(tp, (int)digits);
+   
+   // --- SPREAD PROTECTION ---
+   if(cmd == OP_BUY || cmd == OP_SELL)
+   {
+       double ask = MarketInfo(symbol, MODE_ASK);
+       double bid = MarketInfo(symbol, MODE_BID);
+       double spread = (ask - bid) / MarketInfo(symbol, MODE_POINT);
+       
+       if(spread > g_MaxSpread)
+       {
+            string errorMsg = "Spread too high (" + DoubleToString(spread, 0) + " > " + IntegerToString(g_MaxSpread) + ")!";
+            HandleTradeMessage(errorMsg, g_ColorRed);
+            return;
+       }
+   }
    
    int slippagePoints = GetSlippagePoints(MaxSlippage);
    int ticket = SafeOrderSend(symbol, cmd, volume, price, slippagePoints, sl, tp, "ProPanel", MagicNumber, 0, clrNONE);

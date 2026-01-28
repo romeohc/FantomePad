@@ -55,6 +55,15 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
       
+      // Check Max Risk
+      double rPrc = GetRiskPercentage(risk);
+      if(rPrc > g_MaxRiskPercent)
+      {
+         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
+         ShowValidationError(msg);
+         return true;
+      }
+      
       HideValidationError(); // Clear any previous error on success
       ExecuteOrder(OP_BUY);
       return true;
@@ -78,6 +87,15 @@ bool Handle_Trading_Events(string sparam)
          else errMsg = "Risk required!";
          
          ShowValidationError(errMsg);
+         return true;
+      }
+
+      // Check Max Risk
+      double rPrc = GetRiskPercentage(risk);
+      if(rPrc > g_MaxRiskPercent)
+      {
+         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
+         ShowValidationError(msg);
          return true;
       }
 
@@ -106,6 +124,15 @@ bool Handle_Trading_Events(string sparam)
           
           ShowValidationError(missing + " required!");
           return true;
+      }
+      
+      // Check Max Risk
+      double rPrc = GetRiskPercentage(risk);
+      if(rPrc > g_MaxRiskPercent)
+      {
+         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
+         ShowValidationError(msg);
+         return true;
       }
    
       HideValidationError(); // Clear any previous error on success

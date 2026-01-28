@@ -9,6 +9,7 @@
 //--- Inputs externes (Configuration de base)
 // Default Risk inputs removed
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
+input double   MaxRiskPercent = 2.0;   // Max Risk allowed per trade in %
 input int      DefaultNavigationPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5=BR
 // IMPORTANT: Change this MagicNumber if running multiple instances of FantomePad!
 // Each EA instance MUST have a unique MagicNumber to avoid trade conflicts.
@@ -31,6 +32,7 @@ input color    ColorEntryLine = clrWhite;      // Entry Line Color
 input color    ColorSLLine   = C'214,48,49';   // Stop Loss Line Color
 input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
 input int      MaxSlippage   = 10;             // Max Slippage (Pips)
+input int      MaxSpread     = 50;             // Max Spread (Points)
 
 //--- Couleurs pour la liste
 color ColorListNormal = C'34,38,46';   // Couleur normale item liste
@@ -108,6 +110,7 @@ string g_HistoryFilterSymbol = ""; // Symbol filter string
 // --- SETTINGS GLOBALS ---
 // Default Risk Globals removed
 double   g_OneRPercent;
+double   g_MaxRiskPercent;
 int      g_NavigationPosition; // 0..5
 color    g_ColorBg, g_ColorHeader, g_ColorInput, g_ColorText;
 color    g_ColorGreen, g_ColorRed, g_ColorChartBg;
@@ -136,6 +139,9 @@ int    g_ColorPickerY = 0;
 int    g_ColorPickerW = 0;
 int    g_ColorPickerH = 0;
 color  g_ColorPalette[]; 
+
+// --- SPREAD PROTECTION GLOBAL ---
+int    g_MaxSpread = 50; 
 
 // --- TOAST NOTIFICATION GLOBALS ---
 string g_ToastMsg = "";
@@ -188,6 +194,7 @@ void InitGlobals()
 
    // Default Risk Init removed
    g_OneRPercent = OneRPercent;
+   g_MaxRiskPercent = MaxRiskPercent;
    g_NavigationPosition = DefaultNavigationPosition;
    g_ColorBg     = ColorBg;
    g_ColorHeader = ColorHeader;
@@ -211,6 +218,7 @@ void InitGlobals()
    
    g_ShowOrderLines = true; // Default to ON
    g_ShowPositionLines = true; // Default to ON
+   g_MaxSpread = MaxSpread;
 
    // Init default custom dates (last 7 days by default)
    g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;

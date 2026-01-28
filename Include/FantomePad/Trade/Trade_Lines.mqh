@@ -53,7 +53,7 @@ void UpdateSingleLine(string lineSuffix, string editSuffix, color col)
 
 void UpdateChartLines()
 {
-   if(!g_ShowOrderLines)
+   if(!g_ShowOrderLines || !g_PanelMain.IsVisible)
    {
        string sufs[] = {"Line_SL", "Line_TP", "Line_Price", "Line_SL_Txt", "Line_TP_Txt", "Line_Price_Txt"};
        for(int i=0; i<ArraySize(sufs); i++)

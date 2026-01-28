@@ -144,11 +144,26 @@ void OpenSettings()
        ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
        ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
        SetObjVisible(ne, true);
+
+       // --- MAX RISK (%) ---
+       string nRisk = "Set_Lbl_MaxRiskPercent"; string neRisk = "Set_Edit_MaxRiskPercent";
+       CreateLabel(nRisk, "Max Risk (%)", x + padX, SCREEN_Y + 33, 9, g_ColorText, "Trebuchet MS");
+       ObjectSetInteger(0, PREFIX + nRisk, OBJPROP_ZORDER, 102); SetObjVisible(nRisk, true);
+       CreateEdit(neRisk, DoubleToString(g_MaxRiskPercent, 2), x + w - 80, SCREEN_Y + 30, 60, 25);
+       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ZORDER, 102);
+       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BGCOLOR, g_ColorInput);
+       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_COLOR, g_ColorText);
+       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BORDER_COLOR, C'60,64,72');
+       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ALIGN, ALIGN_CENTER);
+       SetObjVisible(neRisk, true);
    } else {
        if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
        if(ObjectFind(0, PREFIX + ne) >= 0) SetObjVisible(ne, false);
+       
+       if(ObjectFind(0, PREFIX + "Set_Lbl_MaxRiskPercent") >= 0) SetObjVisible("Set_Lbl_MaxRiskPercent", false);
+       if(ObjectFind(0, PREFIX + "Set_Edit_MaxRiskPercent") >= 0) SetObjVisible("Set_Edit_MaxRiskPercent", false);
    }
-   relY += 40;
+   relY += 70; // Increased spacing for 2 inputs
    
    // Separator
    v = CHECK_VIS(1);

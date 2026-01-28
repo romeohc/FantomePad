@@ -35,6 +35,16 @@ void OnEvent_EndEdit(string sparam)
           else ToggleMainPanel(false);
        }
    }
+
+   if(sparam == PREFIX + "Set_Edit_MaxRiskPercent")
+   {
+       double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_MaxRiskPercent", OBJPROP_TEXT));
+       if(r > 0) 
+       {
+          g_MaxRiskPercent = r;
+          SaveConfigToFile();
+       }
+   }
    
    if(StringFind(sparam, PREFIX + "Edit_") >= 0)
    {
@@ -53,7 +63,14 @@ void OnEvent_EndEdit(string sparam)
       
       UpdateChartLines(); 
       AutoSwitchOrderType(); // Vérification logique après édition manuelle
-      UpdateCalculatedLot(); // Recalcul si SL, TP, Entry ou Risk change
+      if(sparam == PREFIX + "Edit_Lot")
+      {
+           UpdateCalculatedRisk();
+      }
+      else
+      {
+           UpdateCalculatedLot();
+      }
    }
    
    // --- UPDATE POSITION SL/TP (Old Auto Logic Removed) ---

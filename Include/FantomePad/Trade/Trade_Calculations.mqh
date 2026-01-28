@@ -10,9 +10,34 @@
 //+------------------------------------------------------------------+
 //| CALCULATIONS                                                     |
 //+------------------------------------------------------------------+
+double GetRiskPercentage(double riskValue)
+{
+   if(riskValue <= 0) return 0.0;
+   
+   if(RiskMode == 0) // Percentage
+   {
+      return riskValue;
+   }
+   else if(RiskMode == 1) // Currency
+   {
+      // Convert Amount to % of Equity
+      // Using Equity for safer risk management
+      double eq = AccountEquity();
+      if(eq <= 0) return 0.0;
+      return (riskValue / eq) * 100.0;
+   }
+   else if(RiskMode == 2) // Risk R
+   {
+      // R is multiplier of OneRPercent
+      return riskValue * g_OneRPercent;
+   }
+   
+   return 0.0;
+}
 double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
 {
    if(entryPrice <= 0 || slPrice <= 0 || riskValue <= 0) return 0.0;
+   if(AccountEquity() <= 0) return 0.0;
    if(MathAbs(entryPrice - slPrice) <= Point) return 0.0;
    
    string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
@@ -35,7 +60,7 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
    else if(RiskMode == 2) // Risk R
    {
         double riskPrc = riskValue * g_OneRPercent;
-        riskMoney = AccountBalance() * (riskPrc / 100.0);
+        riskMoney = AccountEquity() * (riskPrc / 100.0);
    }
    else // Percentage
    {
@@ -48,7 +73,7 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
    
    lotSize = MathFloor(lotSize / lotStep) * lotStep;
    
-   if(lotSize < minLot) lotSize = minLot; 
+   if(lotSize < minLot) return 0.0; 
    if(lotSize > maxLot) lotSize = maxLot;
    
    return lotSize;
@@ -80,6 +105,11 @@ void UpdateCalculatedLot()
    if(CurrentTypeIndex == 0)
    {
       bool isValid = (sl > 0 && risk > 0);
+      
+      // Check Max Risk
+      double rPrc = GetRiskPercentage(risk);
+      if(rPrc > g_MaxRiskPercent) isValid = false;
+
       if(CurrentDirection == 0)
       {
          color c = isValid ? g_ColorGreen : g_ColorBtnInvalid;
@@ -96,6 +126,11 @@ void UpdateCalculatedLot()
    else
    {
        bool isValid = (sl > 0 && risk > 0 && entry > 0);
+       
+       // Check Max Risk
+       double rPrc = GetRiskPercentage(risk);
+       if(rPrc > g_MaxRiskPercent) isValid = false;
+       
        color actionCol = g_ColorBtnInvalid;
        if(isValid)
        {
@@ -109,6 +144,61 @@ void UpdateCalculatedLot()
    
    double lots = CalculateLotSize(entry, sl, risk);
    ObjectSetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT, DoubleToString(lots, 2));
+}
+
+void UpdateCalculatedRisk()
+{
+   string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+   if(symbol == "") symbol = Symbol();
+   
+   double entry = 0;
+   double currentBid = MarketInfo(symbol, MODE_BID);
+   double currentAsk = MarketInfo(symbol, MODE_ASK);
+   
+   if(CurrentTypeIndex == 0) // Market
+   {
+      if(CurrentDirection == 0) entry = currentAsk;
+      else                      entry = currentBid;
+   }
+   else
+   {
+      entry = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT));
+   }
+   
+   double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
+   double lots = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+   
+   if(lots <= 0 || AccountEquity() <= 0) return;
+   if(MathAbs(entry - sl) <= Point) return;
+
+   double tickSize   = MarketInfo(symbol, MODE_TICKSIZE);
+   double tickValue  = MarketInfo(symbol, MODE_TICKVALUE);
+   
+   if(tickSize == 0 || tickValue == 0) return;
+   
+   double distance = MathAbs(entry - sl);
+   double steps = distance / tickSize;
+   
+   // Risk Money = Lot * Steps * TickValue
+   double riskMoney = lots * steps * tickValue;
+   
+   double calculatedRiskVal = 0;
+   
+   if(RiskMode == 1) // Currency
+   {
+      calculatedRiskVal = riskMoney;
+   }
+   else if(RiskMode == 2) // Risk R
+   {
+       if(g_OneRPercent > 0)
+         calculatedRiskVal = (riskMoney / AccountEquity()) * 100.0 / g_OneRPercent;
+   }
+   else // Percentage
+   {
+      calculatedRiskVal = (riskMoney / AccountEquity()) * 100.0;
+   }
+   
+   ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, DoubleToString(calculatedRiskVal, 2));
 }
 
 #endif

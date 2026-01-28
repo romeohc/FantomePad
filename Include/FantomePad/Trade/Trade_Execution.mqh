@@ -55,7 +55,7 @@ int SafeOrderSend(string symbol, int cmd, double volume, double price, int slipp
       double requiredMargin = MarketInfo(symbol, MODE_MARGINREQUIRED) * volume;
       requiredMargin *= 1.10; // Safety buffer
       
-      if((cmd == OP_BUY || cmd == OP_SELL) && AccountFreeMargin() < requiredMargin)
+      if(AccountFreeMargin() < requiredMargin)
       {
          HandleTradeError(134, "Insufficient Free Margin (Need: " + DoubleToString(requiredMargin, 2) + ", Have: " + DoubleToString(AccountFreeMargin(), 2) + ")");
          return -1;
@@ -77,6 +77,16 @@ int SafeOrderSend(string symbol, int cmd, double volume, double price, int slipp
          {
             HandleTradeError(130, "TakeProfit too close (Min: " + DoubleToString(minDist, (int)digits) + " pts)");
             return -1;
+         }
+         
+         if(cmd > 1) // Pending Order
+         {
+             double currentPrice = (cmd == OP_BUYLIMIT || cmd == OP_BUYSTOP) ? MarketInfo(symbol, MODE_ASK) : MarketInfo(symbol, MODE_BID);
+             if(MathAbs(price - currentPrice) < minDist)
+             {
+                 HandleTradeError(130, "Pending Entry too close to Market (Min: " + DoubleToString(minDist, (int)digits) + " pts)");
+                 return -1;
+             }
          }
       }
       
