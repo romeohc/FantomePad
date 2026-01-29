@@ -1,8 +1,8 @@
 # FantomePad - Technical Documentation & Vision
 
 > **Target Audience:** AI Agents & Core Developers
-> **Project Status:** Active Development (V2.0)
-> **Goal:** Revolutionize the MetaTrader 4 experience through a modern "OS-like" overlay and hardware integration.
+> **Project Status:** Active Development (V2.1 - Pad Integration Live)
+> **Goal:** Revolutionize the MetaTrader 4 experience through a modern "OS-like" overlay and hardware integration (The Pad).
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### The Core Pillars
 *   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows (Trading, Positions, History, Settings) that remember their state across sessions, creating a seamless "desktop" experience within MT4.
-*   **Hardware (The Pad):** Future-proof integration with a physical macropad for **"Blind Execution,"** enabling traders to execute complex orders via tactile shortcuts without ever touching a mouse.
+*   **Hardware (The Pad):** Now fully functional. Deep integration with physical macropads enabling **"Blind Execution."** Traders can now execute orders, manage risk, and navigate symbols via tactile shortcuts with high-security sequence verification.
 
 ### Key Objectives
 *   **Eliminate Friction:** Automated risk management (real-time lot sizing based on % or cash risk) and one-click execution to save critical seconds.
@@ -80,7 +80,24 @@ The GUI engine uses a **Virtual Window Manager** with a highly modular design:
 *   **File:** `FantomePad_Config.txt` (in `MQL4/Files/`).
 *   **Mechanism:** `SaveConfig` / `LoadConfig` in `Core/Config.mqh` serialize the UI state. This ensures the "Desktop" arrangement remains after restarting MT4.
 
-### 3.3. Security & Stability
+### 3.4. Hardware Integration & Shortcuts (`GUI_Event_Key.mqh`)
+The Pad system is designed for high-speed, tactile execution without mouse interaction. It uses a **High-Security Sequence Engine** to prevent accidental triggers.
+
+*   **Security Sequence:** Commands require a specific 5-digit sequence (e.g., `9191x`) sent within a **150ms-200ms** window. This ensures that only a programmed hardware pad (not human typing) can trigger core actions.
+*   **Trading Macros:**
+    *   **Execution:** `91911` (BUY), `91912` (SELL), `91913` (LIMIT), `91914` (STOP).
+    *   **Risk Toggle:** `91915` switches between % Risk, Monetary Risk, and Fixed Lot.
+*   **Position Management:**
+    *   **Quick Closes:** `91917` (25%), `91918` (50%), `91919` (100% - Close All).
+    *   **Break-Even:** `91916` moves SL to BE for the selected position.
+*   **Navigation & Precision:**
+    *   **Symbol Wheel:** `66661/2` to scroll through Market Watch, `66660` to select.
+    *   **Risk Wheel:** `77771/2` to increment/decrement risk value, `77770` to reset.
+    *   **Cycle Positions:** `82821` to cycle through open trades (autoswitches chart).
+
+---
+
+### 3.5. Security & Stability
 *   **Input Validation:** All user inputs (Risk parameters) are sanitized via dedicated handlers.
 *   **Order Integrity:** Unique Magic Numbers identify FantomePad trades.
 *   **Performance:** `OnTick` is throttled for UI updates (500ms) to preserve CPU for trade execution. `OnTimer` handles high-frequency UI warnings.

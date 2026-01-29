@@ -15,15 +15,25 @@
 void HandleTradeError(int error, string extraMsg="")
 {
    string desc = ErrorDescription(error);
-   string fullMsg = "Error " + IntegerToString(error) + ": " + desc;
-   if(extraMsg != "") fullMsg += " (" + extraMsg + ")";
+   string userMsg = desc; 
    
-   Print(fullMsg);
+   // simplify technical messages for the users
+   if(error == 130) userMsg = "Invalid SL/TP or too close to price.";
+   if(error == 132) userMsg = "Market is closed.";
+   if(error == 133) userMsg = "Trading is disabled for this account/symbol.";
+   if(error == 134) userMsg = "Insufficient Margin!";
+   if(error == 4109) userMsg = "Expert Trading not allowed by broker.";
    
-   // Set Toast Global (picked up by GUI)
-   g_ToastMsg = fullMsg;
+   // log detailed technical info to journal
+   string logMsg = "Trade Error " + IntegerToString(error) + ": " + desc;
+   if(extraMsg != "") logMsg += " (" + extraMsg + ")";
+   Print(logMsg);
+   
+   // user friendly message for GUI
+   g_ToastMsg = userMsg;
    g_ToastColor = g_ColorRed;
    g_ToastStartTime = GetTickCount();
+   g_LastTradeErrorMsg = userMsg;
 }
 
 void HandleTradeMessage(string msg, color col)
@@ -32,6 +42,7 @@ void HandleTradeMessage(string msg, color col)
    g_ToastMsg = msg;
    g_ToastColor = col;
    g_ToastStartTime = GetTickCount();
+   g_LastTradeErrorMsg = msg;
 }
 
 //+------------------------------------------------------------------+

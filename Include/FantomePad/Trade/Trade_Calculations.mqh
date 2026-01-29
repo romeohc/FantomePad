@@ -49,7 +49,7 @@ double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
    double minLot     = MarketInfo(symbol, MODE_MINLOT);
    double maxLot     = MarketInfo(symbol, MODE_MAXLOT);
    
-   if(tickSize == 0 || tickValue == 0) return 0.0;
+   if(tickSize <= 0 || tickValue <= 0 || lotStep <= 0) return 0.0;
    
    double riskMoney = 0;
    
@@ -101,10 +101,13 @@ void UpdateCalculatedLot()
    double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
    double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
    
+   double lots = CalculateLotSize(entry, sl, risk);
+   ObjectSetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT, DoubleToString(lots, 2));
+
    // UI Update (Buttons colors)
    if(CurrentTypeIndex == 0)
    {
-      bool isValid = (sl > 0 && risk > 0);
+      bool isValid = (sl > 0 && risk > 0 && lots > 0);
       
       // Check Max Risk
       double rPrc = GetRiskPercentage(risk);
@@ -125,7 +128,7 @@ void UpdateCalculatedLot()
    }
    else
    {
-       bool isValid = (sl > 0 && risk > 0 && entry > 0);
+       bool isValid = (sl > 0 && risk > 0 && entry > 0 && lots > 0);
        
        // Check Max Risk
        double rPrc = GetRiskPercentage(risk);
@@ -141,9 +144,6 @@ void UpdateCalculatedLot()
        ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, actionCol);
        ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BORDER_COLOR, actionCol);
    }
-   
-   double lots = CalculateLotSize(entry, sl, risk);
-   ObjectSetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT, DoubleToString(lots, 2));
 }
 
 void UpdateCalculatedRisk()

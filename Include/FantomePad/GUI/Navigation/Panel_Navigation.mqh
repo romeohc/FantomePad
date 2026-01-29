@@ -252,10 +252,12 @@ void DrawSymbolList()
       string symName = SymbolName(dataIdx, true);
       string btnName = "ListItem_" + IntegerToString(i);
       
-      CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);
+      color itemBg = (dataIdx == g_SymbolHoverIndex) ? g_ColorBtnActive : g_ColorInput;
+      
+      CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, itemBg, g_ColorText);
       ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); 
       ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
+      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, itemBg);
       ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
       
       currentY += itemHeight;

@@ -63,6 +63,14 @@ bool Handle_Trading_Events(string sparam)
          ShowValidationError(msg);
          return true;
       }
+
+      // Check Lot Size
+      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+      if(volume <= 0)
+      {
+         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         return true;
+      }
       
       HideValidationError(); // Clear any previous error on success
       ExecuteOrder(OP_BUY);
@@ -99,6 +107,14 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
 
+      // Check Lot Size
+      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+      if(volume <= 0)
+      {
+         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         return true;
+      }
+
       HideValidationError(); // Clear any previous error on success
       ExecuteOrder(OP_SELL);
       return true;
@@ -132,6 +148,14 @@ bool Handle_Trading_Events(string sparam)
       {
          string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
          ShowValidationError(msg);
+         return true;
+      }
+
+      // Check Lot Size
+      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+      if(volume <= 0)
+      {
+         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
          return true;
       }
    

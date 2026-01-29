@@ -88,6 +88,18 @@ bool Handle_PositionActions_Events(string sparam)
    {
       EffectButton(sparam);
       
+      // --- SAFETY CHECK: AUTO-TRADING & LIVE TRADING ---
+      if(!IsExpertEnabled())
+      {
+         ShowPosValidationError("Auto-Trading is OFF!");
+         return true;
+      }
+      if(!IsTradeAllowed())
+      {
+         ShowPosValidationError("Live Trading disabled!");
+         return true;
+      }
+
       // --- VALIDATION CHECKS ---
       // 1. Check if position is selected
       if(SelectedPositionTicket == -1)

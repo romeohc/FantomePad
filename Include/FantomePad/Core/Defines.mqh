@@ -92,6 +92,7 @@ bool   IsListOpen = false; // État de la liste déroulante
 int    VisibleListItems = 0; // Nombre d'items affichés dans la liste
 int    g_SymbolListOffset = 0; // Scroll offset for symbol list
 int    g_SymbolListMaxVisible = 20; // Max visible items in symbol list
+int    g_SymbolHoverIndex = -1; // Current highlighted index for wheel navigation
 
 // --- POSITIONS SPECIFIC ---
 int    SelectedPositionTicket = -1; // -1 = None
@@ -151,6 +152,7 @@ color  g_ToastColor = C'214,48,49'; // Red by default
 // --- VALIDATION ERROR MESSAGE GLOBALS ---
 string g_ValidationErrorMsg = "";     // Current error message to display
 bool   g_ValidationErrorVisible = false; // Is the error message currently visible
+string g_LastTradeErrorMsg = "";      // Last error from trading logic (to be picked up by GUI)
 
 // --- ONBOARDING GLOBALS ---
 bool   g_IsFirstRun = false;
