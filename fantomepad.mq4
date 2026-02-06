@@ -3,7 +3,7 @@
 //|                                     Copyright 2026, FantomePad   |
 //|                                          Designed for Aesthetics |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2026, FantomePad"
+#property copyright "Copyright qzfqfgzf2026, FantomePad"
 #property link      "https://fantomepad.com"
 #property version   "2.00"
 #property strict

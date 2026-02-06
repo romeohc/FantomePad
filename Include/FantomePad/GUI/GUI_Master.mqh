@@ -13,8 +13,6 @@
 #include "Navigation/Panel_Navigation.mqh"
 #include "Positions/Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
-#include "Onboarding/Panel_Onboarding.mqh"
-
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
 //+------------------------------------------------------------------+
@@ -32,33 +30,10 @@ void GUI_OnInit()
       UpdateOpenOrderLines();
    }
 
-   // 1. Onboarding Logic: Only show during the first execution
-   if(g_IsFirstRun)
-   {
-      CreateOnboardingUI();
-      ShowOnboarding(true);
-      
-      // Force hide standard panels for a clean onboarding experience
-      ToggleMainPanel(false);
-      ToggleAccountPanel(false);
-      TogglePositionsPanel(false);
-      ToggleHistoryPanel(false);
-      
-      // Hide navigation specifically (prefix cleanup)
-      ObjectsDeleteAll(0, PREFIX + "Nav_");
-      return; 
-   }
-   else 
-   {
-      // CLEANUP: Ensure onboarding objects are removed if it's not the first run
-      // This prevents the onboarding from popping up on symbol or account changes
-      ObjectsDeleteAll(0, PREFIX + "Onboarding_");
-   }
-
-   // 2. Full UI Refresh (Handles Create + Toggle for all panels)
+   // 1. Full UI Refresh (Handles Create + Toggle for all panels)
    RefreshAllPanels();
    
-   // 3. Specific startup logic
+   // 2. Specific startup logic
    if(g_PanelMain.IsVisible) ApplyDefaultTradeValues();
 }
 
@@ -81,9 +56,7 @@ void UpdateToastNotification()
 //| EVENT TICK (MISE A JOUR CONTINUE)                                |
 //+------------------------------------------------------------------+
 void GUI_OnTick()
-{
-   if(g_IsFirstRun) return; // Guard: No updates during onboarding
-   
+{   
    // Throttle UI updates to save CPU (500ms)
    static uint lastUpdate = 0;
    if(GetTickCount() - lastUpdate < 500) return; 
@@ -100,7 +73,6 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
-   if(g_IsFirstRun) return; // Guard: No updates during onboarding
    UpdateAutoTradingWarning();
 }
 
@@ -245,22 +217,6 @@ void GUI_OnChartEvent(const int id,
                       const double &dparam,
                       const string &sparam)
 {
-   // --- ONBOARDING GUARD ---
-   // If it's the first run, we only allow onboarding button clicks and chart resize events.
-   // This prevents other panels from surfacing accidentally due to drag/clicks.
-   if(g_IsFirstRun)
-   {
-      if(id == CHARTEVENT_OBJECT_CLICK && sparam == PREFIX + "Onboarding_BtnStart")
-      {
-         OnEvent_ObjectClick(sparam);
-      }
-      if(id == CHARTEVENT_CHART_CHANGE)
-      {
-         OnEvent_Resize();
-      }
-      return; // Block all other events during onboarding
-   }
-
    // 1. CHART RESIZE
    if(id == CHARTEVENT_CHART_CHANGE)
    {

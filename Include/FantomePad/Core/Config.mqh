@@ -130,13 +130,6 @@ void SaveConfigToFile()
 
 void LoadConfig()
 {
-   if(!FileIsExist(ConfigFileName, FILE_COMMON)) 
-   {
-      g_IsFirstRun = true;
-      return;
-   }
-   
-   g_IsFirstRun = false; // File exists, so not the first run
    int handle = FileOpen(ConfigFileName, FILE_READ|FILE_TXT|FILE_COMMON);
    if(handle > 0)
    {

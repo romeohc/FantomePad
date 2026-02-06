@@ -154,18 +154,11 @@ string g_ValidationErrorMsg = "";     // Current error message to display
 bool   g_ValidationErrorVisible = false; // Is the error message currently visible
 string g_LastTradeErrorMsg = "";      // Last error from trading logic (to be picked up by GUI)
 
-// --- ONBOARDING GLOBALS ---
-bool   g_IsFirstRun = false;
-TPanelState g_PanelOnboarding;
 
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
 {
    // Init State Structs
-   g_PanelOnboarding.Width = 400;
-   g_PanelOnboarding.Height = 250;
-   g_PanelOnboarding.IsVisible = false;
-   
    g_PanelMain.Width = 280; // Default
    g_PanelMain.IsVisible = true;
    g_PanelMain.X = -1;
@@ -187,7 +180,7 @@ void InitGlobals()
    g_PanelSettings.X = -1;
    g_PanelSettings.Y = -1;
    
-   g_PanelNavigation.IsVisible = false; // Hidden by default during initial load
+   g_PanelNavigation.IsVisible = false;
    
    g_ScrollSettings.ViewportHeight = 400;
    g_ScrollSettings.ContentHeight = 620; 
