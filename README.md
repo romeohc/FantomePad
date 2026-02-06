@@ -1,8 +1,8 @@
 # FantomePad - Technical Documentation & Vision
 
 > **Target Audience:** AI Agents & Core Developers
-> **Project Status:** Active Development (V2.1 - Pad Integration Live)
-> **Goal:** Revolutionize the MetaTrader 4 experience through a modern "OS-like" overlay and hardware integration (The Pad).
+> **Project Status:** Active Development (V3.0 - Security & Licensing Live)
+> **Goal:** Revolutionize the MetaTrader 4 experience through a modern "OS-like" overlay, cloud-based licensing, and hardware integration (The Pad).
 
 ---
 
@@ -11,8 +11,9 @@
 **PhantomPad** is a high-performance GUI overlay for MetaTrader 4, engineered to transcend the limitations of the archaic 2005 interface. It transforms the terminal into a modern, fluid environment where the user interacts exclusively with a custom "Mini OS" rendered directly on the chart canvas.
 
 ### The Core Pillars
-*   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows (Trading, Positions, History, Settings) that remember their state across sessions, creating a seamless "desktop" experience within MT4.
-*   **Hardware (The Pad):** Now fully functional. Deep integration with physical macropads enabling **"Blind Execution."** Traders can now execute orders, manage risk, and navigate symbols via tactile shortcuts with high-security sequence verification.
+*   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows that remember their state across sessions.
+*   **Security (Cloud Unified):** A robust, **zero-DLL** licensing system integrated with **Supabase**. It features hardware-bound activation, secret token certificates, and periodic license validation.
+*   **Hardware (The Pad):** Deep integration with physical macropads enabling **"Blind Execution."** Traders can now execute orders, manage risk, and navigate symbols via tactile shortcuts with high-security sequence verification.
 
 ### Key Objectives
 *   **Eliminate Friction:** Automated risk management (real-time lot sizing based on % or cash risk) and one-click execution to save critical seconds.
@@ -28,16 +29,18 @@ The project follows a strict **Modular Monolith** architecture to ensure maintai
 ### 2.1. File Structure Overview
 ```text
 MQL4/Experts/FantomePad/
-├── fantomepad.mq4           # Entry Point (OnInit, OnTick, OnChartEvent)
+├── fantomepad.mq4           # Entry Point (License Heartbeat, Logic)
 └── Include/FantomePad/      # Core Logic Library
-    ├── Core/                # Global Definitions & Configuration
+    ├── Core/                # Global Definitions & Security
     │   ├── Defines.mqh      # Constants, Colors, Structs, Global State
-    │   └── Config.mqh       # Save/Load State Logic (File I/O)
+    │   ├── Config.mqh       # Persistence Logic (File I/O)
+    │   └── Security.mqh     # Cloud Auth Logic (Supabase, Hardware ID)
     ├── GUI/                 # Custom Graphics Engine (Modular)
     │   ├── GUI_Master.mqh   # Main Coordinator & Bridge to MQL4 Events
     │   ├── Components/      # UI Primitives (Buttons, Panels, Labels)
     │   ├── Events/          # Event Dispatchers (Click, Drag, Key, etc.)
     │   │   └── Handlers/    # High-level event logic for specific features
+    │   ├── Auth/            # Onboarding & Activation UI Module
     │   ├── Account/         # Account Info Panel Module
     │   ├── History/         # Trade History Panel Module
     │   ├── Main/            # Trading Panel Module (Risk, Buy/Sell)
@@ -97,10 +100,29 @@ The Pad system is designed for high-speed, tactile execution without mouse inter
 
 ---
 
-### 3.5. Security & Stability
+### 3.5. Security & Stability (Risk Control)
 *   **Input Validation:** All user inputs (Risk parameters) are sanitized via dedicated handlers.
 *   **Order Integrity:** Unique Magic Numbers identify FantomePad trades.
-*   **Performance:** `OnTick` is throttled for UI updates (500ms) to preserve CPU for trade execution. `OnTimer` handles high-frequency UI warnings.
+*   **Performance:** `OnTick` is throttled for UI updates (500ms) to preserve CPU for trade execution. `OnTimer` handles high-frequency license heartbeats.
+
+### 3.6. Security & Licensing (Supabase Cloud Ecosystem)
+The security module (`Security.mqh`) represents a major shift toward a professional SaaS model, operating entirely within the MQL4 sandbox without external DLLs.
+
+*   **Cloud Verification:** Powered by **Supabase Edge Functions**. The EA communicates via native `WebRequest` to validate license states, order IDs, and activation status.
+*   **Hardware Binding (Session-Locked):**
+    *   Licenses are bound to a unique hardware signature derived from `TERMINAL_COMMONDATA_PATH` usage and `TERMINAL_CPU_CORES`.
+    *   This ensures "one-click" portability within a user's machine while preventing unauthorized sharing.
+*   **The Secret Token (Self-Healing Certificate):**
+    *   Upon activation, the server generates a unique **Secret Token** stored in a hidden local binary file (`fantome_cert.dat`).
+    *   Verification requires a triple-match: {License Code + Hardware ID + Secret Token}.
+    *   **Self-Healing:** If a token is corrupted or reset by an admin, the EA automatically purges local certificates to allow the user a clean re-activation.
+*   **Onboarding Experience:**
+    *   A custom-built **Onboarding UI** handles the "The new standard is here" first-run experience.
+    *   Features a full-screen chart-hiding overlay for a focused, premium software feel.
+    *   Monochrome branding (#121212 / #FFFFFF) with professional feedback loops.
+*   **Dynamic Revocation:**
+    *   A periodic **License Heartbeat** (every 5 seconds) checks status against the Supabase backend.
+    *   Instant revocation capability allows admins to block/ban licenses in real-time, immediately locking the GUI and navigation modules.
 
 ---
 
@@ -110,13 +132,13 @@ The Pad system is designed for high-speed, tactile execution without mouse inter
 1.  **Module Creation:** Create a new folder in `Include/FantomePad/GUI/`.
 2.  **Define State:** If it needs persistence, add relevant fields to `Defines.mqh` and update `Config.mqh`.
 3.  **Implement UI:** Use `Components.mqh` primitives to build the interface within your module.
-4.  **Register:** Link the new panel in `GUI_Master.mqh` (`GUI_OnInit` and `RefreshAllPanels`).
-5.  **Event Handling:** Add/Update handlers in `GUI/Events/Handlers/` if your feature requires complex interaction logic.
+4.  **Register:** Link the new panel in `GUI_Master.mqh`.
+5.  **Validation:** Ensure the feature respects the `g_IsLicensed` flag for proper security blocking.
 
 ### Design Philosophy
-*   **"Aesthetics First":** Maintain the "Deep Dark" professional aesthetic using `Defines.mqh` color tokens.
-*   **Strict Modularity:** Keep layout/UI separate from logic. Files should remain under 500 lines.
-*   **Zero-Lag Optimization:** Throttling in `OnTick` and efficient event routing are mandatory.
+*   **"Aesthetics First":** Maintain the **"Monochrome Premium"** aesthetic (#121212 / #FFFFFF / #2962FF) using `Defines.mqh` color tokens.
+*   **Strict Modularity:** Keep layout/UI separate from logic. Files MUST remain under 300 lines (refactoring mandatory).
+*   **SaaS Reliability:** Every network call must be asynchronous or timeout-protected to ensure the EA never freezes during trade execution.
 
 ---
 
