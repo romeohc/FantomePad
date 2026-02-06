@@ -108,6 +108,10 @@ datetime g_HistoryCustomStart = 0;
 datetime g_HistoryCustomEnd = 0;
 string g_HistoryFilterSymbol = ""; // Symbol filter string
 
+// --- AUTHENTICATION GLOBALS ---
+bool   g_IsLicensed = false;
+string g_ActivationCode = "";
+TPanelState g_PanelAuth;
 // --- SETTINGS GLOBALS ---
 // Default Risk Globals removed
 double   g_OneRPercent;
@@ -159,6 +163,9 @@ string g_LastTradeErrorMsg = "";      // Last error from trading logic (to be pi
 void InitGlobals()
 {
    // Init State Structs
+   g_PanelAuth.Width = 320;
+   g_PanelAuth.Height = 220;
+   g_PanelAuth.IsVisible = false;
    g_PanelMain.Width = 280; // Default
    g_PanelMain.IsVisible = true;
    g_PanelMain.X = -1;

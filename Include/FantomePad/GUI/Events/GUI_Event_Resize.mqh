@@ -8,6 +8,13 @@
 //+------------------------------------------------------------------+
 void OnEvent_Resize()
 {
+   // --- AUTH PANEL RESIZE ---
+   if(!g_IsLicensed)
+   {
+      CreateAuthUI();
+      ShowAuthPanel(true);
+      return;
+   }
    // --- SAFETY CHECK: Recenter panels if hidden by resize ---
    if(g_PanelMain.IsVisible) {
        long h = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);

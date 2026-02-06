@@ -13,6 +13,7 @@
 #include "Navigation/Panel_Navigation.mqh"
 #include "Positions/Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
+#include "Auth/Panel_Auth.mqh"
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
 //+------------------------------------------------------------------+
@@ -30,7 +31,34 @@ void GUI_OnInit()
       UpdateOpenOrderLines();
    }
 
-   // 1. Full UI Refresh (Handles Create + Toggle for all panels)
+   // 1. Initial License Check
+   if(g_ActivationCode != "")
+   {
+      if(CheckLicense(g_ActivationCode)) g_IsLicensed = true;
+   }
+
+   if(!g_IsLicensed)
+   {
+      CreateAuthUI();
+      ShowAuthPanel(true);
+      
+      // Force hide all standard panels
+      ToggleMainPanel(false);
+      ToggleAccountPanel(false);
+      TogglePositionsPanel(false);
+      ToggleHistoryPanel(false);
+      
+      // Hide navigation
+      ObjectsDeleteAll(0, PREFIX + "Nav_");
+      return; 
+   }
+   else 
+   {
+      // Ensure auth objects are removed if licensed
+      ObjectsDeleteAll(0, PREFIX + "Auth_");
+   }
+
+   // 2. Full UI Refresh
    RefreshAllPanels();
    
    // 2. Specific startup logic
@@ -57,6 +85,7 @@ void UpdateToastNotification()
 //+------------------------------------------------------------------+
 void GUI_OnTick()
 {   
+   if(!g_IsLicensed) return; // Guard: No updates if not licensed
    // Throttle UI updates to save CPU (500ms)
    static uint lastUpdate = 0;
    if(GetTickCount() - lastUpdate < 500) return; 
@@ -73,6 +102,7 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
+   if(!g_IsLicensed) return; // Guard: No updates if not licensed
    UpdateAutoTradingWarning();
 }
 
@@ -114,6 +144,13 @@ double GetOriginalLotSize(int ticket)
 //+------------------------------------------------------------------+
 void RefreshAllPanels()
 {
+    if(!g_IsLicensed)
+    {
+        CreateAuthUI();
+        ShowAuthPanel(true);
+        return;
+    }
+
     // 1. Navigation (Master Controller)
     CreateNavigationPanel();
     // Navigation is always visible if EA is running, but let's be explicit
@@ -217,6 +254,24 @@ void GUI_OnChartEvent(const int id,
                       const double &dparam,
                       const string &sparam)
 {
+   // --- AUTHENTICATION GUARD ---
+   if(!g_IsLicensed)
+   {
+      if(id == CHARTEVENT_OBJECT_CLICK && sparam == PREFIX + "Auth_BtnActive")
+      {
+         OnEvent_ObjectClick(sparam);
+      }
+      if(id == CHARTEVENT_CHART_CHANGE)
+      {
+         OnEvent_Resize();
+      }
+      if(id == CHARTEVENT_OBJECT_ENDEDIT && sparam == PREFIX + "Auth_Input")
+      {
+         // Update activation code as user types/finishes edit
+         g_ActivationCode = ObjectGetString(0, sparam, OBJPROP_TEXT);
+      }
+      return; // Block all other events if not licensed
+   }
    // 1. CHART RESIZE
    if(id == CHARTEVENT_CHART_CHANGE)
    {

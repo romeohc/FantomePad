@@ -27,7 +27,7 @@ void HandleTradeError(int error, string extraMsg="")
    // log detailed technical info to journal
    string logMsg = "Trade Error " + IntegerToString(error) + ": " + desc;
    if(extraMsg != "") logMsg += " (" + extraMsg + ")";
-   Print(logMsg);
+   // Print(logMsg);
    
    // user friendly message for GUI
    g_ToastMsg = userMsg;
@@ -38,7 +38,7 @@ void HandleTradeError(int error, string extraMsg="")
 
 void HandleTradeMessage(string msg, color col)
 {
-   Print(msg);
+   // Print(msg);
    g_ToastMsg = msg;
    g_ToastColor = col;
    g_ToastStartTime = GetTickCount();

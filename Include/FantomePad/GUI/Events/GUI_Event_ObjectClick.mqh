@@ -30,6 +30,12 @@ void OnEvent_ObjectClick(string sparam)
         return;
     }
 
+    // 0. Authentication Logic
+    if(sparam == PREFIX + "Auth_BtnActive")
+    {
+        OnClick_AuthActivate();
+        return;
+    }
     // 1. Validation Logic (Errors)
     if(Handle_Validation_Events(sparam)) return;
     
