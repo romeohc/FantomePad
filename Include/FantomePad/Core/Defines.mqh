@@ -111,6 +111,7 @@ string g_HistoryFilterSymbol = ""; // Symbol filter string
 // --- AUTHENTICATION GLOBALS ---
 bool   g_IsLicensed = false;
 string g_ActivationCode = "";
+string g_AuthErrorMsg    = ""; // Stores the last error from the server
 TPanelState g_PanelAuth;
 // --- SETTINGS GLOBALS ---
 // Default Risk Globals removed

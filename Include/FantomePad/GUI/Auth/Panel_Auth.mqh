@@ -43,7 +43,8 @@ void OnClick_AuthActivate()
    }
    else
    {
-      UpdateAuthStatus("Code Invalide ou Erreur de Connexion.", g_ColorRed);
+      string error = (g_AuthErrorMsg != "") ? g_AuthErrorMsg : "Erreur de connexion";
+      UpdateAuthStatus(error, g_ColorRed);
       g_IsLicensed = false;
    }
    

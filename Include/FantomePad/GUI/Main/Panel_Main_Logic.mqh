@@ -53,7 +53,7 @@ void AutoSwitchOrderType()
    
    if(sl <= 0) return;
    
-   string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+   string symbol = ObjectGetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT);
    if(symbol == "") symbol = Symbol();
    double bid = MarketInfo(symbol, MODE_BID);
    double ask = MarketInfo(symbol, MODE_ASK);
@@ -152,7 +152,7 @@ void AutoSwitchOrderType()
 //+------------------------------------------------------------------+
 void ApplyDefaultTradeValues()
 {
-   string symbol = ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+   string symbol = ObjectGetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT);
    if(symbol == "") symbol = Symbol();
    
    double bid = MarketInfo(symbol, MODE_BID);

@@ -164,7 +164,7 @@ void CreateNavigationPanel()
    currentX += btnW + margin;
    int symBtnW = 100; // Wider for symbol name
    // We reuse the ID "Btn_SymbolSelect" so GUI_Master logic works
-   CreateButton("Btn_SymbolSelect", Symbol(), currentX, startY, symBtnW, btnH, g_ColorInput, g_ColorText);
+   CreateButton("Nav_Btn_SymbolSelect", Symbol(), currentX, startY, symBtnW, btnH, g_ColorInput, g_ColorText);
    UpdateAutoTradingWarning();
 }
 
@@ -196,10 +196,10 @@ void CloseSymbolList()
 
 void DrawSymbolList()
 {
-   long x = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XDISTANCE);
-   long y = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YDISTANCE);
-   long w = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_XSIZE);
-   long h = ObjectGetInteger(0, PREFIX + "Btn_SymbolSelect", OBJPROP_YSIZE);
+   long x = ObjectGetInteger(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_XDISTANCE);
+   long y = ObjectGetInteger(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_YDISTANCE);
+   long w = ObjectGetInteger(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_XSIZE);
+   long h = ObjectGetInteger(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_YSIZE);
    
    int total = SymbolsTotal(true);
    int itemHeight = 25;

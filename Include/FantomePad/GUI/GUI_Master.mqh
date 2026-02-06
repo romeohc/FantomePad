@@ -102,6 +102,22 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
+   // 1. Permanent License Check (Heartbeat) - Temporary: 5 seconds for testing
+   static uint lastHeartbeat = 0;
+   uint now = GetTickCount();
+   
+   if(g_IsLicensed && (now - lastHeartbeat > 5000 || lastHeartbeat == 0)) 
+   {
+      lastHeartbeat = now;
+      if(!CheckLicense(g_ActivationCode))
+      {
+         Print("FantomePad: License invalidated during heartbeat.");
+         g_IsLicensed = false;
+         GUI_OnInit(); // Trigger re-auth
+         return;
+      }
+   }
+
    if(!g_IsLicensed) return; // Guard: No updates if not licensed
    UpdateAutoTradingWarning();
 }
@@ -160,7 +176,7 @@ void RefreshAllPanels()
     SetObjVisible("Nav_Btn_Account", true);
     SetObjVisible("Nav_Btn_History", true);
     SetObjVisible("Nav_Btn_Settings", true);
-    SetObjVisible("Btn_SymbolSelect", true);
+    SetObjVisible("Nav_Btn_SymbolSelect", true);
 
     // 2. Trade Panel
     CreatePanel(); 

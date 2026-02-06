@@ -101,11 +101,11 @@ bool CheckLicense(string code)
    
    if(res == 200) 
    {
-      string response = CharArrayToString(result);
+      string response = CharArrayToString(result, 0, WHOLE_ARRAY, CP_UTF8);
       if(StringFind(response, "\"valid\":true") >= 0) 
       {
+         g_AuthErrorMsg = ""; // Suppression des erreurs précédentes
          // Si le serveur nous renvoie un NOUVEAU token (première activation), on l'enregistre
-         // Format attendu: {"valid":true, "new_token":"..."}
          int tokenPos = StringFind(response, "\"new_token\":\"");
          if(tokenPos >= 0)
          {
@@ -115,6 +115,30 @@ bool CheckLicense(string code)
          }
          return true;
       }
+      else 
+      {
+         // On essaie d'extraire le message d'erreur du JSON {"valid":false, "error":"..."}
+         int errPos = StringFind(response, "\"error\":\"");
+         if(errPos >= 0)
+         {
+            string sub = StringSubstr(response, errPos + 9);
+            int endPos = StringFind(sub, "\"");
+            if(endPos > 0) g_AuthErrorMsg = StringSubstr(sub, 0, endPos);
+            else g_AuthErrorMsg = "Erreur inconnue";
+            
+            // SELF-HEALING: Si le token est invalide (fichier corrompu ou reset serveur),
+            // on supprime le fichier local pour permettre une ré-activation propre.
+            if(StringFind(g_AuthErrorMsg, "Certificat") >= 0)
+            {
+               FileDelete("fantome_cert.dat", FILE_COMMON);
+            }
+         }
+         else g_AuthErrorMsg = "Réponse invalide du serveur";
+      }
+   }
+   else 
+   {
+      g_AuthErrorMsg = "Serveur injoignable (Erreur HTTP " + IntegerToString(res) + ")";
    }
    return false;
 }

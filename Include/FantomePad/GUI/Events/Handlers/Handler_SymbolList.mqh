@@ -6,7 +6,7 @@
 bool Handle_SymbolList_Events(string sparam)
 {
    // 1. Clic sur le bouton principal de l'actif
-   if(sparam == PREFIX + "Btn_SymbolSelect")
+   if(sparam == PREFIX + "Nav_Btn_SymbolSelect")
    {
       ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Désactiver l'état "enfoncé" pour garder la couleur d'origine
       ToggleSymbolList();
@@ -21,7 +21,7 @@ bool Handle_SymbolList_Events(string sparam)
       string selectedSymbol = ObjectGetString(0, sparam, OBJPROP_TEXT);
       
       // Mettre à jour le bouton principal
-      ObjectSetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT, selectedSymbol);
+      ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, selectedSymbol);
       
       // Changer le symbole du graphique en arrière-plan
       ChartSetSymbolPeriod(0, selectedSymbol, Period());
@@ -36,7 +36,7 @@ bool Handle_SymbolList_Events(string sparam)
    // Si on clique ailleurs et que la liste est ouverte, on la ferme
    if(IsListOpen && 
       StringFind(sparam, PREFIX + "ListItem_") < 0 && 
-      sparam != PREFIX + "Btn_SymbolSelect" &&
+      sparam != PREFIX + "Nav_Btn_SymbolSelect" &&
       sparam != PREFIX + "ScrollTrack" &&
       sparam != PREFIX + "ScrollThumb")
    {

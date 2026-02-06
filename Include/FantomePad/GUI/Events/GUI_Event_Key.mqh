@@ -98,7 +98,7 @@ void SelectSymbol()
    string sym = SymbolName(g_SymbolHoverIndex, true);
    
    // Execute selection logic
-   ObjectSetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT, sym);
+   ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, sym);
    ChartSetSymbolPeriod(0, sym, Period());
    
    CloseSymbolList();
