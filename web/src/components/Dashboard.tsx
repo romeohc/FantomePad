@@ -108,10 +108,10 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
     if (status === 'pending') {
         return (
             <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
-                <div className="max-w-4xl w-full space-y-12">
+                <div className="max-w-6xl w-full space-y-12">
                     {/* Header */}
                     <div className="flex justify-between items-center">
-                        <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={160} height={40} className="h-8 md:h-10 w-auto brightness-0 invert" />
+                        <span className="text-xl font-bold text-white tracking-tight">Tutoriel d&apos;installation</span>
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-2 text-xs font-bold text-brand-gray hover:text-white transition-colors uppercase tracking-wider"
@@ -120,10 +120,10 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
                         {/* Left: Video Tutorial */}
-                        <div className="space-y-6">
-                            <div className="relative aspect-video bg-[#151515] border border-white/10 rounded-3xl overflow-hidden group cursor-pointer shadow-2xl">
+                        <div className="h-full">
+                            <div className="relative w-full h-full min-h-[350px] bg-[#151515] border border-white/10 rounded-3xl overflow-hidden group cursor-pointer shadow-2xl">
                                 <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/10 to-transparent opacity-50" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="h-20 w-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform shadow-xl">
@@ -135,16 +135,14 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                     <h3 className="text-xl font-bold">Installation & Connexion</h3>
                                 </div>
                             </div>
-                            <div className="text-sm text-brand-gray leading-relaxed">
-                                Regardez ce guide rapide pour connecter votre Expert Advisor à la plateforme. Une fois connecté, votre dashboard s&apos;activera automatiquement.
-                            </div>
                         </div>
 
                         {/* Right: Actions */}
-                        <div className="space-y-8 bg-[#121212] p-8 rounded-3xl border border-white/5">
+                        <div className="space-y-8 bg-[#121212] p-10 rounded-3xl border border-white/5 flex flex-col justify-center">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">En attente de connexion...</h2>
-                                <p className="text-brand-gray text-sm">Veuillez installer l&apos;Expert Advisor sur votre MetaTrader.</p>
+                                <div className="inline-block">
+                                    <StatusIndicator status="pending" />
+                                </div>
                             </div>
 
                             {/* License Key Display */}
@@ -155,12 +153,12 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                 </div>
                                 <div
                                     onClick={handleCopy}
-                                    className="bg-black/50 border border-white/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-brand-blue/50 transition-all group"
+                                    className="bg-black/50 border border-white/10 rounded-xl p-6 flex items-center justify-between cursor-pointer hover:border-brand-blue/50 transition-all group"
                                 >
-                                    <code className="font-mono text-xl font-bold tracking-widest text-white group-hover:text-brand-blue transition-colors">
+                                    <code className="font-mono text-2xl font-bold tracking-widest text-white group-hover:text-brand-blue transition-colors">
                                         {activationCode}
                                     </code>
-                                    <Copy className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
+                                    <Copy className="h-6 w-6 text-brand-gray group-hover:text-white transition-colors" />
                                 </div>
                             </div>
 
@@ -168,12 +166,11 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
 
                             {/* Download Button */}
                             <a href="#" className="flex items-center gap-4 group">
-                                <div className="h-12 w-12 bg-white text-black rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                    <Download className="h-6 w-6" />
+                                <div className="h-14 w-14 bg-white text-black rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <Download className="h-7 w-7" />
                                 </div>
                                 <div>
-                                    <div className="font-bold text-white group-hover:text-brand-blue transition-colors">Télécharger l&apos;Expert Advisor</div>
-                                    <div className="text-xs text-brand-gray">Dernière version v2.4.1</div>
+                                    <div className="font-bold text-lg text-white group-hover:text-brand-blue transition-colors">Télécharger mon Logiciel</div>
                                 </div>
                             </a>
                         </div>

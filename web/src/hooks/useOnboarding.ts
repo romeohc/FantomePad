@@ -5,17 +5,23 @@ import { createClient } from "@/utils/supabase";
 /**
  * Onboarding steps:
  * 1. platform_selection: User chooses MT4 or MT5
- * 2. install: User confirms installation or downloads platform
- * 3. activation: User generates/views their license code
+ * 2. install: User confirms platform installation
+ * 3. download: User downloads the Expert Advisor software
+ * 4. activation: Tutorial video + License Key + Waiting for active status
  */
-export type OnboardingStep = "platform_selection" | "install" | "activation";
+export type OnboardingStep = "platform_selection" | "install" | "download" | "activation";
 export type Platform = "mt4" | "mt5" | null;
 
-export const useOnboarding = (email: string) => {
+interface LicenseData {
+    activation_code?: string;
+    status?: string;
+}
+
+export const useOnboarding = (email: string, initialData?: LicenseData | null) => {
     // Initialize state
     const [step, setStep] = useState<OnboardingStep>("platform_selection");
     const [platform, setPlatform] = useState<Platform>(null);
-    const [activationCode, setActivationCode] = useState<string | null>(null);
+    const [activationCode, setActivationCode] = useState<string | null>(initialData?.activation_code || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +30,13 @@ export const useOnboarding = (email: string) => {
 
     const checkExistingLicense = useCallback(async () => {
         if (!email) return;
+
+        // specific check if we already have initialData from parent
+        if (initialData?.activation_code) {
+            setActivationCode(initialData.activation_code);
+            setStep("activation");
+            return;
+        }
 
         try {
             const { data } = await supabase
@@ -41,7 +54,7 @@ export const useOnboarding = (email: string) => {
         } catch (err) {
             console.error("Error checking license:", err);
         }
-    }, [email, supabase]);
+    }, [email, supabase, initialData]);
 
     // Load state from localStorage on mount (Client-side only)
     useEffect(() => {
@@ -49,7 +62,15 @@ export const useOnboarding = (email: string) => {
             const savedStep = localStorage.getItem("onboarding_step") as OnboardingStep;
             const savedPlatform = localStorage.getItem("onboarding_platform") as Platform;
 
-            if (savedStep) setStep(savedStep);
+            // Only restore step if we don't have a code, OR if the code exists and we are essentially resuming
+            if (savedStep && !activationCode) {
+                setStep(savedStep);
+            }
+            // If we have an activation code, we FORCE step to activation (step 4)
+            if (activationCode || initialData?.activation_code) {
+                setStep("activation");
+            }
+
             if (savedPlatform) setPlatform(savedPlatform);
         }
 
@@ -140,8 +161,9 @@ export const useOnboarding = (email: string) => {
 
     const getProgress = () => {
         switch (step) {
-            case "platform_selection": return 33;
-            case "install": return 66;
+            case "platform_selection": return 25;
+            case "install": return 50;
+            case "download": return 75;
             case "activation": return 100;
             default: return 0;
         }

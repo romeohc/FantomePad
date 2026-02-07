@@ -144,13 +144,13 @@ export default function Home() {
     );
   }
 
-  // Dashboard View (Full Screen)
-  if (session && license?.activation_code) {
+  // Dashboard View (Full Screen) - Only if active
+  if (session && license?.activation_code && license?.status === 'active') {
     return (
       <Dashboard
         email={session.user.email || ""}
         activationCode={license.activation_code}
-        status={license.status || "pending"}
+        status="active"
       />
     );
   }
@@ -167,12 +167,13 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className={`relative z-10 w-full ${session ? "max-w-5xl" : "max-w-md"} transition-all duration-500`}
+        className={`relative z-10 w-full ${session ? "max-w-6xl" : "max-w-md"} transition-all duration-500`}
       >
         {session ? (
           // Onboarding State (Within Card)
           <OnboardingFlow
             email={session.user.email || ""}
+            initialData={license}
             onComplete={() => fetchLicense(session.user.email || "")}
           />
         ) : (
