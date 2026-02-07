@@ -151,7 +151,12 @@ export default function Home() {
             {session ? (
               // Logged In State
               license?.activation_code ? (
-                <Dashboard email={session.user.email} activationCode={license.activation_code} />
+                <Dashboard
+                  email={session.user.email}
+                  activationCode={license.activation_code}
+                  hardwareId={license.hardware_id}
+                  status={license.status}
+                />
               ) : (
                 <OnboardingFlow
                   email={session.user.email}

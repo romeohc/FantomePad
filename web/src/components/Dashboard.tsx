@@ -1,14 +1,14 @@
-import { LogOut, Activity, Monitor, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Activity, Monitor } from "lucide-react";
 import { createClient } from "@/utils/supabase";
 
 interface DashboardProps {
     email: string;
     activationCode: string;
+    hardwareId?: string;
+    status: string;
 }
 
-export default function Dashboard({ email, activationCode }: DashboardProps) {
-    const [resetting, setResetting] = useState(false);
+export default function Dashboard({ email, activationCode, hardwareId, status }: DashboardProps) {
     const supabase = createClient();
 
     const handleLogout = async () => {
@@ -16,11 +16,37 @@ export default function Dashboard({ email, activationCode }: DashboardProps) {
         window.location.reload();
     };
 
-    const handleReset = async () => {
-        setResetting(true);
-        // Simulation du reset
-        setTimeout(() => setResetting(false), 2000);
+    const getStatusStyles = () => {
+        switch (status?.toLowerCase()) {
+            case "active":
+                return {
+                    bg: "bg-green-500/10",
+                    border: "border-green-500/20",
+                    text: "text-green-400",
+                    label: "Actif",
+                    dot: "bg-green-500"
+                };
+            case "blocked":
+                return {
+                    bg: "bg-red-500/10",
+                    border: "border-red-500/20",
+                    text: "text-red-400",
+                    label: "Bloqué",
+                    dot: "bg-red-500"
+                };
+            case "pending":
+            default:
+                return {
+                    bg: "bg-yellow-500/10",
+                    border: "border-yellow-500/20",
+                    text: "text-yellow-400",
+                    label: "En attente",
+                    dot: "bg-yellow-500"
+                };
+        }
     };
+
+    const statusStyle = getStatusStyles();
 
     return (
         <div className="w-full max-w-lg space-y-6 animate-in fade-in duration-700">
@@ -30,12 +56,14 @@ export default function Dashboard({ email, activationCode }: DashboardProps) {
                     <h1 className="text-2xl font-bold text-white">Dashboard</h1>
                     <p className="text-brand-gray text-xs truncate max-w-[200px]">{email}</p>
                 </div>
-                <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
+                <div className={`px-3 py-1 rounded-full ${statusStyle.bg} border ${statusStyle.border} ${statusStyle.text} text-[10px] font-bold uppercase tracking-wide flex items-center gap-2`}>
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        {status?.toLowerCase() === "active" && (
+                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusStyle.dot} opacity-75`}></span>
+                        )}
+                        <span className={`relative inline-flex rounded-full h-2 w-2 ${statusStyle.dot}`}></span>
                     </span>
-                    Actif
+                    {statusStyle.label}
                 </div>
             </div>
 
@@ -57,18 +85,12 @@ export default function Dashboard({ email, activationCode }: DashboardProps) {
                             <Monitor className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <div className="text-xs text-brand-gray">Machine ID</div>
-                            <div className="text-sm text-white font-mono">HW-7823-99X1</div>
+                            <div className="text-xs text-brand-gray">Hardware ID</div>
+                            <div className="text-sm text-white font-mono">
+                                {hardwareId || "Non lié"}
+                            </div>
                         </div>
                     </div>
-
-                    <button
-                        onClick={handleReset}
-                        disabled={resetting}
-                        className="text-xs text-brand-gray hover:text-white underline decoration-brand-gray/50 hover:decoration-white transition-all disabled:opacity-50"
-                    >
-                        {resetting ? "Reset..." : "Reset HWID"}
-                    </button>
                 </div>
             </div>
 
