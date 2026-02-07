@@ -13,6 +13,7 @@
 ### The Core Pillars
 *   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows that remember their state across sessions.
 *   **Security (Cloud Unified):** A robust, **zero-DLL** licensing system integrated with **Supabase**. It features hardware-bound activation, secret token certificates, and periodic license validation.
+*   **Web Hub (**`web/`**):** A modern Next.js centralized portal for license management, user onboarding flow, and terminal connectivity monitoring.
 *   **Hardware (The Pad):** Deep integration with physical macropads enabling **"Blind Execution."** Traders can now execute orders, manage risk, and navigate symbols via tactile shortcuts with high-security sequence verification.
 
 ### Key Objectives
@@ -30,7 +31,14 @@ The project follows a strict **Modular Monolith** architecture to ensure maintai
 ```text
 MQL4/Experts/FantomePad/
 ├── fantomepad.mq4           # Entry Point (License Heartbeat, Logic)
-└── Include/FantomePad/      # Core Logic Library
+├── Include/FantomePad/      # Core Logic Library
+└── web/                      # Next.js Web Dashboard & Onboarding
+    ├── src/app/             # Application Routes (Dashboard, Onboarding)
+    ├── src/components/      # UI components (Framer Motion, Tailwind 4)
+    └── netlify.toml         # Deployment Configuration (Netlify)
+
+Included Files:
+├── Include/FantomePad/
     ├── Core/                # Global Definitions & Security
     │   ├── Defines.mqh      # Constants, Colors, Structs, Global State
     │   ├── Config.mqh       # Persistence Logic (File I/O)
@@ -120,9 +128,15 @@ The security module (`Security.mqh`) represents a major shift toward a professio
     *   A custom-built **Onboarding UI** handles the "The new standard is here" first-run experience.
     *   Features a full-screen chart-hiding overlay for a focused, premium software feel.
     *   Monochrome branding (#121212 / #FFFFFF) with professional feedback loops.
-*   **Dynamic Revocation:**
-    *   A periodic **License Heartbeat** (every 5 seconds) checks status against the Supabase backend.
     *   Instant revocation capability allows admins to block/ban licenses in real-time, immediately locking the GUI and navigation modules.
+
+### 3.7. The Web Hub (`web/`)
+The **FantomePad Web Hub** is the administrative and user-facing gateway to the ecosystem.
+
+*   **Tech Stack:** Next.js 15, TypeScript, Tailwind CSS 4, Framer Motion, and Supabase SSR.
+*   **Onboarding Flow:** A high-end interactive onboarding experience that guide users through registration and terminal linking.
+*   **User Dashboard:** provides a real-time overview of active licenses, hardware bindings, and account status.
+*   **Deployment:** Optimized for Netlify with automatic branch deploys and environment management.
 
 ---
 
