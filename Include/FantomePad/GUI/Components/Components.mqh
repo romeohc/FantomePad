@@ -9,6 +9,10 @@
 // Relative path to avoid dependency on global include paths
 #include "../../Core/Defines.mqh"
 
+// Forward declaration wrapper to prevent "no #import declaration" warnings in MQL4
+class CGUI_Master { public: static void RefreshAllPanels(); };
+#define RefreshAllPanels CGUI_Master::RefreshAllPanels
+
 //+------------------------------------------------------------------+
 //| Helpers Graphiques                                               |
 //+------------------------------------------------------------------+

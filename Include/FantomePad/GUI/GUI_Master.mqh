@@ -102,11 +102,11 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
-   // 1. Permanent License Check (Heartbeat) - Temporary: 5 seconds for testing
+   // 1. Permanent License Check (Heartbeat) - Checked every 1 hour to prevent UI freezing on network issues
    static uint lastHeartbeat = 0;
    uint now = GetTickCount();
    
-   if(g_IsLicensed && (now - lastHeartbeat > 5000 || lastHeartbeat == 0)) 
+   if(g_IsLicensed && (now - lastHeartbeat > 3600 || lastHeartbeat == 0)) 
    {
       lastHeartbeat = now;
       if(!CheckLicense(g_ActivationCode))
@@ -158,7 +158,7 @@ double GetOriginalLotSize(int ticket)
 //+------------------------------------------------------------------+
 //| HELPER: REFRESH ALL PANELS                                       |
 //+------------------------------------------------------------------+
-void RefreshAllPanels()
+void CGUI_Master::RefreshAllPanels()
 {
     if(!g_IsLicensed)
     {

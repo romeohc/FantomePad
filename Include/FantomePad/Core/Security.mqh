@@ -80,6 +80,11 @@ void SaveSecretToken(string token)
 bool CheckLicense(string code)
 {
    if(code == "") return false;
+
+   // Sanitize code to prevent JSON injection
+   string cleanCode = code;
+   StringReplace(cleanCode, "\"", "");
+   StringReplace(cleanCode, "\\", "");
    
    string url = "https://zxgkjytxqqxkizqcrdwf.functions.supabase.co/verify-license";
    
@@ -88,7 +93,7 @@ bool CheckLicense(string code)
    string secretToken = GetSecretToken();
    
    // Payload avec les 3 clés
-   string payload = "{\"code\":\"" + code + "\", \"session_id\":\"" + sessionID + "\", \"secret_token\":\"" + secretToken + "\"}";
+   string payload = "{\"code\":\"" + cleanCode + "\", \"session_id\":\"" + sessionID + "\", \"secret_token\":\"" + secretToken + "\"}";
    
    char data[], result[];
    string responseHeaders;

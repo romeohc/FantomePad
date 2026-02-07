@@ -9,14 +9,15 @@
 #include "../../Core/Security.mqh"
 #include "../../Core/Config.mqh"
 
-// Forward declaration to refresh UI after activation
-void RefreshAllPanels();
+// RefreshAllPanels is now handled via CGUI_Master in Components.mqh
 
 void OnClick_AuthActivate()
 {
    string code = ObjectGetString(0, PREFIX + "Auth_Input", OBJPROP_TEXT);
    StringTrimLeft(code);
    StringTrimRight(code);
+   StringReplace(code, "\"", "");
+   StringReplace(code, "\\", "");
    
    UpdateAuthStatus("Vérification en cours...", clrWhite);
    

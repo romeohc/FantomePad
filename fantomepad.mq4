@@ -99,6 +99,12 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
+   if(!g_IsLicensed) 
+   {
+      GUI_OnTick(); // Still need to update Auth UI if visible
+      return;
+   }
+
    // Mise à jour des lignes d'ordres ouverts (Custom Colors)
    UpdateOpenOrderLines();
    
