@@ -1,13 +1,14 @@
 import {
-    LogOut, Monitor, Shield, HelpCircle,
+    LogOut, Monitor, HelpCircle,
     Copy, Check, Clock, Bell,
-    Zap, Download,
+    Zap, Download, Eye, EyeOff,
     LayoutDashboard, Menu, X, PlayCircle, Calendar,
-    Mail, ExternalLink, FileCode, LucideIcon
+    ExternalLink, FileCode, LucideIcon
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface DashboardProps {
     email: string;
@@ -90,18 +91,97 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
     const [isLocked, setIsLocked] = useState(false);
     const notifications = 2;
 
-    const handleLogout = async () => {
+    const handleLogout = async () => { // Renamed from handleSignOut in snippet
         await supabase.auth.signOut();
         window.location.reload();
     };
 
     const handleCopy = () => {
-        if (activationCode) {
+        if (activationCode) { // Added check for activationCode
             navigator.clipboard.writeText(activationCode);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
     };
+
+    // --- PENDING STATE VIEW ---
+    if (status === 'pending') {
+        return (
+            <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
+                <div className="max-w-4xl w-full space-y-12">
+                    {/* Header */}
+                    <div className="flex justify-between items-center">
+                        <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={160} height={40} className="h-8 md:h-10 w-auto brightness-0 invert" />
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 text-xs font-bold text-brand-gray hover:text-white transition-colors uppercase tracking-wider"
+                        >
+                            <LogOut className="h-4 w-4" /> Déconnexion
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        {/* Left: Video Tutorial */}
+                        <div className="space-y-6">
+                            <div className="relative aspect-video bg-[#151515] border border-white/10 rounded-3xl overflow-hidden group cursor-pointer shadow-2xl">
+                                <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/10 to-transparent opacity-50" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="h-20 w-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform shadow-xl">
+                                        <PlayCircle className="h-8 w-8 text-white fill-white/20" />
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-6 left-6">
+                                    <div className="px-3 py-1 bg-brand-blue text-black text-[10px] font-black uppercase tracking-widest rounded-full mb-2 inline-block">Tutoriel</div>
+                                    <h3 className="text-xl font-bold">Installation & Connexion</h3>
+                                </div>
+                            </div>
+                            <div className="text-sm text-brand-gray leading-relaxed">
+                                Regardez ce guide rapide pour connecter votre Expert Advisor à la plateforme. Une fois connecté, votre dashboard s&apos;activera automatiquement.
+                            </div>
+                        </div>
+
+                        {/* Right: Actions */}
+                        <div className="space-y-8 bg-[#121212] p-8 rounded-3xl border border-white/5">
+                            <div>
+                                <h2 className="text-2xl font-bold mb-2">En attente de connexion...</h2>
+                                <p className="text-brand-gray text-sm">Veuillez installer l&apos;Expert Advisor sur votre MetaTrader.</p>
+                            </div>
+
+                            {/* License Key Display */}
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] uppercase tracking-widest font-bold text-brand-gray">Votre Licence</span>
+                                    {copied && <span className="text-[10px] text-green-400 font-bold flex items-center gap-1"><Check className="h-3 w-3" /> Copié</span>}
+                                </div>
+                                <div
+                                    onClick={handleCopy}
+                                    className="bg-black/50 border border-white/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-brand-blue/50 transition-all group"
+                                >
+                                    <code className="font-mono text-xl font-bold tracking-widest text-white group-hover:text-brand-blue transition-colors">
+                                        {activationCode}
+                                    </code>
+                                    <Copy className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-white/5" />
+
+                            {/* Download Button */}
+                            <a href="#" className="flex items-center gap-4 group">
+                                <div className="h-12 w-12 bg-white text-black rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <Download className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <div className="font-bold text-white group-hover:text-brand-blue transition-colors">Télécharger l&apos;Expert Advisor</div>
+                                    <div className="text-xs text-brand-gray">Dernière version v2.4.1</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none relative font-sans">
@@ -115,14 +195,9 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         transition={{ type: "tween" }}
                         className="absolute inset-0 z-50 bg-[#0F0F0F] p-6 flex flex-col md:hidden"
                     >
-                        <div className="flex items-center justify-between mb-12">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                                    <span className="font-bold text-white text-xl">F</span>
-                                </div>
-                                <span className="font-bold text-2xl tracking-tight">FantomePad</span>
-                            </div>
-                            <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                        <div className="flex items-center justify-center mb-12 relative h-10">
+                            <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={128} height={32} className="h-8 brightness-0 invert" />
+                            <button onClick={() => setMobileMenuOpen(false)} className="absolute right-0 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
                                 <X className="h-6 w-6 text-white" />
                             </button>
                         </div>
@@ -133,7 +208,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="mt-8 w-full flex items-center justify-center gap-2 text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 py-4 rounded-xl transition-all border border-red-500/20"
+                            className="mt-8 w-full flex items-center justify-center gap-3 text-sm font-bold text-white hover:text-white/80 py-4 transition-all"
                         >
                             <LogOut className="h-4 w-4" />
                             Se déconnecter
@@ -144,11 +219,8 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
 
             {/* Sidebar (Desktop) */}
             <div className="hidden md:flex w-72 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
-                <div className="flex items-center gap-3 px-2">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                        <span className="font-bold text-white text-xl">F</span>
-                    </div>
-                    <span className="font-bold text-xl tracking-tight">FantomePad</span>
+                <div className="flex items-center justify-center px-2">
+                    <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-9 w-auto brightness-0 invert" />
                 </div>
 
                 <div className="space-y-2 flex-1 pt-6">
@@ -160,7 +232,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                 <div className="pt-6">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center justify-center gap-2 text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 py-4 rounded-xl transition-all border border-red-500/20 group"
+                        className="w-full flex items-center justify-center gap-3 text-sm font-bold text-white hover:text-white/80 py-4 transition-all group"
                     >
                         <LogOut className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                         Se déconnecter
@@ -213,11 +285,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                                 <div>
                                                     <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Votre Licence</div>
                                                     <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">FantomePad Pro</h3>
-                                                    <div className="mt-2 text-brand-gray text-sm font-medium mb-4 italic opacity-80">Protection active par abonnement</div>
                                                     <StatusIndicator status={status} />
-                                                </div>
-                                                <div className="bg-white/5 p-3 rounded-2xl shrink-0">
-                                                    <Shield className="h-8 w-8 text-brand-blue" />
                                                 </div>
                                             </div>
 
@@ -239,9 +307,9 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                             </div>
                                             <button
                                                 onClick={() => setIsLocked(!isLocked)}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${isLocked ? 'bg-brand-blue text-black' : 'bg-white/10 text-white'}`}
+                                                className="p-2 text-brand-gray hover:text-white transition-colors"
                                             >
-                                                <span className="text-xs font-bold uppercase">{isLocked ? "Masqué" : "Visible"}</span>
+                                                {isLocked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                             </button>
                                         </div>
 
@@ -270,23 +338,20 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                                 <h4 className="text-xl font-bold text-white">Centre de Téléchargement</h4>
                                                 <p className="text-sm text-brand-gray">Plateformes et Logiciel FantomePad</p>
                                             </div>
-                                            <div className="h-10 w-10 bg-brand-blue/10 rounded-xl flex items-center justify-center">
-                                                <Download className="h-6 w-6 text-brand-blue" />
-                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {/* Platforms Selection */}
                                             <div className="space-y-4">
                                                 <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Plateformes</div>
-                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
                                                     <div className="flex items-center gap-4">
                                                         <Monitor className="h-5 w-5 text-brand-gray group-hover:text-white" />
                                                         <span className="font-bold text-base">MetaTrader 4</span>
                                                     </div>
                                                     <Download className="h-4 w-4 text-brand-gray group-hover:text-white" />
                                                 </button>
-                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
+                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
                                                     <div className="flex items-center gap-4">
                                                         <Monitor className="h-5 w-5 text-brand-gray" />
                                                         <span className="font-bold text-base text-brand-gray">MetaTrader 5</span>
@@ -298,21 +363,21 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                             {/* Software Selection */}
                                             <div className="space-y-4">
                                                 <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Logiciel Expert</div>
-                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/20 transition-all group">
+                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/20 transition-all group">
                                                     <div className="flex items-center gap-4">
                                                         <FileCode className="h-5 w-5 text-brand-blue" />
                                                         <div className="text-left">
-                                                            <div className="font-bold text-base text-white">Expert MT4</div>
+                                                            <div className="font-bold text-base text-white leading-tight">Expert MT4</div>
                                                             <div className="text-[10px] text-brand-blue font-bold">Version v2.4.1</div>
                                                         </div>
                                                     </div>
                                                     <Download className="h-4 w-4 text-brand-blue group-hover:scale-110 transition-transform" />
                                                 </button>
-                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
+                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
                                                     <div className="flex items-center gap-4">
                                                         <FileCode className="h-5 w-5 text-brand-gray" />
                                                         <div className="text-left">
-                                                            <div className="font-bold text-base text-brand-gray">Expert MT5</div>
+                                                            <div className="font-bold text-base text-brand-gray leading-tight">Expert MT5</div>
                                                             <div className="text-[10px] text-brand-gray/50 font-bold uppercase">MetaTrader 5</div>
                                                         </div>
                                                     </div>
@@ -327,9 +392,6 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-brand-blue/10 transition-colors"></div>
 
                                         <div>
-                                            <div className="h-12 w-12 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/5 group-hover:border-brand-blue/30 transition-colors">
-                                                <Mail className="h-6 w-6 text-brand-blue" />
-                                            </div>
                                             <h4 className="text-2xl font-bold text-white mb-2">Support &amp; Aide</h4>
                                             <p className="text-brand-gray text-sm leading-relaxed mb-6">
                                                 Notre équipe est à votre disposition pour vous aider dans l&apos;installation ou la configuration de FantomePad.
@@ -339,7 +401,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/20 border border-white/5">
                                                 <div className="text-xs font-bold text-brand-gray uppercase tracking-widest">Email:</div>
-                                                <div className="text-brand-blue font-mono font-bold">contact@fantomepad.com</div>
+                                                <div className="text-white font-mono font-bold">contact@fantomepad.com</div>
                                             </div>
 
                                             <a
@@ -431,6 +493,6 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                     </div>
                 </main>
             </div>
-        </div>
+        </div >
     );
 }

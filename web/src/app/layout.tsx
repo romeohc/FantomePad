@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FantomePad | Dashboard",
-  description: "The new standard in trading technology activation and management.",
+  title: "FantomePad | Setup",
+  description: "The new standard is here.",
+  icons: {
+    icon: "/logo-blanc.svg",
+  },
 };
 
 export const viewport = {

@@ -1,8 +1,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Download, PlayCircle, Copy, Check, ChevronLeft, Laptop, Zap } from "lucide-react";
+import { ArrowRight, Copy, Check, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import Image from "next/image";
 
 interface OnboardingFlowProps {
     email: string;
@@ -125,8 +126,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             }`}
                                     >
                                         <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
-                                            <div className={`p-4 rounded-2xl transition-colors ${platform === "mt4" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
-                                                <Laptop className="h-8 w-8" />
+                                            <div className="p-1 rounded-2xl">
+                                                <Image src="/logo mt4.png" alt="MT4" width={56} height={56} className="h-14 w-14 object-contain rounded-xl" />
                                             </div>
                                             <div className="text-center md:text-left">
                                                 <div className="text-xl md:text-2xl font-bold text-white">MT4</div>
@@ -142,8 +143,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             }`}
                                     >
                                         <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
-                                            <div className={`p-4 rounded-2xl transition-colors ${platform === "mt5" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
-                                                <Zap className="h-8 w-8" />
+                                            <div className="p-1 rounded-2xl">
+                                                <Image src="/logo mt5.png" alt="MT5" width={56} height={56} className="h-14 w-14 object-contain rounded-xl" />
                                             </div>
                                             <div className="text-center md:text-left">
                                                 <div className="text-xl md:text-2xl font-bold text-white">MT5</div>
@@ -152,11 +153,11 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                     </button>
                                 </div>
 
-                                <div className="flex justify-center md:justify-end pt-6">
+                                <div className="flex justify-center pt-6">
                                     <button
                                         disabled={!platform}
                                         onClick={() => setStep("install")}
-                                        className="w-full md:w-auto px-16 py-5 bg-brand-blue text-white font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:bg-brand-blue/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-brand-blue/10 group active:scale-[0.98]"
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
                                         Étape Suivante
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -185,8 +186,14 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 <div className="space-y-6">
                                     <a href="#" className="block w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all">
                                         <div className="flex items-center gap-6">
-                                            <div className="bg-brand-blue/10 p-5 rounded-2xl text-brand-blue border border-brand-blue/20 group-hover:bg-brand-blue group-hover:text-black transition-all">
-                                                <Download className="h-7 w-7" />
+                                            <div className="p-1 rounded-2xl flex items-center justify-center">
+                                                <Image
+                                                    src={platform === "mt4" ? "/logo mt4.png" : "/logo mt5.png"}
+                                                    alt={platform?.toUpperCase() || "Platform"}
+                                                    width={40}
+                                                    height={40}
+                                                    className="h-10 w-10 object-contain rounded-lg"
+                                                />
                                             </div>
                                             <div>
                                                 <div className="text-lg font-bold text-white">Installer {platform?.toUpperCase()}</div>
@@ -210,9 +217,10 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             setStep("activation");
                                             activateLicense();
                                         }}
-                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
-                                        Plateforme déjà prête
+                                        {platform === "mt4" ? "MT4 Installé" : "MT5 Installé"}
+                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </button>
                                 </div>
                             </motion.div>
@@ -224,14 +232,14 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 key="activation"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="space-y-10 text-center"
+                                className="space-y-6"
                             >
-                                <div className="space-y-4">
-                                    <div className="mx-auto w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-8 ring-8 ring-green-500/5 animate-pulse">
-                                        <Check className="h-10 w-10 text-green-400" />
+                                <div className="space-y-2 text-center">
+                                    <div className="mx-auto w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center mb-2 ring-4 ring-green-500/5 animate-pulse">
+                                        <Check className="h-6 w-6 text-green-400" />
                                     </div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tighter">Votre Clé est Prête</h2>
-                                    <p className="text-brand-gray text-base md:text-lg max-w-sm mx-auto">Code unique généré pour votre compte.</p>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tighter">Votre Clé est Prête</h2>
+                                    <p className="text-brand-gray text-sm">Code unique généré pour votre compte.</p>
                                 </div>
 
                                 {loading ? (
@@ -240,55 +248,34 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                         <p className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">Génération...</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8 max-w-md mx-auto">
-                                        {/* License Key Card */}
-                                        <div className="bg-[#121212] border-2 border-white/5 rounded-3xl p-6 space-y-4 relative overflow-hidden group">
-                                            <div className="text-[10px] text-brand-gray/50 uppercase tracking-[0.3em] font-black">License Key</div>
-                                            <div className="text-xl md:text-2xl font-mono font-bold text-white tracking-[0.2em] py-3 bg-black/40 rounded-xl border border-white/5 shadow-inner">
-                                                {activationCode}
+                                    <div className="space-y-6 max-w-md mx-auto">
+                                        {/* Block 1: License Key (Full Width) */}
+                                        <div className="bg-[#121212] border-2 border-white/5 rounded-2xl p-6 relative overflow-hidden group">
+                                            <div className="space-y-4 text-center">
+                                                <div className="text-[10px] text-brand-gray/50 uppercase tracking-[0.3em] font-black">Licence</div>
+                                                <div className="text-2xl font-mono font-bold text-white tracking-[0.1em] py-4 bg-black/40 rounded-xl border border-white/5 shadow-inner">
+                                                    {activationCode || "Error"}
+                                                </div>
                                             </div>
                                             <button
                                                 onClick={handleCopy}
-                                                className="w-full flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest text-brand-blue hover:text-white py-3 transition-all bg-brand-blue/5 hover:bg-brand-blue/20 rounded-xl border border-brand-blue/20 hover:border-brand-blue/50"
+                                                className="w-full mt-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-brand-blue hover:text-white py-3 transition-all bg-brand-blue/5 hover:bg-brand-blue/20 rounded-xl border border-brand-blue/20 hover:border-brand-blue/50"
                                             >
                                                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                                 {copied ? "Copié" : "Copier la clé"}
                                             </button>
                                         </div>
 
-                                        {/* Fake Video Tutorial */}
-                                        <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-3xl overflow-hidden group cursor-pointer hover:border-brand-blue/30 transition-all">
-                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                                <div className="h-16 w-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
-                                                    <PlayCircle className="h-8 w-8 text-white fill-white/20" />
-                                                </div>
-                                            </div>
-                                            <div className="absolute bottom-4 left-4 right-4">
-                                                <div className="text-sm font-bold text-white">Tutoriel d&apos;installation</div>
-                                                <div className="text-[10px] text-brand-gray uppercase tracking-wider font-bold">Guide Rapide • 2:30</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Download EA Button */}
-                                        <a
-                                            href="#"
-                                            className="w-full flex items-center justify-center gap-3 p-5 bg-[#151515] border border-white/10 rounded-2xl hover:bg-[#1A1A1A] hover:border-brand-blue/50 transition-all group"
-                                        >
-                                            <div className="h-10 w-10 bg-brand-blue/10 rounded-lg flex items-center justify-center text-brand-blue group-hover:bg-brand-blue group-hover:text-black transition-colors">
-                                                <Download className="h-5 w-5" />
-                                            </div>
-                                            <div className="text-left">
-                                                <div className="text-xs font-black text-white uppercase tracking-wider">Télécharger l&apos;Expert Advisor</div>
-                                                <div className="text-[10px] text-brand-gray font-bold">Version v2.4.1 pour {platform?.toUpperCase()}</div>
-                                            </div>
-                                        </a>
-
-                                        {/* Final Button */}
+                                        {/* Block 2: Open FantomePad (White - Full Width) */}
                                         <button
                                             onClick={onComplete}
-                                            className="w-full bg-brand-blue text-white font-black text-xs uppercase tracking-widest py-6 rounded-2xl hover:bg-brand-blue/90 transition-all shadow-2xl shadow-brand-blue/20 active:scale-[0.98] mt-8"
+                                            className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-[0.98] group"
                                         >
-                                            Ouvrir FantomePad
+                                            <div className="flex items-center gap-3">
+                                                <span>Ouvrir FantomePad</span>
+                                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                            </div>
+                                            <span className="text-[10px] opacity-50 font-medium normal-case tracking-normal">Configuration terminée</span>
                                         </button>
                                     </div>
                                 )}

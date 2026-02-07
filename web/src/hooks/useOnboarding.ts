@@ -82,42 +82,57 @@ export const useOnboarding = (email: string) => {
         setError(null);
 
         try {
-            // 1. Check if code already exists (double check)
-            const { data: existing } = await supabase
+            // 1. Check existing license
+            const { data: current, error: checkError } = await supabase
                 .from("licences")
                 .select("activation_code")
                 .ilike("email", email)
                 .single();
 
-            if (existing?.activation_code) {
-                setActivationCode(existing.activation_code);
+            if (checkError && checkError.code !== 'PGRST116') { // PGRST116 means "no rows found"
+                throw checkError;
+            }
+
+            // If code exists and is not empty, we are done
+            if (current?.activation_code) {
+                setActivationCode(current.activation_code);
                 setStep("activation");
                 setLoading(false);
                 return;
             }
 
             // 2. Generate and Update
+            // The row should exist (created at purchase), so we just update the code
             const newCode = generateCode();
+            console.log("Generating code for:", email);
 
             const { data: updated, error: updateError } = await supabase
                 .from("licences")
-                .update({ activation_code: newCode })
+                .update({
+                    activation_code: newCode,
+                    status: 'pending', // Set to pending so user sees the setup dashboard
+                    last_check: new Date().toISOString()
+                })
                 .ilike("email", email)
                 .select("activation_code")
                 .single();
 
-            if (updateError) throw updateError;
+            if (updateError) {
+                console.error("Supabase Update Error:", updateError);
+                throw updateError;
+            }
 
             if (updated?.activation_code) {
                 setActivationCode(updated.activation_code);
                 setStep("activation");
             } else {
-                throw new Error("Activation failed - no data returned");
+                throw new Error("Update succeeded but returned no data");
             }
 
         } catch (err: unknown) {
-            console.error("Activation error:", err);
-            setError("Erreur d'activation. Veuillez réessayer.");
+            console.error("Full Activation Error:", JSON.stringify(err, null, 2));
+            const msg = (err as Error)?.message || "Erreur inconnue";
+            setError(`Erreur: ${msg}`);
         } finally {
             setLoading(false);
         }
