@@ -1,9 +1,8 @@
-
 import {
-    LogOut, Activity, Monitor, Shield, Settings, HelpCircle,
-    Copy, Check, MoreVertical, CreditCard, Clock, Bell,
-    ChevronRight, Zap, RefreshCw, Smartphone, Download,
-    LayoutDashboard, Key, Menu, X
+    LogOut, Monitor, Shield, HelpCircle,
+    Copy, Check, Clock, Bell,
+    Zap, Smartphone, Download,
+    LayoutDashboard, Menu, X, PlayCircle, Calendar
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase";
@@ -53,7 +52,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
         };
         const style = getStyles();
         return (
-            <div className={`px-3 py-1.5 rounded-full ${style.bg} border border-white/5 ${style.text} text-[10px] font-bold uppercase tracking-wide flex items-center gap-2`}>
+            <div className={`px-4 py-2 rounded-full ${style.bg} border border-white/5 ${style.text} text-xs font-bold uppercase tracking-wide flex items-center gap-2`}>
                 <span className="relative flex h-2 w-2">
                     {status?.toLowerCase() === "active" && (
                         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${style.dot} opacity-75`}></span>
@@ -71,23 +70,23 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                 setActiveTab(id);
                 setMobileMenuOpen(false);
             }}
-            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${activeTab === id
-                    ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20"
-                    : "text-brand-gray hover:bg-white/5 hover:text-white"
+            className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === id
+                ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20"
+                : "text-brand-gray hover:bg-white/5 hover:text-white"
                 }`}
         >
             <div className="flex items-center gap-3">
                 <Icon className="h-5 w-5" />
-                <span className="text-sm font-medium">{label}</span>
+                <span className="text-sm font-bold">{label}</span>
             </div>
             {alert && (
-                <span className="bg-brand-blue text-black text-[10px] font-bold px-1.5 rounded-full">{alert}</span>
+                <span className="bg-brand-blue text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{alert}</span>
             )}
         </button>
     );
 
     return (
-        <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none relative">
+        <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none relative font-sans">
             {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {mobileMenuOpen && (
@@ -98,28 +97,25 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                         transition={{ type: "tween" }}
                         className="absolute inset-0 z-50 bg-[#0F0F0F] p-6 flex flex-col md:hidden"
                     >
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center justify-between mb-12">
                             <div className="flex items-center gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                                    <span className="font-bold text-white">F</span>
+                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
+                                    <span className="font-bold text-white text-xl">F</span>
                                 </div>
-                                <span className="font-bold text-lg tracking-tight">FantomePad</span>
+                                <span className="font-bold text-2xl tracking-tight">FantomePad</span>
                             </div>
-                            <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-white/5 rounded-lg">
+                            <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
                                 <X className="h-6 w-6 text-white" />
                             </button>
                         </div>
-                        <div className="space-y-2 flex-1">
+                        <div className="space-y-3 flex-1">
                             <NavItem id="overview" icon={LayoutDashboard} label="Vue d'ensemble" />
-                            <NavItem id="license" icon={Key} label="Ma Licence" />
-                            <NavItem id="settings" icon={Settings} label="Paramètres" />
-                            <div className="h-px bg-white/5 my-4" />
                             <NavItem id="docs" icon={HelpCircle} label="Documentation" />
                             <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="mt-8 w-full flex items-center justify-center gap-2 text-xs text-brand-gray/50 hover:text-red-400 transition-colors py-4 border-t border-white/5"
+                            className="mt-8 w-full flex items-center justify-center gap-2 text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 py-4 rounded-xl transition-all border border-red-500/20"
                         >
                             <LogOut className="h-4 w-4" />
                             Se déconnecter
@@ -129,41 +125,26 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
             </AnimatePresence>
 
             {/* Sidebar (Desktop) */}
-            <div className="hidden md:flex w-64 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
+            <div className="hidden md:flex w-72 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
                 <div className="flex items-center gap-3 px-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                        <span className="font-bold text-white">F</span>
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
+                        <span className="font-bold text-white text-xl">F</span>
                     </div>
-                    <span className="font-bold text-lg tracking-tight">FantomePad</span>
+                    <span className="font-bold text-xl tracking-tight">FantomePad</span>
                 </div>
 
-                <div className="space-y-2 flex-1">
-                    <div className="text-[10px] font-bold text-brand-gray/50 uppercase tracking-widest px-3 mb-2">Menu Principal</div>
+                <div className="space-y-2 flex-1 pt-6">
                     <NavItem id="overview" icon={LayoutDashboard} label="Vue d'ensemble" />
-                    <NavItem id="license" icon={Key} label="Ma Licence" />
-                    <NavItem id="settings" icon={Settings} label="Paramètres" />
-                    <div className="pt-4">
-                        <div className="text-[10px] font-bold text-brand-gray/50 uppercase tracking-widest px-3 mb-2">Support</div>
-                        <NavItem id="docs" icon={HelpCircle} label="Documentation" />
-                        <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
-                    </div>
+                    <NavItem id="docs" icon={HelpCircle} label="Documentation" />
+                    <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
                 </div>
 
-                <div className="border-t border-white/5 pt-6 space-y-4">
-                    <div className="bg-[#151515] p-3 rounded-xl border border-white/5 flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold ring-2 ring-black">
-                            {email.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="overflow-hidden">
-                            <div className="text-xs font-bold text-white truncate max-w-[120px]">{email}</div>
-                            <div className="text-[10px] text-brand-gray truncate">Utilisateur Pro</div>
-                        </div>
-                    </div>
+                <div className="pt-6">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center justify-center gap-2 text-xs text-brand-gray/50 hover:text-red-400 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 py-4 rounded-xl transition-all border border-red-500/20 group"
                     >
-                        <LogOut className="h-3 w-3" />
+                        <LogOut className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                         Se déconnecter
                     </button>
                 </div>
@@ -172,7 +153,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
             {/* Main Content */}
             <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#0A0A0A]">
                 {/* Top Bar */}
-                <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#0A0A0A]/80 backdrop-blur-xl z-20 sticky top-0">
+                <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 md:px-10 bg-[#0A0A0A]/80 backdrop-blur-xl z-20 sticky top-0">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setMobileMenuOpen(true)}
@@ -180,187 +161,211 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                         >
                             <Menu className="h-6 w-6" />
                         </button>
-                        <h2 className="text-lg font-bold truncate">Vue d'ensemble</h2>
+                        <h2 className="text-xl font-bold truncate">
+                            {activeTab === 'overview' && "Tableau de Bord"}
+                            {activeTab === 'docs' && "Centre de Ressources"}
+                            {activeTab === 'updates' && "Dernières Annonces"}
+                        </h2>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="hidden md:flex items-center gap-1 text-xs text-brand-gray mr-4">
+                        <div className="hidden md:flex items-center gap-2 text-xs text-brand-gray mr-4 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                             <Clock className="h-3 w-3" />
-                            <span className="hidden lg:inline">Dernière synchro:</span> À l'instant
+                            <span>Connecté</span>
                         </div>
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex md:hidden items-center justify-center text-xs font-bold ring-2 ring-black">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold ring-2 ring-black">
                             {email.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="hidden md:block px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-brand-gray">
-                            v2.4.1
                         </div>
                     </div>
                 </header>
 
-                {/* Dashboard Grid */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
-                    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 md:pb-0">
+                {/* Dashboard Content */}
+                <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide">
+                    <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 md:pb-0">
 
-                        {/* Status Hero Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                            <div className="md:col-span-2 relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/10 to-purple-500/10 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                                <div className="relative h-full bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col justify-between overflow-hidden">
-                                    <div className="flex justify-between items-start mb-6 md:mb-0">
-                                        <div>
-                                            <div className="text-sm text-brand-gray mb-1">Statut de la Licence</div>
-                                            <div className="flex flex-wrap items-center gap-3">
-                                                <h3 className="text-2xl md:text-3xl font-bold text-white">FantomePad Pro</h3>
-                                                <StatusIndicator status={status} />
+                        {activeTab === 'overview' && (
+                            <div className="space-y-6">
+                                {/* Top Row: Status & HWID - BIGGER cards */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Status Card */}
+                                    <div className="relative group min-h-[220px]">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/10 to-purple-500/10 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                                        <div className="relative h-full bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between overflow-hidden">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Votre Licence</div>
+                                                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">FantomePad Pro</h3>
+                                                    <div className="mt-2">
+                                                        <StatusIndicator status={status} />
+                                                    </div>
+                                                </div>
+                                                <div className="bg-white/5 p-3 rounded-2xl shrink-0">
+                                                    <Shield className="h-8 w-8 text-brand-blue" />
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-8 flex gap-4">
+                                                <div className="bg-black/30 px-4 py-2 rounded-xl border border-white/5 flex items-center gap-2">
+                                                    <Zap className="h-4 w-4 text-yellow-400" />
+                                                    <span className="text-sm font-bold text-white">Version Lifetime</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="bg-white/5 p-2 rounded-lg shrink-0">
-                                            <Shield className="h-5 w-5 md:h-6 md:w-6 text-brand-blue" />
-                                        </div>
                                     </div>
 
-                                    <div className="mt-4 md:mt-8 grid grid-cols-2 md:grid-cols-3 gap-3">
-                                        <div className="bg-black/20 p-3 rounded-lg border border-white/5">
-                                            <div className="text-[10px] text-brand-gray uppercase mb-1">Renouvellement</div>
-                                            <div className="text-xs md:text-sm font-bold text-white">Lifetime Access</div>
-                                        </div>
-                                        <div className="bg-black/20 p-3 rounded-lg border border-white/5">
-                                            <div className="text-[10px] text-brand-gray uppercase mb-1">Serveur</div>
-                                            <div className="text-xs md:text-sm font-bold text-green-400 flex items-center gap-1">
-                                                <Zap className="h-3 w-3" />
-                                                Connecté
+                                    {/* HWID Card */}
+                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between hover:border-brand-gray/20 transition-colors gap-6 min-h-[220px]">
+                                        <div className="flex justify-between items-start">
+                                            <div className="overflow-hidden w-full">
+                                                <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Hardware ID (HWID)</div>
+                                                <div className="text-xl md:text-2xl font-mono font-bold text-white truncate w-full tracking-wider bg-black/20 p-3 rounded-xl border border-white/5">
+                                                    {hardwareId || "Non lié"}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="hidden md:block bg-black/20 p-3 rounded-lg border border-white/5">
-                                            <div className="text-[10px] text-brand-gray uppercase mb-1">Sécurité</div>
-                                            <div className="text-xs md:text-sm font-bold text-white">Maximal</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* HWID Card */}
-                            <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col justify-between hover:border-brand-gray/20 transition-colors gap-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="overflow-hidden">
-                                        <div className="text-sm text-brand-gray mb-1">Hardware ID (HWID)</div>
-                                        <div className="text-base md:text-lg font-mono font-bold text-white truncate w-full">
-                                            {hardwareId || "Non lié"}
-                                        </div>
-                                    </div>
-                                    <Monitor className="h-5 w-5 text-purple-400 shrink-0" />
-                                </div>
-                                <div className="mt-auto">
-                                    <div className="flex items-center justify-between text-xs text-brand-gray mb-2">
-                                        <span>Dernière connexion</span>
-                                        <span>2 min</span>
-                                    </div>
-                                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div className="h-full bg-purple-500 w-3/4 rounded-full"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Middle Section: Activation Code & Actions */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                            {/* License Code */}
-                            <div className="md:col-span-2 bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl">
-                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-brand-blue/10 rounded-lg text-brand-blue">
-                                            <Key className="h-5 w-5" />
+                                            <Monitor className="h-8 w-8 text-purple-400 shrink-0 ml-4" />
                                         </div>
                                         <div>
-                                            <h4 className="text-base font-bold text-white">Clé d'Activation</h4>
-                                            <p className="text-xs text-brand-gray">Clé unique pour votre EA</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 self-end md:self-auto">
-                                        <span className="text-[10px] font-bold text-brand-gray uppercase tracking-wider hidden md:inline">Protection</span>
-                                        <button
-                                            onClick={() => setIsLocked(!isLocked)}
-                                            className={`w-10 h-6 rounded-full p-1 transition-colors ${isLocked ? 'bg-brand-blue' : 'bg-white/10'}`}
-                                        >
-                                            <div className={`h-4 w-4 bg-white rounded-full transition-transform ${isLocked ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="relative group">
-                                    <div className="bg-black/40 border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between font-mono text-base md:text-xl tracking-widest text-center shadow-inner overflow-hidden">
-                                        <span className="truncate mr-2">
-                                            {isLocked ? "•••• - •••• - ••••" : activationCode}
-                                        </span>
-                                        <button
-                                            onClick={handleCopy}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-brand-gray hover:text-white shrink-0"
-                                        >
-                                            {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Platform Actions */}
-                            <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col space-y-4">
-                                <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                    <Smartphone className="h-4 w-4 text-brand-gray" />
-                                    Plateformes
-                                </h4>
-
-                                <button className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-                                        <span className="font-bold text-sm">MetaTrader 4</span>
-                                    </div>
-                                    <Download className="h-4 w-4 text-brand-gray group-hover:text-white" />
-                                </button>
-                                <button className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-2 w-2 rounded-full bg-brand-gray"></div>
-                                        <span className="font-bold text-sm text-brand-gray">MetaTrader 5</span>
-                                    </div>
-                                    <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-brand-gray">Bientôt</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Graph Section (Fictional) - Hidden on very small screens if needed, but we'll try to keep it responsive */}
-                        <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl hidden md:block">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h4 className="text-base font-bold text-white">Activité du Trading</h4>
-                                    <p className="text-xs text-brand-gray">Performance de l'EA sur les 30 derniers jours</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    {['1H', '24H', '7J', '30J'].map((t) => (
-                                        <button key={t} className={`px-3 py-1 rounded-lg text-xs font-bold ${t === '30J' ? 'bg-brand-blue text-black' : 'bg-white/5 text-brand-gray hover:bg-white/10'}`}>
-                                            {t}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Fake Graph Visual */}
-                            <div className="h-48 w-full flex items-end gap-2 px-2">
-                                {Array.from({ length: 40 }).map((_, i) => {
-                                    const height = Math.random() * 80 + 20 + "%";
-                                    return (
-                                        <div
-                                            key={i}
-                                            className="flex-1 bg-brand-blue/20 hover:bg-brand-blue/50 transition-colors rounded-t-sm relative group"
-                                            style={{ height }}
-                                        >
-                                            {/* Tooltip on hover */}
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black border border-white/10 px-2 py-1 rounded text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                Trade #{i + 1}
+                                            <div className="flex items-center justify-between text-xs text-brand-gray mb-2 font-medium">
+                                                <span>Sécurité active</span>
+                                                <span className="text-green-400">100%</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-gradient-to-r from-brand-blue to-purple-500 w-full rounded-full"></div>
                                             </div>
                                         </div>
-                                    )
-                                })}
+                                    </div>
+                                </div>
+
+                                {/* Bottom Row: License Key & Platform - BIGGER cards */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    {/* License Code */}
+                                    <div className="lg:col-span-2 bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-center min-h-[200px]">
+                                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                                            <div>
+                                                <h4 className="text-xl font-bold text-white">Clé d'Activation</h4>
+                                                <p className="text-sm text-brand-gray mt-1">Utilisez cette clé pour activer votre Expert Advisor.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsLocked(!isLocked)}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${isLocked ? 'bg-brand-blue text-black' : 'bg-white/10 text-white'}`}
+                                            >
+                                                <span className="text-xs font-bold uppercase">{isLocked ? "Masqué" : "Visible"}</span>
+                                            </button>
+                                        </div>
+
+                                        <div className="relative group">
+                                            <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex items-center justify-between font-mono text-xl md:text-3xl tracking-widest text-center shadow-inner overflow-hidden">
+                                                <span className="truncate mr-4 text-brand-blue/90">
+                                                    {isLocked ? "•••• - •••• - •••• - ••••" : activationCode}
+                                                </span>
+                                                <button
+                                                    onClick={handleCopy}
+                                                    className="p-3 hover:bg-white/10 rounded-xl transition-colors text-brand-gray hover:text-white shrink-0 active:scale-95"
+                                                >
+                                                    {copied ? <Check className="h-6 w-6 text-green-400" /> : <Copy className="h-6 w-6" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Platform Actions */}
+                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col space-y-4 min-h-[200px]">
+                                        <h4 className="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                                            <Smartphone className="h-5 w-5 text-brand-gray" />
+                                            Téléchargements
+                                        </h4>
+
+                                        <button className="flex-1 flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-3 w-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
+                                                <span className="font-bold text-base">MetaTrader 4</span>
+                                            </div>
+                                            <Download className="h-5 w-5 text-brand-gray group-hover:text-white" />
+                                        </button>
+                                        <button className="flex-1 flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-3 w-3 rounded-full bg-brand-gray"></div>
+                                                <span className="font-bold text-base text-brand-gray">MetaTrader 5</span>
+                                            </div>
+                                            <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-brand-gray font-bold">BIENTÔT</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {activeTab === 'docs' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[
+                                    { title: "Installation Complète", duration: "5:20", level: "Débutant" },
+                                    { title: "Première Configuration", duration: "12:10", level: "Débutant" },
+                                    { title: "Comprendre les Signaux", duration: "8:45", level: "Intermédiaire" },
+                                    { title: "Optimisation des Gains", duration: "15:30", level: "Avancé" },
+                                    { title: "Gérer le Risque (Risk Management)", duration: "10:00", level: "Essentiel" },
+                                    { title: "Dépannage Courant", duration: "6:15", level: "Support" },
+                                ].map((video, idx) => (
+                                    <div key={idx} className="group cursor-pointer">
+                                        <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-2xl overflow-hidden mb-4 group-hover:border-brand-blue/50 transition-all">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
+                                                <div className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
+                                                    <PlayCircle className="h-6 w-6 text-white fill-current" />
+                                                </div>
+                                            </div>
+                                            <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white">
+                                                {video.duration}
+                                            </div>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">{video.title}</h3>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="text-xs text-brand-gray font-medium px-2 py-0.5 bg-white/5 rounded border border-white/5">{video.level}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {activeTab === 'updates' && (
+                            <div className="space-y-4 max-w-4xl mx-auto">
+                                {[
+                                    {
+                                        version: "v2.4.1",
+                                        date: "7 Fév 2026",
+                                        title: "Mise à jour de performance critique",
+                                        desc: "Amélioration significative de la vitesse d'exécution des ordres sur les marchés volatils. Correction de bugs mineurs sur l'affichage."
+                                    },
+                                    {
+                                        version: "v2.4.0",
+                                        date: "1 Fév 2026",
+                                        title: "Nouvelle interface Dashboard",
+                                        desc: "Refonte complète de l'expérience utilisateur. Le dashboard est maintenant plus rapide, plus fluide et entièrement responsive mobile."
+                                    },
+                                    {
+                                        version: "v2.3.5",
+                                        date: "20 Jan 2026",
+                                        title: "Support Multi-Devises",
+                                        desc: "Ajout du support pour les paires exotiques. Vous pouvez maintenant trader sur plus de 50 nouveaux instruments avec la même précision."
+                                    }
+                                ].map((update, idx) => (
+                                    <div key={idx} className="bg-[#121212] border border-white/5 p-6 rounded-3xl hover:bg-[#151515] transition-colors group">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <span className="px-3 py-1 bg-brand-blue/10 text-brand-blue text-xs font-black rounded-lg border border-brand-blue/20">
+                                                    {update.version}
+                                                </span>
+                                                <h3 className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">{update.title}</h3>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-brand-gray font-bold uppercase tracking-wider">
+                                                <Calendar className="h-4 w-4" />
+                                                {update.date}
+                                            </div>
+                                        </div>
+                                        <p className="text-brand-gray text-sm leading-relaxed">
+                                            {update.desc}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                     </div>
                 </main>
