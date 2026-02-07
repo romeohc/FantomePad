@@ -40,237 +40,255 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
     const currentStepIndex = steps.findIndex(s => s.id === step);
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row bg-[#0F0F0F] rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative min-h-[600px] md:min-h-[500px]">
-            {/* Background Effects */}
+        <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 md:gap-0 relative">
+            {/* Background Effects (Moved to outer to cover everything) */}
             <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Left Panel: Visual & Progress */}
-            <div className="md:w-1/3 bg-[#121212] p-8 border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-between relative z-10">
-                <div>
-                    <div className="flex items-center justify-center md:justify-start gap-3 mb-8">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
-                            <span className="font-bold text-white">F</span>
-                        </div>
-                        <span className="font-bold text-lg tracking-tight text-white">FantomePad</span>
-                    </div>
+            {/* Progress Bar Container - Detached on Mobile */}
+            <div className="md:hidden flex justify-center py-4">
+                <div className="flex items-center gap-12 relative px-4">
+                    {steps.map((s, idx) => (
+                        <div key={s.id} className="flex flex-col items-center gap-3 relative">
+                            {/* Connector Line (Large Mobile) */}
+                            {idx < steps.length - 1 && (
+                                <div className={`absolute left-10 top-5 w-12 h-px transition-colors duration-500 ${idx < currentStepIndex ? "bg-brand-blue" : "bg-white/10"
+                                    }`} />
+                            )}
 
-                    <div className="flex flex-row justify-center gap-6 md:flex-col md:justify-start md:gap-0 md:space-y-6 mb-4 md:mb-0">
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 z-10 ${idx <= currentStepIndex
+                                    ? "bg-brand-blue border-brand-blue text-black shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                                    : "bg-black border-white/20 text-brand-gray"
+                                }`}>
+                                {idx < currentStepIndex ? <Check className="h-5 w-5" /> : idx + 1}
+                            </div>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${idx <= currentStepIndex ? "text-white" : "text-brand-gray/50"
+                                }`}>
+                                {s.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Main Content Box */}
+            <div className="flex flex-col md:flex-row bg-[#0F0F0F] rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative min-h-[500px]">
+
+                {/* Left Panel: Desktop Progress & Security */}
+                <div className="hidden md:flex md:w-1/4 bg-[#121212] p-8 border-r border-white/5 flex-col justify-between relative z-10">
+                    <div className="space-y-8 mt-4">
                         {steps.map((s, idx) => (
-                            <div key={s.id} className="flex flex-col md:flex-row items-center gap-2 md:gap-4 relative">
-                                {/* Connector Line */}
+                            <div key={s.id} className="flex items-center gap-4 relative">
+                                {/* Connector Line (Desktop) */}
                                 {idx < steps.length - 1 && (
-                                    <div className={`absolute transition-colors duration-500 
-                                        left-8 top-[11px] w-8 h-px 
-                                        md:left-[11px] md:top-8 md:w-px md:h-8 
-                                        ${idx < currentStepIndex ? "bg-brand-blue" : "bg-white/10"}`}
-                                    />
+                                    <div className={`absolute left-[11px] top-8 w-px h-10 transition-colors duration-500 ${idx < currentStepIndex ? "bg-brand-blue" : "bg-white/10"
+                                        }`} />
                                 )}
 
-                                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 z-10 ${idx <= currentStepIndex
-                                        ? "bg-brand-blue border-brand-blue text-black scale-110"
-                                        : "bg-black border-white/20 text-brand-gray"
+                                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 ${idx <= currentStepIndex
+                                        ? "bg-brand-blue border-brand-blue text-black"
+                                        : "bg-transparent border-white/20 text-brand-gray"
                                     }`}>
                                     {idx < currentStepIndex ? <Check className="h-3 w-3" /> : idx + 1}
                                 </div>
-                                <span className={`text-[10px] md:text-sm font-bold md:font-medium tracking-wider md:tracking-normal transition-colors duration-500 ${idx <= currentStepIndex ? "text-white" : "text-brand-gray"
+                                <span className={`text-sm font-medium transition-colors duration-500 ${idx <= currentStepIndex ? "text-white" : "text-brand-gray"
                                     }`}>
                                     {s.label}
                                 </span>
                             </div>
                         ))}
                     </div>
-                </div>
 
-                <div className="mt-8 hidden md:block">
                     <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-xs text-brand-gray">
-                        <p className="flex items-center gap-2 mb-2 font-bold text-white">
+                        <p className="flex items-center gap-2 mb-2 font-bold text-white uppercase tracking-tighter">
                             <ShieldCheck className="h-4 w-4 text-green-400" />
-                            Security First
+                            License Safe
                         </p>
-                        Votre licence est liée à votre Hardware ID pour une protection maximale.
+                        Lié à votre matériel (HWID).
                     </div>
                 </div>
-            </div>
 
-            {/* Right Panel: Content Form */}
-            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center min-h-[450px] md:min-h-[500px]">
-                <AnimatePresence mode="wait">
-                    {/* Step 1: Platform Selection */}
-                    {step === "platform_selection" && (
-                        <motion.div
-                            key="platform"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-8"
-                        >
-                            <div className="space-y-2 text-center md:text-left">
-                                <h2 className="text-2xl md:text-3xl font-bold text-white">Version de MetaTrader</h2>
-                                <p className="text-brand-gray text-sm md:text-base">Sur quelle plateforme opérez-vous ?</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={() => setPlatform("mt4")}
-                                    className={`p-6 rounded-2xl border transition-all group relative overflow-hidden ${platform === "mt4"
-                                        ? "bg-brand-blue/10 border-brand-blue ring-1 ring-brand-blue shadow-lg shadow-brand-blue/10"
-                                        : "bg-[#151515] border-white/5 hover:border-brand-gray/50 hover:bg-[#1A1A1A]"
-                                        }`}
-                                >
-                                    <div className="flex flex-col items-center md:items-start gap-4 relative z-10">
-                                        <div className={`p-3 rounded-xl transition-colors ${platform === "mt4" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
-                                            <Laptop className="h-6 w-6" />
-                                        </div>
-                                        <div className="text-center md:text-left">
-                                            <div className="text-lg md:text-xl font-bold text-white">MetaTrader 4</div>
-                                            <div className="text-[10px] md:text-xs text-brand-gray/80 mt-1 uppercase tracking-widest font-bold">Standard</div>
-                                        </div>
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={() => setPlatform("mt5")}
-                                    className={`p-6 rounded-2xl border transition-all group relative overflow-hidden ${platform === "mt5"
-                                        ? "bg-brand-blue/10 border-brand-blue ring-1 ring-brand-blue shadow-lg shadow-brand-blue/10"
-                                        : "bg-[#151515] border-white/5 hover:border-brand-gray/50 hover:bg-[#1A1A1A]"
-                                        }`}
-                                >
-                                    <div className="flex flex-col items-center md:items-start gap-4 relative z-10">
-                                        <div className={`p-3 rounded-xl transition-colors ${platform === "mt5" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
-                                            <Zap className="h-6 w-6" />
-                                        </div>
-                                        <div className="text-center md:text-left">
-                                            <div className="text-lg md:text-xl font-bold text-white">MetaTrader 5</div>
-                                            <div className="text-[10px] md:text-xs text-brand-gray/80 mt-1 uppercase tracking-widest font-bold">Performance</div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <div className="flex justify-center md:justify-end pt-4">
-                                <button
-                                    disabled={!platform}
-                                    onClick={() => setStep("install")}
-                                    className="w-full md:w-auto px-12 py-4 bg-brand-blue text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-brand-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-blue/20"
-                                >
-                                    Continuer
-                                    <ArrowRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* Step 2: Install */}
-                    {step === "install" && (
-                        <motion.div
-                            key="install"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-8"
-                        >
-                            <div className="space-y-2 text-center md:text-left">
-                                <button onClick={() => setStep("platform_selection")} className="flex items-center gap-1 text-xs text-brand-gray hover:text-white transition-colors mb-4 mx-auto md:mx-0">
-                                    <ChevronLeft className="h-3 w-3" /> Retour
-                                </button>
-                                <h2 className="text-2xl md:text-3xl font-bold text-white">Prêt pour l'install ?</h2>
-                                <p className="text-brand-gray text-sm md:text-base">MetaTrader doit être installé sur votre machine.</p>
-                            </div>
-
-                            <div className="space-y-4">
-                                <a href="#" className="block w-full group p-5 bg-[#151515] border border-white/5 rounded-2xl flex items-center justify-between hover:border-brand-blue/50 hover:bg-[#1A1A1A] transition-all">
-                                    <div className="flex items-center gap-5">
-                                        <div className="bg-brand-blue/10 p-4 rounded-xl text-brand-blue border border-brand-blue/20">
-                                            <Download className="h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm md:text-base font-bold text-white">Télécharger {platform === "mt4" ? "MT4" : "MT5"}</div>
-                                            <div className="text-[10px] md:text-xs text-brand-gray mt-1">Installateur Officiel (Win/Mac)</div>
-                                        </div>
-                                    </div>
-                                    <ArrowRight className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
-                                </a>
-
-                                <div className="text-center text-[10px] text-brand-gray py-2 uppercase tracking-[0.2em] font-bold">
-                                    — Ou —
+                {/* Right Panel: Content Form */}
+                <div className="flex-1 p-8 md:p-16 relative z-10 flex flex-col justify-center">
+                    <AnimatePresence mode="wait">
+                        {/* Step 1: Platform Selection */}
+                        {step === "platform_selection" && (
+                            <motion.div
+                                key="platform"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                className="space-y-8"
+                            >
+                                <div className="space-y-3 text-center md:text-left">
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Version de MetaTrader</h2>
+                                    <p className="text-brand-gray text-base md:text-lg">Sélectionnez la plateforme de trading que vous utilisez.</p>
                                 </div>
 
-                                <button
-                                    onClick={() => {
-                                        setStep("activation");
-                                        activateLicense();
-                                    }}
-                                    className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-neutral-200 transition-all shadow-lg shadow-white/5"
-                                >
-                                    C'est déjà fait, continuer
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* Step 3: Activation */}
-                    {step === "activation" && (
-                        <motion.div
-                            key="activation"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-8 text-center"
-                        >
-                            <div className="space-y-2">
-                                <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-6 ring-4 ring-green-500/5">
-                                    <Check className="h-8 w-8 text-green-400" />
-                                </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-white">Activation Terminée !</h2>
-                                <p className="text-brand-gray text-sm max-w-sm mx-auto">Voici votre code de licence personnel à entrer dans l'EA.</p>
-                            </div>
-
-                            {loading ? (
-                                <div className="py-12 flex justify-center">
-                                    <div className="h-8 w-8 border-4 border-brand-blue border-t-transparent rounded-full animate-spin" />
-                                </div>
-                            ) : (
-                                <div className="space-y-6 max-w-sm mx-auto">
-                                    <div className="bg-[#151515] border border-white/5 rounded-2xl p-6 space-y-4 relative overflow-hidden group hover:border-white/10 transition-colors">
-                                        <div className="absolute top-0 right-0 p-2 opacity-50">
-                                            <Copy className="h-24 w-24 text-white/5 -rotate-12 transform translate-x-4 -translate-y-4" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <button
+                                        onClick={() => setPlatform("mt4")}
+                                        className={`p-8 rounded-3xl border-2 transition-all group relative overflow-hidden ${platform === "mt4"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                                            : "bg-[#151515] border-white/5 hover:border-white/10"
+                                            }`}
+                                    >
+                                        <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
+                                            <div className={`p-4 rounded-2xl transition-colors ${platform === "mt4" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
+                                                <Laptop className="h-8 w-8" />
+                                            </div>
+                                            <div className="text-center md:text-left">
+                                                <div className="text-xl md:text-2xl font-bold text-white">MT4</div>
+                                                <div className="text-[10px] text-brand-gray/60 mt-2 uppercase tracking-[0.2em] font-black">Standard Pro</div>
+                                            </div>
                                         </div>
+                                    </button>
 
-                                        <div className="text-[10px] text-brand-gray uppercase tracking-widest font-bold">Clé d'Activation</div>
-                                        <div className="text-xl md:text-2xl font-mono font-bold text-white tracking-widest py-2 border-y border-white/5 bg-black/20 rounded">
-                                            {activationCode}
+                                    <button
+                                        onClick={() => setPlatform("mt5")}
+                                        className={`p-8 rounded-3xl border-2 transition-all group relative overflow-hidden ${platform === "mt5"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                                            : "bg-[#151515] border-white/5 hover:border-white/10"
+                                            }`}
+                                    >
+                                        <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
+                                            <div className={`p-4 rounded-2xl transition-colors ${platform === "mt5" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
+                                                <Zap className="h-8 w-8" />
+                                            </div>
+                                            <div className="text-center md:text-left">
+                                                <div className="text-xl md:text-2xl font-bold text-white">MT5</div>
+                                                <div className="text-[10px] text-brand-gray/60 mt-2 uppercase tracking-[0.2em] font-black">Next Gen</div>
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={handleCopy}
-                                            className="w-full flex items-center justify-center gap-2 text-[10px] md:text-xs font-bold text-brand-blue hover:text-white py-2 transition-colors bg-brand-blue/5 hover:bg-brand-blue/10 rounded-lg"
-                                        >
-                                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                            {copied ? "Copié !" : "Copier la clé"}
-                                        </button>
-                                    </div>
+                                    </button>
+                                </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button className="p-3 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-xl flex flex-col items-center gap-2 transition-all group">
-                                            <Download className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
-                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Fichier EA</span>
-                                        </button>
-                                        <button className="p-3 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-xl flex flex-col items-center gap-2 transition-all group">
-                                            <PlayCircle className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
-                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Aide</span>
-                                        </button>
+                                <div className="flex justify-center md:justify-end pt-6">
+                                    <button
+                                        disabled={!platform}
+                                        onClick={() => setStep("install")}
+                                        className="w-full md:w-auto px-16 py-5 bg-brand-blue text-black font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:bg-brand-blue/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-brand-blue/10 group"
+                                    >
+                                        Étape Suivante
+                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Step 2: Install */}
+                        {step === "install" && (
+                            <motion.div
+                                key="install"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-10"
+                            >
+                                <div className="space-y-4 text-center md:text-left">
+                                    <button onClick={() => setStep("platform_selection")} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-gray hover:text-white transition-colors mb-6 mx-auto md:mx-0 group">
+                                        <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Retour
+                                    </button>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Installation</h2>
+                                    <p className="text-brand-gray text-base md:text-lg">Téléchargez ou vérifiez votre plateforme {platform?.toUpperCase()}.</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <a href="#" className="block w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all">
+                                        <div className="flex items-center gap-6">
+                                            <div className="bg-brand-blue/10 p-5 rounded-2xl text-brand-blue border border-brand-blue/20 group-hover:bg-brand-blue group-hover:text-black transition-all">
+                                                <Download className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <div className="text-lg font-bold text-white">Installer {platform?.toUpperCase()}</div>
+                                                <div className="text-xs text-brand-gray mt-1 font-medium italic opacity-60 text-left">Version officielle MetaQuotes</div>
+                                            </div>
+                                        </div>
+                                        <ArrowRight className="h-6 w-6 text-brand-gray group-hover:text-white transition-all transform group-hover:translate-x-1" />
+                                    </a>
+
+                                    <div className="relative py-4">
+                                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                            <div className="w-full border-t border-white/5"></div>
+                                        </div>
+                                        <div className="relative flex justify-center">
+                                            <span className="bg-[#0F0F0F] px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Alpha</span>
+                                        </div>
                                     </div>
 
                                     <button
-                                        onClick={onComplete}
-                                        className="w-full bg-brand-blue text-black font-bold py-4 rounded-xl hover:bg-brand-blue/90 transition-all shadow-lg shadow-brand-blue/20"
+                                        onClick={() => {
+                                            setStep("activation");
+                                            activateLicense();
+                                        }}
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
                                     >
-                                        Accéder au Dashboard
+                                        Plateforme déjà prête
                                     </button>
                                 </div>
-                            )}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            </motion.div>
+                        )}
+
+                        {/* Step 3: Activation */}
+                        {step === "activation" && (
+                            <motion.div
+                                key="activation"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="space-y-10 text-center"
+                            >
+                                <div className="space-y-4">
+                                    <div className="mx-auto w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-8 ring-8 ring-green-500/5 animate-pulse">
+                                        <Check className="h-10 w-10 text-green-400" />
+                                    </div>
+                                    <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tighter">Votre Clé est Prête</h2>
+                                    <p className="text-brand-gray text-base md:text-lg max-w-sm mx-auto">Code unique généré spécifiquement pour votre compte.</p>
+                                </div>
+
+                                {loading ? (
+                                    <div className="py-12 flex flex-col items-center gap-4">
+                                        <div className="h-10 w-10 border-4 border-brand-blue border-t-transparent rounded-full animate-spin" />
+                                        <p className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">Génération...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8 max-w-sm mx-auto">
+                                        <div className="bg-[#121212] border-2 border-white/5 rounded-3xl p-8 space-y-5 relative overflow-hidden group">
+                                            <div className="text-[10px] text-brand-gray/50 uppercase tracking-[0.3em] font-black">License Key</div>
+                                            <div className="text-2xl md:text-3xl font-mono font-bold text-white tracking-[0.2em] py-4 bg-black/40 rounded-xl border border-white/5 shadow-inner">
+                                                {activationCode}
+                                            </div>
+                                            <button
+                                                onClick={handleCopy}
+                                                className="w-full flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest text-brand-blue hover:text-white py-3 transition-all bg-brand-blue/5 hover:bg-brand-blue/20 rounded-xl border border-brand-blue/20 hover:border-brand-blue/50"
+                                            >
+                                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                                {copied ? "Copié" : "Copier la clé"}
+                                            </button>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <button className="p-4 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-2xl flex flex-col items-center gap-3 transition-all group">
+                                                <Download className="h-6 w-6 text-brand-gray group-hover:text-brand-blue transition-colors" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-gray/50 group-hover:text-white">Expert Adv.</span>
+                                            </button>
+                                            <button className="p-4 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-2xl flex flex-col items-center gap-3 transition-all group">
+                                                <PlayCircle className="h-6 w-6 text-brand-gray group-hover:text-brand-blue transition-colors" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-gray/50 group-hover:text-white">Support</span>
+                                            </button>
+                                        </div>
+
+                                        <button
+                                            onClick={onComplete}
+                                            className="w-full bg-brand-blue text-black font-black text-xs uppercase tracking-widest py-6 rounded-2xl hover:bg-brand-blue/90 transition-all shadow-2xl shadow-brand-blue/20 active:scale-[0.98]"
+                                        >
+                                            Ouvrir FantomePad
+                                        </button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );
