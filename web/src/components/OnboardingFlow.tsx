@@ -40,7 +40,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
     const currentStepIndex = steps.findIndex(s => s.id === step);
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row bg-[#0F0F0F] rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative">
+        <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row bg-[#0F0F0F] rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative min-h-[600px] md:min-h-[500px]">
             {/* Background Effects */}
             <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -65,8 +65,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 )}
 
                                 <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 ${idx <= currentStepIndex
-                                        ? "bg-brand-blue border-brand-blue text-black scale-110"
-                                        : "bg-transparent border-white/20 text-brand-gray"
+                                    ? "bg-brand-blue border-brand-blue text-black scale-110"
+                                    : "bg-transparent border-white/20 text-brand-gray"
                                     }`}>
                                     {idx < currentStepIndex ? <Check className="h-3 w-3" /> : idx + 1}
                                 </div>

@@ -157,7 +157,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-md"
+        className={`relative z-10 w-full ${session ? "max-w-5xl" : "max-w-md"} transition-all duration-500`}
       >
         {session ? (
           // Onboarding State (Within Card)

@@ -3,11 +3,11 @@ import {
     LogOut, Activity, Monitor, Shield, Settings, HelpCircle,
     Copy, Check, MoreVertical, CreditCard, Clock, Bell,
     ChevronRight, Zap, RefreshCw, Smartphone, Download,
-    LayoutDashboard, Key
+    LayoutDashboard, Key, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface DashboardProps {
     email: string;
@@ -20,6 +20,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState("overview");
     const [copied, setCopied] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Fictional states for non-functional features
     const [isLocked, setIsLocked] = useState(false);
@@ -66,7 +67,10 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
 
     const NavItem = ({ id, icon: Icon, label, alert }: any) => (
         <button
-            onClick={() => setActiveTab(id)}
+            onClick={() => {
+                setActiveTab(id);
+                setMobileMenuOpen(false);
+            }}
             className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${activeTab === id
                     ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20"
                     : "text-brand-gray hover:bg-white/5 hover:text-white"
@@ -83,9 +87,49 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
     );
 
     return (
-        <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none">
-            {/* Sidebar */}
-            <div className="w-64 border-r border-white/5 flex flex-col p-6 space-y-8 bg-[#0F0F0F]">
+        <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none relative">
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: "-100%" }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: "-100%" }}
+                        transition={{ type: "tween" }}
+                        className="absolute inset-0 z-50 bg-[#0F0F0F] p-6 flex flex-col md:hidden"
+                    >
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
+                                    <span className="font-bold text-white">F</span>
+                                </div>
+                                <span className="font-bold text-lg tracking-tight">FantomePad</span>
+                            </div>
+                            <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-white/5 rounded-lg">
+                                <X className="h-6 w-6 text-white" />
+                            </button>
+                        </div>
+                        <div className="space-y-2 flex-1">
+                            <NavItem id="overview" icon={LayoutDashboard} label="Vue d'ensemble" />
+                            <NavItem id="license" icon={Key} label="Ma Licence" />
+                            <NavItem id="settings" icon={Settings} label="Paramètres" />
+                            <div className="h-px bg-white/5 my-4" />
+                            <NavItem id="docs" icon={HelpCircle} label="Documentation" />
+                            <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
+                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="mt-8 w-full flex items-center justify-center gap-2 text-xs text-brand-gray/50 hover:text-red-400 transition-colors py-4 border-t border-white/5"
+                        >
+                            <LogOut className="h-4 w-4" />
+                            Se déconnecter
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Sidebar (Desktop) */}
+            <div className="hidden md:flex w-64 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
                 <div className="flex items-center gap-3 px-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
                         <span className="font-bold text-white">F</span>
@@ -111,7 +155,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                             {email.substring(0, 2).toUpperCase()}
                         </div>
                         <div className="overflow-hidden">
-                            <div className="text-xs font-bold text-white truncate">{email}</div>
+                            <div className="text-xs font-bold text-white truncate max-w-[120px]">{email}</div>
                             <div className="text-[10px] text-brand-gray truncate">Utilisateur Pro</div>
                         </div>
                     </div>
@@ -126,78 +170,87 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+            <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#0A0A0A]">
                 {/* Top Bar */}
-                <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-[#0A0A0A]/50 backdrop-blur-xl z-10">
+                <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#0A0A0A]/80 backdrop-blur-xl z-20 sticky top-0">
                     <div className="flex items-center gap-4">
-                        <h2 className="text-lg font-bold">Vue d'ensemble</h2>
-                        <div className="h-4 w-px bg-white/10 mx-2"></div>
-                        <span className="text-xs text-brand-gray flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Dernière synchro: À l'instant
-                        </span>
+                        <button
+                            onClick={() => setMobileMenuOpen(true)}
+                            className="md:hidden p-2 -ml-2 text-brand-gray hover:text-white"
+                        >
+                            <Menu className="h-6 w-6" />
+                        </button>
+                        <h2 className="text-lg font-bold truncate">Vue d'ensemble</h2>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-brand-gray">
-                            v2.4.1 (Latest)
+
+                    <div className="flex items-center gap-3">
+                        <div className="hidden md:flex items-center gap-1 text-xs text-brand-gray mr-4">
+                            <Clock className="h-3 w-3" />
+                            <span className="hidden lg:inline">Dernière synchro:</span> À l'instant
+                        </div>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex md:hidden items-center justify-center text-xs font-bold ring-2 ring-black">
+                            {email.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="hidden md:block px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-brand-gray">
+                            v2.4.1
                         </div>
                     </div>
                 </header>
 
                 {/* Dashboard Grid */}
-                <main className="flex-1 overflow-y-auto p-8">
-                    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <main className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
+                    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 md:pb-0">
 
                         {/* Status Hero Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                             <div className="md:col-span-2 relative group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/10 to-purple-500/10 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                                <div className="relative h-full bg-[#121212] border border-white/5 p-6 rounded-2xl flex flex-col justify-between overflow-hidden">
-                                    <div className="flex justify-between items-start">
+                                <div className="relative h-full bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col justify-between overflow-hidden">
+                                    <div className="flex justify-between items-start mb-6 md:mb-0">
                                         <div>
                                             <div className="text-sm text-brand-gray mb-1">Statut de la Licence</div>
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="text-3xl font-bold text-white">FantomePad Pro</h3>
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <h3 className="text-2xl md:text-3xl font-bold text-white">FantomePad Pro</h3>
                                                 <StatusIndicator status={status} />
                                             </div>
                                         </div>
-                                        <div className="bg-white/5 p-2 rounded-lg">
-                                            <Shield className="h-6 w-6 text-brand-blue" />
+                                        <div className="bg-white/5 p-2 rounded-lg shrink-0">
+                                            <Shield className="h-5 w-5 md:h-6 md:w-6 text-brand-blue" />
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 grid grid-cols-3 gap-4">
+                                    <div className="mt-4 md:mt-8 grid grid-cols-2 md:grid-cols-3 gap-3">
                                         <div className="bg-black/20 p-3 rounded-lg border border-white/5">
                                             <div className="text-[10px] text-brand-gray uppercase mb-1">Renouvellement</div>
-                                            <div className="text-sm font-bold text-white">Lifetime Access</div>
+                                            <div className="text-xs md:text-sm font-bold text-white">Lifetime Access</div>
                                         </div>
                                         <div className="bg-black/20 p-3 rounded-lg border border-white/5">
                                             <div className="text-[10px] text-brand-gray uppercase mb-1">Serveur</div>
-                                            <div className="text-sm font-bold text-green-400 flex items-center gap-1">
+                                            <div className="text-xs md:text-sm font-bold text-green-400 flex items-center gap-1">
                                                 <Zap className="h-3 w-3" />
                                                 Connecté
                                             </div>
                                         </div>
-                                        <div className="bg-black/20 p-3 rounded-lg border border-white/5">
+                                        <div className="hidden md:block bg-black/20 p-3 rounded-lg border border-white/5">
                                             <div className="text-[10px] text-brand-gray uppercase mb-1">Sécurité</div>
-                                            <div className="text-sm font-bold text-white">Maximal</div>
+                                            <div className="text-xs md:text-sm font-bold text-white">Maximal</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* HWID Card */}
-                            <div className="bg-[#121212] border border-white/5 p-6 rounded-2xl flex flex-col justify-between hover:border-brand-gray/20 transition-colors">
+                            <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col justify-between hover:border-brand-gray/20 transition-colors gap-4">
                                 <div className="flex justify-between items-start">
-                                    <div>
+                                    <div className="overflow-hidden">
                                         <div className="text-sm text-brand-gray mb-1">Hardware ID (HWID)</div>
-                                        <div className="text-lg font-mono font-bold text-white truncate max-w-[200px]">
+                                        <div className="text-base md:text-lg font-mono font-bold text-white truncate w-full">
                                             {hardwareId || "Non lié"}
                                         </div>
                                     </div>
-                                    <Monitor className="h-5 w-5 text-purple-400" />
+                                    <Monitor className="h-5 w-5 text-purple-400 shrink-0" />
                                 </div>
-                                <div className="mt-4">
+                                <div className="mt-auto">
                                     <div className="flex items-center justify-between text-xs text-brand-gray mb-2">
                                         <span>Dernière connexion</span>
                                         <span>2 min</span>
@@ -206,29 +259,25 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                         <div className="h-full bg-purple-500 w-3/4 rounded-full"></div>
                                     </div>
                                 </div>
-                                <button disabled className="mt-4 w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold text-white transition-colors flex items-center justify-center gap-2">
-                                    <RefreshCw className="h-3 w-3" />
-                                    Gestion Appareil
-                                </button>
                             </div>
                         </div>
 
                         {/* Middle Section: Activation Code & Actions */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                             {/* License Code */}
-                            <div className="md:col-span-2 bg-[#121212] border border-white/5 p-6 rounded-2xl">
-                                <div className="flex items-center justify-between mb-6">
+                            <div className="md:col-span-2 bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl">
+                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-brand-blue/10 rounded-lg text-brand-blue">
                                             <Key className="h-5 w-5" />
                                         </div>
                                         <div>
                                             <h4 className="text-base font-bold text-white">Clé d'Activation</h4>
-                                            <p className="text-xs text-brand-gray">Utilisez cette clé pour débloquer l'EA sur votre terminal</p>
+                                            <p className="text-xs text-brand-gray">Clé unique pour votre EA</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Verrouillage Protection</span>
+                                    <div className="flex items-center gap-2 self-end md:self-auto">
+                                        <span className="text-[10px] font-bold text-brand-gray uppercase tracking-wider hidden md:inline">Protection</span>
                                         <button
                                             onClick={() => setIsLocked(!isLocked)}
                                             className={`w-10 h-6 rounded-full p-1 transition-colors ${isLocked ? 'bg-brand-blue' : 'bg-white/10'}`}
@@ -239,11 +288,13 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                 </div>
 
                                 <div className="relative group">
-                                    <div className="bg-black/40 border border-white/5 rounded-xl p-4 flex items-center justify-between font-mono text-xl tracking-widest text-center shadow-inner">
-                                        {isLocked ? "•••• - •••• - ••••" : activationCode}
+                                    <div className="bg-black/40 border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between font-mono text-base md:text-xl tracking-widest text-center shadow-inner overflow-hidden">
+                                        <span className="truncate mr-2">
+                                            {isLocked ? "•••• - •••• - ••••" : activationCode}
+                                        </span>
                                         <button
                                             onClick={handleCopy}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-brand-gray hover:text-white"
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-brand-gray hover:text-white shrink-0"
                                         >
                                             {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
                                         </button>
@@ -252,7 +303,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                             </div>
 
                             {/* Platform Actions */}
-                            <div className="bg-[#121212] border border-white/5 p-6 rounded-2xl flex flex-col space-y-4">
+                            <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col space-y-4">
                                 <h4 className="text-sm font-bold text-white flex items-center gap-2">
                                     <Smartphone className="h-4 w-4 text-brand-gray" />
                                     Plateformes
@@ -275,8 +326,8 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                             </div>
                         </div>
 
-                        {/* Graph Section (Fictional) */}
-                        <div className="bg-[#121212] border border-white/5 p-6 rounded-2xl">
+                        {/* Graph Section (Fictional) - Hidden on very small screens if needed, but we'll try to keep it responsive */}
+                        <div className="bg-[#121212] border border-white/5 p-5 md:p-6 rounded-2xl hidden md:block">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h4 className="text-base font-bold text-white">Activité du Trading</h4>
