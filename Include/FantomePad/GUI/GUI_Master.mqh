@@ -106,7 +106,7 @@ void GUI_OnTimer()
    static uint lastHeartbeat = 0;
    uint now = GetTickCount();
    
-   if(g_IsLicensed && (now - lastHeartbeat > 3600 || lastHeartbeat == 0)) 
+   if(g_IsLicensed && (now - lastHeartbeat > 3600000 || lastHeartbeat == 0)) 
    {
       lastHeartbeat = now;
       if(!CheckLicense(g_ActivationCode))
