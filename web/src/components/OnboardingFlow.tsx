@@ -57,8 +57,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                             )}
 
                             <div className={`h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-500 z-10 ${idx <= currentStepIndex
-                                    ? "bg-brand-blue border-brand-blue text-black shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                                    : "bg-black border-white/20 text-brand-gray"
+                                ? "bg-brand-blue border-brand-blue text-black shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                                : "bg-black border-white/20 text-brand-gray"
                                 }`}>
                                 {idx < currentStepIndex ? <Check className="h-5 w-5" /> : idx + 1}
                             </div>
@@ -86,8 +86,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 )}
 
                                 <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 ${idx <= currentStepIndex
-                                        ? "bg-brand-blue border-brand-blue text-black"
-                                        : "bg-transparent border-white/20 text-brand-gray"
+                                    ? "bg-brand-blue border-brand-blue text-black"
+                                    : "bg-transparent border-white/20 text-brand-gray"
                                     }`}>
                                     {idx < currentStepIndex ? <Check className="h-3 w-3" /> : idx + 1}
                                 </div>
@@ -97,14 +97,6 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 </span>
                             </div>
                         ))}
-                    </div>
-
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-xs text-brand-gray">
-                        <p className="flex items-center gap-2 mb-2 font-bold text-white uppercase tracking-tighter">
-                            <ShieldCheck className="h-4 w-4 text-green-400" />
-                            License Safe
-                        </p>
-                        Lié à votre matériel (HWID).
                     </div>
                 </div>
 
@@ -139,7 +131,6 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             </div>
                                             <div className="text-center md:text-left">
                                                 <div className="text-xl md:text-2xl font-bold text-white">MT4</div>
-                                                <div className="text-[10px] text-brand-gray/60 mt-2 uppercase tracking-[0.2em] font-black">Standard Pro</div>
                                             </div>
                                         </div>
                                     </button>
@@ -157,7 +148,6 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             </div>
                                             <div className="text-center md:text-left">
                                                 <div className="text-xl md:text-2xl font-bold text-white">MT5</div>
-                                                <div className="text-[10px] text-brand-gray/60 mt-2 uppercase tracking-[0.2em] font-black">Next Gen</div>
                                             </div>
                                         </div>
                                     </button>
@@ -167,7 +157,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                     <button
                                         disabled={!platform}
                                         onClick={() => setStep("install")}
-                                        className="w-full md:w-auto px-16 py-5 bg-brand-blue text-black font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:bg-brand-blue/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-brand-blue/10 group"
+                                        className="w-full md:w-auto px-16 py-5 bg-brand-blue text-white font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:bg-brand-blue/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-brand-blue/10 group active:scale-[0.98]"
                                     >
                                         Étape Suivante
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -212,7 +202,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             <div className="w-full border-t border-white/5"></div>
                                         </div>
                                         <div className="relative flex justify-center">
-                                            <span className="bg-[#0F0F0F] px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Alpha</span>
+                                            <span className="bg-[#0F0F0F] px-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/20">OU</span>
                                         </div>
                                     </div>
 
@@ -242,7 +232,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                         <Check className="h-10 w-10 text-green-400" />
                                     </div>
                                     <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tighter">Votre Clé est Prête</h2>
-                                    <p className="text-brand-gray text-base md:text-lg max-w-sm mx-auto">Code unique généré spécifiquement pour votre compte.</p>
+                                    <p className="text-brand-gray text-base md:text-lg max-w-sm mx-auto">Code unique généré pour votre compte.</p>
                                 </div>
 
                                 {loading ? (
@@ -251,10 +241,11 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                         <p className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">Génération...</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8 max-w-sm mx-auto">
-                                        <div className="bg-[#121212] border-2 border-white/5 rounded-3xl p-8 space-y-5 relative overflow-hidden group">
+                                    <div className="space-y-8 max-w-md mx-auto">
+                                        {/* License Key Card */}
+                                        <div className="bg-[#121212] border-2 border-white/5 rounded-3xl p-6 space-y-4 relative overflow-hidden group">
                                             <div className="text-[10px] text-brand-gray/50 uppercase tracking-[0.3em] font-black">License Key</div>
-                                            <div className="text-2xl md:text-3xl font-mono font-bold text-white tracking-[0.2em] py-4 bg-black/40 rounded-xl border border-white/5 shadow-inner">
+                                            <div className="text-xl md:text-2xl font-mono font-bold text-white tracking-[0.2em] py-3 bg-black/40 rounded-xl border border-white/5 shadow-inner">
                                                 {activationCode}
                                             </div>
                                             <button
@@ -266,20 +257,37 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             </button>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <button className="p-4 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-2xl flex flex-col items-center gap-3 transition-all group">
-                                                <Download className="h-6 w-6 text-brand-gray group-hover:text-brand-blue transition-colors" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-gray/50 group-hover:text-white">Expert Adv.</span>
-                                            </button>
-                                            <button className="p-4 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-2xl flex flex-col items-center gap-3 transition-all group">
-                                                <PlayCircle className="h-6 w-6 text-brand-gray group-hover:text-brand-blue transition-colors" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-gray/50 group-hover:text-white">Support</span>
-                                            </button>
+                                        {/* Fake Video Tutorial */}
+                                        <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-3xl overflow-hidden group cursor-pointer hover:border-brand-blue/30 transition-all">
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                                <div className="h-16 w-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
+                                                    <PlayCircle className="h-8 w-8 text-white fill-white/20" />
+                                                </div>
+                                            </div>
+                                            <div className="absolute bottom-4 left-4 right-4">
+                                                <div className="text-sm font-bold text-white">Tutoriel d'installation</div>
+                                                <div className="text-[10px] text-brand-gray uppercase tracking-wider font-bold">Guide Rapide • 2:30</div>
+                                            </div>
                                         </div>
 
+                                        {/* Download EA Button */}
+                                        <a
+                                            href="#"
+                                            className="w-full flex items-center justify-center gap-3 p-5 bg-[#151515] border border-white/10 rounded-2xl hover:bg-[#1A1A1A] hover:border-brand-blue/50 transition-all group"
+                                        >
+                                            <div className="h-10 w-10 bg-brand-blue/10 rounded-lg flex items-center justify-center text-brand-blue group-hover:bg-brand-blue group-hover:text-black transition-colors">
+                                                <Download className="h-5 w-5" />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="text-xs font-black text-white uppercase tracking-wider">Télécharger l'Expert Advisor</div>
+                                                <div className="text-[10px] text-brand-gray font-bold">Version v2.4.1 pour {platform?.toUpperCase()}</div>
+                                            </div>
+                                        </a>
+
+                                        {/* Final Button */}
                                         <button
                                             onClick={onComplete}
-                                            className="w-full bg-brand-blue text-black font-black text-xs uppercase tracking-widest py-6 rounded-2xl hover:bg-brand-blue/90 transition-all shadow-2xl shadow-brand-blue/20 active:scale-[0.98]"
+                                            className="w-full bg-brand-blue text-white font-black text-xs uppercase tracking-widest py-6 rounded-2xl hover:bg-brand-blue/90 transition-all shadow-2xl shadow-brand-blue/20 active:scale-[0.98] mt-8"
                                         >
                                             Ouvrir FantomePad
                                         </button>
