@@ -46,31 +46,34 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
 
             {/* Left Panel: Visual & Progress */}
-            <div className="md:w-1/3 bg-[#121212] p-8 border-r border-white/5 flex flex-col justify-between relative z-10">
+            <div className="md:w-1/3 bg-[#121212] p-8 border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-between relative z-10">
                 <div>
-                    <div className="flex items-center gap-3 mb-8">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-8">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-blue to-purple-600 flex items-center justify-center shadow-lg shadow-brand-blue/20">
                             <span className="font-bold text-white">F</span>
                         </div>
                         <span className="font-bold text-lg tracking-tight text-white">FantomePad</span>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="flex flex-row justify-center gap-6 md:flex-col md:justify-start md:gap-0 md:space-y-6 mb-4 md:mb-0">
                         {steps.map((s, idx) => (
-                            <div key={s.id} className="flex items-center gap-4 relative">
+                            <div key={s.id} className="flex flex-col md:flex-row items-center gap-2 md:gap-4 relative">
                                 {/* Connector Line */}
                                 {idx < steps.length - 1 && (
-                                    <div className={`absolute left-[11px] top-8 w-px h-8 transition-colors duration-500 ${idx < currentStepIndex ? "bg-brand-blue" : "bg-white/10"
-                                        }`} />
+                                    <div className={`absolute transition-colors duration-500 
+                                        left-8 top-[11px] w-8 h-px 
+                                        md:left-[11px] md:top-8 md:w-px md:h-8 
+                                        ${idx < currentStepIndex ? "bg-brand-blue" : "bg-white/10"}`}
+                                    />
                                 )}
 
-                                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 ${idx <= currentStepIndex
-                                    ? "bg-brand-blue border-brand-blue text-black scale-110"
-                                    : "bg-transparent border-white/20 text-brand-gray"
+                                <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-500 z-10 ${idx <= currentStepIndex
+                                        ? "bg-brand-blue border-brand-blue text-black scale-110"
+                                        : "bg-black border-white/20 text-brand-gray"
                                     }`}>
                                     {idx < currentStepIndex ? <Check className="h-3 w-3" /> : idx + 1}
                                 </div>
-                                <span className={`text-sm font-medium transition-colors duration-500 ${idx <= currentStepIndex ? "text-white" : "text-brand-gray"
+                                <span className={`text-[10px] md:text-sm font-bold md:font-medium tracking-wider md:tracking-normal transition-colors duration-500 ${idx <= currentStepIndex ? "text-white" : "text-brand-gray"
                                     }`}>
                                     {s.label}
                                 </span>
@@ -79,7 +82,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                     </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 hidden md:block">
                     <div className="bg-white/5 p-4 rounded-xl border border-white/5 text-xs text-brand-gray">
                         <p className="flex items-center gap-2 mb-2 font-bold text-white">
                             <ShieldCheck className="h-4 w-4 text-green-400" />
@@ -91,7 +94,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
             </div>
 
             {/* Right Panel: Content Form */}
-            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center min-h-[500px]">
+            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center min-h-[450px] md:min-h-[500px]">
                 <AnimatePresence mode="wait">
                     {/* Step 1: Platform Selection */}
                     {step === "platform_selection" && (
@@ -102,9 +105,9 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-8"
                         >
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold text-white">Choisissez votre plateforme</h2>
-                                <p className="text-brand-gray">Sur quelle version de MetaTrader opérez-vous ?</p>
+                            <div className="space-y-2 text-center md:text-left">
+                                <h2 className="text-2xl md:text-3xl font-bold text-white">Version de MetaTrader</h2>
+                                <p className="text-brand-gray text-sm md:text-base">Sur quelle plateforme opérez-vous ?</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -115,13 +118,13 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                         : "bg-[#151515] border-white/5 hover:border-brand-gray/50 hover:bg-[#1A1A1A]"
                                         }`}
                                 >
-                                    <div className="flex flex-col items-start gap-4 relative z-10">
+                                    <div className="flex flex-col items-center md:items-start gap-4 relative z-10">
                                         <div className={`p-3 rounded-xl transition-colors ${platform === "mt4" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
                                             <Laptop className="h-6 w-6" />
                                         </div>
-                                        <div>
-                                            <div className="text-xl font-bold text-white">MetaTrader 4</div>
-                                            <div className="text-xs text-brand-gray/80 mt-1">Version Standard</div>
+                                        <div className="text-center md:text-left">
+                                            <div className="text-lg md:text-xl font-bold text-white">MetaTrader 4</div>
+                                            <div className="text-[10px] md:text-xs text-brand-gray/80 mt-1 uppercase tracking-widest font-bold">Standard</div>
                                         </div>
                                     </div>
                                 </button>
@@ -133,23 +136,23 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                         : "bg-[#151515] border-white/5 hover:border-brand-gray/50 hover:bg-[#1A1A1A]"
                                         }`}
                                 >
-                                    <div className="flex flex-col items-start gap-4 relative z-10">
+                                    <div className="flex flex-col items-center md:items-start gap-4 relative z-10">
                                         <div className={`p-3 rounded-xl transition-colors ${platform === "mt5" ? "bg-brand-blue text-black" : "bg-white/5 text-white"}`}>
                                             <Zap className="h-6 w-6" />
                                         </div>
-                                        <div>
-                                            <div className="text-xl font-bold text-white">MetaTrader 5</div>
-                                            <div className="text-xs text-brand-gray/80 mt-1">Performance Max</div>
+                                        <div className="text-center md:text-left">
+                                            <div className="text-lg md:text-xl font-bold text-white">MetaTrader 5</div>
+                                            <div className="text-[10px] md:text-xs text-brand-gray/80 mt-1 uppercase tracking-widest font-bold">Performance</div>
                                         </div>
                                     </div>
                                 </button>
                             </div>
 
-                            <div className="flex justify-end pt-4">
+                            <div className="flex justify-center md:justify-end pt-4">
                                 <button
                                     disabled={!platform}
                                     onClick={() => setStep("install")}
-                                    className="px-8 py-3.5 bg-brand-blue text-black font-bold rounded-xl flex items-center gap-2 hover:bg-brand-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-blue/20"
+                                    className="w-full md:w-auto px-12 py-4 bg-brand-blue text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-brand-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-blue/20"
                                 >
                                     Continuer
                                     <ArrowRight className="h-4 w-4" />
@@ -167,12 +170,12 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-8"
                         >
-                            <div className="space-y-2">
-                                <button onClick={() => setStep("platform_selection")} className="flex items-center gap-1 text-xs text-brand-gray hover:text-white transition-colors mb-4">
+                            <div className="space-y-2 text-center md:text-left">
+                                <button onClick={() => setStep("platform_selection")} className="flex items-center gap-1 text-xs text-brand-gray hover:text-white transition-colors mb-4 mx-auto md:mx-0">
                                     <ChevronLeft className="h-3 w-3" /> Retour
                                 </button>
-                                <h2 className="text-3xl font-bold text-white">Installation Requise</h2>
-                                <p className="text-brand-gray">Assurez-vous d'avoir la plateforme installée avant de continuer.</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-white">Prêt pour l'install ?</h2>
+                                <p className="text-brand-gray text-sm md:text-base">MetaTrader doit être installé sur votre machine.</p>
                             </div>
 
                             <div className="space-y-4">
@@ -182,14 +185,14 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             <Download className="h-6 w-6" />
                                         </div>
                                         <div>
-                                            <div className="text-base font-bold text-white">Télécharger {platform === "mt4" ? "MT4" : "MT5"}</div>
-                                            <div className="text-xs text-brand-gray mt-1">Installateur Officiel MetaQuotes (Win/Mac)</div>
+                                            <div className="text-sm md:text-base font-bold text-white">Télécharger {platform === "mt4" ? "MT4" : "MT5"}</div>
+                                            <div className="text-[10px] md:text-xs text-brand-gray mt-1">Installateur Officiel (Win/Mac)</div>
                                         </div>
                                     </div>
                                     <ArrowRight className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
                                 </a>
 
-                                <div className="text-center text-xs text-brand-gray py-2 uppercase tracking-widest font-bold">
+                                <div className="text-center text-[10px] text-brand-gray py-2 uppercase tracking-[0.2em] font-bold">
                                     — Ou —
                                 </div>
 
@@ -200,7 +203,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                     }}
                                     className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-neutral-200 transition-all shadow-lg shadow-white/5"
                                 >
-                                    Je l'ai déjà installé
+                                    C'est déjà fait, continuer
                                 </button>
                             </div>
                         </motion.div>
@@ -218,8 +221,8 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                 <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-6 ring-4 ring-green-500/5">
                                     <Check className="h-8 w-8 text-green-400" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-white">Licence Active !</h2>
-                                <p className="text-brand-gray max-w-sm mx-auto">Votre code unique a été généré. Copiez-le pour débloquer votre accès.</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-white">Activation Terminée !</h2>
+                                <p className="text-brand-gray text-sm max-w-sm mx-auto">Voici votre code de licence personnel à entrer dans l'EA.</p>
                             </div>
 
                             {loading ? (
@@ -233,27 +236,27 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                             <Copy className="h-24 w-24 text-white/5 -rotate-12 transform translate-x-4 -translate-y-4" />
                                         </div>
 
-                                        <div className="text-[10px] text-brand-gray uppercase tracking-widest font-bold">Votre Code de Licence</div>
-                                        <div className="text-2xl font-mono font-bold text-white tracking-widest py-2 border-y border-white/5 bg-black/20 rounded">
+                                        <div className="text-[10px] text-brand-gray uppercase tracking-widest font-bold">Clé d'Activation</div>
+                                        <div className="text-xl md:text-2xl font-mono font-bold text-white tracking-widest py-2 border-y border-white/5 bg-black/20 rounded">
                                             {activationCode}
                                         </div>
                                         <button
                                             onClick={handleCopy}
-                                            className="w-full flex items-center justify-center gap-2 text-xs font-bold text-brand-blue hover:text-white py-2 transition-colors bg-brand-blue/5 hover:bg-brand-blue/10 rounded-lg"
+                                            className="w-full flex items-center justify-center gap-2 text-[10px] md:text-xs font-bold text-brand-blue hover:text-white py-2 transition-colors bg-brand-blue/5 hover:bg-brand-blue/10 rounded-lg"
                                         >
                                             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                            {copied ? "Copié dans le presse-papier" : "Copier le code"}
+                                            {copied ? "Copié !" : "Copier la clé"}
                                         </button>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3">
                                         <button className="p-3 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-xl flex flex-col items-center gap-2 transition-all group">
                                             <Download className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
-                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Télécharger EA</span>
+                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Fichier EA</span>
                                         </button>
                                         <button className="p-3 bg-[#151515] hover:bg-[#1A1A1A] border border-white/5 rounded-xl flex flex-col items-center gap-2 transition-all group">
                                             <PlayCircle className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
-                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Tutoriel</span>
+                                            <span className="text-[10px] font-bold text-brand-gray group-hover:text-white">Aide</span>
                                         </button>
                                     </div>
 
