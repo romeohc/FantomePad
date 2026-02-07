@@ -1,8 +1,9 @@
 import {
     LogOut, Monitor, Shield, HelpCircle,
     Copy, Check, Clock, Bell,
-    Zap, Smartphone, Download,
-    LayoutDashboard, Menu, X, PlayCircle, Calendar
+    Zap, Download,
+    LayoutDashboard, Menu, X, PlayCircle, Calendar,
+    Mail, ExternalLink, FileCode
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase";
@@ -11,11 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 interface DashboardProps {
     email: string;
     activationCode: string;
-    hardwareId?: string;
     status: string;
 }
 
-export default function Dashboard({ email, activationCode, hardwareId, status }: DashboardProps) {
+export default function Dashboard({ email, activationCode, status }: DashboardProps) {
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState("overview");
     const [copied, setCopied] = useState(false);
@@ -185,7 +185,7 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
 
                         {activeTab === 'overview' && (
                             <div className="space-y-6">
-                                {/* Top Row: Status & HWID - BIGGER cards */}
+                                {/* Top Row: Status & Activation Code */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {/* Status Card */}
                                     <div className="relative group min-h-[220px]">
@@ -195,16 +195,15 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                                 <div>
                                                     <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Votre Licence</div>
                                                     <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">FantomePad Pro</h3>
-                                                    <div className="mt-2">
-                                                        <StatusIndicator status={status} />
-                                                    </div>
+                                                    <div className="mt-2 text-brand-gray text-sm font-medium mb-4 italic opacity-80">Protection active par abonnement</div>
+                                                    <StatusIndicator status={status} />
                                                 </div>
                                                 <div className="bg-white/5 p-3 rounded-2xl shrink-0">
                                                     <Shield className="h-8 w-8 text-brand-blue" />
                                                 </div>
                                             </div>
 
-                                            <div className="mt-8 flex gap-4">
+                                            <div className="mt-4 flex gap-4">
                                                 <div className="bg-black/30 px-4 py-2 rounded-xl border border-white/5 flex items-center gap-2">
                                                     <Zap className="h-4 w-4 text-yellow-400" />
                                                     <span className="text-sm font-bold text-white">Version Lifetime</span>
@@ -213,34 +212,9 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                         </div>
                                     </div>
 
-                                    {/* HWID Card */}
-                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between hover:border-brand-gray/20 transition-colors gap-6 min-h-[220px]">
+                                    {/* License Code Card */}
+                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between min-h-[220px]">
                                         <div className="flex justify-between items-start">
-                                            <div className="overflow-hidden w-full">
-                                                <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Hardware ID (HWID)</div>
-                                                <div className="text-xl md:text-2xl font-mono font-bold text-white truncate w-full tracking-wider bg-black/20 p-3 rounded-xl border border-white/5">
-                                                    {hardwareId || "Non lié"}
-                                                </div>
-                                            </div>
-                                            <Monitor className="h-8 w-8 text-purple-400 shrink-0 ml-4" />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center justify-between text-xs text-brand-gray mb-2 font-medium">
-                                                <span>Sécurité active</span>
-                                                <span className="text-green-400">100%</span>
-                                            </div>
-                                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-brand-blue to-purple-500 w-full rounded-full"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Bottom Row: License Key & Platform - BIGGER cards */}
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                    {/* License Code */}
-                                    <div className="lg:col-span-2 bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-center min-h-[200px]">
-                                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
                                             <div>
                                                 <h4 className="text-xl font-bold text-white">Clé d'Activation</h4>
                                                 <p className="text-sm text-brand-gray mt-1">Utilisez cette clé pour activer votre Expert Advisor.</p>
@@ -253,8 +227,8 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                             </button>
                                         </div>
 
-                                        <div className="relative group">
-                                            <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex items-center justify-between font-mono text-xl md:text-3xl tracking-widest text-center shadow-inner overflow-hidden">
+                                        <div className="relative group pt-4">
+                                            <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex items-center justify-between font-mono text-xl md:text-2xl tracking-widest text-center shadow-inner overflow-hidden">
                                                 <span className="truncate mr-4 text-brand-blue/90">
                                                     {isLocked ? "•••• - •••• - •••• - ••••" : activationCode}
                                                 </span>
@@ -267,28 +241,97 @@ export default function Dashboard({ email, activationCode, hardwareId, status }:
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Platform Actions */}
-                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col space-y-4 min-h-[200px]">
-                                        <h4 className="text-lg font-bold text-white flex items-center gap-2 mb-2">
-                                            <Smartphone className="h-5 w-5 text-brand-gray" />
-                                            Téléchargements
-                                        </h4>
+                                {/* Bottom Row: Downloads & Support */}
+                                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                                    {/* Downloads Hub */}
+                                    <div className="lg:col-span-3 bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col min-h-[300px]">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <div>
+                                                <h4 className="text-xl font-bold text-white">Centre de Téléchargement</h4>
+                                                <p className="text-sm text-brand-gray">Plateformes et Logiciel FantomePad</p>
+                                            </div>
+                                            <div className="h-10 w-10 bg-brand-blue/10 rounded-xl flex items-center justify-center">
+                                                <Download className="h-6 w-6 text-brand-blue" />
+                                            </div>
+                                        </div>
 
-                                        <button className="flex-1 flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-3 w-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
-                                                <span className="font-bold text-base">MetaTrader 4</span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Platforms Selection */}
+                                            <div className="space-y-4">
+                                                <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Plateformes</div>
+                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <Monitor className="h-5 w-5 text-brand-gray group-hover:text-white" />
+                                                        <span className="font-bold text-base">MetaTrader 4</span>
+                                                    </div>
+                                                    <Download className="h-4 w-4 text-brand-gray group-hover:text-white" />
+                                                </button>
+                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
+                                                    <div className="flex items-center gap-4">
+                                                        <Monitor className="h-5 w-5 text-brand-gray" />
+                                                        <span className="font-bold text-base text-brand-gray">MetaTrader 5</span>
+                                                    </div>
+                                                    <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-brand-gray font-bold">BIENTÔT</span>
+                                                </button>
                                             </div>
-                                            <Download className="h-5 w-5 text-brand-gray group-hover:text-white" />
-                                        </button>
-                                        <button className="flex-1 flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-3 w-3 rounded-full bg-brand-gray"></div>
-                                                <span className="font-bold text-base text-brand-gray">MetaTrader 5</span>
+
+                                            {/* Software Selection */}
+                                            <div className="space-y-4">
+                                                <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Logiciel Expert</div>
+                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/20 transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <FileCode className="h-5 w-5 text-brand-blue" />
+                                                        <div className="text-left">
+                                                            <div className="font-bold text-base text-white">Expert MT4</div>
+                                                            <div className="text-[10px] text-brand-blue font-bold">Version v2.4.1</div>
+                                                        </div>
+                                                    </div>
+                                                    <Download className="h-4 w-4 text-brand-blue group-hover:scale-110 transition-transform" />
+                                                </button>
+                                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
+                                                    <div className="flex items-center gap-4">
+                                                        <FileCode className="h-5 w-5 text-brand-gray" />
+                                                        <div className="text-left">
+                                                            <div className="font-bold text-base text-brand-gray">Expert MT5</div>
+                                                            <div className="text-[10px] text-brand-gray/50 font-bold uppercase">MetaTrader 5</div>
+                                                        </div>
+                                                    </div>
+                                                    <Download className="h-4 w-4 text-brand-gray" />
+                                                </button>
                                             </div>
-                                            <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-brand-gray font-bold">BIENTÔT</span>
-                                        </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Support Card */}
+                                    <div className="lg:col-span-2 bg-gradient-to-br from-[#1A1A1A] to-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between min-h-[300px] relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-brand-blue/10 transition-colors"></div>
+
+                                        <div>
+                                            <div className="h-12 w-12 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/5 group-hover:border-brand-blue/30 transition-colors">
+                                                <Mail className="h-6 w-6 text-brand-blue" />
+                                            </div>
+                                            <h4 className="text-2xl font-bold text-white mb-2">Support & Aide</h4>
+                                            <p className="text-brand-gray text-sm leading-relaxed mb-6">
+                                                Notre équipe est à votre disposition pour vous aider dans l'installation ou la configuration de FantomePad.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/20 border border-white/5">
+                                                <div className="text-xs font-bold text-brand-gray uppercase tracking-widest">Email:</div>
+                                                <div className="text-brand-blue font-mono font-bold">contact@fantomepad.com</div>
+                                            </div>
+
+                                            <a
+                                                href="mailto:contact@fantomepad.com"
+                                                className="w-full flex items-center justify-center gap-2 bg-white text-black font-black py-4 rounded-2xl hover:bg-neutral-200 transition-all active:scale-[0.98]"
+                                            >
+                                                <span>Contacter le support</span>
+                                                <ExternalLink className="h-4 w-4" />
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

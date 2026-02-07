@@ -139,7 +139,6 @@ export default function Home() {
       <Dashboard
         email={session.user.email}
         activationCode={license.activation_code}
-        hardwareId={license.hardware_id}
         status={license.status}
       />
     );
