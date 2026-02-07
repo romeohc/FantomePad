@@ -133,6 +133,19 @@ export default function Home() {
     );
   }
 
+  // Dashboard View (Full Screen)
+  if (session && license?.activation_code) {
+    return (
+      <Dashboard
+        email={session.user.email}
+        activationCode={license.activation_code}
+        hardwareId={license.hardware_id}
+        status={license.status}
+      />
+    );
+  }
+
+  // Auth & Onboarding View (Centered Card)
   return (
     <main className="flex min-h-screen items-center justify-center p-4 bg-brand-bg select-none">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -146,135 +159,124 @@ export default function Home() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-brand-border to-transparent">
-          <div className="bg-brand-bg rounded-2xl p-8 md:p-12 border border-brand-border/50 min-h-[500px] flex flex-col justify-center">
-            {session ? (
-              // Logged In State
-              license?.activation_code ? (
-                <Dashboard
-                  email={session.user.email}
-                  activationCode={license.activation_code}
-                  hardwareId={license.hardware_id}
-                  status={license.status}
-                />
-              ) : (
-                <OnboardingFlow
-                  email={session.user.email}
-                  onComplete={() => fetchLicense(session.user.email)}
-                />
-              )
-            ) : (
-              // Login Form State
-              <>
-                <header className="text-center mb-10">
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-xs font-bold tracking-[0.2em] text-brand-gray uppercase mb-3 block"
-                  >
-                    {step === "email" ? "Accès Propriétaire" : "Vérification"}
-                  </motion.span>
-                  <motion.h1
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-2xl md:text-3xl font-bold text-white tracking-tight"
-                  >
-                    {step === "email" ? (
-                      <>The new standard <br /> <span className="text-brand-gray">is here.</span></>
-                    ) : (
-                      <>Saisissez votre <br /> <span className="text-brand-gray">code OTP.</span></>
-                    )}
-                  </motion.h1>
-                </header>
+        {session ? (
+          // Onboarding State (Within Card)
+          <OnboardingFlow
+            email={session.user.email}
+            onComplete={() => fetchLicense(session.user.email)}
+          />
+        ) : (
+          <div className="p-[1px] rounded-2xl bg-gradient-to-b from-brand-border to-transparent">
+            <div className="bg-brand-bg rounded-2xl p-8 md:p-12 border border-brand-border/50 min-h-[500px] flex flex-col justify-center">
+              {/* Login Form State */}
+              <header className="text-center mb-10">
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-xs font-bold tracking-[0.2em] text-brand-gray uppercase mb-3 block"
+                >
+                  {step === "email" ? "Accès Propriétaire" : "Vérification"}
+                </motion.span>
+                <motion.h1
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-2xl md:text-3xl font-bold text-white tracking-tight"
+                >
+                  {step === "email" ? (
+                    <>The new standard <br /> <span className="text-brand-gray">is here.</span></>
+                  ) : (
+                    <>Saisissez votre <br /> <span className="text-brand-gray">code OTP.</span></>
+                  )}
+                </motion.h1>
+              </header>
 
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={step}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <form onSubmit={step === "email" ? handleSendOTP : handleVerifyOTP} className="space-y-6">
-                      {error && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs animate-shake">
-                          <AlertCircle className="h-4 w-4 shrink-0" />
-                          <span>{error}</span>
-                        </div>
-                      )}
-                      {message && (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs">
-                          <CheckCircle2 className="h-4 w-4 shrink-0" />
-                          <span>{message}</span>
-                        </div>
-                      )}
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-brand-gray tracking-widest uppercase ml-1">
-                          {step === "email" ? "Email d'achat Shopify" : "Code de vérification"}
-                        </label>
-                        <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            {step === "email" ? (
-                              <Mail className="h-4 w-4 text-brand-gray group-focus-within:text-white transition-colors" />
-                            ) : (
-                              <KeyRound className="h-4 w-4 text-brand-gray group-focus-within:text-white transition-colors" />
-                            )}
-                          </div>
-                          <input
-                            type={step === "email" ? "email" : "text"}
-                            required
-                            value={step === "email" ? email : code}
-                            onChange={(e) => step === "email" ? setEmail(e.target.value) : setCode(e.target.value)}
-                            placeholder={step === "email" ? "nom@exemple.com" : "000000"}
-                            maxLength={step === "email" ? undefined : 8}
-                            className="w-full bg-[#1A1A1A] border border-brand-border rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-brand-gray/50 focus:outline-none focus:ring-1 focus:ring-brand-blue focus:border-transparent transition-all tracking-wide"
-                          />
-                        </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <form onSubmit={step === "email" ? handleSendOTP : handleVerifyOTP} className="space-y-6">
+                    {error && (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs animate-shake">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{error}</span>
                       </div>
+                    )}
+                    {message && (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span>{message}</span>
+                      </div>
+                    )}
 
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-white text-black font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-neutral-200 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                      >
-                        {loading ? (
-                          <div className="h-5 w-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            {step === "email" ? "Continuer" : "Vérifier"}
-                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                          </>
-                        )}
-                      </button>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-brand-gray tracking-widest uppercase ml-1">
+                        {step === "email" ? "Email d'achat Shopify" : "Code de vérification"}
+                      </label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          {step === "email" ? (
+                            <Mail className="h-4 w-4 text-brand-gray group-focus-within:text-white transition-colors" />
+                          ) : (
+                            <KeyRound className="h-4 w-4 text-brand-gray group-focus-within:text-white transition-colors" />
+                          )}
+                        </div>
+                        <input
+                          type={step === "email" ? "email" : "text"}
+                          required
+                          value={step === "email" ? email : code}
+                          onChange={(e) => step === "email" ? setEmail(e.target.value) : setCode(e.target.value)}
+                          placeholder={step === "email" ? "nom@exemple.com" : "000000"}
+                          maxLength={step === "email" ? undefined : 8}
+                          className="w-full bg-[#1A1A1A] border border-brand-border rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-brand-gray/50 focus:outline-none focus:ring-1 focus:ring-brand-blue focus:border-transparent transition-all tracking-wide"
+                        />
+                      </div>
+                    </div>
 
-                      {step === "otp" && (
-                        <button
-                          type="button"
-                          onClick={() => setStep("email")}
-                          className="w-full text-center text-xs text-brand-gray hover:text-white transition-colors"
-                        >
-                          Modifier l'email
-                        </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-white text-black font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-neutral-200 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                    >
+                      {loading ? (
+                        <div className="h-5 w-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          {step === "email" ? "Continuer" : "Vérifier"}
+                          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </>
                       )}
-                    </form>
-                  </motion.div>
-                </AnimatePresence>
+                    </button>
 
-                <footer className="mt-12 pt-8 border-t border-brand-border/50 text-center">
-                  <p className="text-[10px] text-brand-gray tracking-wide">
-                    Besoin d'aide ?{" "}
-                    <a href="mailto:contact@fantomepad.com" className="text-white hover:underline">
-                      contact@fantomepad.com
-                    </a>
-                  </p>
-                </footer>
-              </>
-            )}
+                    {step === "otp" && (
+                      <button
+                        type="button"
+                        onClick={() => setStep("email")}
+                        className="w-full text-center text-xs text-brand-gray hover:text-white transition-colors"
+                      >
+                        Modifier l'email
+                      </button>
+                    )}
+                  </form>
+                </motion.div>
+              </AnimatePresence>
+
+              <footer className="mt-12 pt-8 border-t border-brand-border/50 text-center">
+                <p className="text-[10px] text-brand-gray tracking-wide">
+                  Besoin d'aide ?{" "}
+                  <a href="mailto:contact@fantomepad.com" className="text-white hover:underline">
+                    contact@fantomepad.com
+                  </a>
+                </p>
+              </footer>
+            </div>
           </div>
-        </div>
+        )}
       </motion.div>
     </main>
   );
