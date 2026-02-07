@@ -75,44 +75,46 @@ export const useOnboarding = (email: string) => {
     const activateLicense = async () => {
         if (!email) return;
 
-        // Safety check: Don't generate if already exists in state
-        if (activationCode) return;
-
         setLoading(true);
         setError(null);
 
-        // Double check DB before writing (in case state is stale)
-        const { data: existing } = await supabase
-            .from("licences")
-            .select("activation_code")
-            .ilike("email", email)
-            .single();
-
-        if (existing?.activation_code) {
-            setActivationCode(existing.activation_code);
-            setStep("activation");
-            setLoading(false);
-            return;
-        }
-
         try {
+            // 1. Check if code already exists (double check)
+            const { data: existing } = await supabase
+                .from("licences")
+                .select("activation_code")
+                .ilike("email", email)
+                .single();
+
+            if (existing?.activation_code) {
+                setActivationCode(existing.activation_code);
+                setStep("activation");
+                setLoading(false);
+                return;
+            }
+
+            // 2. Generate and Update
             const newCode = generateCode();
 
-            // Only update if activation_code is currently NULL
-            const { error: updateError } = await supabase
+            const { data: updated, error: updateError } = await supabase
                 .from("licences")
                 .update({ activation_code: newCode })
-                .ilike("email", email) // Case-insensitive match for safety
-                .is("activation_code", null);
+                .ilike("email", email)
+                .select("activation_code")
+                .single();
 
             if (updateError) throw updateError;
 
-            // Verification: Read it back to be sure
-            await checkExistingLicense();
+            if (updated?.activation_code) {
+                setActivationCode(updated.activation_code);
+                setStep("activation");
+            } else {
+                throw new Error("Activation failed - no data returned");
+            }
 
         } catch (err: any) {
-            setError("Erreur lors de l'activation. Veuillez réessayer.");
-            console.error(err);
+            console.error("Activation error:", err);
+            setError("Erreur d'activation. Veuillez réessayer.");
         } finally {
             setLoading(false);
         }

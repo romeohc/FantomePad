@@ -33,23 +33,21 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
     return (
         <div className="w-full space-y-8 min-h-[400px] flex flex-col justify-center">
             {/* Progress Bar - Visible during onboarding */}
-            {!activationCode && (
-                <div className="absolute top-0 left-0 w-full px-8 md:px-12 pt-8">
-                    <div className="h-1 w-full bg-[#1A1A1A] rounded-full overflow-hidden">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 0.5, ease: "circOut" }}
-                            className="h-full bg-brand-blue shadow-[0_0_10px_rgba(0,186,255,0.5)]"
-                        />
-                    </div>
-                    <div className="flex justify-between mt-2">
-                        <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "platform_selection" ? "text-brand-blue" : "text-brand-gray"}`}>Plateforme</span>
-                        <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "install" ? "text-brand-blue" : "text-brand-gray"}`}>Installation</span>
-                        <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "activation" ? "text-brand-blue" : "text-brand-gray"}`}>Activation</span>
-                    </div>
+            <div className="absolute top-0 left-0 w-full px-8 md:px-12 pt-8">
+                <div className="h-1 w-full bg-[#1A1A1A] rounded-full overflow-hidden">
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5, ease: "circOut" }}
+                        className="h-full bg-brand-blue shadow-[0_0_10px_rgba(0,186,255,0.5)]"
+                    />
                 </div>
-            )}
+                <div className="flex justify-between mt-2">
+                    <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "platform_selection" ? "text-brand-blue" : "text-brand-gray"}`}>Plateforme</span>
+                    <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "install" ? "text-brand-blue" : "text-brand-gray"}`}>Installation</span>
+                    <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${step === "activation" ? "text-brand-blue" : "text-brand-gray"}`}>Activation</span>
+                </div>
+            </div>
 
             {/* Step Content */}
             {step === "platform_selection" && (
