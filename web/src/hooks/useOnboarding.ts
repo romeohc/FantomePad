@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/utils/supabase";
 
 /**
@@ -19,35 +19,14 @@ export const useOnboarding = (email: string) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const supabase = createClient();
+    // Memoize the supabase client to prevent recreation on every render
+    const supabase = useMemo(() => createClient(), []);
 
-    // Load state from localStorage on mount (Client-side only)
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const savedStep = localStorage.getItem("onboarding_step") as OnboardingStep;
-            const savedPlatform = localStorage.getItem("onboarding_platform") as Platform;
-
-            if (savedStep) setStep(savedStep);
-            if (savedPlatform) setPlatform(savedPlatform);
-        }
-
-        // Always check the specific license status from DB effectively acting as the "source of truth"
-        checkExistingLicense();
-    }, [email]); // Re-run if email changes (e.g. login)
-
-    // Persist state changes to localStorage
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            if (step) localStorage.setItem("onboarding_step", step);
-            if (platform) localStorage.setItem("onboarding_platform", platform);
-        }
-    }, [step, platform]);
-
-    const checkExistingLicense = async () => {
+    const checkExistingLicense = useCallback(async () => {
         if (!email) return;
 
         try {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from("licences")
                 .select("activation_code")
                 .ilike("email", email) // Case-insensitive match
@@ -62,7 +41,31 @@ export const useOnboarding = (email: string) => {
         } catch (err) {
             console.error("Error checking license:", err);
         }
-    };
+    }, [email, supabase]);
+
+    // Load state from localStorage on mount (Client-side only)
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const savedStep = localStorage.getItem("onboarding_step") as OnboardingStep;
+            const savedPlatform = localStorage.getItem("onboarding_platform") as Platform;
+
+            if (savedStep) setStep(savedStep);
+            if (savedPlatform) setPlatform(savedPlatform);
+        }
+
+        // Always check the specific license status from DB effectively acting as the "source of truth"
+        checkExistingLicense();
+    }, [email, checkExistingLicense]); // Re-run if email changes (e.g. login)
+
+    // Persist state changes to localStorage
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            if (step) localStorage.setItem("onboarding_step", step);
+            if (platform) localStorage.setItem("onboarding_platform", platform);
+        }
+    }, [step, platform]);
+
+
 
     // Generate a random activation code (Format: FP-XXXX-XXXX)
     const generateCode = () => {
@@ -112,7 +115,7 @@ export const useOnboarding = (email: string) => {
                 throw new Error("Activation failed - no data returned");
             }
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Activation error:", err);
             setError("Erreur d'activation. Veuillez réessayer.");
         } finally {

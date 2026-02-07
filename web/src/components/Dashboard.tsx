@@ -3,7 +3,7 @@ import {
     Copy, Check, Clock, Bell,
     Zap, Download,
     LayoutDashboard, Menu, X, PlayCircle, Calendar,
-    Mail, ExternalLink, FileCode
+    Mail, ExternalLink, FileCode, LucideIcon
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase";
@@ -15,56 +15,23 @@ interface DashboardProps {
     status: string;
 }
 
-export default function Dashboard({ email, activationCode, status }: DashboardProps) {
-    const supabase = createClient();
-    const [activeTab, setActiveTab] = useState("overview");
-    const [copied, setCopied] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface NavItemProps {
+    id: string;
+    icon: LucideIcon;
+    label: string;
+    alert?: number;
+    activeTab: string;
+    setActiveTab: (id: string) => void;
+    setMobileMenuOpen: (open: boolean) => void;
+}
 
-    // Fictional states for non-functional features
-    const [isLocked, setIsLocked] = useState(false);
-    const [notifications, setNotifications] = useState(2);
+interface StatusIndicatorProps {
+    status: string;
+}
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        window.location.reload();
-    };
-
-    const handleCopy = () => {
-        if (activationCode) {
-            navigator.clipboard.writeText(activationCode);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
-
-    const StatusIndicator = ({ status }: { status: string }) => {
-        const getStyles = () => {
-            switch (status?.toLowerCase()) {
-                case "active":
-                    return { bg: "bg-green-500/10", text: "text-green-400", dot: "bg-green-500", label: "Actif" };
-                case "blocked":
-                    return { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-500", label: "Bloqué" };
-                case "pending":
-                default:
-                    return { bg: "bg-yellow-500/10", text: "text-yellow-400", dot: "bg-yellow-500", label: "En attente" };
-            }
-        };
-        const style = getStyles();
-        return (
-            <div className={`px-4 py-2 rounded-full ${style.bg} border border-white/5 ${style.text} text-xs font-bold uppercase tracking-wide flex items-center gap-2`}>
-                <span className="relative flex h-2 w-2">
-                    {status?.toLowerCase() === "active" && (
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${style.dot} opacity-75`}></span>
-                    )}
-                    <span className={`relative inline-flex rounded-full h-2 w-2 ${style.dot}`}></span>
-                </span>
-                {style.label}
-            </div>
-        );
-    };
-
-    const NavItem = ({ id, icon: Icon, label, alert }: any) => (
+// Move NavItem OUTSIDE the Dashboard component to avoid re-creation during render
+function NavItem({ id, icon: Icon, label, alert, activeTab, setActiveTab, setMobileMenuOpen }: NavItemProps) {
+    return (
         <button
             onClick={() => {
                 setActiveTab(id);
@@ -84,6 +51,57 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
             )}
         </button>
     );
+}
+
+// Move StatusIndicator OUTSIDE the Dashboard component to avoid re-creation during render
+function StatusIndicator({ status }: StatusIndicatorProps) {
+    const getStyles = () => {
+        switch (status?.toLowerCase()) {
+            case "active":
+                return { bg: "bg-green-500/10", text: "text-green-400", dot: "bg-green-500", label: "Actif" };
+            case "blocked":
+                return { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-500", label: "Bloqué" };
+            case "pending":
+            default:
+                return { bg: "bg-yellow-500/10", text: "text-yellow-400", dot: "bg-yellow-500", label: "En attente" };
+        }
+    };
+    const style = getStyles();
+    return (
+        <div className={`px-4 py-2 rounded-full ${style.bg} border border-white/5 ${style.text} text-xs font-bold uppercase tracking-wide flex items-center gap-2`}>
+            <span className="relative flex h-2 w-2">
+                {status?.toLowerCase() === "active" && (
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${style.dot} opacity-75`}></span>
+                )}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${style.dot}`}></span>
+            </span>
+            {style.label}
+        </div>
+    );
+}
+
+export default function Dashboard({ email, activationCode, status }: DashboardProps) {
+    const supabase = createClient();
+    const [activeTab, setActiveTab] = useState("overview");
+    const [copied, setCopied] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Fictional states for non-functional features
+    const [isLocked, setIsLocked] = useState(false);
+    const notifications = 2;
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        window.location.reload();
+    };
+
+    const handleCopy = () => {
+        if (activationCode) {
+            navigator.clipboard.writeText(activationCode);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     return (
         <div className="flex h-screen w-full bg-[#0A0A0A] overflow-hidden text-white select-none relative font-sans">
@@ -109,9 +127,9 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                             </button>
                         </div>
                         <div className="space-y-3 flex-1">
-                            <NavItem id="overview" icon={LayoutDashboard} label="Vue d'ensemble" />
-                            <NavItem id="docs" icon={HelpCircle} label="Documentation" />
-                            <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
+                            <NavItem id="overview" icon={LayoutDashboard} label="Vue d&apos;ensemble" activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
+                            <NavItem id="docs" icon={HelpCircle} label="Documentation" activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
+                            <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
                         </div>
                         <button
                             onClick={handleLogout}
@@ -134,9 +152,9 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                 </div>
 
                 <div className="space-y-2 flex-1 pt-6">
-                    <NavItem id="overview" icon={LayoutDashboard} label="Vue d'ensemble" />
-                    <NavItem id="docs" icon={HelpCircle} label="Documentation" />
-                    <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} />
+                    <NavItem id="overview" icon={LayoutDashboard} label="Vue d&apos;ensemble" activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
+                    <NavItem id="docs" icon={HelpCircle} label="Documentation" activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
+                    <NavItem id="updates" icon={Bell} label="Nouveautés" alert={notifications} activeTab={activeTab} setActiveTab={setActiveTab} setMobileMenuOpen={setMobileMenuOpen} />
                 </div>
 
                 <div className="pt-6">
@@ -216,7 +234,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                     <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between min-h-[220px]">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <h4 className="text-xl font-bold text-white">Clé d'Activation</h4>
+                                                <h4 className="text-xl font-bold text-white">Clé d&apos;Activation</h4>
                                                 <p className="text-sm text-brand-gray mt-1">Utilisez cette clé pour activer votre Expert Advisor.</p>
                                             </div>
                                             <button
@@ -312,9 +330,9 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                             <div className="h-12 w-12 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/5 group-hover:border-brand-blue/30 transition-colors">
                                                 <Mail className="h-6 w-6 text-brand-blue" />
                                             </div>
-                                            <h4 className="text-2xl font-bold text-white mb-2">Support & Aide</h4>
+                                            <h4 className="text-2xl font-bold text-white mb-2">Support &amp; Aide</h4>
                                             <p className="text-brand-gray text-sm leading-relaxed mb-6">
-                                                Notre équipe est à votre disposition pour vous aider dans l'installation ou la configuration de FantomePad.
+                                                Notre équipe est à votre disposition pour vous aider dans l&apos;installation ou la configuration de FantomePad.
                                             </p>
                                         </div>
 

@@ -1,15 +1,23 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowRight, Mail, KeyRound, AlertCircle, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/utils/supabase";
 import OnboardingFlow from "@/components/OnboardingFlow";
 import Dashboard from "@/components/Dashboard";
+import type { Session } from "@supabase/supabase-js";
+
+interface LicenseData {
+  id?: string;
+  email: string;
+  activation_code?: string;
+  status?: string;
+}
 
 export default function Home() {
-  const [session, setSession] = useState<any>(null);
-  const [license, setLicense] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [license, setLicense] = useState<LicenseData | null>(null);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,15 +25,34 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const supabase = createClient();
+  // Memoize the supabase client to prevent recreation on every render
+  const supabase = useMemo(() => createClient(), []);
+
+  const fetchLicense = useCallback(async (userEmail: string) => {
+    const { data, error: fetchError } = await supabase
+      .from("licences")
+      .select("*")
+      .eq("email", userEmail)
+      .single();
+
+    if (fetchError && fetchError.code === 'PGRST116') { // No rows found
+      setLicense(null);
+      setError("Cet email n'est associé à aucune commande FantomePad.");
+    } else if (fetchError) {
+      setError(fetchError.message || "Une erreur est survenue lors de la récupération de la licence.");
+    } else {
+      setLicense(data);
+    }
+    setLoading(false);
+  }, [supabase]);
 
   useEffect(() => {
     // Check current session
     const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      if (session?.user?.email) {
-        fetchLicense(session.user.email);
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      setSession(currentSession);
+      if (currentSession?.user?.email) {
+        fetchLicense(currentSession.user.email);
       } else {
         setLoading(false);
       }
@@ -34,10 +61,10 @@ export default function Home() {
     initSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user?.email) {
-        fetchLicense(session.user.email);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession?.user?.email) {
+        fetchLicense(newSession.user.email);
       } else {
         setLicense(null); // Clear license if session ends
         setLoading(false);
@@ -45,25 +72,9 @@ export default function Home() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth, fetchLicense]);
 
-  const fetchLicense = async (email: string) => {
-    const { data, error } = await supabase
-      .from("licences")
-      .select("*")
-      .eq("email", email)
-      .single();
 
-    if (error && error.code === 'PGRST116') { // No rows found
-      setLicense(null);
-      setError("Cet email n'est associé à aucune commande FantomePad.");
-    } else if (error) {
-      setError(error.message || "Une erreur est survenue lors de la récupération de la licence.");
-    } else {
-      setLicense(data);
-    }
-    setLoading(false);
-  };
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,8 +107,8 @@ export default function Home() {
 
       setStep("otp");
       setMessage("Un code de vérification a été envoyé à votre email.");
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {
       setLoading(false);
     }
@@ -118,8 +129,8 @@ export default function Home() {
       if (verifyError) throw verifyError;
 
       window.location.reload();
-    } catch (err: any) {
-      setError(err.message || "Code invalide ou expiré.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Code invalide ou expiré.");
     } finally {
       setLoading(false);
     }
@@ -137,9 +148,9 @@ export default function Home() {
   if (session && license?.activation_code) {
     return (
       <Dashboard
-        email={session.user.email}
+        email={session.user.email || ""}
         activationCode={license.activation_code}
-        status={license.status}
+        status={license.status || "pending"}
       />
     );
   }
@@ -161,8 +172,8 @@ export default function Home() {
         {session ? (
           // Onboarding State (Within Card)
           <OnboardingFlow
-            email={session.user.email}
-            onComplete={() => fetchLicense(session.user.email)}
+            email={session.user.email || ""}
+            onComplete={() => fetchLicense(session.user.email || "")}
           />
         ) : (
           <div className="p-[1px] rounded-2xl bg-gradient-to-b from-brand-border to-transparent">
@@ -258,7 +269,7 @@ export default function Home() {
                         onClick={() => setStep("email")}
                         className="w-full text-center text-xs text-brand-gray hover:text-white transition-colors"
                       >
-                        Modifier l'email
+                        Modifier l&apos;email
                       </button>
                     )}
                   </form>
@@ -267,7 +278,7 @@ export default function Home() {
 
               <footer className="mt-12 pt-8 border-t border-brand-border/50 text-center">
                 <p className="text-[10px] text-brand-gray tracking-wide">
-                  Besoin d'aide ?{" "}
+                  Besoin d&apos;aide ?{" "}
                   <a href="mailto:contact@fantomepad.com" className="text-white hover:underline">
                     contact@fantomepad.com
                   </a>

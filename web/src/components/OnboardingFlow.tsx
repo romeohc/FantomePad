@@ -1,6 +1,6 @@
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Download, PlayCircle, Copy, Check, ChevronLeft, Laptop, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Download, PlayCircle, Copy, Check, ChevronLeft, Laptop, Zap } from "lucide-react";
 import { useState } from "react";
 import { useOnboarding } from "@/hooks/useOnboarding";
 
@@ -17,8 +17,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
         setPlatform,
         activationCode,
         activateLicense,
-        loading,
-        progress
+        loading
     } = useOnboarding(email);
 
     const [copied, setCopied] = useState(false);
@@ -265,7 +264,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                                 </div>
                                             </div>
                                             <div className="absolute bottom-4 left-4 right-4">
-                                                <div className="text-sm font-bold text-white">Tutoriel d'installation</div>
+                                                <div className="text-sm font-bold text-white">Tutoriel d&apos;installation</div>
                                                 <div className="text-[10px] text-brand-gray uppercase tracking-wider font-bold">Guide Rapide • 2:30</div>
                                             </div>
                                         </div>
@@ -279,7 +278,7 @@ export default function OnboardingFlow({ email, onComplete }: OnboardingFlowProp
                                                 <Download className="h-5 w-5" />
                                             </div>
                                             <div className="text-left">
-                                                <div className="text-xs font-black text-white uppercase tracking-wider">Télécharger l'Expert Advisor</div>
+                                                <div className="text-xs font-black text-white uppercase tracking-wider">Télécharger l&apos;Expert Advisor</div>
                                                 <div className="text-[10px] text-brand-gray font-bold">Version v2.4.1 pour {platform?.toUpperCase()}</div>
                                             </div>
                                         </a>
