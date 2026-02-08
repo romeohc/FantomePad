@@ -22,6 +22,8 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         setStep,
         platform,
         setPlatform,
+        os,
+        setOs,
         activationCode,
         activateLicense,
         loading
@@ -133,54 +135,74 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.98 }}
-                                className="space-y-8 max-w-2xl mx-auto w-full"
+                                className="space-y-6 max-w-2xl mx-auto w-full"
                             >
                                 <div className="space-y-3 text-center md:text-left">
-                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Version de MetaTrader</h2>
-                                    <p className="text-brand-gray text-base md:text-lg">Sélectionnez la plateforme de trading que vous utilisez.</p>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Configuration</h2>
+                                    <p className="text-brand-gray text-base md:text-lg">Sélectionnez votre plateforme et votre système d'exploitation.</p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="grid grid-cols-2 gap-4">
                                     <button
                                         onClick={() => setPlatform("mt4")}
-                                        className={`p-8 rounded-3xl border-2 transition-all group relative overflow-hidden ${platform === "mt4"
-                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                                        className={`p-4 rounded-2xl border-2 transition-all group relative overflow-hidden ${platform === "mt4"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_20px_rgba(59,130,246,0.15)]"
                                             : "bg-[#151515] border-white/5 hover:border-white/10"
                                             }`}
                                     >
-                                        <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
-                                            <div className="p-1 rounded-2xl">
-                                                <Image src="/logo mt4.png" alt="MT4" width={56} height={56} className="h-14 w-14 object-contain rounded-xl" />
-                                            </div>
-                                            <div className="text-center md:text-left">
-                                                <div className="text-xl md:text-2xl font-bold text-white">MT4</div>
-                                            </div>
+                                        <div className="flex flex-col items-center gap-3 relative z-10">
+                                            <Image src="/logo mt4.png" alt="MT4" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <span className="text-lg font-bold text-white">MT4</span>
                                         </div>
                                     </button>
 
                                     <button
                                         onClick={() => setPlatform("mt5")}
-                                        className={`p-8 rounded-3xl border-2 transition-all group relative overflow-hidden ${platform === "mt5"
-                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                                        className={`p-4 rounded-2xl border-2 transition-all group relative overflow-hidden ${platform === "mt5"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_20px_rgba(59,130,246,0.15)]"
                                             : "bg-[#151515] border-white/5 hover:border-white/10"
                                             }`}
                                     >
-                                        <div className="flex flex-col items-center md:items-start gap-5 relative z-10">
-                                            <div className="p-1 rounded-2xl">
-                                                <Image src="/logo mt5.png" alt="MT5" width={56} height={56} className="h-14 w-14 object-contain rounded-xl" />
-                                            </div>
-                                            <div className="text-center md:text-left">
-                                                <div className="text-xl md:text-2xl font-bold text-white">MT5</div>
-                                            </div>
+                                        <div className="flex flex-col items-center gap-3 relative z-10">
+                                            <Image src="/logo mt5.png" alt="MT5" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <span className="text-lg font-bold text-white">MT5</span>
                                         </div>
                                     </button>
                                 </div>
 
-                                <div className="flex justify-center pt-6">
+                                <div className="grid grid-cols-2 gap-4">
                                     <button
-                                        disabled={!platform}
+                                        onClick={() => setOs("windows")}
+                                        className={`p-4 rounded-2xl border-2 transition-all group relative overflow-hidden ${os === "windows"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                                            : "bg-[#151515] border-white/5 hover:border-white/10"
+                                            }`}
+                                    >
+                                        <div className="flex flex-col items-center gap-3 relative z-10">
+                                            <Image src="/logo windows.png" alt="Windows" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <span className="text-lg font-bold text-white">Windows</span>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => setOs("mac")}
+                                        className={`p-4 rounded-2xl border-2 transition-all group relative overflow-hidden ${os === "mac"
+                                            ? "bg-brand-blue/10 border-brand-blue shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                                            : "bg-[#151515] border-white/5 hover:border-white/10"
+                                            }`}
+                                    >
+                                        <div className="flex flex-col items-center gap-3 relative z-10">
+                                            <Image src="/logo apple.png" alt="Mac" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <span className="text-lg font-bold text-white">Mac</span>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <div className="flex justify-center pt-4">
+                                    <button
+                                        disabled={!platform || !os}
                                         onClick={() => setStep("install")}
-                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
                                         Étape Suivante
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -202,7 +224,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                     <button onClick={() => setStep("platform_selection")} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-gray hover:text-white transition-colors mb-6 mx-auto md:mx-0 group">
                                         <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Retour
                                     </button>
-                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Installation MetaTrader</h2>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Télécharger {platform?.toUpperCase()}</h2>
                                     <p className="text-brand-gray text-base md:text-lg">Assurez-vous d'avoir installé la plateforme {platform?.toUpperCase()}.</p>
                                 </div>
 
@@ -219,7 +241,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 />
                                             </div>
                                             <div>
-                                                <div className="text-lg font-bold text-white">Installer {platform?.toUpperCase()}</div>
+                                                <div className="text-lg font-bold text-white">Télécharger {platform?.toUpperCase()}</div>
                                                 <div className="text-xs text-brand-gray mt-1 font-medium italic opacity-60 text-left">Version officielle MetaQuotes</div>
                                             </div>
                                         </div>
@@ -229,7 +251,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         onClick={() => setStep("download")}
                                         className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
-                                        J'ai installé {platform?.toUpperCase()}
+                                        J'AI TÉLÉCHARGÉ {platform?.toUpperCase()}
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </button>
                                 </div>
@@ -250,7 +272,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Retour
                                     </button>
                                     <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Télécharger FantomePad</h2>
-                                    <p className="text-brand-gray text-base md:text-lg">Obtenez la dernière version de l'Expert Advisor pour {platform?.toUpperCase()}.</p>
+                                    <p className="text-brand-gray text-base md:text-lg">Obtenez la dernière version de FantomePad.</p>
                                 </div>
 
                                 <div className="space-y-6">
@@ -266,7 +288,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 />
                                             </div>
                                             <div>
-                                                <div className="text-lg font-bold text-white">Télécharger le Logiciel</div>
+                                                <div className="text-lg font-bold text-white">Télécharger FantomePad</div>
                                                 <div className="text-xs text-brand-gray mt-1 font-medium italic opacity-60 text-left">Version 2.4.1 • {platform?.toUpperCase()}</div>
                                             </div>
                                         </div>
@@ -279,7 +301,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         }}
                                         className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
-                                        J'ai téléchargé le logiciel
+                                        J'AI TÉLÉCHARGÉ FANTOMEPAD
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </button>
                                 </div>

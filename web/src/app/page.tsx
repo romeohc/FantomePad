@@ -187,7 +187,7 @@ export default function Home() {
                   transition={{ delay: 0.2 }}
                   className="text-xs font-bold tracking-[0.2em] text-brand-gray uppercase mb-3 block"
                 >
-                  {step === "email" ? "Accès Propriétaire" : "Vérification"}
+                  {step === "email" ? "ACTIVATE YOUR FANTOMEPAD" : "Vérification"}
                 </motion.span>
                 <motion.h1
                   initial={{ opacity: 0 }}
@@ -198,7 +198,7 @@ export default function Home() {
                   {step === "email" ? (
                     <>The new standard <br /> <span className="text-brand-gray">is here.</span></>
                   ) : (
-                    <>Saisissez votre <br /> <span className="text-brand-gray">code OTP.</span></>
+                    <>Saisissez votre <br /> <span className="text-brand-gray">code de connexion.</span></>
                   )}
                 </motion.h1>
               </header>
@@ -226,9 +226,6 @@ export default function Home() {
                     )}
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-brand-gray tracking-widest uppercase ml-1">
-                        {step === "email" ? "Email d'achat Shopify" : "Code de vérification"}
-                      </label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           {step === "email" ? (
@@ -278,7 +275,7 @@ export default function Home() {
               </AnimatePresence>
 
               <footer className="mt-12 pt-8 border-t border-brand-border/50 text-center">
-                <p className="text-[10px] text-brand-gray tracking-wide">
+                <p className="text-xs text-brand-gray tracking-wide">
                   Besoin d&apos;aide ?{" "}
                   <a href="mailto:contact@fantomepad.com" className="text-white hover:underline">
                     contact@fantomepad.com

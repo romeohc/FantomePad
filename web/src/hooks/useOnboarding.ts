@@ -11,6 +11,7 @@ import { createClient } from "@/utils/supabase";
  */
 export type OnboardingStep = "platform_selection" | "install" | "download" | "activation";
 export type Platform = "mt4" | "mt5" | null;
+export type OperatingSystem = "windows" | "mac" | null;
 
 interface LicenseData {
     activation_code?: string;
@@ -21,6 +22,7 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
     // Initialize state
     const [step, setStep] = useState<OnboardingStep>("platform_selection");
     const [platform, setPlatform] = useState<Platform>(null);
+    const [os, setOs] = useState<OperatingSystem>(null);
     const [activationCode, setActivationCode] = useState<string | null>(initialData?.activation_code || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -61,6 +63,7 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
         if (typeof window !== "undefined") {
             const savedStep = localStorage.getItem("onboarding_step") as OnboardingStep;
             const savedPlatform = localStorage.getItem("onboarding_platform") as Platform;
+            const savedOs = localStorage.getItem("onboarding_os") as OperatingSystem;
 
             // Only restore step if we don't have a code, OR if the code exists and we are essentially resuming
             if (savedStep && !activationCode) {
@@ -72,6 +75,7 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
             }
 
             if (savedPlatform) setPlatform(savedPlatform);
+            if (savedOs) setOs(savedOs);
         }
 
         // Always check the specific license status from DB effectively acting as the "source of truth"
@@ -83,8 +87,9 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
         if (typeof window !== "undefined") {
             if (step) localStorage.setItem("onboarding_step", step);
             if (platform) localStorage.setItem("onboarding_platform", platform);
+            if (os) localStorage.setItem("onboarding_os", os);
         }
-    }, [step, platform]);
+    }, [step, platform, os]);
 
 
 
@@ -174,6 +179,8 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
         setStep,
         platform,
         setPlatform,
+        os,
+        setOs,
         activationCode,
         activateLicense,
         loading,
