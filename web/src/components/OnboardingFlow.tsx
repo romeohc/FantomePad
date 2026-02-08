@@ -1,7 +1,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Copy, Check, ChevronLeft, Download, PlayCircle, Loader2 } from "lucide-react";
+import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircle, Loader2, Monitor, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import Image from "next/image";
 
@@ -30,6 +31,53 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     } = useOnboarding(email, initialData);
 
     const [copied, setCopied] = useState(false);
+    const [tutorialStep, setTutorialStep] = useState(0);
+
+    // Reset tutorial step when leaving/entering
+    useEffect(() => {
+        if (step !== "activation") {
+            setTutorialStep(0);
+        }
+    }, [step]);
+
+    const tutorialSteps = [
+        {
+            title: `1. Ouvrir ${platform === 'mt5' ? 'MT5' : 'MT4'}`,
+            description: "Lancez votre terminal de trading.",
+        },
+        {
+            title: "2. Dossier de données",
+            description: "Fichier > Ouvrir dossier des données.",
+        },
+        {
+            title: "3. Copier le fichier",
+            description: "Collez le dans le dossier 'Experts'.",
+        },
+        {
+            title: "4. Installation",
+            description: "Glissez FantomePad sur un graphique.",
+        },
+        {
+            title: "5. Auto-trading",
+            description: "Activez l'option Auto-trading.",
+        },
+        {
+            title: "6. Activation",
+            description: "Collez votre licence à droite.",
+        }
+    ];
+
+    const nextTutorialStep = () => {
+        if (tutorialStep < tutorialSteps.length - 1) {
+            setTutorialStep(tutorialStep + 1);
+        }
+    };
+
+    const prevTutorialStep = () => {
+        if (tutorialStep > 0) {
+            setTutorialStep(tutorialStep - 1);
+        }
+    };
 
     // Poll for status update when in activation step
     useEffect(() => {
@@ -55,6 +103,12 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         }
     };
 
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        window.location.reload();
+    };
+
     const steps = [
         { id: "platform_selection", label: "Plateforme" },
         { id: "install", label: "Installation" },
@@ -69,6 +123,21 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
             {/* Background Effects */}
             <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+            {/* Desktop Recommendation Alert - Floating above main box */}
+
+
+            {/* Mobile Desktop Recommendation Alert */}
+            {
+                step === "platform_selection" && (
+                    <div className="md:hidden flex justify-center mb-2">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in-down">
+                            <Monitor className="h-3.5 w-3.5 text-blue-400" />
+                            <span className="text-[11px] font-bold text-blue-200">Installation recommandée sur Ordinateur</span>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Progress Bar Container - Detached on Mobile */}
             <div className="md:hidden flex justify-center py-4">
@@ -96,6 +165,9 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                 </div>
             </div>
 
+
+
+
             {/* Main Content Box */}
             <div className="flex flex-col md:flex-row bg-[#0F0F0F] rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative min-h-[600px]">
 
@@ -122,7 +194,17 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                 </span>
                             </div>
                         ))}
+
                     </div>
+
+                    {/* Desktop Logout Button - Bottom of Sidebar */}
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 text-xs font-bold text-brand-gray hover:text-white transition-all group mt-auto pt-8 opacity-60 hover:opacity-100"
+                    >
+                        <LogOut className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                        Se Déconnecter
+                    </button>
                 </div>
 
                 {/* Right Panel: Content Form */}
@@ -198,7 +280,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                     </button>
                                 </div>
 
-                                <div className="flex justify-center pt-4">
+                                <div className="flex flex-col items-center gap-6 pt-4">
                                     <button
                                         disabled={!platform || !os}
                                         onClick={() => setStep("install")}
@@ -249,7 +331,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
                                     <button
                                         onClick={() => setStep("download")}
-                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
                                         J'AI TÉLÉCHARGÉ {platform?.toUpperCase()}
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -299,7 +381,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             setStep("activation");
                                             if (!activationCode) activateLicense();
                                         }}
-                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
+                                        className="w-full bg-white text-black font-black text-xs uppercase tracking-widest py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 group active:scale-[0.98]"
                                     >
                                         J'AI TÉLÉCHARGÉ FANTOMEPAD
                                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -327,45 +409,73 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-stretch">
                                         {/* Left: Video */}
+                                        {/* Left: Interactive Tutorial Carousel */}
                                         <div className="relative w-full bg-[#151515] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full min-h-[300px]">
-                                            <div className="flex-1 relative">
-                                                <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/10 to-transparent opacity-50" />
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="h-20 w-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 hover:scale-110 transition-transform shadow-xl cursor-pointer">
-                                                        <PlayCircle className="h-8 w-8 text-white fill-white/20" />
+                                            <div className="flex-1 relative group">
+                                                <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-50" />
+
+                                                {/* Placeholder Content Center */}
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                    <div className="text-white/5 font-bold text-8xl select-none">
+                                                        {tutorialStep + 1}
                                                     </div>
                                                 </div>
-                                                <div className="absolute bottom-6 left-6">
-                                                    <div className="px-3 py-1 bg-brand-blue text-black text-[10px] font-black uppercase tracking-widest rounded-full mb-2 inline-block">Tutoriel</div>
-                                                    <h3 className="text-xl font-bold text-white">Installation & Connexion</h3>
+
+                                                {/* Bottom Controls & Text */}
+                                                <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                                                    <div className="flex-1 pr-4 min-w-0">
+                                                        <h3 className="text-xl font-bold text-white mb-1 transition-all whitespace-nowrap truncate">
+                                                            {tutorialSteps[tutorialStep].title}
+                                                        </h3>
+                                                        <p className="text-xs text-brand-gray font-medium leading-relaxed whitespace-nowrap truncate">
+                                                            {tutorialSteps[tutorialStep].description}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <button
+                                                            onClick={prevTutorialStep}
+                                                            disabled={tutorialStep === 0}
+                                                            className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center transition-all border border-white/10"
+                                                        >
+                                                            <ChevronLeft className="h-4 w-4 text-white" />
+                                                        </button>
+                                                        <button
+                                                            onClick={nextTutorialStep}
+                                                            disabled={tutorialStep === tutorialSteps.length - 1}
+                                                            className="h-8 w-8 rounded-full bg-brand-blue text-black hover:bg-brand-blue/90 disabled:bg-white/10 disabled:text-white disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg shadow-brand-blue/20"
+                                                        >
+                                                            <ChevronRight className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Right: Actions */}
-                                        <div className="flex flex-col justify-center h-full">
+                                        <div className="flex flex-col justify-center h-full gap-6">
                                             {loading ? (
                                                 <div className="py-8 flex flex-col items-center gap-4 border border-white/5 rounded-2xl bg-white/5 h-full justify-center min-h-[300px]">
                                                     <Loader2 className="h-8 w-8 text-brand-blue animate-spin" />
                                                     <p className="text-[10px] font-bold text-brand-gray uppercase tracking-widest">Génération de la clé...</p>
                                                 </div>
                                             ) : (
-                                                <div className="bg-[#121212] border border-white/5 rounded-3xl p-8 flex flex-col justify-center gap-6 h-full min-h-[300px]">
-                                                    {/* Status Block (Yellow) - On Top */}
-                                                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 flex items-center justify-center gap-3 animate-pulse">
+                                                <>
+                                                    {/* Status Block (Yellow) */}
+                                                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-6 flex items-center justify-center gap-3 animate-pulse w-full">
                                                         <div className="h-3 w-3 bg-yellow-500 rounded-full shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
                                                         <span className="text-sm font-black text-yellow-500 tracking-widest uppercase">NON ACTIVÉ</span>
                                                     </div>
 
                                                     {/* License Block */}
-                                                    <div className="bg-[#151515] border border-white/5 rounded-2xl p-6 space-y-4">
+                                                    <div className="bg-[#121212] border border-white/5 rounded-3xl p-6 space-y-4 w-full h-full flex flex-col justify-center">
                                                         <div className="flex justify-between items-center">
                                                             <span className="text-[10px] uppercase tracking-widest font-bold text-brand-gray">Votre Licence</span>
                                                             {copied && <span className="text-[10px] text-green-400 font-bold flex items-center gap-1"><Check className="h-3 w-3" /> Copié</span>}
                                                         </div>
                                                         <button
                                                             onClick={handleCopy}
-                                                            className="w-full bg-black/50 border border-white/10 rounded-xl p-4 flex items-center justify-between hover:border-brand-blue/50 transition-all group"
+                                                            className="w-full bg-[#151515] border border-white/10 rounded-xl p-4 flex items-center justify-between hover:border-brand-blue/50 transition-all group"
                                                         >
                                                             <code className="font-mono text-xl font-bold tracking-widest text-white group-hover:text-brand-blue transition-colors">
                                                                 {activationCode || "FP-XXXX-XXXX"}
@@ -373,7 +483,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                             <Copy className="h-5 w-5 text-brand-gray group-hover:text-white transition-colors" />
                                                         </button>
                                                     </div>
-                                                </div>
+                                                </>
                                             )}
                                         </div>
                                     </div>
@@ -383,6 +493,18 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                     </AnimatePresence>
                 </div>
             </div>
-        </div>
+
+
+            {/* Logout Button - Mobile only, centered below the main box */}
+            <div className="md:hidden flex justify-center mt-6 pb-8">
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-xs font-bold text-brand-gray hover:text-white py-2 transition-all group opacity-60 hover:opacity-100"
+                >
+                    <LogOut className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                    Se Déconnecter
+                </button>
+            </div>
+        </div >
     );
 }
