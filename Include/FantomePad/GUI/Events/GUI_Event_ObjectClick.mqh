@@ -21,6 +21,17 @@ void OnEvent_ObjectClick(string sparam)
 {
     LastClickTime = GetTickCount(); // Enregistrer l'heure du clic sur un objet
     
+    // --- LICENSE REVOKED GUARD ---
+    if(g_LicenseState == LICENSE_REVOKED)
+    {
+        // Allow ONLY Position-related clicks (including PosList items) OR Auth-related
+        if(StringFind(sparam, PREFIX + "Pos") < 0 && StringFind(sparam, PREFIX + "Auth") < 0)
+        {
+            ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Reset state of blocked button
+            return;
+        }
+    }
+
     // --- SAFETY BLOCK AFTER DRAG ---
     if(g_BlockClick || IsScrollDragging)
     {
@@ -36,6 +47,7 @@ void OnEvent_ObjectClick(string sparam)
         OnClick_AuthActivate();
         return;
     }
+    
     // 1. Validation Logic (Errors)
     if(Handle_Validation_Events(sparam)) return;
     

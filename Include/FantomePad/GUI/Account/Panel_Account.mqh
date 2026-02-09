@@ -255,6 +255,7 @@ void UpdateAccountPanel()
 //+------------------------------------------------------------------+
 void ToggleAccountPanel(bool visible)
 {
+   g_PanelAccount.IsVisible = visible;
    SetObjVisible("Account_Bg", visible);
    SetObjVisible("Account_Header", visible);
    SetObjVisible("Account_Title", visible);

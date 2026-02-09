@@ -9,7 +9,7 @@
 void OnEvent_Resize()
 {
    // --- AUTH PANEL RESIZE ---
-   if(!g_IsLicensed)
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
    {
       CreateAuthUI();
       ShowAuthPanel(true);

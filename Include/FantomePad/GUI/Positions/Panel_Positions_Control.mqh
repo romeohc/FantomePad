@@ -9,6 +9,7 @@
 //+------------------------------------------------------------------+
 void TogglePositionsPanel(bool visible)
 {
+   g_PanelPositions.IsVisible = visible;
    SetObjVisible("Pos_Bg", visible);
    SetObjVisible("Pos_Header", visible);
    SetObjVisible("Pos_Title", visible);

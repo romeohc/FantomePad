@@ -45,32 +45,32 @@ void CreateAuthUI()
    CreateRect(p + "Accent", x, y, w, 2, COLOR_BRAND_WHITE, BORDER_FLAT);
    
    // 3. BRANDING
-   CreateLabel(p + "Brand", "WELCOME TO FANTOMEPAD", centerX, y + 45, 9, COLOR_BRAND_GRAY, "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + p + "Brand", OBJPROP_ANCHOR, ANCHOR_CENTER);
+   // "WELCOME TO FANTOMEPAD" REMOVED AS REQUESTED
    
-   CreateLabel(p + "Title", "The new standard is here.", centerX, y + 75, 20, COLOR_BRAND_WHITE, "Trebuchet MS Bold");
+   CreateLabel(p + "Title", "The new standard is here.", centerX, y + 60, 20, COLOR_BRAND_WHITE, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + p + "Title", OBJPROP_ANCHOR, ANCHOR_CENTER);
    
-   // 4. ACTIVATION SECTION (Added more space above)
-   CreateLabel(p + "Notes", "CODE D'ACTIVATION", centerX, y + 150, 8, COLOR_BRAND_GRAY, "Arial Bold");
+   // 4. ACTIVATION SECTION
+   CreateLabel(p + "Notes", "Code d'Activation", centerX, y + 130, 8, COLOR_BRAND_GRAY, "Arial Bold");
    ObjectSetInteger(0, PREFIX + p + "Notes", OBJPROP_ANCHOR, ANCHOR_CENTER);
    
-   CreateEdit(p + "Input", g_ActivationCode, x + 75, y + 167, w - 150, 35);
+   CreateEdit(p + "Input", "", x + 75, y + 147, w - 150, 35);
+   ObjectSetString(0, PREFIX + p + "Input", OBJPROP_TEXT, ""); // FORCE EMPTY
    ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BGCOLOR, C'28,28,28'); 
    ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BORDER_COLOR, COLOR_BRAND_BORDER);
    ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_COLOR, COLOR_BRAND_WHITE);
    
    // 5. ACTION BUTTON
-   CreateButton(p + "BtnActive", "ACTIVER LE LOGICIEL", x + 75, y + 215, w - 150, 45, COLOR_BRAND_WHITE, clrBlack);
+   CreateButton(p + "BtnActive", "ACTIVER LE LOGICIEL", x + 75, y + 210, w - 150, 45, COLOR_BRAND_WHITE, clrBlack);
    ObjectSetString(0, PREFIX + p + "BtnActive", OBJPROP_FONT, "Segoe UI Bold");
    ObjectSetInteger(0, PREFIX + p + "BtnActive", OBJPROP_FONTSIZE, 10);
    
-   // 6. ERROR/STATUS AREA (Back to regular Arial)
+   // 6. ERROR/STATUS AREA
    CreateLabel(p + "StatusMsg_0", "", centerX, y + 270, 9, COLOR_BRAND_GRAY, "Arial");
    ObjectSetInteger(0, PREFIX + p + "StatusMsg_0", OBJPROP_ANCHOR, ANCHOR_CENTER);
    
-   // 7. FOOTER
-   CreateLabel(p + "Help", "Besoin d'aide ? contact@fantomepad.com", centerX, y + h - 35, 9, COLOR_BRAND_GRAY, "Arial");
+   // 7. FOOTER (Moved up slightly to reduce gap from button)
+   CreateLabel(p + "Help", "Besoin d'aide ? contact@fantomepad.com", centerX, y + 315, 9, COLOR_BRAND_GRAY, "Arial");
    ObjectSetInteger(0, PREFIX + p + "Help", OBJPROP_ANCHOR, ANCHOR_CENTER);
 }
 

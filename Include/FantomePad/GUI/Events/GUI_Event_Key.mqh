@@ -12,6 +12,7 @@
 //+------------------------------------------------------------------+
 void EnsureTradePanel()
 {
+   if(g_LicenseState == LICENSE_REVOKED) return; // Guard: Block opening Trade panel via PAD
    if(!g_PanelMain.IsVisible) { g_PanelMain.IsVisible = true; ToggleMainPanel(true); }
    if(g_PanelPositions.IsVisible) { g_PanelPositions.IsVisible = false; TogglePositionsPanel(false); }
 }
@@ -54,6 +55,7 @@ void AdjustRisk(double direction) // direction: 1 for right, -1 for left
 //+------------------------------------------------------------------+
 void ResetRisk()
 {
+   if(g_LicenseState == LICENSE_REVOKED) return; // Guard
    EnsureTradePanel();
    ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0.0");
    UpdateCalculatedLot();
@@ -65,6 +67,7 @@ void ResetRisk()
 //+------------------------------------------------------------------+
 void NavigateSymbols(int direction)
 {
+   if(g_LicenseState == LICENSE_REVOKED) return; // Guard
    if(!IsListOpen) 
    {
       IsListOpen = true;
@@ -161,6 +164,16 @@ void OnEvent_Key(long lparam)
    bool changed = false;
    bool forceUIRefresh = false;
    bool executed = false;
+   
+   // --- LICENSE REVOKED GUARD FOR KEYS ---
+   bool isTradeCmd = (cmdCode >= 91911 && cmdCode <= 91915); // BUY, SELL, LIMIT, STOP, RISK
+   if(g_LicenseState == LICENSE_REVOKED && isTradeCmd)
+   {
+       Print("FantomePad: Key Command Blocked (License Revoked)");
+       // Clear sequence to prevent partial matches
+       for(int i=0; i<SEQ_COUNT; i++) seq[i] = -1;
+       return;
+   }
 
    // --- SECURITY COMMAND MAPPING (9191X & 8282X) ---
    
@@ -355,6 +368,15 @@ void SelectNextPosition()
 //+------------------------------------------------------------------+
 void ExecuteGlobalValidate()
 {
+   // --- LICENSE REVOKED GUARD ---
+   // Force validation to stick to Positions panel if revoked
+   if(g_LicenseState == LICENSE_REVOKED)
+   {
+       if(g_PanelPositions.IsVisible && SelectedPositionTicket != -1)
+          Handle_PositionActions_Events(PREFIX + "Pos_Btn_Validate");
+       return;
+   }
+
    // Priority 1: Trade Panel (if Market and focused/visible)
    if(g_PanelMain.IsVisible)
    {
@@ -383,6 +405,9 @@ void ExecuteGlobalValidate()
 //+------------------------------------------------------------------+
 void ExecuteGlobalCancel()
 {
+   // --- LICENSE REVOKED GUARD ---
+   if(g_LicenseState == LICENSE_REVOKED) return; // Don't allow closing things or clearing selection
+
    // Close Settings if open
    if(g_PanelSettings.IsVisible)
    {

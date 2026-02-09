@@ -19,11 +19,19 @@ void OnClick_AuthActivate()
    StringReplace(code, "\"", "");
    StringReplace(code, "\\", "");
    
+   if(code == "")
+   {
+      UpdateAuthStatus("Veuillez renseigner un code d'activation", g_ColorRed);
+      ChartRedraw();
+      return;
+   }
+   
    UpdateAuthStatus("Vérification en cours...", clrWhite);
    
    if(CheckLicense(code))
    {
       g_IsLicensed = true;
+      g_LicenseState = LICENSE_OK;
       g_ActivationCode = code;
       
       // Save the validated code to persistence
@@ -33,11 +41,15 @@ void OnClick_AuthActivate()
       UpdateAuthStatus("Licence Activée !", g_ColorGreen);
       Sleep(500);
       
+      // Update Heartbeat timer to prevent immediate background check after login
+      GlobalVariableSet("FantomePad_LastHeartbeat", GetTickCount()); 
+
       // Hide Auth Panel and showing the real interface
       ShowAuthPanel(false);
       
-      // Cleanup auth objects
+      // Cleanup auth objects and soft lock UI
       ObjectsDeleteAll(0, PREFIX + "Auth_");
+      ClearSoftLockUI();
       
       // Trigger full UI refresh
       RefreshAllPanels();

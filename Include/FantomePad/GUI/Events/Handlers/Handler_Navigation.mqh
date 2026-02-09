@@ -4,6 +4,19 @@
 
 bool Handle_Navigation_Events(string sparam)
 {
+   // --- LICENSE REVOKED GUARD ---
+   if(g_LicenseState == LICENSE_REVOKED)
+   {
+      // Block opening Main, Account, History or Settings
+      if(sparam == PREFIX + "Nav_Btn_Main" || 
+         sparam == PREFIX + "Nav_Btn_Account" || 
+         sparam == PREFIX + "Nav_Btn_History" || 
+         sparam == PREFIX + "Nav_Btn_Settings")
+      {
+         return true; // Ignore and block
+      }
+   }
+
    // --- NAVIGATION PANEL EVENTS ---
    
    // 1. Toggle Trade Panel

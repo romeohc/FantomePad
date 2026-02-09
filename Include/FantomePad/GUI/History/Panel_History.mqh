@@ -72,6 +72,7 @@ void CreateHistoryPanel()
 //+------------------------------------------------------------------+
 void ToggleHistoryPanel(bool visible)
 {
+   g_PanelHistory.IsVisible = visible;
    SetObjVisible("Hist_Bg", visible);
    SetObjVisible("Hist_Header", visible);
    SetObjVisible("Hist_Title", visible);

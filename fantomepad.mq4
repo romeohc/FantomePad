@@ -3,7 +3,7 @@
 //|                                     Copyright 2026, FantomePad   |
 //|                                          Designed for Aesthetics |
 //+------------------------------------------------------------------+
-#property copyright "Copyright qzfqfgzf2026, FantomePad"
+#property copyright "Copyright 2026, FantomePad"
 #property link      "https://fantomepad.com"
 #property version   "2.00"
 #property strict
@@ -112,6 +112,12 @@ void OnDeinit(const int reason)
 {
    EventKillTimer();
    ObjectsDeleteAll(0, PREFIX);
+   
+   // --- RESTORE CHART UI ON EXIT ---
+   ChartSetInteger(0, CHART_SHOW_PRICE_SCALE, true);
+   ChartSetInteger(0, CHART_SHOW_DATE_SCALE, true);
+   ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
+   ChartSetInteger(0, CHART_KEYBOARD_CONTROL, true);
 }
 
 //+------------------------------------------------------------------+

@@ -77,7 +77,7 @@ void SaveSecretToken(string token)
 //+------------------------------------------------------------------+
 //| Check the license status with Supabase                           |
 //+------------------------------------------------------------------+
-bool CheckLicense(string code)
+bool CheckLicense(string code, int timeout_ms = 5000)
 {
    if(code == "") return false;
 
@@ -102,7 +102,7 @@ bool CheckLicense(string code)
    string headers = "Content-Type: application/json\r\n";
    
    ResetLastError();
-   int res = WebRequest("POST", url, headers, 5000, data, result, responseHeaders);
+   int res = WebRequest("POST", url, headers, timeout_ms, data, result, responseHeaders);
    
    if(res == 200) 
    {

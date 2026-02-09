@@ -186,6 +186,7 @@ void UpdateUIMode()
 //+------------------------------------------------------------------+
 void ToggleMainPanel(bool visible)
 {
+   g_PanelMain.IsVisible = visible;
    SetObjVisible("Bg", visible);
    SetObjVisible("Header", visible);
    SetObjVisible("Title", visible);

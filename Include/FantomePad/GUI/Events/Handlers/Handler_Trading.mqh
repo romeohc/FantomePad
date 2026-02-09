@@ -5,6 +5,16 @@
 
 bool Handle_Trading_Events(string sparam)
 {
+   // --- LICENSE GUARD (FAST MEMORY CHECK) ---
+   if(g_LicenseState != LICENSE_OK)
+   {
+       // Blocage immédiat des prises de positions
+       // Les actions de clôture/modif sont gérées ailleurs (Handler_PositionActions)
+       // Ici on gère le panel principal Buy/Sell/Pending
+       Print("FantomePad: Trade Blocked. LicenseState=" + IntegerToString(g_LicenseState));
+       return false;
+   }
+
    // Cycle Type d'Ordre
    if(sparam == PREFIX + "Btn_Type")
    {

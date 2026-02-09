@@ -109,7 +109,12 @@ datetime g_HistoryCustomEnd = 0;
 string g_HistoryFilterSymbol = ""; // Symbol filter string
 
 // --- AUTHENTICATION GLOBALS ---
-bool   g_IsLicensed = false;
+enum ENUM_LICENSE_STATE { LICENSE_OK, LICENSE_REVOKED, LICENSE_NONE };
+
+bool   g_IsLicensed = false; // Legacy flag, kept for compatibility, follows g_LicenseState
+ENUM_LICENSE_STATE g_LicenseState = LICENSE_NONE;
+uint   g_LastLicenseCheckTime = 0;
+
 string g_ActivationCode = "";
 string g_AuthErrorMsg    = ""; // Stores the last error from the server
 TPanelState g_PanelAuth;
@@ -137,6 +142,7 @@ bool   IsScrollDragging = false; // Symbol List Scroll
 int    ScrollDragY = 0;
 bool   g_BlockClick = false;
 uint   LastClickTime = 0;
+uint   g_LastInteractionTime = 0;
 
 // --- COLOR PICKER GLOBALS ---
 bool   g_IsColorPickerOpen = false;

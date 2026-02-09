@@ -34,10 +34,36 @@ void GUI_OnInit()
    // 1. Initial License Check
    if(g_ActivationCode != "")
    {
-      if(CheckLicense(g_ActivationCode)) g_IsLicensed = true;
+      if(CheckLicense(g_ActivationCode)) 
+      {
+         g_IsLicensed = true;
+         g_LicenseState = LICENSE_OK;
+      }
+      else
+      {
+         // If license fails or is revoked, check if we have open positions 
+         // before forcing the login screen.
+         if(OrdersTotal() > 0)
+         {
+             Print("FantomePad: License invalid but positions open. Entering Soft Lock.");
+             g_IsLicensed = false; 
+             g_LicenseState = LICENSE_REVOKED;
+         }
+         else
+         {
+             g_IsLicensed = false;
+             g_LicenseState = LICENSE_NONE;
+         }
+      }
+   }
+   else if(OrdersTotal() > 0)
+   {
+       // Even without a code, if positions are open, we allow management
+       g_IsLicensed = false;
+       g_LicenseState = LICENSE_REVOKED;
    }
 
-   if(!g_IsLicensed)
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
    {
       CreateAuthUI();
       ShowAuthPanel(true);
@@ -50,12 +76,18 @@ void GUI_OnInit()
       
       // Hide navigation
       ObjectsDeleteAll(0, PREFIX + "Nav_");
+      
+      SyncChartUI(); // Hide UI
       return; 
    }
    else 
    {
-      // Ensure auth objects are removed if licensed
+      // Ensure auth objects are removed if not in pure Auth mode
       ObjectsDeleteAll(0, PREFIX + "Auth_");
+      if(g_LicenseState == LICENSE_OK) ClearSoftLockUI();
+      
+      ShowAuthPanel(false); // Clean up any auth UI state
+      SyncChartUI(); // Restore UI if needed
    }
 
    // 2. Full UI Refresh
@@ -85,16 +117,15 @@ void UpdateToastNotification()
 //+------------------------------------------------------------------+
 void GUI_OnTick()
 {   
-   if(!g_IsLicensed) return; // Guard: No updates if not licensed
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED) return; // Guard: Allow REVOKED for position updates
    // Throttle UI updates to save CPU (500ms)
    static uint lastUpdate = 0;
    if(GetTickCount() - lastUpdate < 500) return; 
    lastUpdate = GetTickCount();
 
-   UpdateAccountPanel();
-   UpdatePositionsValues();
-   // UpdateToastNotification(); // Removed 
-   // Warning update moved to Timer for responsiveness
+   // Only update panels that are SUPPOSED to be visible
+   if(g_PanelAccount.IsVisible && g_LicenseState == LICENSE_OK) UpdateAccountPanel();
+   UpdatePositionsValues(); // Always update if positions visible
 }
 
 //+------------------------------------------------------------------+
@@ -102,24 +133,172 @@ void GUI_OnTick()
 //+------------------------------------------------------------------+
 void GUI_OnTimer()
 {
-   // 1. Permanent License Check (Heartbeat) - Checked every 1 hour to prevent UI freezing on network issues
+   // 1. Permanent License Check (Heartbeat) - Premium Logic
+   // Rule: Check every 30 min, BUT only if user has been idle for >1 min to ensure zero lag.
+   
    static uint lastHeartbeat = 0;
+   // Synchronize with Auth success if available
+   if(lastHeartbeat == 0 && GlobalVariableCheck("FantomePad_LastHeartbeat"))
+   {
+      lastHeartbeat = (uint)GlobalVariableGet("FantomePad_LastHeartbeat");
+      GlobalVariableDel("FantomePad_LastHeartbeat");
+   }
+   
    uint now = GetTickCount();
    
-   if(g_IsLicensed && (now - lastHeartbeat > 3600000 || lastHeartbeat == 0)) 
+   // Check if 30 minutes have passed since last check
+   // We allow checking if licensed OR if revoked (to allow recovery)
+   if((g_IsLicensed || g_LicenseState == LICENSE_REVOKED) && (now - lastHeartbeat > 1800000 || lastHeartbeat == 0)) 
    {
-      lastHeartbeat = now;
-      if(!CheckLicense(g_ActivationCode))
+      // Check if user has been idle for at least 1 minute
+      if(now - g_LastInteractionTime > 60000) 
       {
-         Print("FantomePad: License invalidated during heartbeat.");
-         g_IsLicensed = false;
-         GUI_OnInit(); // Trigger re-auth
-         return;
+         lastHeartbeat = now;
+         
+         // Perform check with short timeout (1500ms)
+         bool isValid = CheckLicense(g_ActivationCode, 1500);
+         
+         if(!isValid)
+         {
+             // Only react if it's a definitive failure (not just internet down)
+             if(g_AuthErrorMsg != "" && StringFind(g_AuthErrorMsg, "Serveur injoignable") < 0)
+             {
+                 Print("FantomePad: License Revoked/Invalidated. Enhancing Security.");
+                 g_IsLicensed = false; 
+                 g_LicenseState = LICENSE_REVOKED;
+                 
+                 // Apply Soft Lock Mode immediately
+                 ApplySoftLockMode();
+             }
+         }
+         else
+         {
+             // Recovery: if we were revoked but now valid
+             if(g_LicenseState == LICENSE_REVOKED || g_LicenseState == LICENSE_NONE)
+             {
+                 g_LicenseState = LICENSE_OK;
+                 g_IsLicensed = true;
+                 ClearSoftLockUI(); // Immediate cleanup
+                 RefreshAllPanels(); // Restore UI
+             }
+         }
       }
    }
 
-   if(!g_IsLicensed) return; // Guard: No updates if not licensed
+   // 2. Soft Lock Persistence & Exit Logic
+   if(g_LicenseState == LICENSE_REVOKED)
+   {
+       // If no open positions remain, force redirect to Auth
+       // We use a small safety buffer: check if it's REALLY zero across all symbols
+       if(OrdersTotal() == 0)
+       {
+           Print("FantomePad: No more positions. Redirecting to Auth.");
+           g_LicenseState = LICENSE_NONE;
+           g_IsLicensed = false;
+           GUI_OnInit(); // Redirect to Auth
+           return;
+       }
+       
+       // Ensure Soft Lock UI banner is present
+       ApplySoftLockMode();
+       
+       // Force UI state for Soft Lock (Keep Positions visible, hide others) only if changed
+       if(!g_PanelPositions.IsVisible) TogglePositionsPanel(true);
+       if(g_PanelMain.IsVisible) ToggleMainPanel(false);
+       if(g_PanelAccount.IsVisible) ToggleAccountPanel(false);
+       if(g_PanelHistory.IsVisible) ToggleHistoryPanel(false);
+       if(g_PanelSettings.IsVisible) ToggleSettings(); 
+   }
+
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED) return; // Guard
+   
    UpdateAutoTradingWarning();
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: SOFT LOCK MODE (Security UI)                             |
+//+------------------------------------------------------------------+
+void ApplySoftLockMode()
+{
+    // 1. Force hide all non-essential panels and update their State flags
+    if(g_PanelMain.IsVisible) { g_PanelMain.IsVisible = false; ToggleMainPanel(false); }
+    if(g_PanelAccount.IsVisible) { g_PanelAccount.IsVisible = false; ToggleAccountPanel(false); }
+    if(g_PanelHistory.IsVisible) { g_PanelHistory.IsVisible = false; ToggleHistoryPanel(false); }
+    
+    // Explicit Settings Cleanup (Correcting Prefix from Settings_ to Set_)
+    if(g_PanelSettings.IsVisible) 
+    {
+        ObjectsDeleteAll(0, PREFIX + "Set_"); 
+        g_PanelSettings.IsVisible = false;
+    }
+    
+    // 2. Ensure Positions Panel is visible and state is correct
+    if(!g_PanelPositions.IsVisible) 
+    {
+        g_PanelPositions.IsVisible = true;
+        TogglePositionsPanel(true);
+    }
+    
+    // 3. Show Alert Banner (Red)
+    string alertName = PREFIX + "LicenseAlert";
+    if(ObjectFind(0, alertName) < 0)
+    {
+        ObjectCreate(0, alertName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+        ObjectSetInteger(0, alertName, OBJPROP_XDISTANCE, 0);
+        ObjectSetInteger(0, alertName, OBJPROP_YDISTANCE, 0);
+        ObjectSetInteger(0, alertName, OBJPROP_XSIZE, (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS));
+        ObjectSetInteger(0, alertName, OBJPROP_YSIZE, 30);
+        ObjectSetInteger(0, alertName, OBJPROP_BGCOLOR, g_ColorRed);
+        ObjectSetInteger(0, alertName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+        ObjectSetInteger(0, alertName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+    }
+    
+    string alertTxt = PREFIX + "LicenseAlertTxt";
+    
+    // Simplified logic for reasons
+    string reason = "VERIFICATION FAILED";
+    string errLower = g_AuthErrorMsg;
+    StringToLower(errLower);
+
+    if(StringFind(errLower, "code") >= 0 || StringFind(errLower, "incorrect") >= 0 || StringFind(errLower, "chang") >= 0)
+        reason = "INVALID ACTIVATION CODE";
+    else if(StringFind(errLower, "hardware") >= 0 || StringFind(errLower, "id") >= 0 || StringFind(errLower, "appareil") >= 0 || StringFind(errLower, "activé") >= 0)
+        reason = "DEVICE MISMATCH";
+    else if(StringFind(errLower, "bloqué") >= 0 || StringFind(errLower, "blocked") >= 0 || StringFind(errLower, "status") >= 0)
+        reason = "ACCOUNT BLOCKED";
+    else if(StringFind(errLower, "certificat") >= 0 || StringFind(errLower, "token") >= 0)
+        reason = "CERTIFICATE ERROR";
+
+    // ULTRA-SIMPLIFIED BOLD MESSAGE
+    string fullMsg = reason + " - contact@fantomepad.com";
+    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+
+    if(ObjectFind(0, alertTxt) < 0)
+    {
+        ObjectCreate(0, alertTxt, OBJ_LABEL, 0, 0, 0);
+        ObjectSetInteger(0, alertTxt, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+        ObjectSetInteger(0, alertTxt, OBJPROP_YDISTANCE, 7); 
+        ObjectSetString(0, alertTxt, OBJPROP_FONT, "Trebuchet MS Bold"); // Use a naturally bolder font
+        ObjectSetInteger(0, alertTxt, OBJPROP_FONTSIZE, 10); // Slightly larger
+        ObjectSetInteger(0, alertTxt, OBJPROP_COLOR, clrWhite);
+        ObjectSetInteger(0, alertTxt, OBJPROP_ANCHOR, ANCHOR_UPPER); 
+    }
+    
+    // Exact center position
+    ObjectSetInteger(0, alertTxt, OBJPROP_XDISTANCE, chartW / 2);
+    ObjectSetString(0, alertTxt, OBJPROP_TEXT, fullMsg);
+    
+    ChartRedraw();
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: CLEAR SOFT LOCK UI                                       |
+//+------------------------------------------------------------------+
+void ClearSoftLockUI()
+{
+    ObjectDelete(0, PREFIX + "LicenseAlert");
+    ObjectDelete(0, PREFIX + "LicenseAlertTxt");
+    ChartRedraw();
 }
 
 
@@ -160,16 +339,29 @@ double GetOriginalLotSize(int ticket)
 //+------------------------------------------------------------------+
 void CGUI_Master::RefreshAllPanels()
 {
-    if(!g_IsLicensed)
+    if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
     {
         CreateAuthUI();
         ShowAuthPanel(true);
         return;
     }
 
+    // Ensure Soft Lock UI is cleared when fully licensed
+    if(g_LicenseState == LICENSE_OK) ClearSoftLockUI();
+    
+    // --- SOFT LOCK ENFORCEMENT ---
+    if(g_LicenseState == LICENSE_REVOKED)
+    {
+        g_PanelMain.IsVisible = false;
+        g_PanelAccount.IsVisible = false;
+        g_PanelHistory.IsVisible = false;
+        g_PanelSettings.IsVisible = false;
+        g_PanelPositions.IsVisible = true;
+    }
+
     // 1. Navigation (Master Controller)
     CreateNavigationPanel();
-    // Navigation is always visible if EA is running, but let's be explicit
+    // Navigation is always visible if EA is running
     SetObjVisible("Nav_Bg", true);
     SetObjVisible("Nav_Btn_Main", true);
     SetObjVisible("Nav_Btn_Pos", true);
@@ -196,7 +388,27 @@ void CGUI_Master::RefreshAllPanels()
     
     // 6. Settings Panel
     if(g_PanelSettings.IsVisible) OpenSettings();
-    else ObjectsDeleteAll(0, PREFIX + "Settings_");
+    else ObjectsDeleteAll(0, PREFIX + "Set_"); // Correct prefix
+
+    SyncChartUI();
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: SYNC CHART UI (Axes, Interaction)                        |
+//+------------------------------------------------------------------+
+void SyncChartUI()
+{
+   bool isAuthMode = (!g_IsLicensed && g_LicenseState != LICENSE_REVOKED);
+   
+   // Apply Chart UI state based on mode
+   ChartSetInteger(0, CHART_SHOW_PRICE_SCALE, !isAuthMode);
+   ChartSetInteger(0, CHART_SHOW_DATE_SCALE, !isAuthMode);
+   ChartSetInteger(0, CHART_MOUSE_SCROLL, !isAuthMode);
+   ChartSetInteger(0, CHART_KEYBOARD_CONTROL, !isAuthMode);
+   
+   // Special: Grid is handled by aesthetic preference in licensed mode, 
+   // but always OFF in Auth mode.
+   if(isAuthMode) ChartSetInteger(0, CHART_SHOW_GRID, false);
 }
 
 //+------------------------------------------------------------------+
@@ -270,8 +482,16 @@ void GUI_OnChartEvent(const int id,
                       const double &dparam,
                       const string &sparam)
 {
+   // --- USER INTERACTION TRACKING ---
+   // Any manual event (Mouse, Key, Click) signifies the user is active.
+   // We exclude CHART_CHANGE (resize) which is automatic.
+   if(id != CHARTEVENT_CHART_CHANGE)
+   {
+      g_LastInteractionTime = GetTickCount();
+   }
+
    // --- AUTHENTICATION GUARD ---
-   if(!g_IsLicensed)
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
    {
       if(id == CHARTEVENT_OBJECT_CLICK && sparam == PREFIX + "Auth_BtnActive")
       {
@@ -286,7 +506,7 @@ void GUI_OnChartEvent(const int id,
          // Update activation code as user types/finishes edit
          g_ActivationCode = ObjectGetString(0, sparam, OBJPROP_TEXT);
       }
-      return; // Block all other events if not licensed
+      return; // Block all other events if not licensed AND not revoked
    }
    // 1. CHART RESIZE
    if(id == CHARTEVENT_CHART_CHANGE)
