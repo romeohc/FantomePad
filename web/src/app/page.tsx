@@ -144,13 +144,13 @@ export default function Home() {
     );
   }
 
-  // Dashboard View (Full Screen) - Only if active
-  if (session && license?.activation_code && license?.status === 'active') {
+  // Dashboard View (Full Screen) - Only if active or blocked
+  if (session && license?.activation_code && (license?.status === 'active' || license?.status === 'blocked')) {
     return (
       <Dashboard
         email={session.user.email || ""}
         activationCode={license.activation_code}
-        status="active"
+        status={license.status}
       />
     );
   }

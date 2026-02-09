@@ -31,24 +31,61 @@ interface StatusIndicatorProps {
 }
 
 // Move NavItem OUTSIDE the Dashboard component to avoid re-creation during render
+// Move NavItem OUTSIDE the Dashboard component to avoid re-creation during render
 function NavItem({ id, icon: Icon, label, alert, activeTab, setActiveTab, setMobileMenuOpen }: NavItemProps) {
+    const isActive = activeTab === id;
+
     return (
         <button
             onClick={() => {
                 setActiveTab(id);
                 setMobileMenuOpen(false);
             }}
-            className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === id
-                ? "bg-brand-blue/10 text-brand-blue border border-brand-blue/20"
-                : "text-brand-gray hover:bg-white/5 hover:text-white"
-                }`}
+            className="group relative w-full flex items-center justify-between p-4 rounded-xl outline-none focus:outline-none transition-all duration-300"
         >
-            <div className="flex items-center gap-3">
-                <Icon className="h-5 w-5" />
-                <span className="text-sm font-bold">{label}</span>
+            {/* Active Background Animation */}
+            {isActive && (
+                <motion.div
+                    layoutId="active-nav-background"
+                    className="absolute inset-0 bg-brand-blue/10 border border-brand-blue/20 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30
+                    }}
+                />
+            )}
+
+            {/* Hover Background (only when not active) */}
+            {!isActive && (
+                <div className="absolute inset-0 bg-transparent group-hover:bg-white/5 rounded-xl transition-colors duration-200" />
+            )}
+
+            {/* Content */}
+            <div className="relative z-10 flex items-center gap-3">
+                <Icon
+                    className={`h-5 w-5 transition-colors duration-300 ${isActive
+                        ? "text-brand-blue drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+                        : "text-brand-gray group-hover:text-white"
+                        }`}
+                />
+                <span
+                    className={`text-sm font-bold tracking-wide transition-colors duration-300 ${isActive
+                        ? "text-white"
+                        : "text-brand-gray group-hover:text-white"
+                        }`}
+                >
+                    {label}
+                </span>
             </div>
+
             {alert && (
-                <span className="bg-brand-blue text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{alert}</span>
+                <span className="relative z-10 bg-brand-blue text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+                    {alert}
+                </span>
             )}
         </button>
     );
@@ -193,7 +230,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         className="absolute inset-0 z-50 bg-[#0F0F0F] p-6 flex flex-col md:hidden"
                     >
                         <div className="flex items-center justify-center mb-12 relative h-10">
-                            <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={128} height={32} className="h-8 brightness-0 invert" />
+                            <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
                             <button onClick={() => setMobileMenuOpen(false)} className="absolute right-0 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
                                 <X className="h-6 w-6 text-white" />
                             </button>
@@ -217,7 +254,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
             {/* Sidebar (Desktop) */}
             <div className="hidden md:flex w-72 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
                 <div className="flex items-center justify-center px-2">
-                    <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-9 w-auto brightness-0 invert" />
+                    <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
                 </div>
 
                 <div className="space-y-2 flex-1 pt-6">
@@ -271,144 +308,145 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                     <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 md:pb-0">
 
                         {activeTab === 'overview' && (
-                            <div className="space-y-6">
-                                {/* Top Row: Status & Activation Code */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    {/* Status Card */}
-                                    <div className="relative group min-h-[220px]">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/10 to-purple-500/10 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                                        <div className="relative h-full bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between overflow-hidden">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="text-sm font-bold text-brand-gray mb-2 uppercase tracking-wider">Votre Licence</div>
-                                                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">FantomePad Pro</h3>
-                                                    <StatusIndicator status={status} />
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-4 flex gap-4">
-                                                <div className="bg-black/30 px-4 py-2 rounded-xl border border-white/5 flex items-center gap-2">
-                                                    <Zap className="h-4 w-4 text-yellow-400" />
-                                                    <span className="text-sm font-bold text-white">Version Lifetime</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div className="space-y-8 max-w-6xl mx-auto pt-4">
+                                {/* Header Section: Single License & Status Card */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6 px-1">
+                                        <h3 className="text-xl font-bold text-white">Ma Licence</h3>
                                     </div>
+                                    <div className="bg-[#121212] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
 
-                                    {/* License Code Card */}
-                                    <div className="bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between min-h-[220px]">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h4 className="text-xl font-bold text-white">Clé d&apos;Activation</h4>
-                                                <p className="text-sm text-brand-gray mt-1">Utilisez cette clé pour activer votre Expert Advisor.</p>
+                                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                                            <div className="w-full md:w-auto">
+                                                <h3 className="text-brand-gray text-xs font-bold uppercase tracking-widest mb-3">État de votre licence</h3>
+                                                {status === 'active' ? (
+                                                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-2 flex items-center gap-3 w-fit">
+                                                        <div className="relative flex h-2 w-2">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500 shadow-[0_0_10px_#22c55e]"></span>
+                                                        </div>
+                                                        <span className="text-xs font-black text-green-500 tracking-widest uppercase">ACTIF</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 flex items-center gap-3 w-fit">
+                                                        <div className="h-2 w-2 bg-red-500 rounded-full shrink-0 shadow-[0_0_10px_#ef4444]" />
+                                                        <span className="text-xs font-black text-red-500 tracking-widest uppercase">BLOQUÉ</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <button
-                                                onClick={() => setIsLocked(!isLocked)}
-                                                className="p-2 text-brand-gray hover:text-white transition-colors"
-                                            >
-                                                {isLocked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                            </button>
-                                        </div>
 
-                                        <div className="relative group pt-4">
-                                            <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex items-center justify-between font-mono text-xl md:text-2xl tracking-widest text-center shadow-inner overflow-hidden">
-                                                <span className="truncate mr-4 text-brand-blue/90">
-                                                    {isLocked ? "•••• - •••• - •••• - ••••" : activationCode}
-                                                </span>
-                                                <button
-                                                    onClick={handleCopy}
-                                                    className="p-3 hover:bg-white/10 rounded-xl transition-colors text-brand-gray hover:text-white shrink-0 active:scale-95"
-                                                >
-                                                    {copied ? <Check className="h-6 w-6 text-green-400" /> : <Copy className="h-6 w-6" />}
-                                                </button>
+                                            <div className="w-full md:w-auto md:min-w-[400px]">
+                                                <div className="bg-black/40 border border-white/5 rounded-2xl p-2 pl-6 flex items-center justify-between group hover:border-white/10 transition-colors">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] font-bold text-brand-gray uppercase tracking-wider mb-1">Clé d'activation</span>
+                                                        <code className="font-mono text-xl text-brand-blue font-bold tracking-wider truncate mr-4">
+                                                            {isLocked ? "•••• - •••• - ••••" : activationCode}
+                                                        </code>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            onClick={() => setIsLocked(!isLocked)}
+                                                            className="p-3 hover:bg-white/10 rounded-xl transition-colors text-brand-gray hover:text-white"
+                                                        >
+                                                            {isLocked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCopy}
+                                                            className="p-3 hover:bg-white/10 rounded-xl transition-colors text-brand-gray hover:text-white"
+                                                        >
+                                                            {copied ? <Check className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Bottom Row: Downloads & Support */}
-                                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                                    {/* Downloads Hub */}
-                                    <div className="lg:col-span-3 bg-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col min-h-[300px]">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <div>
-                                                <h4 className="text-xl font-bold text-white">Centre de Téléchargement</h4>
-                                                <p className="text-sm text-brand-gray">Plateformes et Logiciel FantomePad</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {/* Platforms Selection */}
-                                            <div className="space-y-4">
-                                                <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Plateformes</div>
-                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
-                                                    <div className="flex items-center gap-4">
-                                                        <Monitor className="h-5 w-5 text-brand-gray group-hover:text-white" />
-                                                        <span className="font-bold text-base">MetaTrader 4</span>
-                                                    </div>
-                                                    <Download className="h-4 w-4 text-brand-gray group-hover:text-white" />
-                                                </button>
-                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
-                                                    <div className="flex items-center gap-4">
-                                                        <Monitor className="h-5 w-5 text-brand-gray" />
-                                                        <span className="font-bold text-base text-brand-gray">MetaTrader 5</span>
-                                                    </div>
-                                                    <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-brand-gray font-bold">BIENTÔT</span>
-                                                </button>
-                                            </div>
-
-                                            {/* Software Selection */}
-                                            <div className="space-y-4">
-                                                <div className="text-[10px] font-bold text-brand-gray uppercase tracking-widest pl-1">Logiciel Expert</div>
-                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/20 transition-all group">
-                                                    <div className="flex items-center gap-4">
-                                                        <FileCode className="h-5 w-5 text-brand-blue" />
-                                                        <div className="text-left">
-                                                            <div className="font-bold text-base text-white leading-tight">Expert MT4</div>
-                                                            <div className="text-[10px] text-brand-blue font-bold">Version v2.4.1</div>
-                                                        </div>
-                                                    </div>
-                                                    <Download className="h-4 w-4 text-brand-blue group-hover:scale-110 transition-transform" />
-                                                </button>
-                                                <button className="w-full h-[72px] flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group opacity-60 cursor-not-allowed">
-                                                    <div className="flex items-center gap-4">
-                                                        <FileCode className="h-5 w-5 text-brand-gray" />
-                                                        <div className="text-left">
-                                                            <div className="font-bold text-base text-brand-gray leading-tight">Expert MT5</div>
-                                                            <div className="text-[10px] text-brand-gray/50 font-bold uppercase">MetaTrader 5</div>
-                                                        </div>
-                                                    </div>
-                                                    <Download className="h-4 w-4 text-brand-gray" />
-                                                </button>
-                                            </div>
-                                        </div>
+                                {/* Download Center - Onboarding Style */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6 px-1">
+                                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                                            Centre de Téléchargement
+                                        </h3>
                                     </div>
 
-                                    {/* Support Card */}
-                                    <div className="lg:col-span-2 bg-gradient-to-br from-[#1A1A1A] to-[#121212] border border-white/5 p-8 rounded-3xl flex flex-col justify-between min-h-[300px] relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-brand-blue/10 transition-colors"></div>
-
-                                        <div>
-                                            <h4 className="text-2xl font-bold text-white mb-2">Support &amp; Aide</h4>
-                                            <p className="text-brand-gray text-sm leading-relaxed mb-6">
-                                                Notre équipe est à votre disposition pour vous aider dans l&apos;installation ou la configuration de FantomePad.
-                                            </p>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/20 border border-white/5">
-                                                <div className="text-xs font-bold text-brand-gray uppercase tracking-widest">Email:</div>
-                                                <div className="text-white font-mono font-bold">contact@fantomepad.com</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* FantomePad MT4 */}
+                                        <button className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden">
+                                            <div className="flex items-center gap-6 relative z-10">
+                                                <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
+                                                    <Image
+                                                        src="/logo-blanc.svg"
+                                                        alt="FantomePad"
+                                                        width={40}
+                                                        height={40}
+                                                        className="h-10 w-10 object-contain"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">FantomePad pour MT4</div>
+                                                    <div className="text-xs text-brand-gray mt-1 font-medium text-left flex items-center gap-2">
+                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v2.4.1</span>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
+                                                <Download className="h-5 w-5" />
+                                            </div>
+                                        </button>
 
-                                            <a
-                                                href="mailto:contact@fantomepad.com"
-                                                className="w-full flex items-center justify-center gap-2 bg-white text-black font-black py-4 rounded-2xl hover:bg-neutral-200 transition-all active:scale-[0.98]"
-                                            >
-                                                <span>Contacter le support</span>
-                                                <ExternalLink className="h-4 w-4" />
-                                            </a>
+                                        {/* FantomePad MT5 */}
+                                        <button className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden">
+                                            <div className="flex items-center gap-6 relative z-10">
+                                                <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
+                                                    <Image
+                                                        src="/logo-blanc.svg"
+                                                        alt="FantomePad"
+                                                        width={40}
+                                                        height={40}
+                                                        className="h-10 w-10 object-contain"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">FantomePad pour MT5</div>
+                                                    <div className="text-xs text-brand-gray mt-1 font-medium text-left flex items-center gap-2">
+                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v2.4.1</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
+                                                <Download className="h-5 w-5" />
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Support Banner */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6 px-1">
+                                        <h3 className="text-xl font-bold text-white">Support</h3>
+                                    </div>
+                                    <div className="bg-gradient-to-r from-[#121212] to-[#0F0F0F] border border-white/5 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 group">
+                                        <div className="flex items-center gap-6">
+                                            <div className="h-14 w-14 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center border border-brand-blue/10">
+                                                <HelpCircle className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xl font-bold text-white mb-1">Une question ?</h4>
+                                                <p className="text-brand-gray text-sm">
+                                                    Notre équipe est disponible pour vous pour toute demande
+                                                </p>
+                                            </div>
                                         </div>
+                                        <a
+                                            href="mailto:contact@fantomepad.com"
+                                            className="w-full md:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                                        >
+                                            <span>Contacter le Support</span>
+                                            <ExternalLink className="h-4 w-4" />
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -424,19 +462,24 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                     { title: "Gérer le Risque (Risk Management)", duration: "10:00", level: "Essentiel" },
                                     { title: "Dépannage Courant", duration: "6:15", level: "Support" },
                                 ].map((video, idx) => (
-                                    <div key={idx} className="group cursor-pointer">
-                                        <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-2xl overflow-hidden mb-4 group-hover:border-brand-blue/50 transition-all">
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
-                                                <div className="h-14 w-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
-                                                    <PlayCircle className="h-6 w-6 text-white fill-current" />
+                                    <div key={idx} className="group cursor-default">
+                                        <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-2xl overflow-hidden mb-4 group-hover:border-white/10 transition-all">
+                                            <div className="absolute top-3 left-3 z-20">
+                                                <span className="bg-brand-blue text-black text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide shadow-lg">
+                                                    Bientôt disponible
+                                                </span>
+                                            </div>
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                                                <div className="h-14 w-14 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform opacity-50">
+                                                    <PlayCircle className="h-6 w-6 text-white/50 fill-current" />
                                                 </div>
                                             </div>
-                                            <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white">
+                                            <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white/50">
                                                 {video.duration}
                                             </div>
                                         </div>
-                                        <h3 className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">{video.title}</h3>
-                                        <div className="flex items-center gap-2 mt-2">
+                                        <h3 className="text-lg font-bold text-white/60 group-hover:text-white/80 transition-colors">{video.title}</h3>
+                                        <div className="flex items-center gap-2 mt-2 opacity-60">
                                             <span className="text-xs text-brand-gray font-medium px-2 py-0.5 bg-white/5 rounded border border-white/5">{video.level}</span>
                                         </div>
                                     </div>
@@ -459,12 +502,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                         title: "Nouvelle interface Dashboard",
                                         desc: "Refonte complète de l'expérience utilisateur. Le dashboard est maintenant plus rapide, plus fluide et entièrement responsive mobile."
                                     },
-                                    {
-                                        version: "v2.3.5",
-                                        date: "20 Jan 2026",
-                                        title: "Support Multi-Devises",
-                                        desc: "Ajout du support pour les paires exotiques. Vous pouvez maintenant trader sur plus de 50 nouveaux instruments avec la même précision."
-                                    }
+
                                 ].map((update, idx) => (
                                     <div key={idx} className="bg-[#121212] border border-white/5 p-6 rounded-3xl hover:bg-[#151515] transition-colors group">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
