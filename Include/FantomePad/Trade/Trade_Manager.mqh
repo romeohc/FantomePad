@@ -23,7 +23,6 @@ void ExecuteOrder(int cmd)
    }
    if(!IsTradeAllowed())
    {
-      // If Expert is enabled but Trade is not allowed, it's usually the "Allow live trading" checkbox
       ShowValidationError("Live Trading disabled!");
       return;
    }
@@ -33,15 +32,7 @@ void ExecuteOrder(int cmd)
    
    double sl     = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
    double tp     = StringToDouble(ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
-   
    double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
-   
-   if(volume <= 0) 
-   {
-      string errorMsg = "Lot size too small! Increase risk or tighten SL.";
-      ShowValidationError(errorMsg);
-      return; 
-   } 
    
    double price  = 0;
    double digits = MarketInfo(symbol, MODE_DIGITS);
@@ -53,28 +44,74 @@ void ExecuteOrder(int cmd)
    price = NormalizeDouble(price, (int)digits);
    sl    = NormalizeDouble(sl, (int)digits);
    tp    = NormalizeDouble(tp, (int)digits);
-   
+
+   // --- SECURITY POINT 1: OBLIGATORY STOP LOSS (MOTEUR) ---
+   if(sl <= 0 && (cmd == OP_BUY || cmd == OP_SELL))
+   {
+      ShowValidationError("Stop Loss non défini !");
+      return;
+   }
+
+   if(volume <= 0) 
+   {
+      ShowValidationError("Lot size non défini !");
+      return; 
+   } 
+
+   // --- SECURITY POINT 2: ROBUST INTERNAL RISK VALIDATION ---
+   double tickSize = MarketInfo(symbol, MODE_TICKSIZE);
+   double tickValue = MarketInfo(symbol, MODE_TICKVALUE);
+   if(tickSize > 0 && tickValue > 0 && sl > 0)
+   {
+      double distance = MathAbs(price - sl);
+      double steps = distance / tickSize;
+      double riskMoney = volume * steps * tickValue;
+      double equity = AccountEquity();
+      double realRiskPercent = (equity > 0) ? (riskMoney / equity) * 100.0 : 0;
+      
+      if(realRiskPercent > g_MaxRiskPercent + 0.01) // Epsilon for rounding
+      {
+         string errorMsg = "SÉCURITÉ : Risque (" + DoubleToString(realRiskPercent, 2) + "%) > Max (" + DoubleToString(g_MaxRiskPercent, 2) + "%) !";
+         ShowValidationError(errorMsg);
+         return;
+      }
+   }
+
+   // --- SECURITY POINT 3: TECHNICAL GUARDRAILS (LOTS & MARGIN) ---
+   double maxLot = MarketInfo(symbol, MODE_MAXLOT);
+   if(volume > maxLot)
+   {
+      ShowValidationError("Lot trop élevé pour le courtier (Max: " + DoubleToString(maxLot, 2) + ") !");
+      return;
+   }
+
+   double requiredMargin = MarketInfo(symbol, MODE_MARGINREQUIRED) * volume;
+   if(AccountFreeMargin() < requiredMargin)
+   {
+      ShowValidationError("Fonds insuffisants (Marge requise: " + DoubleToString(requiredMargin, 2) + ") !");
+      return;
+   }
+
    // --- SPREAD PROTECTION ---
    if(cmd == OP_BUY || cmd == OP_SELL)
    {
-       double ask = MarketInfo(symbol, MODE_ASK);
-       double bid = MarketInfo(symbol, MODE_BID);
-       double spread = (ask - bid) / MarketInfo(symbol, MODE_POINT);
-       
-       if(spread > g_MaxSpread)
-       {
-            string errorMsg = "Spread too high (" + DoubleToString(spread, 0) + " > " + IntegerToString(g_MaxSpread) + ")!";
-            ShowValidationError(errorMsg);
-            return;
-       }
+        double ask = MarketInfo(symbol, MODE_ASK);
+        double bid = MarketInfo(symbol, MODE_BID);
+        double spread = (ask - bid) / MarketInfo(symbol, MODE_POINT);
+        
+        if(spread > g_MaxSpread)
+        {
+             ShowValidationError("Spread trop élevé (" + DoubleToString(spread, 0) + " > " + IntegerToString(g_MaxSpread) + ")!");
+             return;
+        }
    }
    
-   int slippagePoints = (int)(MaxSlippage * MathPow(10, (digits == 3 || digits == 5) ? 1 : 0)); // Points
+   int slippagePoints = (int)(MaxSlippage * MathPow(10, (digits == 3 || digits == 5) ? 1 : 0)); 
    int ticket = SafeOrderSend(symbol, cmd, volume, price, slippagePoints, sl, tp, "ProPanel", MagicNumber, 0, clrNONE);
    
    if(ticket >= 0) 
    {
-      g_LastTradeErrorMsg = ""; // Clear on success
+      g_LastTradeErrorMsg = ""; 
       
       // Reset UI after success
       ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, "0.00000");
@@ -92,7 +129,7 @@ void ExecuteOrder(int cmd)
       if(g_LastTradeErrorMsg != "")
       {
          ShowValidationError(g_LastTradeErrorMsg);
-         g_LastTradeErrorMsg = ""; // Reset after showing
+         g_LastTradeErrorMsg = ""; 
       }
    }
 }

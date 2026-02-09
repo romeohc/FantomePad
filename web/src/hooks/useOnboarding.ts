@@ -93,12 +93,7 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
 
 
 
-    // Generate a random activation code (Format: FP-XXXX-XXXX)
-    const generateCode = () => {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-        return `FP-${segment()}-${segment()}`;
-    };
+
 
 
     const activateLicense = async () => {
@@ -108,55 +103,27 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
         setError(null);
 
         try {
-            // 1. Check existing license
-            const { data: current, error: checkError } = await supabase
-                .from("licences")
-                .select("activation_code")
-                .ilike("email", email)
-                .single();
+            // 1. Secure Claim via RPC
+            // verification is done server-side
+            const { data: updated, error: rpcError } = await supabase.rpc('claim_license');
 
-            if (checkError && checkError.code !== 'PGRST116') { // PGRST116 means "no rows found"
-                throw checkError;
-            }
+            console.log("RPC Response - Error:", rpcError);
+            console.log("RPC Response - Data:", updated);
 
-            // If code exists and is not empty, we are done
-            if (current?.activation_code) {
-                setActivationCode(current.activation_code);
-                setStep("activation");
-                setLoading(false);
-                return;
-            }
-
-            // 2. Generate and Update
-            // The row should exist (created at purchase), so we just update the code
-            const newCode = generateCode();
-            console.log("Generating code for:", email);
-
-            const { data: updated, error: updateError } = await supabase
-                .from("licences")
-                .update({
-                    activation_code: newCode,
-                    status: 'pending', // Set to pending so user sees the setup dashboard
-                    last_check: new Date().toISOString()
-                })
-                .ilike("email", email)
-                .select("activation_code")
-                .single();
-
-            if (updateError) {
-                console.error("Supabase Update Error:", updateError);
-                throw updateError;
+            if (rpcError) {
+                console.error("Supabase RPC Error:", rpcError);
+                throw rpcError;
             }
 
             if (updated?.activation_code) {
                 setActivationCode(updated.activation_code);
                 setStep("activation");
             } else {
-                throw new Error("Update succeeded but returned no data");
+                throw new Error("Activation claims returned no code. Please contact support.");
             }
 
         } catch (err: unknown) {
-            console.error("Full Activation Error:", JSON.stringify(err, null, 2));
+            console.error("Full Activation Error:", err);
             const msg = (err as Error)?.message || "Erreur inconnue";
             setError(`Erreur: ${msg}`);
         } finally {

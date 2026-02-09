@@ -5,7 +5,7 @@
 #ifndef _TRADE_CONSTANTS_MQH_
 #define _TRADE_CONSTANTS_MQH_
 
-#define MAX_RETRIES 3
-#define RETRY_DELAY 100 // ms
+const int MAX_RETRIES = 3;
+const int RETRY_DELAY = 100; // ms
 
 #endif

@@ -83,14 +83,15 @@ export default function Home() {
     setMessage(null);
 
     try {
-      // Check if license exists before sending OTP
-      const { data: licenseData, error: licenseError } = await supabase
-        .from("licences")
-        .select("id")
-        .eq("email", email.toLowerCase())
-        .single();
+      // Check if license exists using Secure RPC (prevents public RLS exposure)
+      const { data: exists, error: rpcError } = await supabase
+        .rpc('check_license_exists', { email_input: email.toLowerCase() });
 
-      if (licenseError || !licenseData) {
+      if (rpcError) {
+        throw rpcError;
+      }
+
+      if (!exists) {
         setError("Cet email n'est associé à aucune commande FantomePad.");
         setLoading(false);
         return;
@@ -196,7 +197,7 @@ export default function Home() {
                     transition={{ delay: 0.2 }}
                     className="text-xs font-bold tracking-[0.2em] text-brand-gray uppercase mb-3 block"
                   >
-                    {step === "email" ? "ACTIVATE YOUR FANTOMEPAD" : "Vérification"}
+                    {step === "email" ? "Connection / Inscription" : "Vérification"}
                   </motion.span>
                   <motion.h1
                     initial={{ opacity: 0 }}

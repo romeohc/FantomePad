@@ -64,11 +64,24 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
 
+      double currentPrice = MarketInfo(Symbol(), MODE_ASK);
       // Check Lot Size
       double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
       if(volume <= 0)
       {
-         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         // Recommendation 1: Specific feedback
+         if(MathAbs(currentPrice - sl) <= MarketInfo(Symbol(), MODE_POINT))
+            ShowValidationError("SL too close to Entry for Lot Calculation!");
+         else
+            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         return true;
+      }
+      
+      
+      // double currentPrice = MarketInfo(Symbol(), MODE_ASK); // Removed redundant declaration
+      if(!ValidateSlDirection(OP_BUY, currentPrice, sl))
+      {
+         ShowValidationError("Invalid SL! Must be BELOW entry price.");
          return true;
       }
       
@@ -107,11 +120,24 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
 
+      double currentPrice = MarketInfo(Symbol(), MODE_BID);
       // Check Lot Size
       double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
       if(volume <= 0)
       {
-         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         // Recommendation 1: Specific feedback
+         if(MathAbs(currentPrice - sl) <= MarketInfo(Symbol(), MODE_POINT))
+            ShowValidationError("SL too close to Entry for Lot Calculation!");
+         else
+            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         return true;
+      }
+
+
+      // double currentPrice = MarketInfo(Symbol(), MODE_BID); // Removed redundant declaration
+      if(!ValidateSlDirection(OP_SELL, currentPrice, sl))
+      {
+         ShowValidationError("Invalid SL! Must be ABOVE entry price.");
          return true;
       }
 
@@ -155,7 +181,11 @@ bool Handle_Trading_Events(string sparam)
       double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
       if(volume <= 0)
       {
-         ShowValidationError("Lot size too small! Increase risk or tighten SL.");
+         // Recommendation 1: Specific feedback
+         if(MathAbs(price - sl) <= MarketInfo(Symbol(), MODE_POINT))
+            ShowValidationError("SL too close to Entry for Lot Calculation!");
+         else
+            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
          return true;
       }
    
@@ -166,7 +196,16 @@ bool Handle_Trading_Events(string sparam)
       if(CurrentTypeIndex == 3) opCmd = OP_BUYSTOP;
       if(CurrentTypeIndex == 4) opCmd = OP_SELLSTOP;
       
-      if(opCmd != -1) ExecuteOrder(opCmd);
+      if(opCmd != -1) 
+      {
+          if(!ValidateSlDirection(opCmd, price, sl))
+          {
+              string side = (opCmd == OP_BUYLIMIT || opCmd == OP_BUYSTOP) ? "BELOW" : "ABOVE";
+              ShowValidationError("Invalid SL! Must be " + side + " entry price.");
+              return true;
+          }
+          ExecuteOrder(opCmd);
+      }
       return true;
    }
    

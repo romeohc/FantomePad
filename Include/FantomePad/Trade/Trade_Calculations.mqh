@@ -34,6 +34,24 @@ double GetRiskPercentage(double riskValue)
    
    return 0.0;
 }
+
+// Security Check: Validate that SL is on the correct side of Entry
+// Returns true if SL is valid directionally (Below Entry for BUY, Above for SELL)
+bool ValidateSlDirection(int cmd, double entry, double sl)
+{
+   if(entry <= 0 || sl <= 0) return true; // Let other validation handle zero values
+   
+   if(cmd == OP_BUY || cmd == OP_BUYLIMIT || cmd == OP_BUYSTOP)
+   {
+      return (sl < entry);
+   }
+   else if(cmd == OP_SELL || cmd == OP_SELLLIMIT || cmd == OP_SELLSTOP)
+   {
+      return (sl > entry);
+   }
+   return true;
+}
+
 double CalculateLotSize(double entryPrice, double slPrice, double riskValue)
 {
    if(entryPrice <= 0 || slPrice <= 0 || riskValue <= 0) return 0.0;

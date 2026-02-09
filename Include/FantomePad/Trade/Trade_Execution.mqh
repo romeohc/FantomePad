@@ -55,6 +55,13 @@ int SafeOrderSend(string symbol, int cmd, double volume, double price, int slipp
    
    for(int i = 0; i < MAX_RETRIES; i++)
    {
+      // Recommendation 3: Uniformiser la gestion des embouteillages
+      if(IsTradeContextBusy()) 
+      {
+         Sleep(RETRY_DELAY);
+         continue;
+      }
+
       RefreshRates();
       
       if(cmd == OP_BUY)       price = MarketInfo(symbol, MODE_ASK);
@@ -100,7 +107,7 @@ int SafeOrderSend(string symbol, int cmd, double volume, double price, int slipp
              }
          }
       }
-      
+            
       ticket = OrderSend(symbol, cmd, volume, price, slippage, sl, tp, comment, magic, expiration, clr);
       if(ticket >= 0) return ticket;
       
