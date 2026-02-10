@@ -14,6 +14,7 @@
 #include "Positions/Panel_Positions.mqh"
 #include "History/Panel_History.mqh"
 #include "Auth/Panel_Auth.mqh"
+#include "SymbolManager/Panel_SymbolManager.mqh"
 // --- FORWARD DECLARATIONS REMOVED (Defined in Includes or Locals) ---
 
 //+------------------------------------------------------------------+
@@ -91,6 +92,10 @@ void GUI_OnInit()
    }
 
    // 2. Full UI Refresh
+   g_SymbolManagerLoaded = false; // Force re-scan on account change
+   g_SymMgr_CurrentCategory = "";
+   g_SymMgr_ScrollOffset = 0;
+   
    RefreshAllPanels();
    
    // 2. Specific startup logic
@@ -369,6 +374,9 @@ void CGUI_Master::RefreshAllPanels()
     SetObjVisible("Nav_Btn_History", true);
     SetObjVisible("Nav_Btn_Settings", true);
     SetObjVisible("Nav_Btn_SymbolSelect", true);
+    
+    // 1.b Symbol Manager Overlay (High Z-Order)
+    CreateSymbolManagerPanel();
 
     // 2. Trade Panel
     CreatePanel(); 

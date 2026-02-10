@@ -10,6 +10,7 @@
 void ProcessDragLogic(int mouseX, int mouseY)
 {
     g_BlockClick = false; // Reset safety block on new press
+    bool processed = false;
          
     // DISABLE CHART SCROLL IF DRAGGING OR OVER LIST
     bool isOverList = false;
@@ -26,7 +27,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
 
-    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging;
+    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || g_PanelSymbolManager.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging;
     if(anyDrag || isOverList)
     {
         ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
@@ -88,9 +89,33 @@ void ProcessDragLogic(int mouseX, int mouseY)
             UpdateAccountLayout();
         }
     }
+    // --- 0.8 DRAG SCROLLBAR (SYMBOL MANAGER) ---
+    if(g_PanelSymbolManager.IsVisible && !processed && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelSymbolManager.IsDragging)
+    {
+        int cols = 3;
+        int totalRows = (g_SymMgr_SymbolCount + cols - 1) / cols;
+        int visibleRows = g_SymMgr_MaxVisible / cols;
+        int maxScrollRows = totalRows - visibleRows;
+        if(maxScrollRows < 0) maxScrollRows = 0;
+        
+        int currentRow = g_SymMgr_ScrollOffset / cols;
+        
+        if(HandleScrollDrag(g_ScrollSymbolManager.IsDragging, g_ScrollSymbolManager.DragAnchorY, currentRow, mouseX, mouseY, "SYM_ScrollThumb", g_ScrollSymbolManager.ViewportHeight, maxScrollRows))
+        {
+            g_SymMgr_ScrollOffset = currentRow * cols;
+            // Cap it
+            if(g_SymMgr_ScrollOffset + g_SymMgr_MaxVisible > g_SymMgr_SymbolCount)
+                g_SymMgr_ScrollOffset = MathMax(0, g_SymMgr_SymbolCount - g_SymMgr_MaxVisible);
+            if(g_SymMgr_ScrollOffset < 0) g_SymMgr_ScrollOffset = 0;
+            
+            CreateSymbolManagerPanel();
+            processed = true;
+        }
+    }
+ 
+    if(g_ScrollSymbolManager.IsDragging) processed = true;
  
     // --- PANELS DRAG ---
-    bool processed = false;
     
     // 1. SETTINGS PANEL
     if(g_PanelSettings.IsVisible && !g_PanelMain.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging)
@@ -141,7 +166,17 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
     
-    // 5. MAIN PANEL
+    // 5. SYMBOL MANAGER PANEL
+    if(!processed && g_PanelSymbolManager.IsVisible && !g_PanelSettings.IsDragging && !g_PanelPositions.IsDragging && !g_PanelAccount.IsDragging && !g_PanelHistory.IsDragging && !g_PanelMain.IsDragging && !IsScrollDragging)
+    {
+        if(HandlePanelDrag(g_PanelSymbolManager.IsDragging, g_PanelSymbolManager.X, g_PanelSymbolManager.Y, g_PanelSymbolManager.DragOffsetX, g_PanelSymbolManager.DragOffsetY, mouseX, mouseY, g_PanelSymbolManager.Width, g_PanelSymbolManager.Height, "SYM_Bg"))
+        {
+            CreateSymbolManagerPanel();
+            processed = true;
+        }
+    }
+    
+    // 6. MAIN PANEL
     if(!processed && !g_PanelSettings.IsDragging && !g_PanelAccount.IsDragging && !g_PanelPositions.IsDragging && !g_PanelHistory.IsDragging && !IsScrollDragging && !g_ScrollSettings.IsDragging && !g_ScrollHistory.IsDragging)
     {
        // Initialisation position si nécessaire
@@ -179,7 +214,7 @@ void ProcessDragEnd()
        }
    }
 
-   bool wasDragging = (g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging);
+   bool wasDragging = (g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || g_PanelSymbolManager.IsDragging);
    
    if(g_PanelMain.IsDragging)
    {
@@ -226,8 +261,16 @@ void ProcessDragEnd()
       g_PanelHistory.IsDragging = false;
       CreateHistoryPanel(); // Apply Position
    }
+
+   if(g_PanelSymbolManager.IsDragging)
+   {
+      ApplyPanelSafety(g_PanelSymbolManager.X, g_PanelSymbolManager.Y, g_PanelSymbolManager.Width, g_PanelSymbolManager.Height);
+      g_PanelSymbolManager.IsDragging = false;
+      CreateSymbolManagerPanel(); // Apply Position
+   }
    
    if(wasDragging) SaveConfigToFile();
+
    if(IsScrollDragging)
    {
        IsScrollDragging = false;
@@ -238,7 +281,6 @@ void ProcessDragEnd()
        g_ScrollSettings.IsDragging = false;
        g_BlockClick = true;
    }
-   if(g_PanelHistory.IsDragging) g_PanelHistory.IsDragging = false; // Redundant safety
    if(g_ScrollHistory.IsDragging)
    {
       g_ScrollHistory.IsDragging = false;
@@ -247,6 +289,11 @@ void ProcessDragEnd()
    if(g_ScrollAccountOrders.IsDragging)
    {
       g_ScrollAccountOrders.IsDragging = false;
+      g_BlockClick = true;
+   }
+   if(g_ScrollSymbolManager.IsDragging)
+   {
+      g_ScrollSymbolManager.IsDragging = false;
       g_BlockClick = true;
    }
    

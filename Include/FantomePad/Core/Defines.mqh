@@ -77,11 +77,13 @@ TPanelState g_PanelPositions;
 TPanelState g_PanelHistory;
 TPanelState g_PanelSettings;
 TPanelState g_PanelNavigation;
+TPanelState g_PanelSymbolManager; // New Symbol Manager Overlay
 
 // --- SCROLL STATE INSTANCES ---
 TScrollState g_ScrollSettings;
 TScrollState g_ScrollHistory;
 TScrollState g_ScrollAccountOrders; // Scroll for Active Orders in Account Panel
+TScrollState g_ScrollSymbolManager; // Scroll for Symbol Manager grid
 
 // --- ACCOUNT ORDERS SCROLL GLOBALS ---
 int g_AccountOrdersScrollOffset = 0;   // Current scroll offset for orders list
@@ -165,6 +167,15 @@ string g_ValidationErrorMsg = "";     // Current error message to display
 bool   g_ValidationErrorVisible = false; // Is the error message currently visible
 string g_LastTradeErrorMsg = "";      // Last error from trading logic (to be picked up by GUI)
 
+// --- SYMBOL MANAGER GLOBALS ---
+bool   g_SymbolManagerLoaded = false;
+string g_SymMgr_CurrentCategory = ""; // Currently selected category path
+int    g_SymMgr_ScrollOffset = 0;     // Scroll for symbol grid
+int    g_SymMgr_MaxVisible = 20;      // Max visible rows in grid
+string g_SymMgr_SearchQuery = "";     // Optional search query logic for future use
+string g_SymMgr_SelectedSymbol = "";  // Currently selected symbol in manager
+
+
 
 // --- INITIALIZATION HELPER ---
 void InitGlobals()
@@ -196,10 +207,18 @@ void InitGlobals()
    
    g_PanelNavigation.IsVisible = false;
    
+   g_PanelSymbolManager.Width = 600;
+   g_PanelSymbolManager.Height = 400;
+   g_PanelSymbolManager.IsVisible = false;
+   g_PanelSymbolManager.X = -1; // Center dynamically
+   g_PanelSymbolManager.Y = -1;
+   
    g_ScrollSettings.ViewportHeight = 400;
    g_ScrollSettings.ContentHeight = 620; 
    g_ScrollHistory.ViewportHeight = 400;
    g_ScrollHistory.ContentHeight = 0;
+   g_ScrollSymbolManager.ViewportHeight = 0; // Set dynamically in drawing
+   g_ScrollSymbolManager.ContentHeight = 0;
 
    // Default Risk Init removed
    g_OneRPercent = OneRPercent;

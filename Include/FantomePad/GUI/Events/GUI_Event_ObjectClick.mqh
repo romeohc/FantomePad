@@ -9,6 +9,7 @@
 #include "Handlers/Handler_Navigation.mqh"
 #include "Handlers/Handler_History.mqh"
 #include "Handlers/Handler_SymbolList.mqh"
+#include "Handlers/Handler_SymbolManager.mqh"
 #include "Handlers/Handler_ColorPicker.mqh"
 #include "Handlers/Handler_PositionList.mqh"
 #include "Handlers/Handler_PositionActions.mqh"
@@ -62,6 +63,7 @@ void OnEvent_ObjectClick(string sparam)
 
     // 5. Symbol List Logic
     // Note: Called before Color Picker to preserve original precedence where Symbol Click returns early
+    if(Handle_SymbolManager_Events(sparam)) return; // [NEW] Manager events overlap everything
     if(Handle_SymbolList_Events(sparam)) return;
 
     // 6. Color Picker Logic (Events + Outside Check)

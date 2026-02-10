@@ -182,6 +182,7 @@ void CloseSymbolList()
    // Supprime tous les objets de liste
    // Optimized Deletion
    ObjectsDeleteAll(0, PREFIX + "ListItem_");
+   if(ObjectFind(0, PREFIX + "List_Btn_Add") >= 0) ObjectDelete(0, PREFIX + "List_Btn_Add");
    
    // Clean up specific container elements
    if(ObjectFind(0, PREFIX + "ScrollTrack") >= 0) ObjectDelete(0, PREFIX + "ScrollTrack");
@@ -217,7 +218,8 @@ void DrawSymbolList()
    
    bool showScroll = (total > maxVis);
    
-   int contentHeight = count * itemHeight;
+   int headerHeight = 30; // Height for the Add button area
+   int contentHeight = (count * itemHeight) + headerHeight;
    int containerWidth = (int)w; // Keep same width
 
    // --- DIRECTION LOGIC ---
@@ -244,6 +246,17 @@ void DrawSymbolList()
    int currentY = startY;
    
    // ITEMS
+   // [NEW] Add Button at the top of the list or as a special header
+   // We will place it as a fixed header inside the list container, shifting items down.
+   
+   // Create Add Button
+   string addBtnName = "List_Btn_Add";
+   CreateButton(addBtnName, "+ Add New", itemX, currentY, itemWidth, 25, g_ColorBtnValid, g_ColorText);
+   ObjectSetInteger(0, PREFIX + addBtnName, OBJPROP_ZORDER, 10);
+   ObjectSetString(0, PREFIX + addBtnName, OBJPROP_FONT, "Trebuchet MS Bold");
+   
+   currentY += headerHeight;
+   
    for(int i = 0; i < count; i++)
    {
       int dataIdx = g_SymbolListOffset + i;
