@@ -20,7 +20,7 @@ void OpenSettings()
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
    int w = 340; 
-   int h = 50 + g_ScrollSettings.ViewportHeight; // Header + Viewport
+   int h = 20 + g_ScrollSettings.ViewportHeight; // 20px Top Margin + Viewport
    
    if(g_PanelSettings.X == -1)
    {
@@ -36,21 +36,11 @@ void OpenSettings()
    ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_ZORDER, 100);
    ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_BORDER_COLOR, C'80,80,80');
    ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_WIDTH, 1);
-
-   // --- HEADER ---
-   CreateRect("Set_Header", x, y, w, 50, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Set_Header", OBJPROP_ZORDER, 101);
    
-   CreateLabel("Set_Title", "Settings", x + 15, y + 15, 10, g_ColorText, "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + "Set_Title", OBJPROP_ZORDER, 102);
-
    // --- CONTENT GENERATION ---
-   // We define absolute Y relative to the Content Start (0)
-   // Content Start on screen is y + 50
-   
-   int relY = 20; 
+   int relY = 10; // Start slightly below top margin
    int padX = 20;
-   int contentStartScreenY = y + 50;
+   int contentStartScreenY = y + 20; // content starts after 20px top margin
    
    // Helper lambda substitution
    #define CHECK_VIS(h) IsItemVisible(relY, h)

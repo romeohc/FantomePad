@@ -14,13 +14,9 @@ void UpdatePositionsLayout()
    int width  = 280; 
    int paddingX = 20;
    
-   // --- Header ---
-   SetObjPosition("Pos_Bg", startX, startY);
-   SetObjPosition("Pos_Header", startX, startY);
-   ObjectSetInteger(0, PREFIX + "Pos_Header", OBJPROP_XSIZE, width);
-   SetObjPosition("Pos_Title", startX + 15, startY + 12);
+   int currentY = startY + 20; 
    
-   int currentY = startY + 50; 
+   SetObjPosition("Pos_Bg", startX, startY);
    
    // --- Select Key ---
    SetObjPosition("Pos_Btn_Select", startX + paddingX, currentY);
@@ -75,19 +71,30 @@ void UpdatePositionsLayout()
    
    currentY += statsBgH + 15;
    
-   // --- Protection Section ---
    int inputH   = 28;
    int lblH     = 15;
    int sectionGap = 15;
    
-   SetObjPosition("Pos_Lbl_Entry", startX + paddingX, currentY);
-   currentY += lblH;
+   bool showEntry = false;
+   if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+   {
+      if(OrderType() > 1) showEntry = true;
+   }
    
-   SetObjPosition("Pos_Edit_Entry", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_XSIZE, width - (paddingX * 2));
-   ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_YSIZE, inputH);
+   SetObjVisible("Pos_Lbl_Entry", showEntry);
+   SetObjVisible("Pos_Edit_Entry", showEntry);
    
-   currentY += inputH + sectionGap;
+   if(showEntry)
+   {
+      SetObjPosition("Pos_Lbl_Entry", startX + paddingX, currentY);
+      currentY += lblH;
+      
+      SetObjPosition("Pos_Edit_Entry", startX + paddingX, currentY);
+      ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_XSIZE, width - (paddingX * 2));
+      ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_YSIZE, inputH);
+      
+      currentY += inputH + sectionGap;
+   }
  
    // SL & BE
    SetObjPosition("Pos_Lbl_SL", startX + paddingX, currentY);
@@ -165,10 +172,8 @@ void CreatePositionsPanel()
 {
    int width = 280; 
    
-   // 1. Fond & Header
+   // 1. Fond
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
-   CreateRect("Pos_Header", 0, 0, width, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Pos_Title", "Position", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Select Button
    CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);
@@ -178,7 +183,7 @@ void CreatePositionsPanel()
    CreateRect("Pos_Stats_Bg", 0, 0, width - 40, 175, g_ColorInput, BORDER_FLAT); 
    ObjectSetInteger(0, PREFIX + "Pos_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
    
-   CreateLabel("Pos_Lbl_Size", "SIZE", 0, 0, 7, g_ColorText, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Size", "LOTS", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Pos_Val_Size", "-", 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    CreateLabel("Pos_Lbl_Profit", "PROFIT", 0, 0, 7, g_ColorText, "Trebuchet MS");
@@ -215,7 +220,7 @@ void CreatePositionsPanel()
    CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
    
-   CreateButton("Pos_Btn_BE", "BREAKEVEN", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   CreateButton("Pos_Btn_BE", "BE", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONTSIZE, 8); 
    ObjectSetString(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONT, "Trebuchet MS Bold");
  
@@ -224,17 +229,17 @@ void CreatePositionsPanel()
    CreateEdit("Pos_Edit_TP", "0", 0, 0, 80, 28);
    
    // 6. Close Section
-   CreateLabel("Pos_Lbl_Close", "Partial Close %", 0, 0, 8, g_ColorText, "Trebuchet MS");
+   CreateLabel("Pos_Lbl_Close", "Partial Close", 0, 0, 8, g_ColorText, "Trebuchet MS");
    
-   CreateButton("Pos_Btn_25", "25", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   CreateButton("Pos_Btn_25", "25%", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_FONTSIZE, 9);
    ObjectSetString(0, PREFIX + "Pos_Btn_25", OBJPROP_FONT, "Trebuchet MS");
    
-   CreateButton("Pos_Btn_50", "50", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   CreateButton("Pos_Btn_50", "50%", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_FONTSIZE, 9);
    ObjectSetString(0, PREFIX + "Pos_Btn_50", OBJPROP_FONT, "Trebuchet MS");
    
-   CreateButton("Pos_Btn_100", "100", 0, 0, 35, 28, g_ColorInput, g_ColorText);
+   CreateButton("Pos_Btn_100", "100%", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_FONTSIZE, 9);
    ObjectSetString(0, PREFIX + "Pos_Btn_100", OBJPROP_FONT, "Trebuchet MS");
    

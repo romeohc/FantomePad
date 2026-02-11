@@ -16,7 +16,7 @@ void CreateHistoryPanel()
    
    int width = 800;
    int rowHeight = 30; 
-   int headerHeight = 40;
+   int headerHeight = 20; // Changed from 40 to 20 for margin
    int startX = g_PanelHistory.X;
    int startY = g_PanelHistory.Y;
    
@@ -26,10 +26,8 @@ void CreateHistoryPanel()
    int footerHeight = 40;
    int footerMargin = 20;
    
-   // 1. Fond & Header
+   // 1. Fond
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
-   CreateRect("Hist_Header", startX, startY, width, headerHeight, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Hist_Title", "History", startX + 15, startY + 10, 10, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Toolbar
    DrawHistoryToolbar(startX, startY, headerHeight);
@@ -74,8 +72,6 @@ void ToggleHistoryPanel(bool visible)
 {
    g_PanelHistory.IsVisible = visible;
    SetObjVisible("Hist_Bg", visible);
-   SetObjVisible("Hist_Header", visible);
-   SetObjVisible("Hist_Title", visible);
    
    SetObjVisible("Hist_H_Time", visible);
    SetObjVisible("Hist_H_Type", visible);

@@ -81,7 +81,8 @@ void UpdateAccountLayout()
    // --- HEAD & BG ---
    SetObjPosition("Account_Bg", startX, startY);
    SetObjPosition("Account_Header", startX, startY);
-   SetObjPosition("Account_Title", startX + 15, startY + 12);
+   SetObjPosition("Account_Title", startX + (width / 2), startY + 12);
+   ObjectSetInteger(0, PREFIX + "Account_Title", OBJPROP_ANCHOR, ANCHOR_UPPER);
    
    ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_XSIZE, width);
    ObjectSetInteger(0, PREFIX + "Account_Header", OBJPROP_XSIZE, width);

@@ -136,13 +136,8 @@ void CreateSymbolManagerPanel()
    ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
    ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_WIDTH, 2); 
 
-   // 2. HEADER
-   int headerH = 40;
-   CreateRect("SYM_Header", x, y, w, headerH, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "SYM_Header", OBJPROP_ZORDER, 142);
-   
-   CreateLabel("SYM_Title", "Symbol", x + 15, y + 10, 10, g_ColorText, "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + "SYM_Title", OBJPROP_ZORDER, 143);
+   // 2. MARGIN (Replaces Header)
+   int headerH = 20;
    
    /* 
    // Close Button

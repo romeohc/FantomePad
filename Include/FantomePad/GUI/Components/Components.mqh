@@ -211,4 +211,13 @@ void ApplyPanelSafety(int &safe_x, int &safe_y, int safe_w, int safe_h)
    }
 }
 
+//+------------------------------------------------------------------+
+//| STRING UTILITY: TRUNCATE WITH ELLIPSIS                           |
+//+------------------------------------------------------------------+
+string TruncateString(string text, int maxChars)
+{
+   if(StringLen(text) <= maxChars) return text;
+   return StringSubstr(text, 0, maxChars - 3) + "...";
+}
+
 #endif

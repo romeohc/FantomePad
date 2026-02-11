@@ -26,15 +26,16 @@ void UpdateUIMode()
    int gapY     = 8;
    int sectionGap = 20;
    
-   int currentY = startY + 50; 
+   int currentY = startY + 20; 
    
    SetObjPosition("Bg", startX, startY);
-   SetObjPosition("Header", startX, startY);
-   SetObjPosition("Title", startX + 15, startY + 12);
    
    SetObjPosition("Btn_Type", startX + paddingX, currentY);
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_YSIZE, inputH);
+   
+   string currentSymbol = ObjectGetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT);
+   if(currentSymbol == "") currentSymbol = Symbol();
    
    string typeText = "";
    color  typeBgColor = g_ColorInput;
@@ -67,6 +68,9 @@ void UpdateUIMode()
       typeBgColor = g_ColorRed;
       typeBorderColor = g_ColorRed;
    }
+   
+   // Format: Symbol · OrderType
+   typeText = currentSymbol + "  ·  " + typeText;
    
    ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_TEXT, typeText);
    ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BGCOLOR, typeBgColor);
@@ -171,10 +175,10 @@ void UpdateUIMode()
       ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_YSIZE, 45);
    }
    
-   currentY += 60; 
-   
-   int totalHeight = currentY - startY + 10; 
-   ObjectSetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE, totalHeight);
+    currentY += 45 + 20; // Button height (45) + Bottom margin (20)
+    
+    int totalHeight = currentY - startY; 
+    ObjectSetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE, totalHeight);
    
    UpdateChartLines();
    UpdateCalculatedLot();

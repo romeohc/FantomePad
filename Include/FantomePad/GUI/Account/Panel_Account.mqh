@@ -19,7 +19,12 @@ void CreateAccountPanel()
    // 1. Fond & Header
    CreateRect("Account_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Account_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Account_Title", "Account", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
+   string accountName = AccountInfoString(ACCOUNT_NAME);
+   if(accountName == "") accountName = IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
+   
+   // Truncate if too long (max ~25 chars for header)
+   string displayTitle = TruncateString(accountName, 25);
+   CreateLabel("Account_Title", displayTitle, 0, 0, 9, g_ColorText, "Trebuchet MS Bold");
    
    // 2. Account Data
    CreateRect("Account_Stats_Bg", 0, 0, width - 40, 110, g_ColorInput, BORDER_FLAT); // Grouping Box
@@ -84,18 +89,15 @@ void UpdateAccountPanel()
    ObjectSetString(0, PREFIX + "Account_Val_Margin", OBJPROP_TEXT, sMarg);
    
    // --- DEPOSIT / WITHDRAW UPDATE ---
-   double deps = 0, wits = 0;
+   double deps = 0, wits = 0, netProfitFromHistory = 0;
    
-   // OPTIMIZATION: Only recalculate if history count changed
-   int currentHistoryTotal = OrdersHistoryTotal();
-   if(currentHistoryTotal != g_LastHistoryTotal)
-   {
-      GetAccountHistoryStats(g_CachedDeposit, g_CachedWithdraw);
-      g_LastHistoryTotal = currentHistoryTotal;
-   }
+   // NOTE: Effective MT4 history is limited by the "Account History" tab settings in the terminal.
+   // If "All History" is not selected, the calculations below will only reflect the VISIBLE history.
+   GetAccountHistoryStats(deps, wits, netProfitFromHistory);
    
-   deps = g_CachedDeposit;
-   wits = g_CachedWithdraw;
+   // If no deposit record (OP_BALANCE) is found in the visible history, 
+   // we estimate the starting point based on closed trades.
+   if(deps <= 0) deps = (bal - netProfitFromHistory + wits); 
    
    string sDeps = DoubleToString(deps, 2);
    string sWits = DoubleToString(wits, 2);
@@ -104,34 +106,31 @@ void UpdateAccountPanel()
    ObjectSetString(0, PREFIX + "Account_Val_Withdraw", OBJPROP_TEXT, sWits);
    
    // --- CALCUL P&L et PERF ---
-   // P&L = Balance + Withdraw - Deposit
-   double pnl = bal + wits - deps;
+   // P&L is simply the sum of all visible trades in history
+   double pnl = netProfitFromHistory;
    
-   // Perf % = (P&L / Deposit) * 100 
-   double perfP = 0.0;
-   if(deps > 0) perfP = (pnl / deps) * 100.0;
+   // If we found OP_BALANCE records, use the official P&L formula
+   if(deps > 0 && deps != (bal - netProfitFromHistory + wits)) 
+      pnl = bal - (deps - wits);
    
-   // Perf R = Perf % / 1R_Value
-   double perfR = 0.0;
-   if(g_OneRPercent > 0) perfR = perfP / g_OneRPercent;
+   // Perf % = (P&L / Starting balance) * 100 
+   double perfP = (deps > 0) ? (pnl / deps) * 100.0 : 0.0;
    
-   string sPnL   = DoubleToString(pnl, 2);
-   string sPerfP = DoubleToString(perfP, 2) + " %";
-   string sPerfR = DoubleToString(perfR, 2) + " R";
+   // Perf R = Total % / 1R_Value
+   double perfR = (g_OneRPercent > 0) ? perfP / g_OneRPercent : 0.0;
+   
+   string sPnL   = (pnl >= 0 ? "+" : "") + DoubleToString(pnl, 2) + " " + currency;
+   string sPerfP = (perfP >= 0 ? "+" : "") + DoubleToString(perfP, 2) + " %";
+   string sPerfR = (perfR >= 0 ? "+" : "") + DoubleToString(perfR, 2) + " R";
    
    ObjectSetString(0, PREFIX + "Account_Val_PnL", OBJPROP_TEXT, sPnL);
-   
-   // Couleurs conditionnelles pour P&L
-   if(pnl >= 0) ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, g_ColorGreen);
-   else         ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, (pnl >= 0) ? g_ColorGreen : g_ColorRed);
    
    ObjectSetString(0, PREFIX + "Account_Val_PerfP", OBJPROP_TEXT, sPerfP);
-   if(perfP >= 0) ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, g_ColorGreen);
-   else           ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, (perfP >= 0) ? g_ColorGreen : g_ColorRed);
    
    ObjectSetString(0, PREFIX + "Account_Val_PerfR", OBJPROP_TEXT, sPerfR);
-   if(perfR >= 0) ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, g_ColorGreen);
-   else           ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, (perfR >= 0) ? g_ColorGreen : g_ColorRed);
    
    // Ensure colors are consistent if they were changed elsewhere
    ObjectSetInteger(0, PREFIX + "Account_Val_Balance", OBJPROP_COLOR, g_ColorText);
@@ -198,8 +197,6 @@ void UpdateAccountPanel()
          // 1. Background Card
          string nameBg = "Account_Ord_Bg" + suffix;
          if(ObjectFind(0, PREFIX + nameBg) < 0) CreateRect(nameBg, 0, 0, 10, 10, g_ColorInput, BORDER_FLAT); 
-         ObjectSetInteger(0, PREFIX + nameBg, OBJPROP_BGCOLOR, g_ColorInput);
-         ObjectSetInteger(0, PREFIX + nameBg, OBJPROP_BORDER_COLOR, g_ColorInput);
          SetObjVisible(nameBg, true);
  
          // 2. Symbol Label

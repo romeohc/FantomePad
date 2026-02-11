@@ -72,8 +72,8 @@ void UpdateAutoTradingWarning()
 void CreateNavigationPanel()
 {
    // Init Dimensions
-   g_PanelNavigation.Width = 560; // Exact width for symmetry
-   g_PanelNavigation.Height = 35; // Reduced from 65 (removed Beta Label)
+   g_PanelNavigation.Width = 560; 
+   g_PanelNavigation.Height = 35; 
 
    // Dynamic Positioning
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
@@ -160,12 +160,15 @@ void CreateNavigationPanel()
    CreateButton("Nav_Btn_Settings", "Settings", currentX, startY, btnW, btnH, bgSet, g_ColorText);
    ObjectSetString(0, PREFIX + "Nav_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
 
-   // Button 6: Symbol Select
-   currentX += btnW + margin;
-   int symBtnW = 100; // Wider for symbol name
-   // We reuse the ID "Btn_SymbolSelect" so GUI_Master logic works
-   CreateButton("Nav_Btn_SymbolSelect", Symbol(), currentX, startY, symBtnW, btnH, g_ColorInput, g_ColorText);
-   UpdateAutoTradingWarning();
+    // Button 6: Symbol Select
+    currentX += btnW + margin;
+    int symBtnW = 100; // Wider for symbol name
+    CreateButton("Nav_Btn_SymbolSelect", Symbol(), currentX, startY, symBtnW, btnH, g_ColorInput, g_ColorText);
+
+    // Cleanup old label if exists
+    if(ObjectFind(0, PREFIX + "Nav_Lbl_AccountName") >= 0) ObjectDelete(0, PREFIX + "Nav_Lbl_AccountName");
+    
+    UpdateAutoTradingWarning();
 }
 
 // Logic to clean up if needed provided here, though GUI_Master handles most redraws

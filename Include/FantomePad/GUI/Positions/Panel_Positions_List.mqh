@@ -105,7 +105,7 @@ void DrawPositionList()
          else if(type == OP_BUYSTOP) typeStr = "BUY STP";
          else if(type == OP_SELLSTOP) typeStr = "SELL STP";
  
-         string txt = OrderSymbol() + " " + typeStr + " " + DoubleToString(OrderLots(), 2);
+         string txt = OrderSymbol() + "  ·  " + DoubleToString(OrderLots(), 2);
          string btnName = "PosListItem_" + IntegerToString(tck);
          
          CreateButton(btnName, txt, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);

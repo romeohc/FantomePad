@@ -54,7 +54,7 @@ void DrawSettingsScrollbar(int x, int y)
 {
    int scrollBarWidth = 10;
    int trackX = x + 340 - scrollBarWidth - 2; // Right aligned with slight padding
-   int trackY = y + 50;
+   int trackY = y + 20; // Updated from 50 to 20 to match new margin
    int trackH = g_ScrollSettings.ViewportHeight;
    
    // 1. Track

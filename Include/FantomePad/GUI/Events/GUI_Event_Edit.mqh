@@ -11,13 +11,19 @@ void OnEvent_EndEdit(string sparam)
    // RESET PARTIAL BUTTONS IF CUSTOM TEXT ENTERED
    if(sparam == PREFIX + "Pos_Edit_Close")
    {
-      double val = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
+      string txt = ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT);
+      double val = StringToDouble(txt);
       if(val > 0)
       {
           g_PosPartialMode = 0;
           UpdatePartialButtonsVisuals();
+          
+          if(StringFind(txt, "%") < 0)
+          {
+             ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, DoubleToString(val, 0) + "%");
+          }
       }
-      UpdatePositionsValues(); // Check Modify Status for Validate Button
+      UpdatePositionsValues();
    }
 
    // INSTANT SAVE RISK

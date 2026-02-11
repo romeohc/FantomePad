@@ -16,8 +16,6 @@
 void CreatePanel()
 {
    CreateRect("Bg", 0, 0, g_PanelMain.Width, 100, g_ColorBg, BORDER_FLAT); 
-   CreateRect("Header", 0, 0, g_PanelMain.Width, 40, g_ColorBg, BORDER_FLAT);
-   CreateLabel("Title", "Trade", 0, 0, 10, g_ColorText, "Trebuchet MS Bold");
    
    CreateButton("Btn_Type", OrderTypes[CurrentTypeIndex], 0, 0, g_PanelMain.Width - 40, 28, g_ColorInput, g_ColorText);
    ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_FONT, "Trebuchet MS Bold");
@@ -40,7 +38,7 @@ void CreatePanel()
    ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_FONT, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
    
-   CreateLabel("Label_Lot", "Lots (size)", 0, 0, 8, g_ColorText, "Trebuchet MS");
+   CreateLabel("Label_Lot", "Lot (Auto)", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_Lot", "0.00", 0, 0, g_PanelMain.Width - 40, 28, true);
    
    CreateButton("Btn_Sell", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnValid, g_ColorText); 

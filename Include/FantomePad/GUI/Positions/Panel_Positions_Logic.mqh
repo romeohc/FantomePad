@@ -138,42 +138,29 @@ void UpdatePositionsValues()
              if(ticketChanged)
              {
                  g_PosBE_Active = false;
-                 g_PosPartialMode = 0; // Reset Partial Mode
-                 UpdatePartialButtonsVisuals(); // Visually reset
+                 g_PosPartialMode = 0; 
+                 UpdatePartialButtonsVisuals(); 
                  
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+                 
+                 UpdatePositionsLayout(); // Refresh dynamic visibility (Entry Price hide/show)
              }
              
-             string typeStr = "";
              color typeBg = g_ColorInput;
              int type = OrderType();
              
-             if(type == OP_BUY) { typeStr = "BUY MARKET"; typeBg = g_ColorGreen; }
-             else if(type == OP_SELL) { typeStr = "SELL MARKET"; typeBg = g_ColorRed; }
-             else if(type == OP_BUYLIMIT) { typeStr = "BUY LIMIT"; typeBg = g_ColorGreen; }
-             else if(type == OP_SELLLIMIT) { typeStr = "SELL LIMIT"; typeBg = g_ColorRed; }
-             else if(type == OP_BUYSTOP) { typeStr = "BUY STOP"; typeBg = g_ColorGreen; }
-             else if(type == OP_SELLSTOP) { typeStr = "SELL STOP"; typeBg = g_ColorRed; }
+             if(type == OP_BUY) typeBg = g_ColorGreen;
+             else if(type == OP_SELL) typeBg = g_ColorRed;
+             else if(type == OP_BUYLIMIT) typeBg = g_ColorGreen;
+             else if(type == OP_SELLLIMIT) typeBg = g_ColorRed;
+             else if(type == OP_BUYSTOP) typeBg = g_ColorGreen;
+             else if(type == OP_SELLSTOP) typeBg = g_ColorRed;
              
-             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, typeStr + " " + DoubleToString(lots, 2));
+             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, OrderSymbol() + "  ·  " + DoubleToString(lots, 2));
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
-             
-             // Enable/Disable Entry Price Edit based on Type
-             if(type <= 1) // Market Order (OP_BUY=0, OP_SELL=1)
-             {
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, true);
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorBtnInvalid); // INACTIVE COLOR
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText); 
-             }
-             else // Pending Order
-             {
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_READONLY, false);
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_BGCOLOR, g_ColorInput);
-                 ObjectSetInteger(0, PREFIX + "Pos_Edit_Entry", OBJPROP_COLOR, g_ColorText);
-             }
              
              // BE BUTTON STATE (IN LOSS CHECKS)
              double current = (type == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
