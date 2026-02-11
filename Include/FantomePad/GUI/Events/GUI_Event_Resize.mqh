@@ -8,11 +8,16 @@
 //+------------------------------------------------------------------+
 void OnEvent_Resize()
 {
+   static bool isRunning = false;
+   if(isRunning) return;
+   isRunning = true;
+
    // --- AUTH PANEL RESIZE ---
    if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
    {
       CreateAuthUI();
       ShowAuthPanel(true);
+      isRunning = false;
       return;
    }
    // --- SAFETY CHECK: Recenter panels if hidden by resize ---
@@ -45,13 +50,8 @@ void OnEvent_Resize()
         ApplyPanelSafety(g_PanelSettings.X, g_PanelSettings.Y, 340, h);
    }
 
-   CreatePanel();
-   CreateAccountPanel();
-   CreateNavigationPanel();
-   CreatePositionsPanel();
-   CreateHistoryPanel();
-   if(g_PanelMain.IsVisible) UpdateUIMode();
-   else ToggleMainPanel(false);
-   
-   if(g_PanelSettings.IsVisible) OpenSettings(); // Redraw settings if open
+   // 2. Full UI Refresh
+   RefreshAllPanels();
+
+   isRunning = false;
 }

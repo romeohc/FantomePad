@@ -138,24 +138,30 @@ void CreateSymbolManagerPanel()
 
    // 2. HEADER
    int headerH = 40;
-   CreateRect("SYM_Header", x, y, w, headerH, g_ColorHeader, BORDER_FLAT);
+   CreateRect("SYM_Header", x, y, w, headerH, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "SYM_Header", OBJPROP_ZORDER, 142);
    
-   CreateLabel("SYM_Title", "SYMBOL MANAGER", x + 15, y + 10, 10, g_ColorText, "Trebuchet MS Bold");
+   CreateLabel("SYM_Title", "Symbol", x + 15, y + 10, 10, g_ColorText, "Trebuchet MS Bold");
    ObjectSetInteger(0, PREFIX + "SYM_Title", OBJPROP_ZORDER, 143);
    
+   /* 
    // Close Button
    int closeBtnSize = 24;
    CreateButton("SYM_Btn_Close", "X", x + w - closeBtnSize - 10, y + 8, closeBtnSize, closeBtnSize, g_ColorBtnInvalid, g_ColorText);
    ObjectSetInteger(0, PREFIX + "SYM_Btn_Close", OBJPROP_ZORDER, 143);
+   */
 
    // 3. CATEGORY LIST (LEFT SIDE)
    int catListW = 180;
    int contentY = y + headerH;
    int contentH = h - headerH;
    
-   CreateRect("SYM_CatBg", x, contentY, catListW, contentH, g_ColorInput, BORDER_FLAT);
+   CreateRect("SYM_CatBg", x, contentY, catListW, contentH, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "SYM_CatBg", OBJPROP_ZORDER, 142);
+   
+   // Vertical Separator
+   CreateRect("SYM_Sep", x + catListW, contentY + 10, 1, contentH - 20, C'50,50,50', BORDER_FLAT);
+   ObjectSetInteger(0, PREFIX + "SYM_Sep", OBJPROP_ZORDER, 142);
    
    int catItemH = 25;
    int catStartY = contentY + 10;
@@ -166,7 +172,7 @@ void CreateSymbolManagerPanel()
        
        string catName = g_SymMgr_Categories[i];
        bool isSelected = (catName == g_SymMgr_CurrentCategory);
-       color catBg = isSelected ? g_ColorBtnActive : g_ColorInput;
+       color catBg = isSelected ? g_ColorBtnActive : g_ColorBg;
        color catTxt = isSelected ? clrWhite : g_ColorText;
        
        string btnName = "SYM_Cat_" + IntegerToString(i);
@@ -182,31 +188,6 @@ void CreateSymbolManagerPanel()
    int gridY = contentY + 10;
    int gridW = w - catListW - 20;
    int gridH = contentH - 20;
-   
-   // --- TOGGLE ALL BUTTON ---
-   bool allSelected = true;
-   if(g_SymMgr_SymbolCount > 0)
-   {
-      for(int k=0; k<g_SymMgr_SymbolCount; k++)
-      {
-         if(!SymbolInfoInteger(g_SymMgr_SymbolsInCat[k], SYMBOL_SELECT))
-         {
-            allSelected = false;
-            break;
-         }
-      }
-   }
-   else allSelected = false;
-   
-   string toggleText = allSelected ? "DESELECT ALL" : "SELECT ALL";
-   color toggleBg = allSelected ? g_ColorBtnActive : g_ColorInput;
-   
-   int toggleH = 25;
-   CreateButton("SYM_ToggleAll", toggleText, gridX, gridY, 120, toggleH, toggleBg, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "SYM_ToggleAll", OBJPROP_ZORDER, 143);
-   
-   gridY += toggleH + 10;
-   gridH -= toggleH + 10;
    
    int cols = 3;
    int cellW = (gridW / cols) - 5;
@@ -253,7 +234,7 @@ void CreateSymbolManagerPanel()
         int trackW = 8;
         
         // Track
-        CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorInput, BORDER_FLAT);
+        CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorBg, BORDER_FLAT);
         ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
         
         // Thumb Calculation

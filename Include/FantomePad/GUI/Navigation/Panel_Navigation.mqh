@@ -251,7 +251,7 @@ void DrawSymbolList()
    
    // Create Add Button
    string addBtnName = "List_Btn_Add";
-   CreateButton(addBtnName, "+ Add New", itemX, currentY, itemWidth, 25, g_ColorBtnValid, g_ColorText);
+   CreateButton(addBtnName, "Edit", itemX, currentY, itemWidth, 25, g_ColorBtnActive, g_ColorText);
    ObjectSetInteger(0, PREFIX + addBtnName, OBJPROP_ZORDER, 10);
    ObjectSetString(0, PREFIX + addBtnName, OBJPROP_FONT, "Trebuchet MS Bold");
    

@@ -399,6 +399,7 @@ void CGUI_Master::RefreshAllPanels()
     else ObjectsDeleteAll(0, PREFIX + "Set_"); // Correct prefix
 
     SyncChartUI();
+    ChartRedraw();
 }
 
 //+------------------------------------------------------------------+
@@ -409,14 +410,22 @@ void SyncChartUI()
    bool isAuthMode = (!g_IsLicensed && g_LicenseState != LICENSE_REVOKED);
    
    // Apply Chart UI state based on mode
-   ChartSetInteger(0, CHART_SHOW_PRICE_SCALE, !isAuthMode);
-   ChartSetInteger(0, CHART_SHOW_DATE_SCALE, !isAuthMode);
-   ChartSetInteger(0, CHART_MOUSE_SCROLL, !isAuthMode);
-   ChartSetInteger(0, CHART_KEYBOARD_CONTROL, !isAuthMode);
+   if(ChartGetInteger(0, CHART_SHOW_PRICE_SCALE) != (long)!isAuthMode)
+      ChartSetInteger(0, CHART_SHOW_PRICE_SCALE, !isAuthMode);
+      
+   if(ChartGetInteger(0, CHART_SHOW_DATE_SCALE) != (long)!isAuthMode)
+      ChartSetInteger(0, CHART_SHOW_DATE_SCALE, !isAuthMode);
+      
+   if(ChartGetInteger(0, CHART_MOUSE_SCROLL) != (long)!isAuthMode)
+      ChartSetInteger(0, CHART_MOUSE_SCROLL, !isAuthMode);
+      
+   if(ChartGetInteger(0, CHART_KEYBOARD_CONTROL) != (long)!isAuthMode)
+      ChartSetInteger(0, CHART_KEYBOARD_CONTROL, !isAuthMode);
    
    // Special: Grid is handled by aesthetic preference in licensed mode, 
    // but always OFF in Auth mode.
-   if(isAuthMode) ChartSetInteger(0, CHART_SHOW_GRID, false);
+   if(isAuthMode && ChartGetInteger(0, CHART_SHOW_GRID) != 0) 
+      ChartSetInteger(0, CHART_SHOW_GRID, false);
 }
 
 //+------------------------------------------------------------------+

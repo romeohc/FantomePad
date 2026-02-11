@@ -41,32 +41,7 @@ bool Handle_SymbolManager_Events(string sparam)
         return true;
     }
     
-    // 4. TOGGLE ALL SYMBOLS IN CATEGORY
-    if(sparam == PREFIX + "SYM_ToggleAll")
-    {
-        bool anyUnselected = false;
-        for(int k=0; k<g_SymMgr_SymbolCount; k++)
-        {
-            if(!SymbolInfoInteger(g_SymMgr_SymbolsInCat[k], SYMBOL_SELECT))
-            {
-                anyUnselected = true;
-                break;
-            }
-        }
-        
-        // If any is unselected, we select all. Otherwise we deselect all.
-        bool newState = anyUnselected;
-        
-        for(int j=0; j<g_SymMgr_SymbolCount; j++)
-        {
-            SymbolSelect(g_SymMgr_SymbolsInCat[j], newState);
-        }
-        
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
-        CreateSymbolManagerPanel();
-        ChartRedraw();
-        return true;
-    }
+
     
     // 5. SYMBOL SELECTION (Toggle Logic: Add/Remove)
     if(StringFind(sparam, PREFIX + "SYM_Sym_") >= 0)

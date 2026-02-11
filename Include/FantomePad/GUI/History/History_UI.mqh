@@ -243,7 +243,7 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    
    color colProf = (sumProf >= 0) ? g_ColorGreen : g_ColorRed;
    
-   CreateRect("Hist_Footer_Line", x, y, w, 1, g_ColorInput, BORDER_FLAT);
+   CreateRect("Hist_Footer_Line", x, y, w, 1, C'50,50,50', BORDER_FLAT);
    
    int textY = y + 10;
    CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorText, "Trebuchet MS Bold");

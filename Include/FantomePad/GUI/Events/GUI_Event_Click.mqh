@@ -16,9 +16,14 @@ void OnEvent_Click()
    }
    
    // Close Color Picker on Chart Click
-   // We add a delay check to prevent closing immediately if the click was also an Object Click (which updates LastClickTime)
    if(g_IsColorPickerOpen && (GetTickCount() - LastClickTime) > 100)
    {
       CloseColorPicker();
+   }
+
+   // Close Symbol Manager on Chart Click
+   if(g_PanelSymbolManager.IsVisible && (GetTickCount() - LastClickTime) > 100)
+   {
+      ToggleSymbolManager(false);
    }
 }
