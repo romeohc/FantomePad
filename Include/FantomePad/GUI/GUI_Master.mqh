@@ -473,6 +473,9 @@ void ApplyColorChange(color pickedCol)
        }
        if(StringFind(g_ColorPickerTarget, "_LNorm") > 0)       g_ColorListNormal = (color)pickedCol;
        if(StringFind(g_ColorPickerTarget, "_LHov") > 0)        g_ColorListHover = (color)pickedCol;
+
+       if(StringFind(g_ColorPickerTarget, "_PosInd") > 0)      g_ColorPositive = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_NegInd") > 0)      g_ColorNegative = (color)pickedCol;
        
        SaveConfigToFile();
        RefreshAllPanels();

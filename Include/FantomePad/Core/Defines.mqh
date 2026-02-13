@@ -14,29 +14,29 @@ input int      DefaultNavigationPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5
 // IMPORTANT: Change this MagicNumber if running multiple instances of FantomePad!
 // Each EA instance MUST have a unique MagicNumber to avoid trade conflicts.
 input int      MagicNumber = 123456;   // Magic Number for trade identification (MUST BE UNIQUE PER INSTANCE)
-input color    ColorBg     = C'21,23,28';  // Fond Panel (Deep Dark Theme)
-input color    ColorHeader = C'14,16,19';  // Header Darker
-input color    ColorInput  = C'34,38,46';  // Fond Inputs / Elements
-input color    ColorText   = C'224,228,230'; // Texte Principal (Off-White)
+input color    ColorBg     = C'22,26,46';  // Panel Background (User Custom)
+input color    ColorHeader = C'12,12,12';  // Header (Black)
+input color    ColorInput  = C'12,12,12';  // Input Fields (Black)
+input color    ColorText   = C'255,255,255'; // Main Text (White)
 // input color    ColorLabel removed
-input color    ColorGreen  = C'0,184,148';   // Vibrant Mint (Modern Buy)
-input color    ColorRed    = C'214,48,49';   // Vibrant Red (Modern Sell)
-input color    ColorChartBg= clrBlack;       // Chart Background
-input color    ColorChartFg = clrWhite;      // Chart Axes/Text Color
-input color    ColorCandleUp = C'0,184,148'; // Candle Up
-input color    ColorCandleDown = C'214,48,49'; // Candle Down
-input color    ColorBtnValid = C'0,90,180';    // Button Valid (Functional)
-input color    ColorBtnInvalid = C'80,80,80';  // Button Invalid (Non-functional)
-input color    ColorBtnActive  = C'0,184,148'; // Active Button (Mint)
-input color    ColorEntryLine = clrWhite;      // Entry Line Color
-input color    ColorSLLine   = C'214,48,49';   // Stop Loss Line Color
-input color    ColorTPLine   = C'0,184,148';   // Take Profit Line Color
+input color    ColorGreen  = C'41,98,255';   // Positive / Buy (Blue)
+input color    ColorRed    = C'161,161,166'; // Negative / Sell (Gray)
+input color    ColorChartBg= C'12,12,12';    // Chart Background (Black)
+input color    ColorChartFg = C'161,161,166'; // Chart Axes/Text (Gray)
+input color    ColorCandleUp = C'41,98,255'; // Candle Up (Blue)
+input color    ColorCandleDown = C'161,161,166'; // Candle Down (Gray)
+input color    ColorBtnValid = C'41,98,255';    // Button Valid (Blue)
+input color    ColorBtnInvalid = C'161,161,166';  // Button Invalid (Gray)
+input color    ColorBtnActive  = C'41,98,255'; // Active Button (Blue)
+input color    ColorEntryLine = C'255,255,255';      // Entry Line Color (White)
+input color    ColorSLLine   = C'161,161,166';   // Stop Loss Line Color (Gray)
+input color    ColorTPLine   = C'41,98,255';   // Take Profit Line Color (Blue)
 input int      MaxSlippage   = 10;             // Max Slippage (Pips)
 input int      MaxSpread     = 50;             // Max Spread (Points)
 
 //--- Couleurs pour la liste
-color ColorListNormal = C'34,38,46';   // Couleur normale item liste
-color ColorListHover  = C'45,52,60';   // Couleur au survol
+color ColorListNormal = C'12,12,12';   // List Item (Black)
+color ColorListHover  = C'22,26,46';   // List Hover (Panel Bg)
 
 
 //--- Préfixe pour tous les objets graphiques
@@ -103,7 +103,7 @@ int    g_PosListOffset = 0;
 int    g_PosListMaxVisible = 10;
 
 // --- HISTORY FILTER GLOBALS ---
-enum ENUM_HISTORY_FILTER { H_FILTER_DAILY, H_FILTER_WEEKLY, H_FILTER_MONTHLY, H_FILTER_CUSTOM };
+enum ENUM_HISTORY_FILTER { H_FILTER_DAILY, H_FILTER_WEEKLY, H_FILTER_MONTHLY, H_FILTER_ALL, H_FILTER_CUSTOM };
 ENUM_HISTORY_FILTER g_HistoryFilterMode = H_FILTER_DAILY; // Default to Daily
 int    g_HistoryFilteredIndices[]; // Stores original indices of filtered orders
 datetime g_HistoryCustomStart = 0;
@@ -132,6 +132,7 @@ color    g_ColorBtnValid, g_ColorBtnInvalid, g_ColorEntryLine, g_ColorBtnActive;
 color    g_ColorSLLine, g_ColorTPLine;
 color    g_ColorCandleUp, g_ColorCandleDown;
 color    g_ColorListNormal, g_ColorListHover;
+color    g_ColorPositive, g_ColorNegative; // NEW: Global Positive/Negative indicators
 
 string   g_ColorPickerTarget = ""; // Target button to update
 bool     g_ShowOrderLines;       // Toggle for Order Lines visibility
@@ -243,6 +244,10 @@ void InitGlobals()
    g_ColorCandleDown = ColorCandleDown;
    g_ColorListNormal = ColorListNormal;
    g_ColorListHover = ColorListHover;
+   
+   // Init Dynamic Indicators Defaults
+   g_ColorPositive = g_ColorGreen; 
+   g_ColorNegative = g_ColorRed;
    
    g_ShowOrderLines = true; // Default to ON
    g_ShowPositionLines = true; // Default to ON

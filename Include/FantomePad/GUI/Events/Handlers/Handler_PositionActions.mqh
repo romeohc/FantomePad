@@ -8,6 +8,7 @@ bool Handle_PositionActions_Events(string sparam)
     // --- PARTIAL CLOSE SHORTCUTS ---
    if(sparam == PREFIX + "Pos_Btn_25") 
    {
+	  if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 25) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 25;
       
@@ -20,6 +21,7 @@ bool Handle_PositionActions_Events(string sparam)
    
    if(sparam == PREFIX + "Pos_Btn_50") 
    {
+      if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 50) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 50;
       
@@ -32,6 +34,7 @@ bool Handle_PositionActions_Events(string sparam)
    
    if(sparam == PREFIX + "Pos_Btn_100") 
    {
+      if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 100) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 100;
       

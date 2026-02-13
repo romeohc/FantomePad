@@ -11,27 +11,42 @@
 void UpdateHistoryFilter()
 {
    int total = OrdersHistoryTotal();
-   ArrayResize(g_HistoryFilteredIndices, 0); // Start empty
+   
+   // Pre-allocate to max possible size to avoid resize in loop
+   ArrayResize(g_HistoryFilteredIndices, total);
    
    datetime startLimit = 0;
-   datetime endLimit = 0; // 0 means no limit (or far future)
+   datetime endLimit = 0; // 0 means no limit
+   
+   // Robust Time Calculation (No iTime dependency)
+   MqlDateTime dt;
+   TimeToStruct(TimeCurrent(), dt);
+   
+   // Normalize to Start of Day (00:00:00)
+   dt.hour = 0;
+   dt.min = 0;
+   dt.sec = 0;
+   datetime startOfDay = StructToTime(dt);
    
    if(g_HistoryFilterMode == H_FILTER_DAILY)
    {
-      // Start of Today
-      MqlDateTime dt;
-      TimeToStruct(TimeCurrent(), dt);
-      dt.hour = 0; dt.min = 0; dt.sec = 0;
-      startLimit = StructToTime(dt);
+      startLimit = startOfDay;
    }
    else if(g_HistoryFilterMode == H_FILTER_WEEKLY)
    {
-      // Start of Week
-      startLimit = iTime(NULL, PERIOD_W1, 0);
+      // Start of Week (Sunday 00:00)
+      // day_of_week: 0=Sun, 6=Sat
+      startLimit = startOfDay - (dt.day_of_week * 86400); 
    }
    else if(g_HistoryFilterMode == H_FILTER_MONTHLY)
    {
-      startLimit = iTime(NULL, PERIOD_MN1, 0);
+      // Start of Month (Day 1)
+      dt.day = 1;
+      startLimit = StructToTime(dt);
+   }
+   else if(g_HistoryFilterMode == H_FILTER_ALL)
+   {
+      startLimit = 0; 
    }
    else if(g_HistoryFilterMode == H_FILTER_CUSTOM)
    {
@@ -39,28 +54,30 @@ void UpdateHistoryFilter()
       endLimit   = g_HistoryCustomEnd;
    }
    
-   // Loop and Filter
    int count = 0;
    for(int i=0; i<total; i++)
    {
       if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
       {
-         datetime ct = OrderCloseTime();
          bool match = false;
+         datetime ct = OrderCloseTime();
+         int type = OrderType();
          
-         if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+         // 1. Basic Filters (Order Type)
+         // Exclude Balance (6) and Credit (7)
+         if(type <= 5) // OP_BUY..OP_SELLSTOP
          {
-             if(ct >= startLimit && ct <= endLimit) match = true;
-         }
-         else
-         {
-             if(ct >= startLimit) match = true;
+             if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+             {
+                 if(ct >= startLimit && ct <= endLimit) match = true;
+             }
+             else
+             {
+                 if(ct >= startLimit) match = true;
+             }
          }
          
-         // Fix: Exclude Balance/Credit operations (Type > 1)
-         if(OrderType() > 1) match = false;
-         
-         // Symbol Filter
+         // 2. Symbol Filter
          if(match && g_HistoryFilterSymbol != "")
          {
              if(StringFind(OrderSymbol(), g_HistoryFilterSymbol) == -1) match = false;
@@ -68,12 +85,14 @@ void UpdateHistoryFilter()
          
          if(match)
          {
-            ArrayResize(g_HistoryFilteredIndices, count+1);
-            g_HistoryFilteredIndices[count] = i; // Save POSITION index
+            g_HistoryFilteredIndices[count] = i;
             count++;
          }
       }
    }
+   
+   // Trim array to actual size
+   ArrayResize(g_HistoryFilteredIndices, count);
 }
 
 //+------------------------------------------------------------------+

@@ -27,6 +27,13 @@ bool Handle_History_Events(string sparam)
       EffectButton(sparam);
       return true;
    }
+   if(sparam == PREFIX + "Hist_Btn_All")
+   {
+      SetHistoryFilter(H_FILTER_ALL);
+      CreateHistoryPanel();
+      EffectButton(sparam);
+      return true;
+   }
    if(sparam == PREFIX + "Hist_Btn_Custom")
    {
       SetHistoryFilter(H_FILTER_CUSTOM);

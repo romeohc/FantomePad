@@ -133,13 +133,13 @@ void UpdateCalculatedLot()
 
       if(CurrentDirection == 0)
       {
-         color c = isValid ? g_ColorGreen : g_ColorBtnInvalid;
+         color c = isValid ? g_ColorBtnActive : g_ColorBtnInvalid;
          ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, c);
          ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BORDER_COLOR, c);
       }
       else
       {
-         color c = isValid ? g_ColorRed : g_ColorBtnInvalid;
+         color c = isValid ? g_ColorBtnActive : g_ColorBtnInvalid;
          ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, c);
          ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BORDER_COLOR, c);
       }
@@ -155,9 +155,7 @@ void UpdateCalculatedLot()
        color actionCol = g_ColorBtnInvalid;
        if(isValid)
        {
-          if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3) actionCol = g_ColorGreen;
-          else if(CurrentTypeIndex == 2 || CurrentTypeIndex == 4) actionCol = g_ColorRed;
-          else actionCol = g_ColorBtnValid;
+          actionCol = g_ColorBtnActive;
        }
        ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, actionCol);
        ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BORDER_COLOR, actionCol);

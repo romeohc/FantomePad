@@ -103,6 +103,7 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    
    ResetLastError();
    int res = WebRequest("POST", url, headers, timeout_ms, data, result, responseHeaders);
+   int lastError = GetLastError();
    
    if(res == 200) 
    {
@@ -143,7 +144,16 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    }
    else 
    {
-      g_AuthErrorMsg = "Serveur injoignable (Erreur HTTP " + IntegerToString(res) + ")";
+      if(res == -1)
+      {
+         if(lastError == 4060) g_AuthErrorMsg = "URL non ajouté dans les options";
+         else if(lastError == 4014) g_AuthErrorMsg = "Fonction non permise (Err 4014)";
+         else g_AuthErrorMsg = "Erreur Connexion (Err " + IntegerToString(lastError) + ")";
+      }
+      else
+      {
+         g_AuthErrorMsg = "Erreur Serveur (HTTP " + IntegerToString(res) + ")";
+      }
    }
    return false;
 }

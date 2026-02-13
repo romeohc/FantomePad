@@ -95,6 +95,8 @@ void SaveConfigToFile()
       FileWrite(handle, "ColorCandleDown=" + IntegerToString(g_ColorCandleDown));
       FileWrite(handle, "ColorListNormal=" + IntegerToString(g_ColorListNormal));
       FileWrite(handle, "ColorListHover=" + IntegerToString(g_ColorListHover));
+      FileWrite(handle, "ColorPositive=" + IntegerToString(g_ColorPositive));
+      FileWrite(handle, "ColorNegative=" + IntegerToString(g_ColorNegative));
       
       // Panel States & Positions
       FileWrite(handle, "IsMainPanelVisible=" + IntegerToString(g_PanelMain.IsVisible));
@@ -168,6 +170,8 @@ void LoadConfig()
             if(key == "ColorCandleDown") g_ColorCandleDown = (color)StringToInteger(val);
             if(key == "ColorListNormal") g_ColorListNormal = (color)StringToInteger(val);
             if(key == "ColorListHover")  g_ColorListHover  = (color)StringToInteger(val);
+            if(key == "ColorPositive")   g_ColorPositive   = (color)StringToInteger(val);
+            if(key == "ColorNegative")   g_ColorNegative   = (color)StringToInteger(val);
             
             // Panel States & Positions
             if(key == "IsMainPanelVisible") g_PanelMain.IsVisible = (bool)StringToInteger(val);

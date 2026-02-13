@@ -41,15 +41,15 @@ void CreatePanel()
    CreateLabel("Label_Lot", "Lot (Auto)", 0, 0, 8, g_ColorText, "Trebuchet MS");
    CreateEdit("Edit_Lot", "0.00", 0, 0, g_PanelMain.Width - 40, 28, true);
    
-   CreateButton("Btn_Sell", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnValid, g_ColorText); 
+   CreateButton("Btn_Sell", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnActive, g_ColorText); 
    ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Sell", OBJPROP_FONT, "Trebuchet MS Bold");
    
-   CreateButton("Btn_Buy", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnValid, g_ColorText);
+   CreateButton("Btn_Buy", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnActive, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Buy", OBJPROP_FONT, "Trebuchet MS Bold");
  
-   CreateButton("Btn_Action", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnValid, g_ColorText);
+   CreateButton("Btn_Action", "VALIDATE", 0, 0, g_PanelMain.Width - 40, 45, g_ColorBtnActive, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Btn_Action", OBJPROP_FONT, "Trebuchet MS Bold");
 }

@@ -224,6 +224,21 @@ void OpenSettings()
    CreateColorRow("ChrtFg", "Axes Text Color", col2X, SCREEN_Y, g_ColorChartFg, v);
    relY += rowH + 10;
 
+   // --- SUB: DYNAMIC INDICATORS (Positive/Negative) ---
+   v = CHECK_VIS(20);
+   n = "Set_Sub_DynInd";
+   if(v) {
+       CreateLabel(n, "Dynamic Indicators", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
+       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+   } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
+   relY += 30;
+
+   // Dynamic Indicators Row
+   v = CHECK_VIS(rowH);
+   CreateColorRow("PosInd", "Positive / Buy", col1X, SCREEN_Y, g_ColorPositive, v);
+   CreateColorRow("NegInd", "Negative / Sell", col2X, SCREEN_Y, g_ColorNegative, v);
+   relY += rowH + 10;
+
    // --- SUB: TRADING ---
    v = CHECK_VIS(20);
    n = "Set_Sub_Trade";

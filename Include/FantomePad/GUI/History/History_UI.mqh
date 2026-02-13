@@ -18,15 +18,26 @@ void DrawHistoryToolbar(int startX, int startY, int headerHeight)
    color bgDaily   = (g_HistoryFilterMode == H_FILTER_DAILY) ? g_ColorBtnActive : g_ColorInput;
    color bgWeekly  = (g_HistoryFilterMode == H_FILTER_WEEKLY) ? g_ColorBtnActive : g_ColorInput;
    color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? g_ColorBtnActive : g_ColorInput;
+   color bgAll     = (g_HistoryFilterMode == H_FILTER_ALL) ? g_ColorBtnActive : g_ColorInput;
    color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? g_ColorBtnActive : g_ColorInput;
    
    CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Hist_Btn_Daily", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
    CreateButton("Hist_Btn_Weekly", "Weekly", curBtnX, btnY, btnW, btnH, bgWeekly, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Hist_Btn_Weekly", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
    CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Hist_Btn_Monthly", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
+   
+   // New "All" Button
+   CreateButton("Hist_Btn_All", "All", curBtnX, btnY, 50, btnH, bgAll, g_ColorText); // Smaller width for "All"
+   ObjectSetInteger(0, PREFIX + "Hist_Btn_All", OBJPROP_ZORDER, 5);
+   curBtnX += 50 + gap;
+   
    CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "Hist_Btn_Custom", OBJPROP_ZORDER, 5);
    
    // Symbol Filter UI (Right of buttons)
    int symX = curBtnX + btnW + 30;
@@ -134,8 +145,8 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            if(g_OneRPercent > 0) retR = retPrc / g_OneRPercent;
            string retRStr = DoubleToString(retR, 2) + " R";
            
-           color profCol = (prof >= 0) ? g_ColorGreen : g_ColorRed;
-           color typeCol = (type==OP_BUY || type==OP_BUYLIMIT || type==OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+           color profCol = (prof >= 0) ? g_ColorPositive : g_ColorNegative;
+           color typeCol = (type==OP_BUY || type==OP_BUYLIMIT || type==OP_BUYSTOP) ? g_ColorPositive : g_ColorNegative;
            
            int txtY = itemY + 6;
            int colX = x + paddingX;
@@ -241,7 +252,7 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    string sRetP = DoubleToString(totalRetP, 2) + "%";
    string sRetR = DoubleToString(totalRetR, 2) + " R";
    
-   color colProf = (sumProf >= 0) ? g_ColorGreen : g_ColorRed;
+   color colProf = (sumProf >= 0) ? g_ColorPositive : g_ColorNegative;
    
    CreateRect("Hist_Footer_Line", x, y, w, 1, C'50,50,50', BORDER_FLAT);
    

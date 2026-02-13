@@ -124,13 +124,13 @@ void UpdateAccountPanel()
    string sPerfR = (perfR >= 0 ? "+" : "") + DoubleToString(perfR, 2) + " R";
    
    ObjectSetString(0, PREFIX + "Account_Val_PnL", OBJPROP_TEXT, sPnL);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, (pnl >= 0) ? g_ColorGreen : g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, (pnl >= 0) ? g_ColorPositive : g_ColorNegative);
    
    ObjectSetString(0, PREFIX + "Account_Val_PerfP", OBJPROP_TEXT, sPerfP);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, (perfP >= 0) ? g_ColorGreen : g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, (perfP >= 0) ? g_ColorPositive : g_ColorNegative);
    
    ObjectSetString(0, PREFIX + "Account_Val_PerfR", OBJPROP_TEXT, sPerfR);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, (perfR >= 0) ? g_ColorGreen : g_ColorRed);
+   ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, (perfR >= 0) ? g_ColorPositive : g_ColorNegative);
    
    // Ensure colors are consistent if they were changed elsewhere
    ObjectSetInteger(0, PREFIX + "Account_Val_Balance", OBJPROP_COLOR, g_ColorText);
@@ -190,7 +190,7 @@ void UpdateAccountPanel()
          // DATA
          string typeStr = GetOrderTypeStrShort(OrderType());
          string symbol  = OrderSymbol();
-         color typeColor = (OrderType() % 2 == 0) ? g_ColorGreen : g_ColorRed;
+         color typeColor = (OrderType() % 2 == 0) ? g_ColorPositive : g_ColorNegative;
          
          string suffix = "_" + IntegerToString(visualIndex);
          

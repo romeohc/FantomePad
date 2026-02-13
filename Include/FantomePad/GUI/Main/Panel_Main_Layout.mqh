@@ -46,27 +46,27 @@ void UpdateUIMode()
       if(CurrentDirection == 0) 
       {
          typeText = "BUY MARKET";
-         typeBgColor = g_ColorGreen;
+         typeBgColor = g_ColorPositive;
          typeBorderColor = typeBgColor;
       }
       else 
       {
          typeText = "SELL MARKET";
-         typeBgColor = g_ColorRed;
+         typeBgColor = g_ColorNegative;
          typeBorderColor = typeBgColor;
       }
    }
    else if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3)
    {
       typeText = OrderTypes[CurrentTypeIndex];
-      typeBgColor = g_ColorGreen; 
-      typeBorderColor = g_ColorGreen;
+      typeBgColor = g_ColorPositive; 
+      typeBorderColor = g_ColorPositive;
    }
    else
    {
       typeText = OrderTypes[CurrentTypeIndex];
-      typeBgColor = g_ColorRed;
-      typeBorderColor = g_ColorRed;
+      typeBgColor = g_ColorNegative;
+      typeBorderColor = g_ColorNegative;
    }
    
    // Format: Symbol · OrderType
@@ -155,6 +155,7 @@ void UpdateUIMode()
          SetObjPosition("Btn_Buy", startX + paddingX, currentY);
          ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
          ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_YSIZE, 45);
+         ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorBtnActive);
       }
       else
       {
@@ -163,6 +164,7 @@ void UpdateUIMode()
          SetObjPosition("Btn_Sell", startX + paddingX, currentY);
          ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
          ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_YSIZE, 45); 
+         ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorBtnActive); 
       }
    }
    else
@@ -173,6 +175,7 @@ void UpdateUIMode()
       SetObjPosition("Btn_Action", startX + paddingX, currentY);
       ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
       ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_YSIZE, 45);
+      ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, g_ColorBtnActive);
    }
    
     currentY += 45 + 20; // Button height (45) + Bottom margin (20)

@@ -9,12 +9,20 @@
 //+------------------------------------------------------------------+
 void UpdatePartialButtonsVisuals()
 {
-   color activeCol = g_ColorBtnActive; // Fallback
-   if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+   color activeCol = g_ColorBtnActive; 
+   
+   if(SelectedPositionTicket == -1)
    {
-      int type = OrderType();
-      activeCol = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, g_ColorInput);
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, g_ColorText);
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, g_ColorInput);
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, g_ColorText);
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, g_ColorInput);
+       ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, g_ColorText);
+       ChartRedraw();
+       return;
    }
+
 
    // Button 25
    bool is25 = (g_PosPartialMode == 25);
@@ -39,7 +47,19 @@ void UpdatePartialButtonsVisuals()
 //+------------------------------------------------------------------+
 void UpdatePositionsValues()
 {
-   if(!g_PanelPositions.IsVisible) return;
+   static bool wasVisible = false;
+   if(!g_PanelPositions.IsVisible) 
+   {
+      wasVisible = false;
+      return;
+   }
+   
+   // Force Refresh on Open
+   if(!wasVisible)
+   {
+      g_LastPosTicket = -1;
+      wasVisible = true;
+   }
    
    if(SelectedPositionTicket != -1)
    {
@@ -59,7 +79,7 @@ void UpdatePositionsValues()
              
              string sProfit = DoubleToString(profit, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, sProfit);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
+             ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
 
              double bal = AccountBalance();
              double profitPrc = 0.0;
@@ -69,11 +89,11 @@ void UpdatePositionsValues()
              
              string sProfitR = DoubleToString(profitR, 2) + " R";
              ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, sProfitR);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
+             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
 
              string sProfitPrc = DoubleToString(profitPrc, 2) + "%";
              ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, sProfitPrc);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, (profit >= 0) ? g_ColorGreen : g_ColorRed);
+             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
              
              string sComm = DoubleToString(comm, 2) + " " + AccountCurrency();
              ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, sComm);
@@ -87,22 +107,38 @@ void UpdatePositionsValues()
              
              if(sl > 0)
              {
-                 double tickSize = MarketInfo(Symbol(), MODE_TICKSIZE);
-                 double tickVal  = MarketInfo(Symbol(), MODE_TICKVALUE);
-                 if(tickSize > 0)
+                 // Logic Update: Check if SL is in Profit/BE (Risk Free)
+                 // If SL covers the entry, there is no risk on the table (technically negative risk, but shown as 0)
+                 int opType = OrderType();
+                 bool isRiskFree = false;
+                 
+                 if(opType == OP_BUY && sl >= open) isRiskFree = true;
+                 if(opType == OP_SELL && sl <= open) isRiskFree = true;
+                 
+                 if(isRiskFree)
                  {
-                     double dist = MathAbs(OrderOpenPrice() - sl);
-                     double riskValMoney = (dist / tickSize) * tickVal * lots;
-                     
-                     bal = AccountBalance();
-                     if(bal > 0) {
-                        double riskPrc = (riskValMoney / bal) * 100.0;
-                        sRiskPrc = DoubleToString(riskPrc, 2) + "%";
-                        
-                        if(g_OneRPercent > 0) {
-                           double riskRVal = riskPrc / g_OneRPercent;
-                           sRiskR = DoubleToString(riskRVal, 2) + " R";
-                        }
+                     sRiskR = "0.00 R";
+                     sRiskPrc = "0.00%";
+                 }
+                 else
+                 {
+                     double tickSize = MarketInfo(Symbol(), MODE_TICKSIZE);
+                     double tickVal  = MarketInfo(Symbol(), MODE_TICKVALUE);
+                     if(tickSize > 0)
+                     {
+                         double dist = MathAbs(open - sl);
+                         double riskValMoney = (dist / tickSize) * tickVal * lots;
+                         
+                         bal = AccountBalance();
+                         if(bal > 0) {
+                            double riskPrc = (riskValMoney / bal) * 100.0;
+                            sRiskPrc = DoubleToString(riskPrc, 2) + "%";
+                            
+                            if(g_OneRPercent > 0) {
+                               double riskRVal = riskPrc / g_OneRPercent;
+                               sRiskR = DoubleToString(riskRVal, 2) + " R";
+                            }
+                         }
                      }
                  }
              }
@@ -141,7 +177,7 @@ void UpdatePositionsValues()
                  g_PosPartialMode = 0; 
                  UpdatePartialButtonsVisuals(); 
                  
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
                  
                  UpdatePositionsLayout(); // Refresh dynamic visibility (Entry Price hide/show)
@@ -150,12 +186,12 @@ void UpdatePositionsValues()
              color typeBg = g_ColorInput;
              int type = OrderType();
              
-             if(type == OP_BUY) typeBg = g_ColorGreen;
-             else if(type == OP_SELL) typeBg = g_ColorRed;
-             else if(type == OP_BUYLIMIT) typeBg = g_ColorGreen;
-             else if(type == OP_SELLLIMIT) typeBg = g_ColorRed;
-             else if(type == OP_BUYSTOP) typeBg = g_ColorGreen;
-             else if(type == OP_SELLSTOP) typeBg = g_ColorRed;
+             if(type == OP_BUY) typeBg = g_ColorPositive;
+             else if(type == OP_SELL) typeBg = g_ColorNegative;
+             else if(type == OP_BUYLIMIT) typeBg = g_ColorPositive;
+             else if(type == OP_SELLLIMIT) typeBg = g_ColorNegative;
+             else if(type == OP_BUYSTOP) typeBg = g_ColorPositive;
+             else if(type == OP_SELLSTOP) typeBg = g_ColorNegative;
              
              ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, OrderSymbol() + "  ·  " + DoubleToString(lots, 2));
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
@@ -169,14 +205,19 @@ void UpdatePositionsValues()
              if(inLoss)
              {
                  g_PosBE_Active = false; // Force Disable
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnInvalid); // INACTIVE COLOR
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput); // INACTIVE COLOR
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText); 
              }
              else if(!g_PosBE_Active)
              {
-                 // If eligible but not active, ensure inputs color (normal state)
+                 // If eligible but not active, use Inactive/Default color
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
                  ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+             }
+             else
+             {
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnActive);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, clrWhite);
              }
              
              // Update Validate Button State
@@ -202,7 +243,7 @@ void UpdatePositionsValues()
              color valCol = g_ColorBtnInvalid;
              if(isModified)
              {
-                 valCol = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
+                 valCol = g_ColorBtnActive;
              }
              
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
@@ -216,6 +257,8 @@ void UpdatePositionsValues()
       SelectedPositionTicket = -1;
       g_LastPosTicket = -1;
    }
+   
+   UpdatePartialButtonsVisuals(); // Ensure buttons update to inactive state
    
    ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "Select Position...");
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, g_ColorInput);

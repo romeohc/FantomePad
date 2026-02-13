@@ -57,6 +57,17 @@ int OnInit()
    // 2. Charger la configuration sauvegardée
    LoadConfig();
 
+   // --- AUTO-SELECT SYMBOL ON ACCOUNT CHANGE ---
+   bool accountChanged = CheckAndSetNewAccount();
+   
+   if(accountChanged && !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
+   {
+       Print("FanomePad Info: AutoTrading was disabled by MetaTrader security setting.");
+       Print("To fix: Go to Tools > Options > Expert Advisors > Uncheck 'Disable automated trading when the account has been changed'.");
+       // Optional: Alert the user - but maybe keep it to Print to avoid blocking popup spam on every switch if they don't fix it
+   }
+   // --------------------------------------------
+
    // --- CONFIG SANITY CHECK ---
    // We validate the loaded config values to prevent dangerous edits in the text file
    if(g_MaxRiskPercent <= 0) g_MaxRiskPercent = 2.0;       // Default safe fallback
@@ -162,4 +173,44 @@ void OnChartEvent(const int id,
 {
    // Déléguer entièrement au Master Controller
    GUI_OnChartEvent(id, lparam, dparam, sparam);
+}
+
+//+------------------------------------------------------------------+
+//| Helper: Check for Account Change & Auto-Select First Symbol      |
+//+------------------------------------------------------------------+
+bool CheckAndSetNewAccount()
+{
+   if(IsTesting()) return false; 
+
+   string gvName = "FantomePad_LastAccount";
+   int currentAccount = (int)AccountNumber();
+   int lastAccount = 0;
+
+   // Check if global variable exists and retrieve value
+   if(GlobalVariableCheck(gvName))
+   {
+      lastAccount = (int)GlobalVariableGet(gvName);
+   }
+
+   // If changed (or first run on this terminal because var didn't exist)
+   if(currentAccount != lastAccount)
+   {
+      GlobalVariableSet(gvName, (double)currentAccount);
+      
+      // Get the first symbol from the Market Watch (User's list)
+      int total = SymbolsTotal(true); // true = only selected symbols
+      if(total > 0)
+      {
+         string firstSymbol = SymbolName(0, true);
+         
+         // Only switch if we are not already on it
+         if(Symbol() != firstSymbol)
+         {
+            Print("FantomePad: Account Change Detected (", lastAccount, " -> ", currentAccount, "). Auto-switching to first symbol: ", firstSymbol);
+            ChartSetSymbolPeriod(0, firstSymbol, Period());
+            return true;
+         }
+      }
+   }
+   return false;
 }

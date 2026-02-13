@@ -28,6 +28,7 @@ void CreateHistoryPanel()
    
    // 1. Fond
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
+   ObjectSetInteger(0, PREFIX + "Hist_Bg", OBJPROP_ZORDER, 0);
    
    // 2. Toolbar
    DrawHistoryToolbar(startX, startY, headerHeight);
@@ -94,6 +95,7 @@ void ToggleHistoryPanel(bool visible)
    SetObjVisible("Hist_Btn_Daily", visible);
    SetObjVisible("Hist_Btn_Weekly", visible);
    SetObjVisible("Hist_Btn_Monthly", visible);
+   SetObjVisible("Hist_Btn_All", visible);
    SetObjVisible("Hist_Btn_Custom", visible);
    
    SetObjVisible("Hist_Lbl_SymFilter", visible);
