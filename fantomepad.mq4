@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2026, FantomePad"
 #property link      "https://fantomepad.com"
-#property version   "2.00"
+#property version   "1.00"
 #property strict
 
 // Include Modular Logic

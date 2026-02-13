@@ -15,7 +15,13 @@
 //+------------------------------------------------------------------+
 void ExecuteOrder(int cmd)
 {
-   // --- SAFETY CHECK: AUTO-TRADING & LIVE TRADING ---
+   // --- SAFETY CHECK: AUTO-TRADING & ACCOUNT ---
+   if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+   {
+       ShowValidationError("No Account Connected");
+       return;
+   }
+   
    if(!IsExpertEnabled())
    {
       ShowValidationError("Auto-Trading is OFF!");

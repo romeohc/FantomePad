@@ -19,8 +19,17 @@ void CreateAccountPanel()
    // 1. Fond & Header
    CreateRect("Account_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    CreateRect("Account_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
+   long login = AccountInfoInteger(ACCOUNT_LOGIN);
    string accountName = AccountInfoString(ACCOUNT_NAME);
-   if(accountName == "") accountName = IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
+   
+   if(login == 0)
+   {
+       accountName = "No Account Connected";
+   }
+   else if(accountName == "") 
+   {
+       accountName = IntegerToString(login);
+   }
    
    // Truncate if too long (max ~25 chars for header)
    string displayTitle = TruncateString(accountName, 25);

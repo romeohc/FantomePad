@@ -455,7 +455,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         {activeTab === 'docs' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[
-                                    { title: "Installation Complète", duration: "5:20", level: "Débutant" },
+                                    { title: "Connecter son compte MT4", duration: "0:45", level: "Débutant", src: "/video/tuto-addaccount-mt4.mov" },
                                     { title: "Première Configuration", duration: "12:10", level: "Débutant" },
                                     { title: "Comprendre les Signaux", duration: "8:45", level: "Intermédiaire" },
                                     { title: "Optimisation des Gains", duration: "15:30", level: "Avancé" },
@@ -464,19 +464,30 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                 ].map((video, idx) => (
                                     <div key={idx} className="group cursor-default">
                                         <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-2xl overflow-hidden mb-4 group-hover:border-white/10 transition-all">
-                                            <div className="absolute top-3 left-3 z-20">
-                                                <span className="bg-brand-blue text-black text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide shadow-lg">
-                                                    Bientôt disponible
-                                                </span>
-                                            </div>
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
-                                                <div className="h-14 w-14 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform opacity-50">
-                                                    <PlayCircle className="h-6 w-6 text-white/50 fill-current" />
-                                                </div>
-                                            </div>
-                                            <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white/50">
-                                                {video.duration}
-                                            </div>
+                                            {video.src ? (
+                                                <video
+                                                    src={video.src}
+                                                    className="w-full h-full object-cover"
+                                                    controls
+                                                    playsInline
+                                                />
+                                            ) : (
+                                                <>
+                                                    <div className="absolute top-3 left-3 z-20">
+                                                        <span className="bg-brand-blue text-black text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide shadow-lg">
+                                                            Bientôt disponible
+                                                        </span>
+                                                    </div>
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                                                        <div className="h-14 w-14 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform opacity-50">
+                                                            <PlayCircle className="h-6 w-6 text-white/50 fill-current" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white/50">
+                                                        {video.duration}
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                         <h3 className="text-lg font-bold text-white/60 group-hover:text-white/80 transition-colors">{video.title}</h3>
                                         <div className="flex items-center gap-2 mt-2 opacity-60">

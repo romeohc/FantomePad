@@ -14,7 +14,7 @@ input int      DefaultNavigationPosition = 4; // 0=TL, 1=TC, 2=TR, 3=BL, 4=BC, 5
 // IMPORTANT: Change this MagicNumber if running multiple instances of FantomePad!
 // Each EA instance MUST have a unique MagicNumber to avoid trade conflicts.
 input int      MagicNumber = 123456;   // Magic Number for trade identification (MUST BE UNIQUE PER INSTANCE)
-input color    ColorBg     = C'22,26,46';  // Panel Background (User Custom)
+input color    ColorBg     = C'34,38,46';  // Panel Background (User Custom)
 input color    ColorHeader = C'12,12,12';  // Header (Black)
 input color    ColorInput  = C'12,12,12';  // Input Fields (Black)
 input color    ColorText   = C'255,255,255'; // Main Text (White)
