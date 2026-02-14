@@ -5,7 +5,7 @@
 #ifndef _TRADE_LINES_MQH_
 #define _TRADE_LINES_MQH_
 
-#include "../Core/Defines.mqh"
+#include "../../Common/Core/Defines.mqh"
 
 //+------------------------------------------------------------------+
 //| GESTION DES LIGNES GRAPHIQUES                                    |

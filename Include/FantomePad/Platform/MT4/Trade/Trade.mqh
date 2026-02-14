@@ -7,7 +7,7 @@
 #property strict
 
 // --- Dependencies ---
-#include "../Core/Defines.mqh"
+#include "../../Common/Core/Defines.mqh"
 
 // --- Trade Sub-Modules ---
 #include "Trade_Constants.mqh"

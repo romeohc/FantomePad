@@ -6,7 +6,7 @@
 
 // Includes
 #include "Components/Components.mqh"
-#include "../Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
+#include "../../MT4/Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
 #include "Main/Panel_Main.mqh"
 #include "Settings/Panel_Settings.mqh"
 #include "Account/Panel_Account.mqh"

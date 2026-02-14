@@ -8,7 +8,7 @@
 #include "Trade_Execution.mqh"
 #include "Trade_Calculations.mqh"
 #include "Trade_Lines.mqh"
-#include "../GUI/Main/Panel_Main_Shared.mqh"
+#include "../../Common/GUI/Main/Panel_Main_Shared.mqh"
 
 //+------------------------------------------------------------------+
 //| HIGH LEVEL EXECUTION                                             |

@@ -9,9 +9,10 @@
 #property strict
 
 // Include Modular Logic
-#include "Include/FantomePad/Core/Defines.mqh"
-#include "Include/FantomePad/Core/Config.mqh"
-#include "Include/FantomePad/GUI/GUI_Master.mqh"
+#include "Include/FantomePad/Platform/Common/Core/Defines.mqh"
+#include "Include/FantomePad/Platform/Common/Core/Config.mqh"
+#include "Include/FantomePad/Platform/Common/GUI/GUI_Master.mqh"
+#include "Include/FantomePad/Platform/Bridge.mqh"
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |

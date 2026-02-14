@@ -5,7 +5,7 @@
 #ifndef _TRADE_CALCULATIONS_MQH_
 #define _TRADE_CALCULATIONS_MQH_
 
-#include "../Core/Defines.mqh"
+#include "../../Common/Core/Defines.mqh"
 
 //+------------------------------------------------------------------+
 //| CALCULATIONS                                                     |

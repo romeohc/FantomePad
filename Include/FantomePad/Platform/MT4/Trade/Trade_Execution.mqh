@@ -5,7 +5,7 @@
 #ifndef _TRADE_EXECUTION_MQH_
 #define _TRADE_EXECUTION_MQH_
 
-#include "../Core/Defines.mqh"
+#include "../../Common/Core/Defines.mqh"
 #include "Trade_Constants.mqh"
 #include <stdlib.mqh>
 
