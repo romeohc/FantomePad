@@ -18,56 +18,46 @@ Le code logique de FantomePad (stratégie, interface) ne doit **JAMAIS** parler 
 
 ---
 
-## 📅 PHASES D'EXÉCUTION (SÉQUENTIEL & ÉTANCHE)
+## 📅 PHASES D'EXÉCUTION V2.0 (INDUSTRIELLE & SCALABLE)
+**Philosophie :** "Fail Fast". On doit détecter les incompatibilités MT5 le plus tôt possible, pas à la fin.
 
-### PHASE 0 : RESTRUCTURATION (La Fondation)
-**But :** Organiser le chaos avant de construire.
-- Déplacer physiquement les fichiers existants dans la nouvelle architecture.
-- Séparer ce qui est "Pur" (Common) de ce qui est "Pollué" (MT4 specific).
-- **CRITÈRE DE SUCCÈS :** L'Expert Advisor compile **exactement** comme avant sur MT4. Aucune régression. Les fichiers sont juste ailleurs.
+### PHASE 0 : RESTRUCTURATION (Validée ✅)
+Architecture en place. Les fondations sont saines.
 
-### PHASE 1 : ABSTRACTION DES DONNÉES (Le Vocabulaire)
-**But :** Unifier la langue. MT4 dit `Bid`, MT5 dit `SymbolInfoDouble(..., SYMBOL_BID)`.
-- Créer `Wrapper_Market.mqh` : `GetBid()`, `GetAsk()`, `GetPoint()`.
-- Créer `Wrapper_Account.mqh` : `GetBalance()`, `GetEquity()`, `GetFreeMargin()`.
-- Unifier les Constantes : Mapper `OP_BUY` (MT4) vers `ORDER_TYPE_BUY` (MT5).
-- **CRITÈRE DE SUCCÈS :** Un script de test affiche les mêmes prix et solde sur MT4 et MT5.
+### PHASE 1 : ABSTRACTION DES DONNÉES & NORMALISATION (Le Socle)
+**But :** Créer un langage commun universel structuré (DTO).
+- [ ] Enrichir `Compatibility.mqh` avec les macros manquantes.
+- [ ] **CRITIQUE :** Créer `Common/Core/DataTypes.mqh` contenant `struct FantomeTrade` (Id, Symbol, Type, Lots, Profit...).
+- [ ] Créer `MT4/DataWrapper.mqh` : Une fonction qui remplit `FantomeTrade` depuis `OrderSelect`.
+- [ ] Créer `MT5/DataWrapper.mqh` : Une fonction (stub) qui remplira `FantomeTrade` depuis `PositionSelect`.
+- [ ] **TEST DE FEU :** Compiler tout le projet GUI sur MT5 dès maintenant (avec des stubs vides). Le GUI doit être compilable sur les deux plateformes avant d'aller plus loin.
 
-### PHASE 2 : SÉCURITÉ & AUTH (Le Passeport)
-**But :** Rendre l'authentification Supabase universelle.
-- Adapter `Security.mqh`.
-- Unifier `WebRequest` (Attention aux différences de timeout et headers).
-- Unifier la lecture/écriture de fichiers (Token de licence).
-- **CRITÈRE DE SUCCÈS :** Une licence valide sur MT4 est reconnue valide sur MT5 (même Hardware ID généré).
+### PHASE 2 : SÉCURITÉ & CONNECTIVITÉ
+**But :** Le Passeport Universel.
+- [ ] Adapter `Security.mqh` pour utiliser `WebRequest` de manière unifiée.
+- [ ] Abstraire les accès fichiers (Token, Config) dans une classe `C_FileManager`.
+- [ ] Validation : Le même code d'activation fonctionne sur MT4 et MT5.
 
-### PHASE 3 : MOTEUR D'EXÉCUTION (Le Moteur)
-**But :** La partie la plus critique. Acheter et Vendre.
-- Créer `TradeWrapper.mqh`.
-- MT4 : Utilise `OrderSend` (simple).
-- MT5 : Implémente une structure `MqlTradeRequest` complète (complexe).
-- Gérer les "Retries" et les codes erreurs (Requotes vs Rejets).
-- **CRITÈRE DE SUCCÈS :** 100 trades de test (Buy/Sell/Limit) exécutés sans erreur `10013` ou `10015` sur MT5.
+### PHASE 3 : LE MOTEUR D'EXÉCUTION (Unifier l'Action)
+**But :** Acheter et Vendre sans se soucier du moteur sous le capot.
+- [ ] Créer une interface `ITradeEngine`.
+- [ ] Implémenter `C_TradeEngineMT4` (Basé sur le code actuel).
+- [ ] Implémenter `C_TradeEngineMT5` (Utilisant `MqlTradeRequest`).
+- [ ] Le `Bridge.mqh` instancie le bon moteur au démarrage.
 
-### PHASE 4 : MÉMOIRE & ÉTAT (Le Cerveau)
-**But :** Unifier la vision du passé (Historique) et du présent (Positions ouvertes).
-- **Problème Majeur :** MT4 mélange "Positions" et "Ordres en attente". MT5 les sépare strictement.
-- Créer `PositionsWrapper.mqh` : Une fonction `GetOpenPositions()` qui renvoie une liste unifiée.
-- Créer `HistoryWrapper.mqh` : Abstraire `HistorySelect` (MT5) pour qu'il ressemble à l'accès direct de MT4.
-- **CRITÈRE DE SUCCÈS :** Le Panel "Positions" et le Panel "History" affichent exactement les mêmes données (Profit, Swap, Date) sur les deux plateformes.
+### PHASE 4 : LE CERVEAU (Gestion d'État & Ordres)
+**But :** Le GUI ne regarde jamais `OrdersTotal()` directement.
+- [ ] Créer `C_OrderManager` (Singleton en Common).
+- [ ] Il maintient une liste `FantomeTrade[]` à jour via un Timer/Event.
+- [ ] Le GUI lit uniquement cette liste propre (Zéro lag, Zéro appel système bloquant).
+- [ ] **Avantage énorme :** On peut trier, filtrer ou simuler des ordres sans toucher au moteur MT.
 
-### PHASE 5 : INTERFACE & ÉVÉNEMENTS (La Peau)
-**But :** Rendre le Pad réactif.
-- Adapter `OnChartEvent` pour les différences Clavier/Souris.
-- Vérifier le rendu graphique (les objets `OBJ_RECTANGLE_LABEL` se comportent parfois différemment au pixel près).
-- **CRITÈRE DE SUCCÈS :** Le GUI est fluide, le Drag & Drop fonctionne, les clics sont détectés instantanément.
+### PHASE 5 : INTERFACE & UX (Finitions)
+**But :** Adapter les subtilités graphiques.
+- [ ] Ajuster la gestion des événements Souris (MT5 a plus d'événements que MT4).
+- [ ] Vérifier le rendu des polices et des alignements (Pixel Perfect).
 
-### PHASE 6 : NETTOYAGE & VALIDATION FINALE
-- Supprimer tout code mort ou commenté "Legacy".
-- Test de charge (Scalabilité).
-- Validation finale "User Experience" (Le WAOUH effect).
-
----
-
-**NOTE CRITIQUE POUR L'IA EXÉCUTANTE :**
-Ne jamais mélanger deux phases. Si l'étape 3 (Execution) échoue, ne passez pas à l'étape 4 (History). La base doit être solide.
-Utilisez toujours `#ifdef __MQL5__` pour isoler le code spécifique. Le fichier maître reste propre.
+### PHASE 6 : VALIDATION CROISÉE
+- [ ] Test de charge : 100 ordres ouverts.
+- [ ] Test de crash : Coupure réseau, reconnexion.
+- [ ] Packaging : Générateur d'installeur unique (détecte les terminaux installés).

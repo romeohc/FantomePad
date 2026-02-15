@@ -1,14 +1,16 @@
 # FantomePad - Technical Documentation & Vision
 
 > **Target Audience:** AI Agents & Core Developers
-> **Project Status:** Active Development (V3.0 - Security & Licensing Live)
-> **Goal:** Revolutionize the MetaTrader 4 experience through a modern "OS-like" overlay, cloud-based licensing, and hardware integration (The Pad).
+> **Project Status:** Active Development (V3.0 - Multi-Platform Architecture)
+> **Goal:** Revolutionize the trading experience on legacy platforms (MetaTrader 4 & 5) through a modern "OS-like" overlay, cloud-based licensing, and hardware integration (The Pad).
 
 ---
 
 ## 1. Project Vision: The "OS within an App"
 
-**PhantomPad** is a high-performance GUI overlay for MetaTrader 4, engineered to transcend the limitations of the archaic 2005 interface. It transforms the terminal into a modern, fluid environment where the user interacts exclusively with a custom "Mini OS" rendered directly on the chart canvas.
+**PhantomPad** is a high-performance GUI overlay engineered to transcend the limitations of archaic trading interfaces. It transforms platforms like MetaTrader 4 and MetaTrader 5 into a modern, fluid environment where the user interacts exclusively with a custom "Mini OS" rendered directly on the chart canvas.
+
+Our mission is not just to fix MT4, but to **revolutionize how traders interact with the market**. While we start with the MetaTrader ecosystem (due to its massive user base requiring modernization), our core architecture is designed to be platform-agnostic, ready to adapt to future trading environments.
 
 ### The Core Pillars
 *   **Software (The Overlay):** A custom-built **Modular Monolith** GUI engine. It features independent, draggable, and persistent windows that remember their state across sessions.
@@ -19,47 +21,33 @@
 ### Key Objectives
 *   **Eliminate Friction:** Automated risk management (real-time lot sizing based on % or cash risk) and one-click execution to save critical seconds.
 *   **Premium Aesthetics:** A "Deep Dark" design system with vibrant accents (Mint Green/Vibrant Red), moving away from "standard toolbars" towards a professional, high-tier SaaS aesthetic.
-*   **Sovereignty:** The end goal is for users to maximize their charts, hide all MT4 UI elements, and operate entirely through the PhantomPad ecosystem.
+*   **Sovereignty:** The end goal is for users to maximize their charts, hide all native terminal UI elements, and operate entirely through the PhantomPad ecosystem.
 
 ---
 
 ## 2. Technical Architecture
 
-The project follows a strict **Modular Monolith** architecture to ensure maintainability and scalability in MQL4.
+The project follows a strict **Hardware Abstraction Layer (H.A.L.)** architecture (Onion Architecture variation) to ensure seamless operation across **MetaTrader 4** and **MetaTrader 5** from a single code base.
 
 ### 2.1. File Structure Overview
 ```text
 MQL4/Experts/FantomePad/
-├── fantomepad.mq4           # Entry Point (License Heartbeat, Logic)
+├── fantomepad.mq4           # Entry Point MT4 (Wrapper)
+├── fantomepad.mq5           # Entry Point MT5 (Wrapper)
 ├── Include/FantomePad/      # Core Logic Library
-└── web/                      # Next.js Web Dashboard & Onboarding
-    ├── src/app/             # Application Routes (Dashboard, Onboarding)
-    ├── src/components/      # UI components (Framer Motion, Tailwind 4)
-    └── netlify.toml         # Deployment Configuration (Netlify)
+└── web/                     # Next.js Web Dashboard & Onboarding
 
-Included Files:
-├── Include/FantomePad/
-    ├── Core/                # Global Definitions & Security
-    │   ├── Defines.mqh      # Constants, Colors, Structs, Global State
-    │   ├── Config.mqh       # Persistence Logic (File I/O)
-    │   └── Security.mqh     # Cloud Auth Logic (Supabase, Hardware ID)
-    ├── GUI/                 # Custom Graphics Engine (Modular)
-    │   ├── GUI_Master.mqh   # Main Coordinator & Bridge to MQL4 Events
-    │   ├── Components/      # UI Primitives (Buttons, Panels, Labels)
-    │   ├── Events/          # Event Dispatchers (Click, Drag, Key, etc.)
-    │   │   └── Handlers/    # High-level event logic for specific features
-    │   ├── Auth/            # Onboarding & Activation UI Module
-    │   ├── Account/         # Account Info Panel Module
-    │   ├── History/         # Trade History Panel Module
-    │   ├── Main/            # Trading Panel Module (Risk, Buy/Sell)
-    │   ├── Navigation/      # Sidebar/Menu Navigation Module
-    │   ├── Positions/       # Trade Manager Panel Module
-    │   └── Settings/        # Theming & Global Settings Module
-    ├── Trade/               # Execution & Risk Logic (Modular)
-    │   ├── Trade.mqh        # Main Trading Interface
-    │   ├── Trade_Calculations.mqh # Lot Sizing, RR, Risk Math
-    │   └── Trade_Execution.mqh    # OrderSend Wrappers & Error Handling
-    └── Tests/               # Automated Unit/Integration Tests
+Included Files (Include/FantomePad/):
+├── Platform/                # The H.A.L. Core
+│   ├── Common/              # PLATFORM-AGNOSTIC CODE (The "Brain")
+│   │   ├── Core/            # Global Defs, Config, Security
+│   │   │   ├── Defines.mqh  # + Compatibility.mqh (Data Abstraction Layer)
+│   │   ├── GUI/             # The "Mini OS" Engine (Pure Logic)
+│   │   └── Compatibility.mqh # The "Universal Translator" (Macros & Wrappers)
+│   ├── MT4/                 # MT4 SPECIFIC DRIVERS (The "Hands")
+│   │   └── Trade/           # Execution logic using OrderSend (Cleaned)
+│   ├── MT5/                 # MT5 SPECIFIC DRIVERS (Future Implementation)
+│   └── Bridge.mqh           # The "Switch" (Routes calls based on Compiler)
 ```
 
 ### 2.2. The Custom GUI Engine (`Include/FantomePad/GUI/`)

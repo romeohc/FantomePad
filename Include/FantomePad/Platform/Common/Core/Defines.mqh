@@ -6,6 +6,9 @@
 #define _DEFINES_MQH_
 #property strict
 
+// --- DATA ABSTRACTION LAYER (Compatibility MQL4/MQL5) ---
+#include "../Compatibility.mqh"
+
 //--- Inputs externes (Configuration de base)
 // Default Risk inputs removed
 input double   OneRPercent = 2.0;      // Valeur de 1R en %
