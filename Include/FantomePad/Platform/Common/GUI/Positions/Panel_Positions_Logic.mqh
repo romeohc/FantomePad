@@ -65,15 +65,18 @@ void UpdatePositionsValues()
    {
       if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
       {
-         if(OrderCloseTime() == 0 && OrderSymbol() == Symbol())
+         FantomeTrade trade;
+         FP_GetTrade(trade);
+         
+         if(trade.CloseTime == 0 && trade.Symbol == Symbol())
          {
-             double lots = OrderLots();
-             double profit = OrderProfit();
-             double comm = OrderCommission();
-             double swap = OrderSwap();
-             double open = OrderOpenPrice();
-             double sl = OrderStopLoss();
-             double tp = OrderTakeProfit();
+             double lots = trade.Lots;
+             double profit = trade.Profit;
+             double comm = trade.Commission;
+             double swap = trade.Swap;
+             double open = trade.OpenPrice;
+             double sl = trade.StopLoss;
+             double tp = trade.TakeProfit;
              
              ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, DoubleToString(lots, 2));
              
@@ -109,7 +112,7 @@ void UpdatePositionsValues()
              {
                  // Logic Update: Check if SL is in Profit/BE (Risk Free)
                  // If SL covers the entry, there is no risk on the table (technically negative risk, but shown as 0)
-                 int opType = OrderType();
+                 int opType = trade.Type;
                  bool isRiskFree = false;
                  
                  if(opType == OP_BUY && sl >= open) isRiskFree = true;
@@ -184,7 +187,7 @@ void UpdatePositionsValues()
              }
              
              color typeBg = g_ColorInput;
-             int type = OrderType();
+             int type = trade.Type;
              
              if(type == OP_BUY) typeBg = g_ColorPositive;
              else if(type == OP_SELL) typeBg = g_ColorNegative;
@@ -193,13 +196,13 @@ void UpdatePositionsValues()
              else if(type == OP_BUYSTOP) typeBg = g_ColorPositive;
              else if(type == OP_SELLSTOP) typeBg = g_ColorNegative;
              
-             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, OrderSymbol() + "  ·  " + DoubleToString(lots, 2));
+             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, trade.Symbol + "  ·  " + DoubleToString(lots, 2));
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
              ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
              
              // BE BUTTON STATE (IN LOSS CHECKS)
-             double current = (type == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+             double current = (type == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
              bool inLoss = (type == OP_BUY && current < open) || (type == OP_SELL && current > open);
              
              if(inLoss)

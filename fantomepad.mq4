@@ -11,8 +11,8 @@
 // Include Modular Logic
 #include "Include/FantomePad/Platform/Common/Core/Defines.mqh"
 #include "Include/FantomePad/Platform/Common/Core/Config.mqh"
-#include "Include/FantomePad/Platform/Common/GUI/GUI_Master.mqh"
 #include "Include/FantomePad/Platform/Bridge.mqh"
+#include "Include/FantomePad/Platform/Common/GUI/GUI_Master.mqh"
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |

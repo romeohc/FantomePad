@@ -50,10 +50,13 @@ bool Handle_PositionActions_Events(string sparam)
    {
       if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
       {
+          FantomeTrade trade;
+          FP_GetTrade(trade);
+          
           // Check Eligibility (Profit/Loss)
-          int type = OrderType();
-          double open = OrderOpenPrice();
-          double current = (type == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
+          int type = trade.Type;
+          double open = trade.OpenPrice;
+          double current = (type == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
           
           // Strict check: In Loss = cannot BE
           bool inLoss = (type == OP_BUY && current < open) || (type == OP_SELL && current > open);
@@ -77,7 +80,7 @@ bool Handle_PositionActions_Events(string sparam)
               // Deactivate BE -> Restore Original SL
               ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
               ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
-              ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(OrderStopLoss(), _Digits));
+              ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(trade.StopLoss, _Digits));
           }
           
           UpdatePositionsValues(); // Trigger Validate Button Check
@@ -131,10 +134,13 @@ bool Handle_PositionActions_Events(string sparam)
       }
       
       // 4. Check if any modifications were made
-      double currentSL = OrderStopLoss();
-      double currentTP = OrderTakeProfit();
-      double currentOpen = OrderOpenPrice();
-      int orderType = OrderType();
+       FantomeTrade trade;
+       FP_GetTrade(trade);
+       
+       double currentSL = trade.StopLoss;
+       double currentTP = trade.TakeProfit;
+       double currentOpen = trade.OpenPrice;
+       int orderType = trade.Type;
       
       double userSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
       double userTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
@@ -162,10 +168,13 @@ bool Handle_PositionActions_Events(string sparam)
       
       // --- VALIDATION PASSED - HIDE ERROR AND PROCEED ---
       HidePosValidationError();
-      
-      if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
-      {
-          if(OrderCloseTime() == 0) // Must be open
+            if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+       {
+           FP_GetTrade(trade); // Reuse 'trade' variable from line 135 scope? 
+           // Wait, line 135 scope ends? No, line 135 is in the same function scope.
+           // So 'trade' variable declared at line 135 is still valid. We just refresh it.
+           
+           if(trade.CloseTime == 0) // Must be open
           {
               // 1. HANDLE CLOSE
               double pct = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
@@ -175,18 +184,17 @@ bool Handle_PositionActions_Events(string sparam)
               
               if(pct > 0)
               {
-                  double currentLots = OrderLots();
-                  double toClose = 0.0;
-                  
-                  // ALWAYS calc based on ORIGINAL lots (User Request)
-                  double originLots = GetOriginalLotSize(SelectedPositionTicket);
-                  if(originLots <= 0) originLots = currentLots; // Safety fallback
+                   double currentLots = trade.Lots;
+                   double toClose = 0.0;
+                   
+                   // ALWAYS calc based on ORIGINAL lots (User Request)
+                   double originLots = GetOriginalLotSize(SelectedPositionTicket);
+                   if(originLots <= 0) originLots = currentLots; // Safety fallback
                   
                   toClose = originLots * (pct / 100.0);
-                  
-                  // Normalize Lots
-                  double step = MarketInfo(OrderSymbol(), MODE_LOTSTEP);
-                  double min = MarketInfo(OrderSymbol(), MODE_MINLOT);
+                                    // Normalize Lots
+                   double step = MarketInfo(trade.Symbol, MODE_LOTSTEP);
+                   double min = MarketInfo(trade.Symbol, MODE_MINLOT);
                   
                   // Round to step
                   toClose = MathFloor(toClose / step) * step;
@@ -196,22 +204,21 @@ bool Handle_PositionActions_Events(string sparam)
                   
                   // If 100%, ensure close all despite rounding issues
                   if(pct >= 99.9) toClose = currentLots; 
-                  
-                  // Close
-                  int cmd = OrderType();
-                  bool closed = false;
-                  
-                  if(cmd > 1) // Pending Order (Limit/Stop)
-                  {
-                     // For pending orders, "Close" means Delete. 
-                     // We ignore the percentage (toClose), assuming user wants to remove the order.
-                     closed = SafeOrderDelete(SelectedPositionTicket, clrGray);
-                  }
-                  else // Market Order
-                  {
-                     double closePrice = (cmd == OP_BUY) ? MarketInfo(OrderSymbol(), MODE_BID) : MarketInfo(OrderSymbol(), MODE_ASK);
-                     closed = SafeOrderClose(SelectedPositionTicket, toClose, 0, 10, clrGray); // Use SafeOrderClose with auto-price (0)
-                  }
+                                    // Close
+                   int cmd = trade.Type;
+                   bool closed = false;
+                   
+                   if(cmd > 1) // Pending Order (Limit/Stop)
+                   {
+                      // For pending orders, "Close" means Delete. 
+                      // We ignore the percentage (toClose), assuming user wants to remove the order.
+                      closed = SafeOrderDelete(SelectedPositionTicket, clrGray);
+                   }
+                   else // Market Order
+                   {
+                      double closePrice = (cmd == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
+                      closed = SafeOrderClose(SelectedPositionTicket, toClose, 0, 10, clrGray); // Use SafeOrderClose with auto-price (0)
+                   }
                   if(closed)
                   {
                       ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
@@ -240,31 +247,31 @@ bool Handle_PositionActions_Events(string sparam)
                       // Alert("Close Error: " + IntegerToString(GetLastError()));
                   }
               }
-              
-              // 2. HANDLE MODIFY (SL/TP)
-              // Re-read incase partial close changed something (unlikely for SL/TP values but good practice)
-              if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
-              {
-                  currentSL = OrderStopLoss();
-                  currentTP = OrderTakeProfit();
-                  currentOpen = OrderOpenPrice();
-                  
-                  double inputSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
-                  double inputTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
-                  double inputOpen = currentOpen;
-
-                  // Only update Entry Price for Pending Orders
-                  if(OrderType() > 1) 
+                            // 2. HANDLE MODIFY (SL/TP)
+               // Re-read incase partial close changed something (unlikely for SL/TP values but good practice)
+               if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+               {
+                   FP_GetTrade(trade); // Refresh trade
+                   
+                   currentSL = trade.StopLoss;
+                   currentTP = trade.TakeProfit;
+                   currentOpen = trade.OpenPrice;
+                   
+                   double inputSL = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+                   double inputTP = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+                   double inputOpen = currentOpen;
+ 
+                   // Only update Entry Price for Pending Orders
+                   if(trade.Type > 1) 
                   {
                      inputOpen = StringToDouble(ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
                   }
-                  
-                  // Check if changed
-                  // If BE Active, override Input SL
-                  if(g_PosBE_Active)
-                  {
-                     inputSL = OrderOpenPrice();
-                  }
+                                    // Check if changed
+                   // If BE Active, override Input SL
+                   if(g_PosBE_Active)
+                   {
+                      inputSL = trade.OpenPrice;
+                   }
 
                   if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point || MathAbs(inputOpen - currentOpen) > Point)
                   {

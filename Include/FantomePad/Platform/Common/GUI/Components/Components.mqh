@@ -8,6 +8,7 @@
 
 // Relative path to avoid dependency on global include paths
 #include "../../Core/Defines.mqh"
+#include "../GraphicWrappers.mqh"
 
 // Forward declaration wrapper to prevent "no #import declaration" warnings in MQL4
 class CGUI_Master { public: static void RefreshAllPanels(); };
@@ -18,93 +19,93 @@ class CGUI_Master { public: static void RefreshAllPanels(); };
 //+------------------------------------------------------------------+
 void SetObjPosition(string name, int x, int y)
 {
-   ObjectSetInteger(0, PREFIX + name, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, PREFIX + name, OBJPROP_YDISTANCE, y);
+   FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_XDISTANCE, x);
+   FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_YDISTANCE, y);
 }
 
 void SetObjVisible(string name, bool visible)
 {
-   if(visible) ObjectSetInteger(0, PREFIX + name, OBJPROP_TIMEFRAMES, OBJ_ALL_PERIODS);
-   else        ObjectSetInteger(0, PREFIX + name, OBJPROP_TIMEFRAMES, OBJ_NO_PERIODS);
+   if(visible) FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_TIMEFRAMES, OBJ_ALL_PERIODS);
+   else        FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_TIMEFRAMES, OBJ_NO_PERIODS);
 }
 
 void CreateRect(string name, int x, int y, int w, int h, color bg, int border)
 {
    string objName = PREFIX + name;
-   if(ObjectFind(0, objName) < 0) ObjectCreate(0, objName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
-   ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
-   ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
-   ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, bg);
-   ObjectSetInteger(0, objName, OBJPROP_BORDER_TYPE, border);
-   ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, objName, OBJPROP_COLOR, bg); 
-   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   if(FP_ObjectFind(0, objName) < 0) FP_ObjectCreate(0, objName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, bg);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_TYPE, border);
+   FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   FP_ObjectSetInteger(0, objName, OBJPROP_COLOR, bg); 
+   FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void CreateButton(string name, string text, int x, int y, int w, int h, color bg, color txtColor)
 {
    string objName = PREFIX + name;
-   if(ObjectFind(0, objName) < 0) ObjectCreate(0, objName, OBJ_BUTTON, 0, 0, 0);
-   ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
-   ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
-   ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, bg);
-   ObjectSetInteger(0, objName, OBJPROP_COLOR, txtColor);
-   ObjectSetString(0, objName, OBJPROP_TEXT, text);
-   ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
-   ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10); 
-   ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, objName, OBJPROP_STATE, false);
-   ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
-   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   if(FP_ObjectFind(0, objName) < 0) FP_ObjectCreate(0, objName, OBJ_BUTTON, 0, 0, 0);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, bg);
+   FP_ObjectSetInteger(0, objName, OBJPROP_COLOR, txtColor);
+   FP_ObjectSetString(0, objName, OBJPROP_TEXT, text);
+   FP_ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
+   FP_ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10); 
+   FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   FP_ObjectSetInteger(0, objName, OBJPROP_STATE, false);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void CreateLabel(string name, string text, int x, int y, int fontsize, color col, string font="Trebuchet MS")
 {
    string objName = PREFIX + name;
-   if(ObjectFind(0, objName) < 0) ObjectCreate(0, objName, OBJ_LABEL, 0, 0, 0);
-   ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, objName, OBJPROP_COLOR, col);
-   ObjectSetString(0, objName, OBJPROP_TEXT, text);
-   ObjectSetString(0, objName, OBJPROP_FONT, font);
-   ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, fontsize);
-   ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   if(FP_ObjectFind(0, objName) < 0) FP_ObjectCreate(0, objName, OBJ_LABEL, 0, 0, 0);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
+   FP_ObjectSetInteger(0, objName, OBJPROP_COLOR, col);
+   FP_ObjectSetString(0, objName, OBJPROP_TEXT, text);
+   FP_ObjectSetString(0, objName, OBJPROP_FONT, font);
+   FP_ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, fontsize);
+   FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void CreateEdit(string name, string text, int x, int y, int w, int h, bool readOnly = false)
 {
    string objName = PREFIX + name;
-   bool exists = (ObjectFind(0, objName) >= 0);
-   if(!exists) ObjectCreate(0, objName, OBJ_EDIT, 0, 0, 0);
+   bool exists = (FP_ObjectFind(0, objName) >= 0);
+   if(!exists) FP_ObjectCreate(0, objName, OBJ_EDIT, 0, 0, 0);
    
-   ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
-   ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
-   ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, objName, OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
+   FP_ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
+   FP_ObjectSetInteger(0, objName, OBJPROP_YSIZE, h);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BGCOLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, objName, OBJPROP_COLOR, g_ColorText);
    
-   if(!exists) ObjectSetString(0, objName, OBJPROP_TEXT, text);
+   if(!exists) FP_ObjectSetString(0, objName, OBJPROP_TEXT, text);
    
-   ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
-   ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10);
-   ObjectSetInteger(0, objName, OBJPROP_ALIGN, ALIGN_CENTER);
-   ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); 
-   ObjectSetInteger(0, objName, OBJPROP_READONLY, readOnly);
-   ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   FP_ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
+   FP_ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10);
+   FP_ObjectSetInteger(0, objName, OBJPROP_ALIGN, ALIGN_CENTER);
+   FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); 
+   FP_ObjectSetInteger(0, objName, OBJPROP_READONLY, readOnly);
+   FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
 }
 
 void EffectButton(string name)
 {
-   ObjectSetInteger(0, name, OBJPROP_STATE, true);
+   FP_ObjectSetInteger(0, name, OBJPROP_STATE, true);
    Sleep(100);
-   ObjectSetInteger(0, name, OBJPROP_STATE, false);
+   FP_ObjectSetInteger(0, name, OBJPROP_STATE, false);
    ChartRedraw();
 }
 
@@ -119,7 +120,7 @@ bool HandlePanelDrag(bool &dragging_state, int &pos_x, int &pos_y, int &offset_x
       int current_height = panel_h;
       if(background_name != "")
       {
-          long dynamic_h = ObjectGetInteger(0, PREFIX + background_name, OBJPROP_YSIZE);
+          long dynamic_h = FP_ObjectGetInteger(0, PREFIX + background_name, OBJPROP_YSIZE);
           if(dynamic_h > 50) current_height = (int)dynamic_h;
       }
       
@@ -149,10 +150,10 @@ bool HandleScrollDrag(bool &scroll_dragging, int &scroll_anchor_y, int &scroll_c
 {
     if(!scroll_dragging)
     {
-         long tx = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XDISTANCE);
-         long ty = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YDISTANCE);
-         long tw = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XSIZE);
-         long th = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
+         long tx = FP_ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XDISTANCE);
+         long ty = FP_ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YDISTANCE);
+         long tw = FP_ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_XSIZE);
+         long th = FP_ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
          
          if(mouse_x >= tx - 5 && mouse_x <= tx + tw + 5 && mouse_y >= ty && mouse_y <= ty + th)
          {
@@ -167,7 +168,7 @@ bool HandleScrollDrag(bool &scroll_dragging, int &scroll_anchor_y, int &scroll_c
          int delta_y = mouse_y - scroll_anchor_y;
          if(delta_y != 0)
          {
-             long thumb_h = ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
+             long thumb_h = FP_ObjectGetInteger(0, PREFIX + thumb_name, OBJPROP_YSIZE);
              int track_avail = (int)(track_h - thumb_h);
              
              if(track_avail > 0)

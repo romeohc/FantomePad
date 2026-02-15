@@ -12,7 +12,7 @@ class CPanel_Main
 {
 public:
    // From Logic
-   static void AutoSwitchOrderType();
+   // AutoSwitchOrderType moved to global TradeLogic.mqh
    static void ApplyDefaultTradeValues();
    static void GetVisibleChartPriceRange(double &minP, double &maxP);
    
@@ -34,7 +34,7 @@ public:
 // --- MULTI-FILE REDIRECTS ---
 // This trick maps global calls to the static class methods, 
 // resolving both the circular dependency and the "no #import" warning.
-#define AutoSwitchOrderType        CPanel_Main::AutoSwitchOrderType
+// #define AutoSwitchOrderType        CPanel_Main::AutoSwitchOrderType (Moved to global)
 #define ApplyDefaultTradeValues    CPanel_Main::ApplyDefaultTradeValues
 #define GetVisibleChartPriceRange  CPanel_Main::GetVisibleChartPriceRange
 #define UpdateUIMode               CPanel_Main::UpdateUIMode

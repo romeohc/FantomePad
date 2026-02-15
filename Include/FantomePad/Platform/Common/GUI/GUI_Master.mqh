@@ -6,7 +6,7 @@
 
 // Includes
 #include "Components/Components.mqh"
-#include "../../MT4/Trade/Trade.mqh"       // Needs access to AutoSwitchOrderType
+#include "../Core/TradeLogic.mqh"       // Replaces dependency on MT4/Trade.mqh
 #include "Main/Panel_Main.mqh"
 #include "Settings/Panel_Settings.mqh"
 #include "Account/Panel_Account.mqh"
@@ -342,7 +342,7 @@ double GetOriginalLotSize(int ticket)
 //+------------------------------------------------------------------+
 //| HELPER: REFRESH ALL PANELS                                       |
 //+------------------------------------------------------------------+
-void CGUI_Master::RefreshAllPanels()
+void RefreshAllPanels()
 {
     if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
     {
