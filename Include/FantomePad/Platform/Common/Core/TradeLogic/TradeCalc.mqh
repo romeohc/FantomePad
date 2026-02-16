@@ -107,4 +107,36 @@ int GetSlippagePoints(int slippagePips)
    return slippagePips;
 }
 
+
+//+------------------------------------------------------------------+
+//| HELPER: RETRIEVE ORIGINAL LOT SIZE (TRACE HISTORY)               |
+//+------------------------------------------------------------------+
+double GetOriginalLotSize(int ticket)
+{
+   if(!OrderSelect(ticket, SELECT_BY_TICKET)) return 0.0;
+   
+   double totalLots = OrderLots();
+   string comment = OrderComment();
+   
+   // Loop back through history to find parents
+   int safety = 0;
+   while(StringFind(comment, "from #") >= 0 && safety < 50)
+   {
+      int pos = StringFind(comment, "from #");
+      string sub = StringSubstr(comment, pos + 6);
+      int prevTicket = (int)StringToInteger(sub);
+      
+      if(OrderSelect(prevTicket, SELECT_BY_TICKET, MODE_HISTORY))
+      {
+         totalLots += OrderLots(); // Add the closed amount
+         comment = OrderComment();
+      }
+      else break;
+      
+      safety++;
+   }
+   
+   return totalLots;
+}
+
 #endif
