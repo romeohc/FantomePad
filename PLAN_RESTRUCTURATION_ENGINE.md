@@ -193,7 +193,7 @@ virtual TradeResult Delete(long ticket) = 0;
 
 ### PHASE 2 : LOGIQUE MÉTIER PURE
 
-#### ✅ ÉTAPE 3 : Éclatement de `TradeLogic.mqh` → Dossier `TradeLogic/`
+#### ✅ [TERMINÉ] ÉTAPE 3 : Éclatement de `TradeLogic.mqh` → Dossier `TradeLogic/`
 **Localisation :** `Common/Core/TradeLogic/` (NOUVEAU DOSSIER)
 
 **3A — `TradeCalc.mqh` (PURE MATH, 0 UI)**
