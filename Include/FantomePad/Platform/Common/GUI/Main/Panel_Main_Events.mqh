@@ -7,6 +7,7 @@
 #property strict
 
 #include "Panel_Main_Shared.mqh"
+#include "../Events/Handlers/Handler_Trading.mqh"
 
 // Implementation of Main Panel Event handling
 
@@ -70,43 +71,9 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
           return true;
        }
        
-       if(sparam == PREFIX + "Btn_Type")
-       {
-          if(CurrentTypeIndex == 0 && CurrentDirection == 0) CurrentDirection = 1;
-          else if(CurrentTypeIndex == 0 && CurrentDirection == 1) { CurrentTypeIndex = 1; CurrentDirection = 0; }
-          else if(CurrentTypeIndex == 4) { CurrentTypeIndex = 0; CurrentDirection = 0; }
-          else CurrentTypeIndex++;
-          
-          UpdateUIMode(); 
-          ApplyDefaultTradeValues(); 
-          UpdateCalculatedLot();
-          ChartRedraw();
+       // 2.2 TRADING EVENTS (Route to Handler_Trading)
+       if(Handle_Trading_Events(sparam))
           return true;
-       }
-       
-       if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
-       {
-          EffectButton(sparam);
-          ExecuteOrder(OP_BUY);
-          return true;
-       }
-       if(sparam == PREFIX + "Btn_Sell" && CurrentTypeIndex == 0)
-       {
-          EffectButton(sparam);
-          ExecuteOrder(OP_SELL);
-          return true;
-       }
-       if(sparam == PREFIX + "Btn_Action" && CurrentTypeIndex > 0)
-       {
-          EffectButton(sparam);
-          int opCmd = -1;
-          if(CurrentTypeIndex == 1) opCmd = OP_BUYLIMIT;
-          if(CurrentTypeIndex == 2) opCmd = OP_SELLLIMIT;
-          if(CurrentTypeIndex == 3) opCmd = OP_BUYSTOP;
-          if(CurrentTypeIndex == 4) opCmd = OP_SELLSTOP;
-          if(opCmd != -1) ExecuteOrder(opCmd);
-          return true;
-       }
    }
    
    // 3. EDIT EVENTS (Validation)

@@ -453,7 +453,7 @@ if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
 3. Remplacer `SafeOrderDelete(...)` par `TradeOrchestrator::DeleteOrder(ticket)`.
 4. Lire les `TradeResult` retournés pour afficher les erreurs via `ShowPosValidationError(result.Message)`.
 
-#### ✅ ÉTAPE 11 : Mise à jour de `Trade_Stubs.mqh` (MT5 Temporaire)
+#### ✅ [TERMINÉ] ÉTAPE 11 : Mise à jour de `Trade_Stubs.mqh` (MT5 Temporaire)
 **Localisation :** `MT5/Trade/Trade_Stubs.mqh`
 
 **Action :** Adapter les stubs pour utiliser les nouvelles signatures `TradeResult` OU supprimer si plus utilisé (car `Handler_PositionActions` passe maintenant par l'Orchestrateur).
@@ -463,7 +463,7 @@ if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
 
 ### PHASE 6 : MISE À JOUR DU BRIDGE
 
-#### ✅ ÉTAPE 12 : Nettoyage de `Bridge.mqh`
+#### ✅ [TERMINÉ] ÉTAPE 12 : Nettoyage de `Bridge.mqh`
 **Action :**
 1. Supprimer l'import de `MT4/Trade/Trade.mqh` et `MT5/Trade/Trade_Stubs.mqh`.
 2. Ajouter les imports du nouveau système :

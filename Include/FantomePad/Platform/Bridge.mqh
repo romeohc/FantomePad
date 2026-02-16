@@ -10,6 +10,11 @@
 // 2.5 CORE ENGINE INTERFACE (Must be before implementations)
 #include "Common/Core/Engine/ITradeEngine.mqh"
 
+// New Engine System
+#include "Common/Core/Engine/TradeErrorHandler.mqh"
+#include "Common/Core/Engine/TradeValidator.mqh"
+#include "Common/Core/Engine/TradeOrchestrator.mqh"
+
 // --- GLOBAL TRADE ENGINE POINTER ---
 ITradeEngine *g_TradeEngine = NULL;
 
@@ -18,14 +23,10 @@ ITradeEngine *g_TradeEngine = NULL;
    #include "MT4/Wrappers/Data_Wrapper.mqh"
    // Engine Implementation first
    #include "MT4/Engine/TradeEngineMT4.mqh"
-   // Legacy Logic (Now can see g_TradeEngine)
-   #include "MT4/Trade/Trade.mqh" 
 #else
    #include "MT5/Wrappers/Data_Wrapper.mqh"
    // Engine Implementation first
    #include "MT5/Engine/TradeEngineMT5.mqh"
-   // Legacy Stubs
-   #include "MT5/Trade/Trade_Stubs.mqh" 
 #endif
 
 // --- ENGINE LIFECYCLE MANAGEMENT ---
