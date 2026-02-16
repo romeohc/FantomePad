@@ -339,7 +339,7 @@ Le code actuel est DÉJÀ bon pour l'essentiel.
 
 ### PHASE 4 : INTELLIGENCE & ORCHESTRATION
 
-#### ✅ ÉTAPE 8 : L'Orchestrateur (`TradeOrchestrator.mqh`)
+#### ✅ [TERMINÉ] ÉTAPE 8 : L'Orchestrateur (`TradeOrchestrator.mqh`)
 **Localisation :** `Common/Core/Engine/TradeOrchestrator.mqh`
 **Source principale :** `Trade_Manager.mqh::ExecuteOrder()` (lignes 16-156) est de facto l'orchestrateur actuel.
 
@@ -397,7 +397,7 @@ public:
 
 ### PHASE 5 : LA MIGRATION (LE "SWITCH")
 
-#### ✅ ÉTAPE 9 : Refonte `Handler_Trading.mqh`
+#### ✅ [TERMINÉ] ÉTAPE 9 : Refonte `Handler_Trading.mqh`
 **Localisation :** `Common/GUI/Events/Handlers/Handler_Trading.mqh`
 
 **Action :**

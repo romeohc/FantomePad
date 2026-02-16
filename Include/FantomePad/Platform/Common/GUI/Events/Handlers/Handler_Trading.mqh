@@ -3,6 +3,25 @@
 //+------------------------------------------------------------------+
 #property strict
 
+// New Engine System Includes
+#include "../../../Core/Engine/TradeOrchestrator.mqh"
+#include "../../../Core/Engine/TradeErrorHandler.mqh"
+
+// Helper to reset UI fields after successful trade
+void ResetTradeUI()
+{
+   FP_ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, "0"); 
+   
+   // Refresh UI logic
+   UpdateCalculatedLot();
+   
+   // Audio Feedback
+   PlaySound("ok.wav");
+}
+
 bool Handle_Trading_Events(string sparam)
 {
    // --- LICENSE GUARD (FAST MEMORY CHECK) ---
@@ -43,19 +62,18 @@ bool Handle_Trading_Events(string sparam)
       return true;
    }
 
-   // Actions de Trading
+   // Actions de Trading : MARKET BUY
    if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
    {
       EffectButton(sparam);
-      UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+      HideValidationError();
       
-      // Sécurité : Vérifier si le SL et Risk sont définis
-      double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
-      double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
+      // UX Validation Only (Empty Fields)
+      double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
+      double risk = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
       
       if(sl <= 0 || risk <= 0) 
       {
-         // Build specific error message
          string errMsg = "";
          if(sl <= 0 && risk <= 0) errMsg = "Stop Loss & Risk required!";
          else if(sl <= 0) errMsg = "Stop Loss required!";
@@ -65,53 +83,45 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
       
-      // Check Max Risk
-      double rPrc = GetRiskPercentage(risk);
-      if(rPrc > g_MaxRiskPercent)
-      {
-         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
-         ShowValidationError(msg);
-         return true;
-      }
-
-      double currentPrice = MarketInfo(Symbol(), MODE_ASK);
-      // Check Lot Size
-      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
-      if(volume <= 0)
-      {
-         // Recommendation 1: Specific feedback
-         if(MathAbs(currentPrice - sl) <= MarketInfo(Symbol(), MODE_POINT))
-            ShowValidationError("SL too close to Entry for Lot Calculation!");
-         else
-            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
-         return true;
-      }
+      // Build Request
+      TradeRequest req;
+      req.Symbol = FP_ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+      if(req.Symbol == "") req.Symbol = Symbol();
+      req.Type = OP_BUY;
+      req.Price = MarketInfo(req.Symbol, MODE_ASK);
+      req.SL = sl;
+      req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
+      req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+      req.Comment = "FantomePad";
+      req.Magic = MagicNumber; // Assumes MagicNumber is global
+      req.Expiration = 0;
       
+      // Execute via Orchestrator
+      TradeResult result = TradeOrchestrator::Execute(req);
       
-      // double currentPrice = MarketInfo(Symbol(), MODE_ASK); // Removed redundant declaration
-      if(!ValidateSlDirection(OP_BUY, currentPrice, sl))
-      {
-         ShowValidationError("Invalid SL! Must be BELOW entry price.");
-         return true;
+      if(result.Success) {
+         ResetTradeUI();  
+         UpdateChartLines();
+         UpdateOpenOrderLines();
+         UpdateCalculatedLot();
+      } else {
+         TradeErrorHandler::ShowTradeToast(result);
       }
-      
-      HideValidationError(); // Clear any previous error on success
-      ExecuteOrder(OP_BUY);
       return true;
    }
    
+   // Actions de Trading : MARKET SELL
    if(sparam == PREFIX + "Btn_Sell" && CurrentTypeIndex == 0)
    {
       EffectButton(sparam);
-      UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+      HideValidationError();
       
-      // Sécurité : Vérifier si le SL et Risk sont définis
-      double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
-      double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
+      // UX Validation Only
+      double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
+      double risk = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
 
       if(sl <= 0 || risk <= 0) 
       {
-         // Build specific error message
          string errMsg = "";
          if(sl <= 0 && risk <= 0) errMsg = "Stop Loss & Risk required!";
          else if(sl <= 0) errMsg = "Stop Loss required!";
@@ -121,54 +131,46 @@ bool Handle_Trading_Events(string sparam)
          return true;
       }
 
-      // Check Max Risk
-      double rPrc = GetRiskPercentage(risk);
-      if(rPrc > g_MaxRiskPercent)
-      {
-         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
-         ShowValidationError(msg);
-         return true;
+      // Build Request
+      TradeRequest req;
+      req.Symbol = FP_ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+      if(req.Symbol == "") req.Symbol = Symbol();
+      req.Type = OP_SELL;
+      req.Price = MarketInfo(req.Symbol, MODE_BID);
+      req.SL = sl;
+      req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
+      req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+      req.Comment = "FantomePad";
+      req.Magic = MagicNumber;
+      req.Expiration = 0;
+
+      // Execute via Orchestrator
+      TradeResult result = TradeOrchestrator::Execute(req);
+
+      if(result.Success) {
+         ResetTradeUI();
+         UpdateChartLines();
+         UpdateOpenOrderLines();
+         UpdateCalculatedLot();
+      } else {
+         TradeErrorHandler::ShowTradeToast(result);
       }
-
-      double currentPrice = MarketInfo(Symbol(), MODE_BID);
-      // Check Lot Size
-      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
-      if(volume <= 0)
-      {
-         // Recommendation 1: Specific feedback
-         if(MathAbs(currentPrice - sl) <= MarketInfo(Symbol(), MODE_POINT))
-            ShowValidationError("SL too close to Entry for Lot Calculation!");
-         else
-            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
-         return true;
-      }
-
-
-      // double currentPrice = MarketInfo(Symbol(), MODE_BID); // Removed redundant declaration
-      if(!ValidateSlDirection(OP_SELL, currentPrice, sl))
-      {
-         ShowValidationError("Invalid SL! Must be ABOVE entry price.");
-         return true;
-      }
-
-      HideValidationError(); // Clear any previous error on success
-      ExecuteOrder(OP_SELL);
       return true;
    }
 
+   // Actions de Trading : PENDING ORDERS
    if(sparam == PREFIX + "Btn_Action" && CurrentTypeIndex > 0)
    {
       EffectButton(sparam);
-      UpdateCalculatedLot(); // Ensure Lot is recalculated before execution
+      HideValidationError();
       
-      // Sécurité : Validation complète pour Ordres Pending
-      double sl = StringToDouble(ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
-      double risk = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
-      double price = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT));
+      // UX Validation
+      double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
+      double risk = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
+      double price = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT));
       
       if(sl <= 0 || risk <= 0 || price <= 0)
       {
-          // Build specific error message for pending orders
           string missing = "";
           if(price <= 0) missing = "Entry Price";
           if(sl <= 0) missing = (missing == "") ? "Stop Loss" : missing + ", SL";
@@ -178,28 +180,7 @@ bool Handle_Trading_Events(string sparam)
           return true;
       }
       
-      // Check Max Risk
-      double rPrc = GetRiskPercentage(risk);
-      if(rPrc > g_MaxRiskPercent)
-      {
-         string msg = "Risk exceeds allowed max " + DoubleToString(g_MaxRiskPercent, 2) + "%!";
-         ShowValidationError(msg);
-         return true;
-      }
-
-      // Check Lot Size
-      double volume = StringToDouble(ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
-      if(volume <= 0)
-      {
-         // Recommendation 1: Specific feedback
-         if(MathAbs(price - sl) <= MarketInfo(Symbol(), MODE_POINT))
-            ShowValidationError("SL too close to Entry for Lot Calculation!");
-         else
-            ShowValidationError("Lot size too small! Increase risk or tighten SL.");
-         return true;
-      }
-   
-      HideValidationError(); // Clear any previous error on success
+      // Map UI Type to OP Type
       int opCmd = -1;
       if(CurrentTypeIndex == 1) opCmd = OP_BUYLIMIT;
       if(CurrentTypeIndex == 2) opCmd = OP_SELLLIMIT;
@@ -208,13 +189,28 @@ bool Handle_Trading_Events(string sparam)
       
       if(opCmd != -1) 
       {
-          if(!ValidateSlDirection(opCmd, price, sl))
-          {
-              string side = (opCmd == OP_BUYLIMIT || opCmd == OP_BUYSTOP) ? "BELOW" : "ABOVE";
-              ShowValidationError("Invalid SL! Must be " + side + " entry price.");
-              return true;
-          }
-          ExecuteOrder(opCmd);
+         TradeRequest req;
+         req.Symbol = FP_ObjectGetString(0, PREFIX + "Btn_SymbolSelect", OBJPROP_TEXT);
+         if(req.Symbol == "") req.Symbol = Symbol();
+         req.Type = opCmd;
+         req.Price = price;
+         req.SL = sl;
+         req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
+         req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
+         req.Comment = "FantomePad";
+         req.Magic = MagicNumber; // Global
+         req.Expiration = 0;
+         
+         TradeResult result = TradeOrchestrator::Execute(req);
+         
+         if(result.Success) {
+            ResetTradeUI();
+            UpdateChartLines();
+            UpdateOpenOrderLines();
+            UpdateCalculatedLot();
+         } else {
+            TradeErrorHandler::ShowTradeToast(result);
+         }
       }
       return true;
    }
