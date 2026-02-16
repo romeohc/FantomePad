@@ -4,6 +4,7 @@
 //+------------------------------------------------------------------+
 #ifndef _CONFIG_MQH_
 #define _CONFIG_MQH_
+#include "Crypto.mqh"
 #property strict
 
 // Helpers
@@ -28,20 +29,6 @@ color StringToRGB(string str)
    return clrBlack;
 }
 
-int HexToInt(string hex)
-{
-   int res = 0;
-   for(int i=0; i<StringLen(hex); i++)
-   {
-      res *= 16;
-      ushort c = StringGetCharacter(hex, i);
-      
-      if(c >= '0' && c <= '9')      res += (c - '0');
-      else if(c >= 'a' && c <= 'f') res += (c - 'a' + 10);
-      else if(c >= 'A' && c <= 'F') res += (c - 'A' + 10);
-   }
-   return res;
-}
 
 color HexStringToColor(string hex)
 {
@@ -73,7 +60,7 @@ void SaveConfigToFile()
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
       FileWrite(handle, "MaxRiskPercent=" + DoubleToString(g_MaxRiskPercent, 2));
       FileWrite(handle, "NavigationPosition=" + IntegerToString(g_NavigationPosition));
-      FileWrite(handle, "ActivationCode=" + g_ActivationCode);
+      FileWrite(handle, "ActivationCode=" + EncodeString(g_ActivationCode));
       FileWrite(handle, "ShowOrderLines=" + IntegerToString(g_ShowOrderLines));
       FileWrite(handle, "ShowPositionLines=" + IntegerToString(g_ShowPositionLines));
       FileWrite(handle, "ColorBg=" + IntegerToString(g_ColorBg));
@@ -148,7 +135,7 @@ void LoadConfig()
             if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
             if(key == "MaxRiskPercent")   g_MaxRiskPercent   = StringToDouble(val);
             if(key == "NavigationPosition")  g_NavigationPosition  = (int)StringToInteger(val);
-            if(key == "ActivationCode")   g_ActivationCode   = val;
+            if(key == "ActivationCode")   g_ActivationCode   = DecodeString(val);
             if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
             if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);
             if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
