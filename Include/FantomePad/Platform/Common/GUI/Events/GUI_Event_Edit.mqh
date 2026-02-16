@@ -68,7 +68,7 @@ void OnEvent_EndEdit(string sparam)
       }
       
       UpdateChartLines(); 
-      AutoSwitchOrderType(); // Vérification logique après édition manuelle
+      if(AutoSwitchOrderType()) UpdateUIMode(); // Logic check + UI Refresh if changed
       if(sparam == PREFIX + "Edit_Lot")
       {
            UpdateCalculatedRisk();
@@ -140,7 +140,7 @@ void OnEvent_ObjectDrag(string sparam)
    
    if(dragged)
    {
-      AutoSwitchOrderType(); // Vérification logique après drag
+      if(AutoSwitchOrderType()) UpdateUIMode(); // Logic check + UI Refresh if changed
       UpdateCalculatedLot();
    }
 }

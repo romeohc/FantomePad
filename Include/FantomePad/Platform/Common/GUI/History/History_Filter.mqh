@@ -64,17 +64,21 @@ void UpdateHistoryFilter()
          int type = OrderType();
          
          // 1. Basic Filters (Order Type)
-         // Exclude Balance (6) and Credit (7)
-         if(type <= 5) // OP_BUY..OP_SELLSTOP
+         // Exclude Balance/Credit/Non-trade (type < 0 on MT5, type > 5 on MT4)
+         if(type >= 0 && type <= 5) // OP_BUY..OP_SELLSTOP only
          {
-             if(g_HistoryFilterMode == H_FILTER_CUSTOM)
-             {
-                 if(ct >= startLimit && ct <= endLimit) match = true;
-             }
-             else
-             {
-                 if(ct >= startLimit) match = true;
-             }
+              // CloseTime > 0 excludes MT5 DEAL_ENTRY_IN deals which shouldn't appear in history
+              if(ct > 0)
+              {
+                  if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+                  {
+                      if(ct >= startLimit && ct <= endLimit) match = true;
+                  }
+                  else
+                  {
+                      if(ct >= startLimit) match = true;
+                  }
+              }
          }
          
          // 2. Symbol Filter

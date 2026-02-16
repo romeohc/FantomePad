@@ -91,7 +91,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
             }
             
             UpdateChartLines(); 
-            AutoSwitchOrderType();
+            if(AutoSwitchOrderType()) UpdateUIMode();
             UpdateCalculatedLot();
             return true; 
        }
@@ -109,7 +109,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
            double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
            ObjectSetString(0, PREFIX + editName, OBJPROP_TEXT, DoubleToString(price, _Digits));
            
-           AutoSwitchOrderType();
+           if(AutoSwitchOrderType()) UpdateUIMode();
            UpdateCalculatedLot();
            return true;
         }

@@ -174,6 +174,7 @@ void CreatePositionsPanel()
    
    // 1. Fond
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
+   ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_ZORDER, 0);
    
    // 2. Select Button
    CreateButton("Pos_Btn_Select", "Select Position", 0, 0, width - 40, 30, g_ColorInput, g_ColorText);

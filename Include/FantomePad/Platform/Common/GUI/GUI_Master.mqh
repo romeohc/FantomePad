@@ -90,6 +90,12 @@ void GUI_OnTick()
    if(GetTickCount() - lastUpdate < 500) return; 
    lastUpdate = GetTickCount();
 
+   // MT5 FIX: Reset history cache flag so HistorySelect is called fresh each cycle.
+   // Without this, newly closed trades won't appear in history/account panels.
+   #ifdef __MQL5__
+      g_fp_history_loaded = false;
+   #endif
+
    // Only update panels that are SUPPOSED to be visible
    if(g_PanelAccount.IsVisible && g_LicenseState == LICENSE_OK) UpdateAccountPanel();
    UpdatePositionsValues(); // Always update if positions visible

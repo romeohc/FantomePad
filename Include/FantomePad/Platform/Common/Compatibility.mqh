@@ -24,6 +24,11 @@
    #define POSITION_TYPE_BUY   OP_BUY
    #define POSITION_TYPE_SELL  OP_SELL
 
+   // --- BALANCE CONSTANT (not officially in MQL4, but type 6 in history) ---
+   #ifndef OP_BALANCE
+      #define OP_BALANCE 6
+   #endif
+
    // --- DATA WRAPPERS ---
    // Map Common accessors back to simple native calls
    
@@ -87,26 +92,13 @@
    #define MODE_TICKSIZE   SYMBOL_TRADE_TICK_SIZE
    #define MODE_MARGINREQUIRED 0 
    #define OP_BALANCE -2  // Non-trade history deal type
-
    // --- SELECTION MAPPING ---
    #define MODE_TRADES 0
    #define MODE_HISTORY 1
    #define SELECT_BY_POS 0
    #define SELECT_BY_TICKET 1
    
-   // Use FP_ prefix to avoid ambiguity with system functions
-   int FP_OrdersTotal() 
-   {
-        return PositionsTotal() + OrdersTotal();
-   }
-   
-   int FP_OrdersHistoryTotal()
-   {
-      if(!g_fp_history_loaded) HistorySelect(0, TimeCurrent());
-      return HistoryDealsTotal();
-   }
-   
-   // Selection state tracking
+   // Selection state tracking (MUST be declared before functions that use them)
    static bool g_fp_is_position = false;
    static bool g_fp_is_history  = false;
    static ulong g_fp_selected_ticket = 0;
@@ -123,6 +115,22 @@
    void FP_HistoryEnd()
    {
       g_fp_history_loaded = false;
+   }
+   
+   // Use FP_ prefix to avoid ambiguity with system functions
+   int FP_OrdersTotal() 
+   {
+        return PositionsTotal() + OrdersTotal();
+   }
+   
+   int FP_OrdersHistoryTotal()
+   {
+      if(!g_fp_history_loaded)
+      {
+         HistorySelect(0, TimeCurrent());
+         g_fp_history_loaded = true;
+      }
+      return HistoryDealsTotal();
    }
 
    bool FP_OrderSelect(int index, int select, int pool=MODE_TRADES)
@@ -177,7 +185,11 @@
       }
       else if(pool == MODE_HISTORY)
       {
-         if(!g_fp_history_loaded) HistorySelect(0, TimeCurrent());
+         if(!g_fp_history_loaded)
+         {
+            HistorySelect(0, TimeCurrent());
+            g_fp_history_loaded = true;
+         }
          if(select == SELECT_BY_POS)
          {
             if(index < HistoryDealsTotal())
@@ -256,7 +268,8 @@
          long type = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TYPE);
          if(type == DEAL_TYPE_BUY) return OP_BUY;
          if(type == DEAL_TYPE_SELL) return OP_SELL;
-         return -2; // Non-trade deal (balance, credit, commission, etc.)
+         if(type == DEAL_TYPE_BALANCE) return OP_BALANCE; // Deposits/Withdrawals
+         return -2; // Other non-trade deals (credit, commission, etc.)
       }
       if(g_fp_is_position)
       {

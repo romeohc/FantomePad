@@ -35,15 +35,16 @@ void GetAccountHistoryStats(double &outDeposit, double &outWithdraw, double &out
       if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
       {
          int type = OrderType();
-         if(type == 6) // OP_BALANCE = 6 (Deposit/Withdraw)
+         if(type == OP_BALANCE) // Cross-platform: 6 on MT4, -2 on MT5
          {
             double amt = OrderProfit();
             if(amt > 0) outDeposit += amt;
             else        outWithdraw += MathAbs(amt);
          }
-         else if(type <= 1) // OP_BUY=0, OP_SELL=1
+         else if(type >= 0 && type <= 1 && OrderCloseTime() > 0) // OP_BUY/OP_SELL, only exit deals
          {
-            // Sum net profit (profit + commission + swap)
+            // CloseTime > 0 ensures we skip MT5 DEAL_ENTRY_IN (opening deals)
+            // which have CloseTime = 0 and should not be counted in net profit.
             outNetProfit += (OrderProfit() + OrderCommission() + OrderSwap());
          }
       }

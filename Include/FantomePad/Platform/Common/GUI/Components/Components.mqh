@@ -42,6 +42,7 @@ void CreateRect(string name, int x, int y, int w, int h, color bg, int border)
    FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    FP_ObjectSetInteger(0, objName, OBJPROP_COLOR, bg); 
    FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   FP_ObjectSetInteger(0, objName, OBJPROP_ZORDER, 1); // MT5: Default Z for backgrounds
 }
 
 void CreateButton(string name, string text, int x, int y, int w, int h, color bg, color txtColor)
@@ -66,6 +67,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, color bg
    FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
    FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   FP_ObjectSetInteger(0, objName, OBJPROP_ZORDER, 3); // MT5: Above backgrounds and labels
    
    // MT5 Specific: Ensure buttons are selectable but don't show the selection frame
    #ifdef __MQL5__
@@ -86,6 +88,7 @@ void CreateLabel(string name, string text, int x, int y, int fontsize, color col
    FP_ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, fontsize);
    FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
    FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   FP_ObjectSetInteger(0, objName, OBJPROP_ZORDER, 2); // MT5: Above backgrounds, below buttons
 }
 
 void CreateEdit(string name, string text, int x, int y, int w, int h, bool readOnly = false)
@@ -110,6 +113,7 @@ void CreateEdit(string name, string text, int x, int y, int w, int h, bool readO
    FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, g_ColorInput); 
    FP_ObjectSetInteger(0, objName, OBJPROP_READONLY, readOnly);
    FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   FP_ObjectSetInteger(0, objName, OBJPROP_ZORDER, 3); // MT5: Same level as buttons
 }
 
 void EffectButton(string name)

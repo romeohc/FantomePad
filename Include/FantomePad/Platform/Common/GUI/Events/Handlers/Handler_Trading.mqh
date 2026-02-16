@@ -108,6 +108,7 @@ bool Handle_Trading_Events(string sparam)
          UpdateCalculatedLot();
       } else {
          TradeErrorHandler::ShowTradeToast(result);
+         ShowValidationError(result.Message);
       }
       return true;
    }
@@ -158,6 +159,7 @@ bool Handle_Trading_Events(string sparam)
          UpdateCalculatedLot();
       } else {
          TradeErrorHandler::ShowTradeToast(result);
+         ShowValidationError(result.Message);
       }
       return true;
    }
@@ -216,6 +218,7 @@ bool Handle_Trading_Events(string sparam)
             UpdateCalculatedLot();
          } else {
             TradeErrorHandler::ShowTradeToast(result);
+            ShowValidationError(result.Message);
          }
       }
       return true;

@@ -20,6 +20,12 @@
 //+------------------------------------------------------------------+
 void OnEvent_ObjectClick(string sparam)
 {
+    // MT5 FIX: Always reset button state to prevent double-toggle/lag bug.
+    // On MT5, OBJ_BUTTON toggles OBJPROP_STATE on each click. Without this reset,
+    // the state remains "true" (pressed), causing erratic toggle behavior where
+    // panels open and immediately close (requiring 4-5 clicks to actually toggle).
+    ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+    
     LastClickTime = GetTickCount(); // Enregistrer l'heure du clic sur un objet
     
     // --- LICENSE REVOKED GUARD ---

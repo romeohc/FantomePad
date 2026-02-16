@@ -18,6 +18,7 @@ void CreateAccountPanel()
    
    // 1. Fond & Header
    CreateRect("Account_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
+   ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_ZORDER, 0); // Explicitly lower than child rects
    CreateRect("Account_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
    long login = AccountInfoInteger(ACCOUNT_LOGIN);
    string accountName = AccountInfoString(ACCOUNT_NAME);
