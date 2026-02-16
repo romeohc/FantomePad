@@ -43,7 +43,7 @@ public:
    //+------------------------------------------------------------------+
    //| Open Market Order                                                |
    //+------------------------------------------------------------------+
-   virtual long OpenMarket(string symbol,
+   virtual TradeResult OpenMarket(string symbol,
                            int type,
                            double lots,
                            double price,
@@ -64,19 +64,17 @@ public:
       // We use PositionOpen for explicitly opening a position at market
       if(!m_trade.PositionOpen(symbol, order_type, lots, price, sl, tp, comment))
         {
-         Print("[Error] OpenMarket MT5 failed. RetCode: ", m_trade.ResultRetcode(), 
-               " | Desc: ", m_trade.ResultRetcodeDescription());
-         return -1;
+         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "OpenMarket MT5 failed", m_trade.ResultRetcodeDescription());
         }
 
       // Return the Deal Order Ticket (which becomes the Position Ticket in Hedging)
-      return (long)m_trade.ResultOrder();
+      return MakeSuccessResult(m_trade.ResultOrder());
      }
 
    //+------------------------------------------------------------------+
    //| Open Pending Order                                               |
    //+------------------------------------------------------------------+
-   virtual long OpenPending(string symbol,
+   virtual TradeResult OpenPending(string symbol,
                             int type,
                             double lots,
                             double price,
@@ -94,25 +92,22 @@ public:
       // Ensure expiration is valid if specified
       if(type_time == ORDER_TIME_SPECIFIED && expiration <= TimeCurrent())
       {
-         Print("[Error] OpenPending: Expiration time in the past.");
-         return -1;
+         return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Expiration time in the past");
       }
 
       // limit_price is 0 for standard pending orders (StopLimit not supported nicely in this unified interface yet)
       if(!m_trade.OrderOpen(symbol, order_type, lots, 0.0, price, sl, tp, type_time, expiration, comment))
         {
-         Print("[Error] OpenPending MT5 failed. RetCode: ", m_trade.ResultRetcode(), 
-               " | Desc: ", m_trade.ResultRetcodeDescription());
-         return -1;
+         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "OpenPending MT5 failed", m_trade.ResultRetcodeDescription());
         }
 
-      return (long)m_trade.ResultOrder();
+      return MakeSuccessResult(m_trade.ResultOrder());
      }
 
    //+------------------------------------------------------------------+
    //| Modify Order (Position or Pending)                               |
    //+------------------------------------------------------------------+
-   virtual bool Modify(long ticket,
+   virtual TradeResult Modify(long ticket,
                        double sl,
                        double tp)
      {
@@ -121,11 +116,9 @@ public:
         {
          if(!m_trade.PositionModify(ticket, sl, tp))
            {
-            Print("[Error] Modify Position failed. Ticket: ", ticket, 
-                  " | RetCode: ", m_trade.ResultRetcode());
-            return false;
+            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Modify Position failed");
            }
-         return true;
+         return MakeSuccessResult(ticket);
         }
       
       // If not position, try to modify as Pending Order
@@ -143,29 +136,25 @@ public:
          
          if(!m_trade.OrderModify(ticket, price, sl, tp, type_time, expiration))
            {
-            Print("[Error] Modify Order failed. Ticket: ", ticket, 
-                  " | RetCode: ", m_trade.ResultRetcode());
-            return false;
+            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Modify Order failed");
            }
-         return true;
+         return MakeSuccessResult(ticket);
         }
 
-      Print("[Error] Modify: Ticket ", ticket, " not found (neither Position nor Order).");
-      return false;
+      return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Ticket not found (neither Position nor Order)");
      }
 
    //+------------------------------------------------------------------+
    //| Close Market Order (Position)                                    |
    //+------------------------------------------------------------------+
-   virtual bool Close(long ticket,
+   virtual TradeResult Close(long ticket,
                       double lots,
                       string comment)
      {
       // Check if ticket exists
       if(!PositionSelectByTicket(ticket))
         {
-         Print("[Error] Close: Position ", ticket, " not found.");
-         return false;
+         return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Position not found for close");
         }
         
       double vol = PositionGetDouble(POSITION_VOLUME);
@@ -198,34 +187,31 @@ public:
          
          if(!OrderSend(request, result))
          {
-             Print("[Error] Partial Close failed: ", result.retcode);
-             return false;
+             return MakeErrorResult(result.retcode, TRADE_ERR_BROKER, "Partial Close failed");
          }
-         return true;
+         return MakeSuccessResult(result.order);
       }
       else
       {
          // Full close
          if(!m_trade.PositionClose(ticket, m_slippage))
            {
-            Print("[Error] Close failed. Ticket: ", ticket, " | RetCode: ", m_trade.ResultRetcode());
-            return false;
+            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Close failed");
            }
-         return true;
+         return MakeSuccessResult(ticket);
       }
      }
 
    //+------------------------------------------------------------------+
    //| Delete Pending Order                                             |
    //+------------------------------------------------------------------+
-   virtual bool Delete(long ticket)
+   virtual TradeResult Delete(long ticket)
      {
       if(!m_trade.OrderDelete(ticket))
         {
-         Print("[Error] Delete failed. Ticket: ", ticket, " | RetCode: ", m_trade.ResultRetcode());
-         return false;
+         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Delete failed");
         }
-      return true;
+      return MakeSuccessResult(ticket);
      }
   };
 

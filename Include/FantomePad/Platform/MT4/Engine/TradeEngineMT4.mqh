@@ -25,7 +25,7 @@ public:
    //+------------------------------------------------------------------+
    //| Open Market Order                                                |
    //+------------------------------------------------------------------+
-   virtual long OpenMarket(string symbol,
+   virtual TradeResult OpenMarket(string symbol,
                            int type,
                            double lots,
                            double price,
@@ -38,8 +38,7 @@ public:
       
       // Basic validation
       if(lots <= 0) {
-         Print("[Error] OpenMarket: Invalid lots: ", lots);
-         return -1;
+         return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Invalid lots");
       }
 
       // Determine color based on order type
@@ -62,17 +61,18 @@ public:
       if(ticket < 0)
         {
          int err = GetLastError();
-         Print("[Error] OpenMarket failed. Error: ", err, " | Symbol: ", symbol, " | Type: ", type, " | Price: ", price);
-         return -1;
+         string errDesc = "OpenMarket failed. Error: " + IntegerToString(err);
+         Print("[Error] ", errDesc);
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Order execution failed", errDesc);
         }
 
-      return (long)ticket;
+      return MakeSuccessResult(ticket);
      }
 
    //+------------------------------------------------------------------+
    //| Open Pending Order                                               |
    //+------------------------------------------------------------------+
-   virtual long OpenPending(string symbol,
+   virtual TradeResult OpenPending(string symbol,
                             int type,
                             double lots,
                             double price,
@@ -94,17 +94,18 @@ public:
       if(ticket < 0)
         {
          int err = GetLastError();
-         Print("[Error] OpenPending failed. Error: ", err, " | Symbol: ", symbol, " | Type: ", type, " | Price: ", price);
-         return -1;
+         string errDesc = "OpenPending failed. Error: " + IntegerToString(err);
+         Print("[Error] ", errDesc);
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Order execution failed", errDesc);
         }
 
-      return (long)ticket;
+      return MakeSuccessResult(ticket);
      }
 
    //+------------------------------------------------------------------+
    //| Modify Order                                                     |
    //+------------------------------------------------------------------+
-   virtual bool Modify(long ticket,
+   virtual TradeResult Modify(long ticket,
                        double sl,
                        double tp)
      {
@@ -114,8 +115,7 @@ public:
       if(!OrderSelect((int)ticket, SELECT_BY_TICKET))
         {
          int err = GetLastError();
-         Print("[Error] Modify: Failed to select ticket ", ticket, ". Error: ", err);
-         return false;
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Order not found for modification");
         }
 
       double open_price = OrderOpenPrice();
@@ -127,17 +127,16 @@ public:
       if(!res)
         {
          int err = GetLastError();
-         Print("[Error] Modify failed. Ticket: ", ticket, " | Error: ", err);
-         return false;
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Modify failed");
         }
 
-      return true;
+      return MakeSuccessResult(ticket);
      }
 
    //+------------------------------------------------------------------+
    //| Close Market Order                                               |
    //+------------------------------------------------------------------+
-   virtual bool Close(long ticket,
+   virtual TradeResult Close(long ticket,
                       double lots,
                       string comment)
      {
@@ -147,8 +146,7 @@ public:
       if(!OrderSelect((int)ticket, SELECT_BY_TICKET))
         {
          int err = GetLastError();
-         Print("[Error] Close: Failed to select ticket ", ticket, ". Error: ", err);
-         return false;
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Order not found for close");
         }
 
       string symbol = OrderSymbol();
@@ -167,10 +165,7 @@ public:
         // Not a market order? Maybe caller made a mistake invoking Close() on pending.
         // Try Delete() instead or return error.
         // Assuming Close() handles market orders as per contract.
-        Print("[Warning] Close: Ticket ", ticket, " is not OP_BUY/OP_SELL.");
-        // Try to close at OpenPrice? No, just fail or basic Close.
-        // Actually, if it's pending, OrderClose fails.
-        return false;
+        return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Cannot close pending order, use Delete instead");
         }
 
       color arrow_color = (type == OP_BUY) ? clrRed : clrBlue; // Opposite color for close
@@ -180,17 +175,16 @@ public:
       if(!res)
         {
          int err = GetLastError();
-         Print("[Error] Close failed. Ticket: ", ticket, " | Error: ", err);
-         return false;
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Close execution failed");
         }
 
-      return true;
+      return MakeSuccessResult(ticket);
      }
 
    //+------------------------------------------------------------------+
    //| Delete Pending Order                                             |
    //+------------------------------------------------------------------+
-   virtual bool Delete(long ticket)
+   virtual TradeResult Delete(long ticket)
      {
       ResetLastError();
 
@@ -200,11 +194,10 @@ public:
         {
          int err = GetLastError();
          // Check if already closed/deleted
-         Print("[Error] Delete failed. Ticket: ", ticket, " | Error: ", err);
-         return false;
+         return MakeErrorResult(err, TRADE_ERR_BROKER, "Delete execution failed");
         }
 
-      return true;
+      return MakeSuccessResult(ticket);
      }
   };
 //+------------------------------------------------------------------+

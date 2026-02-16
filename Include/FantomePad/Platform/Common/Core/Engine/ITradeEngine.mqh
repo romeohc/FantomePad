@@ -21,8 +21,8 @@ public:
    virtual ~ITradeEngine() {}
 
    //--- Market Orders
-   // Returns ticket number on success, -1 on failure
-   virtual long OpenMarket(string symbol, 
+   // Returns TradeResult
+   virtual TradeResult OpenMarket(string symbol, 
                           int type, 
                           double lots, 
                           double price, 
@@ -32,8 +32,8 @@ public:
                           int magic) = 0;
 
    //--- Pending Orders
-   // Returns ticket number on success, -1 on failure
-   virtual long OpenPending(string symbol, 
+   // Returns TradeResult
+   virtual TradeResult OpenPending(string symbol, 
                            int type, 
                            double lots, 
                            double price, 
@@ -44,19 +44,19 @@ public:
                            datetime expiration) = 0;
 
    //--- Modify Orders
-   // Returns true on success, false on failure
-   virtual bool Modify(long ticket, 
+   // Returns TradeResult
+   virtual TradeResult Modify(long ticket, 
                       double sl, 
                       double tp) = 0;
 
    //--- Close Orders (Market)
-   // Returns true on success, false on failure
-   virtual bool Close(long ticket, 
+   // Returns TradeResult
+   virtual TradeResult Close(long ticket, 
                      double lots, 
                      string comment) = 0;
 
    //--- Delete Orders (Pending)
-   // Returns true on success, false on failure
-   virtual bool Delete(long ticket) = 0;
+   // Returns TradeResult
+   virtual TradeResult Delete(long ticket) = 0;
   };
 //+------------------------------------------------------------------+
