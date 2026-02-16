@@ -30,7 +30,7 @@ void GUI_OnInit()
 {
    if(GlobalVariableCheck("FantomePad_LastSelectedTicket"))
    {
-      SelectedPositionTicket = (int)GlobalVariableGet("FantomePad_LastSelectedTicket");
+      SelectedPositionTicket = (long)GlobalVariableGet("FantomePad_LastSelectedTicket");
       GlobalVariableDel("FantomePad_LastSelectedTicket");
       g_PanelPositions.IsVisible = true;
       

@@ -5,7 +5,7 @@
 #property strict
 
 // --- TRACKING GLOBALS ---
-int    g_LastPosTicket = -1;
+long   g_LastPosTicket = -1;
 double g_LastPosSL = -1.0;
 double g_LastPosTP = -1.0;
 double g_LastPosEntry = -1.0;

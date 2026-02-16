@@ -33,7 +33,7 @@ void DrawPositionList()
    long w = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE);
    long h = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE);
    
-   int tickets[];
+   long tickets[];
    int count = 0;
    for(int i=0; i<OrdersTotal(); i++)
    {
@@ -93,7 +93,7 @@ void DrawPositionList()
       int dataIdx = (int)g_PosListOffset + i;
       if(dataIdx >= count) break;
       
-      int tck = tickets[dataIdx];
+      long tck = tickets[dataIdx];
       if(OrderSelect(tck, SELECT_BY_TICKET))
       {
          string typeStr = "";

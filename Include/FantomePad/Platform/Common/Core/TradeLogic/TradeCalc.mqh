@@ -111,7 +111,7 @@ int GetSlippagePoints(int slippagePips)
 //+------------------------------------------------------------------+
 //| HELPER: RETRIEVE ORIGINAL LOT SIZE (TRACE HISTORY)               |
 //+------------------------------------------------------------------+
-double GetOriginalLotSize(int ticket)
+double GetOriginalLotSize(long ticket)
 {
    if(!OrderSelect(ticket, SELECT_BY_TICKET)) return 0.0;
    
@@ -124,7 +124,7 @@ double GetOriginalLotSize(int ticket)
    {
       int pos = StringFind(comment, "from #");
       string sub = StringSubstr(comment, pos + 6);
-      int prevTicket = (int)StringToInteger(sub);
+      long prevTicket = StringToInteger(sub);
       
       if(OrderSelect(prevTicket, SELECT_BY_TICKET, MODE_HISTORY))
       {

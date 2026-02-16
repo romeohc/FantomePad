@@ -21,7 +21,7 @@ bool Handle_PositionList_Events(string sparam)
    {
       string prefix = PREFIX + "PosListItem_";
       string sTicket = StringSubstr(sparam, StringLen(prefix));
-      SelectedPositionTicket = (int)StringToInteger(sTicket);
+      SelectedPositionTicket = StringToInteger(sTicket);
       
       // Auto Switch Chart Symbol
       if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))

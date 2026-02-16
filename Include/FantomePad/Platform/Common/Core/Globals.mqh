@@ -40,7 +40,7 @@ int    g_SymbolListMaxVisible = 20; // Max visible items in symbol list
 int    g_SymbolHoverIndex = -1; // Current highlighted index for wheel navigation
 
 // --- POSITIONS SPECIFIC ---
-int    SelectedPositionTicket = -1; // -1 = None
+long   SelectedPositionTicket = -1; // -1 = None
 bool   IsPosListOpen = false;
 int    g_PosListOffset = 0;
 int    g_PosListMaxVisible = 10;

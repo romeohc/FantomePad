@@ -190,13 +190,13 @@ bool CheckAndSetNewAccount()
    if(IsTesting()) return false; 
 
    string gvName = "FantomePad_LastAccount";
-   int currentAccount = (int)AccountNumber();
-   int lastAccount = 0;
+   long currentAccount = AccountNumber();
+   long lastAccount = 0;
 
    // Check if global variable exists and retrieve value
    if(GlobalVariableCheck(gvName))
    {
-      lastAccount = (int)GlobalVariableGet(gvName);
+      lastAccount = (long)GlobalVariableGet(gvName);
    }
 
    // If changed (or first run on this terminal because var didn't exist)

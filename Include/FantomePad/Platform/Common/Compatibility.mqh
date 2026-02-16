@@ -33,9 +33,9 @@
    // Map Common accessors back to simple native calls
    
    // Selection
-   bool FP_OrderSelect(int ticket, int select, int pool=MODE_TRADES)
+   bool FP_OrderSelect(long ticket, int select, int pool=MODE_TRADES)
    {
-      return OrderSelect(ticket, select, pool);
+      return OrderSelect((int)ticket, select, pool);
    }
    
    // Properties
@@ -43,7 +43,7 @@
    double FP_OrderStopLoss()  { return OrderStopLoss(); }
    double FP_OrderTakeProfit(){ return OrderTakeProfit(); }
    double FP_OrderLots()      { return OrderLots(); }
-   int    FP_OrderTicket()    { return OrderTicket(); }
+   long   FP_OrderTicket()    { return OrderTicket(); }
    string FP_OrderSymbol()    { return OrderSymbol(); }
    int    FP_OrderType()      { return OrderType(); }
    double FP_OrderProfit()    { return OrderProfit(); } 
@@ -51,11 +51,12 @@
    double FP_OrderCommission(){ return OrderCommission(); }
    string FP_OrderComment()   { return OrderComment(); }
    datetime FP_OrderCloseTime(){ return OrderCloseTime(); }
+   int    FP_OrderMagic()     { return OrderMagicNumber(); }
    
    // Account
    double FP_AccountEquity()  { return AccountEquity(); }
    double FP_AccountBalance() { return AccountBalance(); }
-   int    FP_AccountNumber()  { return AccountNumber(); }
+   long   FP_AccountNumber()  { return AccountNumber(); }
    
    // Time wrappers
    datetime FP_iTime(string symbol, int timeframe, int shift)
@@ -65,6 +66,26 @@
    
    // Testing
    bool FP_IsTesting() { return IsTesting(); }
+
+   // --- MACROS TO FORCE USAGE OF FP_ FUNCTIONS ---
+   #define OrderSelect FP_OrderSelect
+   #define OrderTicket FP_OrderTicket
+   #define AccountNumber FP_AccountNumber
+   #define IsTesting FP_IsTesting
+   
+   // Map other properties if they need wrappers (not strictly needed on MT4, but for consistency)
+   #define OrderOpenPrice FP_OrderOpenPrice
+   #define OrderStopLoss  FP_OrderStopLoss
+   #define OrderTakeProfit FP_OrderTakeProfit
+   #define OrderLots      FP_OrderLots
+   #define OrderSymbol    FP_OrderSymbol
+   #define OrderType      FP_OrderType
+   #define OrderProfit    FP_OrderProfit
+   #define OrderSwap      FP_OrderSwap
+   #define OrderCommission FP_OrderCommission
+   #define OrderComment   FP_OrderComment
+   #define OrderCloseTime FP_OrderCloseTime
+   #define OrderMagic     FP_OrderMagic
 
 // ===================================================================
 // PLATFORM : METATRADER 5 (MQL5)
@@ -133,7 +154,7 @@
       return HistoryDealsTotal();
    }
 
-   bool FP_OrderSelect(int index, int select, int pool=MODE_TRADES)
+   bool FP_OrderSelect(long index, int select, int pool=MODE_TRADES)
    {
       g_fp_is_position = false;
       g_fp_is_history = false;
@@ -146,7 +167,7 @@
          {
             if(index < posTotal)
             {
-               string sym = PositionGetSymbol(index);
+               string sym = PositionGetSymbol((int)index);
                if(sym != "") 
                {
                   g_fp_is_position = true;
@@ -156,7 +177,7 @@
             }
             else
             {
-               int ordIndex = index - posTotal;
+               int ordIndex = (int)index - posTotal;
                if(ordIndex < OrdersTotal())
                {
                   ulong ticket = OrderGetTicket(ordIndex);
@@ -194,7 +215,7 @@
          {
             if(index < HistoryDealsTotal())
             {
-               ulong ticket = HistoryDealGetTicket(index);
+               ulong ticket = HistoryDealGetTicket((int)index);
                if(ticket > 0)
                {
                   g_fp_is_history = true;
@@ -252,9 +273,9 @@
       if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_VOLUME);
       return g_fp_is_position ? PositionGetDouble(POSITION_VOLUME) : OrderGetDouble(ORDER_VOLUME_INITIAL); 
    }
-   int    FP_OrderTicket()    
+   long   FP_OrderTicket()    
    { 
-      return (int)g_fp_selected_ticket;
+      return (long)g_fp_selected_ticket;
    }
    string FP_OrderSymbol()    
    { 
@@ -371,9 +392,9 @@
       return AccountInfoString(ACCOUNT_CURRENCY);
    }
    
-   int FP_AccountNumber()
+   long FP_AccountNumber()
    {
-      return (int)AccountInfoInteger(ACCOUNT_LOGIN);
+      return AccountInfoInteger(ACCOUNT_LOGIN);
    }
    
    bool IsTradeAllowed()

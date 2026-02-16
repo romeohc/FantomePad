@@ -256,9 +256,8 @@ void UpdatePositionsValues()
              return; 
          }
       }
-      
-      SelectedPositionTicket = -1;
-      g_LastPosTicket = -1;
+           // Note: We removed the aggressive reset to -1 here to prevent 
+      // intermittent selection loss during rapid UI updates on MT5.
    }
    
    UpdatePartialButtonsVisuals(); // Ensure buttons update to inactive state

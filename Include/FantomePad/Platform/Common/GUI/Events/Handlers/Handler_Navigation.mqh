@@ -88,7 +88,7 @@ bool Handle_Navigation_Events(string sparam)
        }
        
        // Get ticket from global array
-       int ticket = -1;
+       long ticket = -1;
        if(visualIdx >= 0 && visualIdx < ArraySize(g_AccountOrdersTickets))
        {
           ticket = g_AccountOrdersTickets[visualIdx];

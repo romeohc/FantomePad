@@ -140,7 +140,7 @@ void UpdateOpenOrderLines()
       {
          if(OrderSymbol() == Symbol())
          {
-            int ticket = OrderTicket();
+            long ticket = OrderTicket();
             activeTickets += IntegerToString(ticket) + "|";
             
             double op = OrderOpenPrice();

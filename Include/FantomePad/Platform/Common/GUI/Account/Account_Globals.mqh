@@ -6,7 +6,7 @@
 // GLOBAL pour suivre le nombre d'ordres affichés
 int g_LastAccountOrderCount = 0;
 int g_TotalAccountOrderCount = 0; // Total orders (including non-visible due to scroll)
-int g_AccountOrdersTickets[];     // Tickets of currently visible orders (for click handling)
+long g_AccountOrdersTickets[];     // Tickets of currently visible orders (for click handling)
 
 // Optimization: Cache history stats to avoid O(N) loop every tick
 int    g_LastHistoryTotal = -1;

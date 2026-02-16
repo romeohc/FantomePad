@@ -148,7 +148,7 @@ void UpdateAccountPanel()
    // --- ORDER LIST UPDATES ---
    // First pass: Count total orders and collect tickets
    int total = OrdersTotal();
-   int tickets[];
+   long tickets[];
    int orderCount = 0;
    
    for(int i=0; i<total; i++)
@@ -189,7 +189,7 @@ void UpdateAccountPanel()
    
    for(int j=visibleStart; j<visibleEnd; j++)
    {
-      int tck = tickets[j];
+      long tck = tickets[j];
       
       // Store ticket in global array for click identification
       if(visualIndex < visibleCount)
