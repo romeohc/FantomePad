@@ -101,16 +101,19 @@
    
    int FP_OrdersHistoryTotal()
    {
-      return HistoryDealsTotal(); // Simplified approximation for now
+      HistorySelect(0, TimeCurrent());
+      return HistoryDealsTotal();
    }
    
    // Selection state tracking
    static bool g_fp_is_position = false;
+   static bool g_fp_is_history  = false;
    static ulong g_fp_selected_ticket = 0;
 
    bool FP_OrderSelect(int index, int select, int pool=MODE_TRADES)
    {
       g_fp_is_position = false;
+      g_fp_is_history = false;
       g_fp_selected_ticket = 0;
 
       if(pool == MODE_TRADES)
@@ -157,6 +160,32 @@
             }
          }
       }
+      else if(pool == MODE_HISTORY)
+      {
+         HistorySelect(0, TimeCurrent());
+         if(select == SELECT_BY_POS)
+         {
+            if(index < HistoryDealsTotal())
+            {
+               ulong ticket = HistoryDealGetTicket(index);
+               if(ticket > 0)
+               {
+                  g_fp_is_history = true;
+                  g_fp_selected_ticket = ticket;
+                  return true;
+               }
+            }
+         }
+         else // BY_TICKET
+         {
+            if(HistoryDealSelect((ulong)index))
+            {
+               g_fp_is_history = true;
+               g_fp_selected_ticket = (ulong)index;
+               return true;
+            }
+         }
+      }
       return false; 
    }
    
@@ -168,18 +197,32 @@
    // --- ORDER PROPERTIES MAPPING ---
    double FP_OrderOpenPrice() 
    { 
+      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PRICE);
       return g_fp_is_position ? PositionGetDouble(POSITION_PRICE_OPEN) : OrderGetDouble(ORDER_PRICE_OPEN); 
    }
    double FP_OrderStopLoss()  
    { 
+      if(g_fp_is_history)
+      {
+         ulong ord_ticket = (ulong)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ORDER);
+         if(HistoryOrderSelect(ord_ticket)) return HistoryOrderGetDouble(ord_ticket, ORDER_SL);
+         return 0;
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_SL) : OrderGetDouble(ORDER_SL); 
    }
    double FP_OrderTakeProfit()
    { 
+      if(g_fp_is_history)
+      {
+         ulong ord_ticket = (ulong)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ORDER);
+         if(HistoryOrderSelect(ord_ticket)) return HistoryOrderGetDouble(ord_ticket, ORDER_TP);
+         return 0;
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_TP) : OrderGetDouble(ORDER_TP); 
    }
    double FP_OrderLots()      
    { 
+      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_VOLUME);
       return g_fp_is_position ? PositionGetDouble(POSITION_VOLUME) : OrderGetDouble(ORDER_VOLUME_INITIAL); 
    }
    int    FP_OrderTicket()    
@@ -188,10 +231,16 @@
    }
    string FP_OrderSymbol()    
    { 
+      if(g_fp_is_history) return HistoryDealGetString(g_fp_selected_ticket, DEAL_SYMBOL);
       return g_fp_is_position ? PositionGetString(POSITION_SYMBOL) : OrderGetString(ORDER_SYMBOL); 
    }
    int    FP_OrderType()      
    { 
+      if(g_fp_is_history)
+      {
+         long type = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TYPE);
+         return (type == DEAL_TYPE_BUY) ? OP_BUY : ((type == DEAL_TYPE_SELL) ? OP_SELL : -1);
+      }
       if(g_fp_is_position)
       {
          int type = (int)PositionGetInteger(POSITION_TYPE);
@@ -201,30 +250,40 @@
    }
    double FP_OrderProfit()    
    { 
+      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PROFIT);
       return g_fp_is_position ? PositionGetDouble(POSITION_PROFIT) : 0; 
    }
    double FP_OrderSwap()      
    { 
+      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_SWAP);
       return g_fp_is_position ? PositionGetDouble(POSITION_SWAP) : 0; 
    }
    string FP_OrderComment()   
    { 
+      if(g_fp_is_history) return HistoryDealGetString(g_fp_selected_ticket, DEAL_COMMENT);
       return g_fp_is_position ? PositionGetString(POSITION_COMMENT) : OrderGetString(ORDER_COMMENT); 
    }
-   double FP_OrderCommission() { return 0.0; }
+   double FP_OrderCommission() 
+   { 
+      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_COMMISSION);
+      return 0.0; 
+   }
    
    datetime FP_OrderOpenTime()
    { 
+      if(g_fp_is_history) return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
       return (datetime)(g_fp_is_position ? PositionGetInteger(POSITION_TIME) : OrderGetInteger(ORDER_TIME_SETUP)); 
    }
    
    datetime FP_OrderCloseTime()
    { 
-      return 0; // Les positions/ordres actifs n'ont pas de CloseTime
+      if(g_fp_is_history) return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
+      return 0; 
    }
 
    int FP_OrderMagic()
    {
+      if(g_fp_is_history) return (int)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_MAGIC);
       return (int)(g_fp_is_position ? PositionGetInteger(POSITION_MAGIC) : OrderGetInteger(ORDER_MAGIC));
    }
 
