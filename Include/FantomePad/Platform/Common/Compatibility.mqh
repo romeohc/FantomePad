@@ -215,6 +215,15 @@
            case SYMBOL_DIGITS:           return (double)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
            case SYMBOL_SPREAD:           return (double)SymbolInfoInteger(symbol, SYMBOL_SPREAD);
            case SYMBOL_TRADE_STOPS_LEVEL: return (double)SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+           
+           case 0: // MODE_MARGINREQUIRED placeholder
+           {
+              double margin = 0;
+              if(OrderCalcMargin(ORDER_TYPE_BUY, symbol, 1.0, SymbolInfoDouble(symbol, SYMBOL_ASK), margin))
+                 return margin;
+              return 0.0;
+           }
+           
            default: return 0.0;
        }
    }

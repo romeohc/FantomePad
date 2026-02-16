@@ -484,7 +484,7 @@ if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
 #### ✅ [TERMINÉ] ÉTAPE 13 : Suppression de l'ancien `TradeLogic.mqh` monolithique
 **Action :** Supprimer le fichier-agrégateur de transition créé à l'étape 3. Mettre à jour tous les `#include` qui pointaient vers `TradeLogic.mqh` pour pointer vers les trois sous-fichiers.
 
-#### ✅ ÉTAPE 14 : Checkpoint Compatibilité MT5
+#### ✅ [TERMINÉ] ÉTAPE 14 : Checkpoint Compatibilité MT5
 **Action :**
 1. Vérifier que `Compatibility.mqh` couvre tous les appels faits par les nouveaux fichiers.
 2. Fix critique : Implémenter `MODE_MARGINREQUIRED` correctement pour MT5 dans `Compatibility.mqh` :
