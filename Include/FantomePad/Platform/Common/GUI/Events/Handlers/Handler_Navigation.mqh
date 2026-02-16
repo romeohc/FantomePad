@@ -25,8 +25,6 @@ bool Handle_Navigation_Events(string sparam)
       g_PanelMain.IsVisible = !g_PanelMain.IsVisible;
       ToggleMainPanel(g_PanelMain.IsVisible);
       UpdateNavigationPanel(); 
-      EffectButton(sparam);
-      SaveConfigToFile();
       return true;
    }
    
@@ -36,8 +34,6 @@ bool Handle_Navigation_Events(string sparam)
       g_PanelPositions.IsVisible = !g_PanelPositions.IsVisible;
       TogglePositionsPanel(g_PanelPositions.IsVisible);
       UpdateNavigationPanel(); 
-      EffectButton(sparam);
-      SaveConfigToFile();
       return true;
    }
 
@@ -47,8 +43,6 @@ bool Handle_Navigation_Events(string sparam)
       g_PanelAccount.IsVisible = !g_PanelAccount.IsVisible;
       ToggleAccountPanel(g_PanelAccount.IsVisible);
       UpdateNavigationPanel(); 
-      EffectButton(sparam);
-      SaveConfigToFile();
       return true;
    }
    
@@ -58,8 +52,6 @@ bool Handle_Navigation_Events(string sparam)
        g_PanelHistory.IsVisible = !g_PanelHistory.IsVisible;
        ToggleHistoryPanel(g_PanelHistory.IsVisible);
        UpdateNavigationPanel(); 
-       EffectButton(sparam);
-       SaveConfigToFile();
        return true;
     }
    
@@ -67,9 +59,7 @@ bool Handle_Navigation_Events(string sparam)
    if(sparam == PREFIX + "Nav_Btn_Settings")
    {
       ToggleSettings();
-      UpdateNavigationPanel(); // Refresh button state
-      EffectButton(sparam);
-      SaveConfigToFile();
+      UpdateNavigationPanel(); 
       return true;
    }
  

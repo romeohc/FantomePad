@@ -23,6 +23,8 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
       ProcessDragEnd();
    }
    
+   bool needsRedraw = false;
+
    // --- DETECT HOVER ON LIST (UI UPDATES) ---
    if(IsListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging)
    {
@@ -30,6 +32,7 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
       for(int i = 0; i < VisibleListItems; i++)
       {
          string btnName = PREFIX + "ListItem_" + IntegerToString(i);
+         if(ObjectFind(0, btnName) < 0) continue;
          
          // Récupération des coordonnées de l'objet
          long x = ObjectGetInteger(0, btnName, OBJPROP_XDISTANCE);
@@ -38,22 +41,18 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
          long h = ObjectGetInteger(0, btnName, OBJPROP_YSIZE);
          
          // Détection si la souris est dessus
-         if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h)
+         color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) ? g_ColorListHover : g_ColorInput;
+         if((color)ObjectGetInteger(0, btnName, OBJPROP_BGCOLOR) != targetColor)
          {
-            ObjectSetInteger(0, btnName, OBJPROP_BGCOLOR, ColorListHover);
-         }
-         else
-         {
-            ObjectSetInteger(0, btnName, OBJPROP_BGCOLOR, g_ColorInput);
+            ObjectSetInteger(0, btnName, OBJPROP_BGCOLOR, targetColor);
+            needsRedraw = true;
          }
       }
-      ChartRedraw();
    }
 
    // --- HOVER ACTIVE ORDERS (ACCOUNT PANEL) ---
    if(g_PanelAccount.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelAccount.IsDragging)
    {
-       bool redraw = false;
        for(int i=0; i<g_LastAccountOrderCount; i++)
        {
           string cardName = PREFIX + "Account_Ord_Bg_" + IntegerToString(i);
@@ -64,23 +63,19 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
           long w = ObjectGetInteger(0, cardName, OBJPROP_XSIZE);
           long h = ObjectGetInteger(0, cardName, OBJPROP_YSIZE);
           
-          color currentColor = (color)ObjectGetInteger(0, cardName, OBJPROP_BGCOLOR);
-          color targetColor = g_ColorInput;
-          if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) targetColor = g_ColorListHover;
+          color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) ? g_ColorListHover : g_ColorInput;
           
-          if(currentColor != targetColor)
+          if((color)ObjectGetInteger(0, cardName, OBJPROP_BGCOLOR) != targetColor)
           {
              ObjectSetInteger(0, cardName, OBJPROP_BGCOLOR, targetColor);
-             redraw = true;
+             needsRedraw = true;
           }
        }
-       if(redraw) ChartRedraw();
    }
 
    // --- HOVER POSITIONS LIST ---
    if(IsPosListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging)
    {
-      bool redraw = false;
       for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
       {
          string name = ObjectName(0, i);
@@ -91,28 +86,20 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
             long w = ObjectGetInteger(0, name, OBJPROP_XSIZE);
             long h = ObjectGetInteger(0, name, OBJPROP_YSIZE);
             
-            color currentColor = (color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR);
-            color targetColor = g_ColorInput;
+            color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) ? g_ColorListHover : g_ColorInput;
             
-            if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h)
-            {
-               targetColor = g_ColorListHover;
-            }
-            
-            if(currentColor != targetColor)
+            if((color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR) != targetColor)
             {
                ObjectSetInteger(0, name, OBJPROP_BGCOLOR, targetColor);
-               redraw = true;
+               needsRedraw = true;
             }
          }
       }
-      if(redraw) ChartRedraw();
    }
 
    // --- HOVER SYMBOL MANAGER ---
    if(g_PanelSymbolManager.IsVisible && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging && !g_PanelSymbolManager.IsDragging)
    {
-      bool redraw = false;
       // 1. Categories
       for(int i=0; i<g_SymMgr_CategoryCount; i++)
       {
@@ -124,16 +111,13 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
          long w = ObjectGetInteger(0, name, OBJPROP_XSIZE);
          long h = ObjectGetInteger(0, name, OBJPROP_YSIZE);
          
-         color currentColor = (color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR);
          color normalColor = (g_SymMgr_Categories[i] == g_SymMgr_CurrentCategory) ? g_ColorBtnActive : g_ColorBg;
-         color targetColor = normalColor;
+         color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h && g_SymMgr_Categories[i] != g_SymMgr_CurrentCategory) ? g_ColorListHover : normalColor;
          
-         if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h && g_SymMgr_Categories[i] != g_SymMgr_CurrentCategory) targetColor = g_ColorListHover;
-         
-         if(currentColor != targetColor)
+         if((color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR) != targetColor)
          {
             ObjectSetInteger(0, name, OBJPROP_BGCOLOR, targetColor);
-            redraw = true;
+            needsRedraw = true;
          }
       }
       
@@ -151,20 +135,18 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
          long w = ObjectGetInteger(0, name, OBJPROP_XSIZE);
          long h = ObjectGetInteger(0, name, OBJPROP_YSIZE);
          
-         color currentColor = (color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR);
          string sym = g_SymMgr_SymbolsInCat[dataIdx];
          bool isInMarket = (bool)SymbolInfoInteger(sym, SYMBOL_SELECT);
          color normalColor = isInMarket ? g_ColorBtnActive : g_ColorBg;
-         color targetColor = normalColor;
+         color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h && !isInMarket) ? g_ColorListHover : normalColor;
          
-         if(mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h && !isInMarket) targetColor = g_ColorListHover;
-         
-         if(currentColor != targetColor)
+         if((color)ObjectGetInteger(0, name, OBJPROP_BGCOLOR) != targetColor)
          {
             ObjectSetInteger(0, name, OBJPROP_BGCOLOR, targetColor);
-            redraw = true;
+            needsRedraw = true;
          }
       }
-      if(redraw) ChartRedraw();
    }
+
+   if(needsRedraw) ChartRedraw();
 }

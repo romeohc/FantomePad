@@ -96,7 +96,7 @@
    // Use FP_ prefix to avoid ambiguity with system functions
    int FP_OrdersTotal() 
    {
-       return PositionsTotal();
+        return PositionsTotal() + OrdersTotal();
    }
    
    int FP_OrdersHistoryTotal()
@@ -104,21 +104,60 @@
       return HistoryDealsTotal(); // Simplified approximation for now
    }
    
+   // Selection state tracking
+   static bool g_fp_is_position = false;
+   static ulong g_fp_selected_ticket = 0;
+
    bool FP_OrderSelect(int index, int select, int pool=MODE_TRADES)
    {
+      g_fp_is_position = false;
+      g_fp_selected_ticket = 0;
+
       if(pool == MODE_TRADES)
       {
+         int posTotal = PositionsTotal();
          if(select == SELECT_BY_POS)
          {
-             string sym = PositionGetSymbol(index);
-             return (sym != "");
+            if(index < posTotal)
+            {
+               string sym = PositionGetSymbol(index);
+               if(sym != "") 
+               {
+                  g_fp_is_position = true;
+                  g_fp_selected_ticket = PositionGetInteger(POSITION_TICKET);
+                  return true;
+               }
+            }
+            else
+            {
+               int ordIndex = index - posTotal;
+               if(ordIndex < OrdersTotal())
+               {
+                  ulong ticket = OrderGetTicket(ordIndex);
+                  if(ticket > 0)
+                  {
+                     g_fp_selected_ticket = ticket;
+                     return true;
+                  }
+               }
+            }
          }
          else // BY_TICKET
          {
-             return PositionSelectByTicket((ulong)index);
+            if(PositionSelectByTicket((ulong)index))
+            {
+               g_fp_is_position = true;
+               g_fp_selected_ticket = (ulong)index;
+               return true;
+            }
+            if(OrderSelect((ulong)index))
+            {
+               g_fp_selected_ticket = (ulong)index;
+               return true;
+            }
          }
       }
-      return false; // History not fully implemented yet in Phase 1
+      return false; 
    }
    
    // --- MACROS TO FORCE USAGE OF FP_ FUNCTIONS ---
@@ -127,17 +166,67 @@
    #define OrdersHistoryTotal FP_OrdersHistoryTotal
    
    // --- ORDER PROPERTIES MAPPING ---
-   double FP_OrderOpenPrice() { return PositionGetDouble(POSITION_PRICE_OPEN); }
-   double FP_OrderStopLoss()  { return PositionGetDouble(POSITION_SL); }
-   double FP_OrderTakeProfit(){ return PositionGetDouble(POSITION_TP); }
-   double FP_OrderLots()      { return PositionGetDouble(POSITION_VOLUME); }
-   int    FP_OrderTicket()    { return (int)PositionGetInteger(POSITION_TICKET); }
-   string FP_OrderSymbol()    { return PositionGetString(POSITION_SYMBOL); }
-   int    FP_OrderType()      { return (int)PositionGetInteger(POSITION_TYPE); }
-   double FP_OrderProfit()    { return PositionGetDouble(POSITION_PROFIT); }
-   double FP_OrderSwap()      { return PositionGetDouble(POSITION_SWAP); }
-   string FP_OrderComment()   { return PositionGetString(POSITION_COMMENT); }
-   datetime FP_OrderCloseTime(){ return (datetime)PositionGetInteger(POSITION_TIME); } // Approx for open pos
+   double FP_OrderOpenPrice() 
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_PRICE_OPEN) : OrderGetDouble(ORDER_PRICE_OPEN); 
+   }
+   double FP_OrderStopLoss()  
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_SL) : OrderGetDouble(ORDER_SL); 
+   }
+   double FP_OrderTakeProfit()
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_TP) : OrderGetDouble(ORDER_TP); 
+   }
+   double FP_OrderLots()      
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_VOLUME) : OrderGetDouble(ORDER_VOLUME_INITIAL); 
+   }
+   int    FP_OrderTicket()    
+   { 
+      return (int)g_fp_selected_ticket;
+   }
+   string FP_OrderSymbol()    
+   { 
+      return g_fp_is_position ? PositionGetString(POSITION_SYMBOL) : OrderGetString(ORDER_SYMBOL); 
+   }
+   int    FP_OrderType()      
+   { 
+      if(g_fp_is_position)
+      {
+         int type = (int)PositionGetInteger(POSITION_TYPE);
+         return (type == POSITION_TYPE_BUY) ? OP_BUY : OP_SELL;
+      }
+      return (int)OrderGetInteger(ORDER_TYPE);
+   }
+   double FP_OrderProfit()    
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_PROFIT) : 0; 
+   }
+   double FP_OrderSwap()      
+   { 
+      return g_fp_is_position ? PositionGetDouble(POSITION_SWAP) : 0; 
+   }
+   string FP_OrderComment()   
+   { 
+      return g_fp_is_position ? PositionGetString(POSITION_COMMENT) : OrderGetString(ORDER_COMMENT); 
+   }
+   double FP_OrderCommission() { return 0.0; }
+   
+   datetime FP_OrderOpenTime()
+   { 
+      return (datetime)(g_fp_is_position ? PositionGetInteger(POSITION_TIME) : OrderGetInteger(ORDER_TIME_SETUP)); 
+   }
+   
+   datetime FP_OrderCloseTime()
+   { 
+      return 0; // Les positions/ordres actifs n'ont pas de CloseTime
+   }
+
+   int FP_OrderMagic()
+   {
+      return (int)(g_fp_is_position ? PositionGetInteger(POSITION_MAGIC) : OrderGetInteger(ORDER_MAGIC));
+   }
 
    #define OrderOpenPrice FP_OrderOpenPrice
    #define OrderStopLoss  FP_OrderStopLoss
@@ -151,6 +240,8 @@
    #define OrderCommission FP_OrderCommission
    #define OrderComment   FP_OrderComment
    #define OrderCloseTime FP_OrderCloseTime
+   #define OrderOpenTime  FP_OrderOpenTime
+   #define OrderMagic     FP_OrderMagic
    
    // --- GLOBAL VARIABLES MACROS ---
    #define Ask SymbolInfoDouble(_Symbol, SYMBOL_ASK)
@@ -251,8 +342,13 @@
    #define OBJPROP_TIME2  OBJPROP_TIME
    
    // MT5 defines Point as a function, MT4 as a var. We map to _Point (_Digits).
-   #define Point _Point
-   #define Digits _Digits
+   // Note: We avoid naked #define Point to prevent breaking struct members
+   #ifndef Point
+      #define Point _Point
+   #endif
+   #ifndef Digits
+      #define Digits _Digits
+   #endif
    #define Bars iBars(_Symbol, _Period)
 
    // --- MACROS FOR WRAPPERS ---
@@ -260,7 +356,7 @@
    #define IsTesting FP_IsTesting
    
    // FIX: POSITION_COMMISSION is deprecated/not available for open positions. Returning 0.
-   double FP_OrderCommission() { return 0.0; } // Was PositionGetDouble(POSITION_COMMISSION);
+   // Removed duplicate definition
 
 #endif
 

@@ -27,8 +27,8 @@ struct FantomeTrade {
    int      Magic;
    
    // Helper fields
-   int      Digits; 
-   double   Point;
+   int      TradeDigits; 
+   double   TradePoint;
 };
 
 //--- Structure unifiée pour le Compte

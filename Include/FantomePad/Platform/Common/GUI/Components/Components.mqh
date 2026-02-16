@@ -47,7 +47,13 @@ void CreateRect(string name, int x, int y, int w, int h, color bg, int border)
 void CreateButton(string name, string text, int x, int y, int w, int h, color bg, color txtColor)
 {
    string objName = PREFIX + name;
-   if(FP_ObjectFind(0, objName) < 0) FP_ObjectCreate(0, objName, OBJ_BUTTON, 0, 0, 0);
+   bool exists = (FP_ObjectFind(0, objName) >= 0);
+   if(!exists) 
+   {
+      FP_ObjectCreate(0, objName, OBJ_BUTTON, 0, 0, 0);
+      FP_ObjectSetInteger(0, objName, OBJPROP_STATE, false);
+   }
+   
    FP_ObjectSetInteger(0, objName, OBJPROP_XDISTANCE, x);
    FP_ObjectSetInteger(0, objName, OBJPROP_YDISTANCE, y);
    FP_ObjectSetInteger(0, objName, OBJPROP_XSIZE, w);
@@ -58,9 +64,14 @@ void CreateButton(string name, string text, int x, int y, int w, int h, color bg
    FP_ObjectSetString(0, objName, OBJPROP_FONT, "Trebuchet MS");
    FP_ObjectSetInteger(0, objName, OBJPROP_FONTSIZE, 10); 
    FP_ObjectSetInteger(0, objName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-   FP_ObjectSetInteger(0, objName, OBJPROP_STATE, false);
    FP_ObjectSetInteger(0, objName, OBJPROP_BORDER_COLOR, bg);
    FP_ObjectSetInteger(0, objName, OBJPROP_BACK, false);
+   
+   // MT5 Specific: Ensure buttons are selectable but don't show the selection frame
+   #ifdef __MQL5__
+      ObjectSetInteger(0, objName, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, objName, OBJPROP_SELECTED, false);
+   #endif
 }
 
 void CreateLabel(string name, string text, int x, int y, int fontsize, color col, string font="Trebuchet MS")
@@ -104,7 +115,7 @@ void CreateEdit(string name, string text, int x, int y, int w, int h, bool readO
 void EffectButton(string name)
 {
    FP_ObjectSetInteger(0, name, OBJPROP_STATE, true);
-   Sleep(100);
+   // Sleep removed to prevent UI lag
    FP_ObjectSetInteger(0, name, OBJPROP_STATE, false);
    ChartRedraw();
 }

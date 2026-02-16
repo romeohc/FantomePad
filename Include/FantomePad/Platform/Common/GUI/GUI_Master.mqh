@@ -219,6 +219,15 @@ void GUI_OnTimer()
 
    if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED) return; // Guard
    
+   // 3. Debounced Save (Every 5 seconds if interaction occurred)
+   static uint lastSave = 0;
+   if(now - lastSave > 5000)
+   {
+       lastSave = now;
+       // We can check a 'dirty' flag here, or just save every 5s if active
+       if(now - g_LastInteractionTime < 6000) SaveConfigToFile(); 
+   }
+
    UpdateAutoTradingWarning();
 }
 

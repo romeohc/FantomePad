@@ -499,7 +499,7 @@ case 0: // MODE_MARGINREQUIRED placeholder
 ```
 **Note :** `UpdateOpenOrderLines()` devra être enrichi pour MT5 (gestion des ordres pendants séparés). → Ticket technique à créer, hors scope de cette restructuration moteur.
 
-#### ✅ ÉTAPE 15 : Suppression du Legacy (Clean-up)
+#### ✅ [TERMINÉ] ÉTAPE 15 : Suppression du Legacy (Clean-up)
 **Backup complet du dossier avant suppression !**
 **Supprimer :**
 *   `MT4/Trade/` entier (`Trade.mqh`, `Trade_Constants.mqh`, `Trade_Execution.mqh`, `Trade_Calculations.mqh`, `Trade_Lines.mqh`, `Trade_Manager.mqh`).
@@ -508,7 +508,7 @@ case 0: // MODE_MARGINREQUIRED placeholder
 *   L'ancien `Common/Core/TradeLogic.mqh` (si pas déjà fait à l'étape 13).
 *   Mettre à jour `Bridge.mqh` pour supprimer tous les `#include` legacy.
 
-#### ✅ ÉTAPE 16 : Validation Compilation
+#### ✅ [TERMINÉ] ÉTAPE 16 : Validation Compilation
 *   Compile MT4 : 0 Error, 0 Warning.
 *   Compile MT5 : 0 Error, 0 Warning.
 

@@ -27,8 +27,8 @@ void FP_GetTrade(FantomeTrade &trade)
    trade.Comment     = OrderComment();
    trade.Magic       = OrderMagicNumber();
    
-   trade.Digits      = (int)MarketInfo(trade.Symbol, MODE_DIGITS);
-   trade.Point       = MarketInfo(trade.Symbol, MODE_POINT);
+   trade.TradeDigits  = (int)MarketInfo(trade.Symbol, MODE_DIGITS);
+   trade.TradePoint   = MarketInfo(trade.Symbol, MODE_POINT);
 }
 
 //+------------------------------------------------------------------+
