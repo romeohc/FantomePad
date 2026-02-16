@@ -153,29 +153,26 @@ public:
       }
 
       // --- Level 6: Permissions ---
-      if(!IsTradeAllowed())
-      {
-         return MakeErrorResult(0, TRADE_ERR_PERMISSION, "AutoTrading Disabled", "Check 'Allow Live Trading' or AutoTrading button");
-      }
+#ifdef __MQL5__
+      if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "AutoTrading Disabled", "AutoTrading button is off in Terminal");
       
-      #ifdef __MQL5__
-         if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
-             return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Terminal Trading Disabled", "AutoTrading button is off");
-         
-         if(!AccountInfoInteger(ACCOUNT_TRADE_ALLOWED))
-             return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Account Trading Disabled", "Investor password or broker disabled?");
-      #else
-         // MT4 IsTradeAllowed covers both partially, but explicit checks are good
-         if(!IsTradeAllowed()) 
-             return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Trading Disabled", "IsTradeAllowed returned false");
-      #endif
+      if(!AccountInfoInteger(ACCOUNT_TRADE_ALLOWED))
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Account Trading Disabled", "Investor password or broker restriction");
+#else
+      if(!IsTradeAllowed())
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "AutoTrading Disabled", "Check 'Allow Live Trading' in EA properties or AutoTrading button");
+      
+      if(!IsExpertEnabled())
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Expert Trading Disabled", "Expert Advisors are disabled in terminal");
+#endif
 
       // License Check
       if(g_LicenseState != LICENSE_OK)
       {
           return MakeErrorResult(0, TRADE_ERR_PERMISSION, "No License", "License not active");
       }
-      
+
       if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
       {
           return MakeErrorResult(0, TRADE_ERR_PERMISSION, "No Account", "Not logged in");
