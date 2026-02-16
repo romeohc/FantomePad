@@ -295,7 +295,7 @@ public:
 
 ### PHASE 3 : IMPLÉMENTATION MOTEUR ROBUSTE
 
-#### ✅ ÉTAPE 6 : Robustesse complète `TradeEngineMT4.mqh`
+#### ✅ [TERMINÉ] ÉTAPE 6 : Robustesse complète `TradeEngineMT4.mqh`
 **Localisation :** `MT4/Engine/TradeEngineMT4.mqh`
 
 **CRITIQUE :** Le code actuel est NAÏF. Il faut importer TOUTE la logique de `Trade_Execution.mqh`.
@@ -325,7 +325,7 @@ public:
 
 **Constantes :** `MAX_RETRIES = 3`, `RETRY_DELAY = 100` définies localement dans la classe (private members), plus besoin de `Trade_Constants.mqh`.
 
-#### ✅ ÉTAPE 7 : Enrichissement `TradeEngineMT5.mqh`
+#### ✅ [TERMINÉ] ÉTAPE 7 : Enrichissement `TradeEngineMT5.mqh`
 **Localisation :** `MT5/Engine/TradeEngineMT5.mqh`
 
 Le code actuel est DÉJÀ bon pour l'essentiel.

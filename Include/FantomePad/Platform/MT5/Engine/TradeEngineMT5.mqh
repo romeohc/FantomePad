@@ -9,6 +9,7 @@
 
 // Include the Interface
 #include "../../Common/Core/Engine/ITradeEngine.mqh"
+#include "../../Common/Core/Engine/TradeErrorHandler.mqh"
 
 // --- FIX: MACRO CONFLICT RESOLUTION ---
 // The Compatibility layer defines 'OrderSelect' as 'FP_OrderSelect' (MT4 Style).
@@ -64,7 +65,7 @@ public:
       // We use PositionOpen for explicitly opening a position at market
       if(!m_trade.PositionOpen(symbol, order_type, lots, price, sl, tp, comment))
         {
-         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "OpenMarket MT5 failed", m_trade.ResultRetcodeDescription());
+         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "OpenMarket");
         }
 
       // Return the Deal Order Ticket (which becomes the Position Ticket in Hedging)
@@ -98,7 +99,7 @@ public:
       // limit_price is 0 for standard pending orders (StopLimit not supported nicely in this unified interface yet)
       if(!m_trade.OrderOpen(symbol, order_type, lots, 0.0, price, sl, tp, type_time, expiration, comment))
         {
-         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "OpenPending MT5 failed", m_trade.ResultRetcodeDescription());
+         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "OpenPending");
         }
 
       return MakeSuccessResult(m_trade.ResultOrder());
@@ -116,7 +117,7 @@ public:
         {
          if(!m_trade.PositionModify(ticket, sl, tp))
            {
-            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Modify Position failed");
+            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Modify Position");
            }
          return MakeSuccessResult(ticket);
         }
@@ -136,7 +137,7 @@ public:
          
          if(!m_trade.OrderModify(ticket, price, sl, tp, type_time, expiration))
            {
-            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Modify Order failed");
+            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Modify Order");
            }
          return MakeSuccessResult(ticket);
         }
@@ -187,7 +188,7 @@ public:
          
          if(!OrderSend(request, result))
          {
-             return MakeErrorResult(result.retcode, TRADE_ERR_BROKER, "Partial Close failed");
+             return TradeErrorHandler::FromMT5RetCode(result.retcode, "Partial Close");
          }
          return MakeSuccessResult(result.order);
       }
@@ -196,7 +197,7 @@ public:
          // Full close
          if(!m_trade.PositionClose(ticket, m_slippage))
            {
-            return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Close failed");
+            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Close");
            }
          return MakeSuccessResult(ticket);
       }
@@ -209,7 +210,7 @@ public:
      {
       if(!m_trade.OrderDelete(ticket))
         {
-         return MakeErrorResult(m_trade.ResultRetcode(), TRADE_ERR_BROKER, "Delete failed");
+         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Delete");
         }
       return MakeSuccessResult(ticket);
      }

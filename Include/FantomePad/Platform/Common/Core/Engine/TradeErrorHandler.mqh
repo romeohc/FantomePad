@@ -8,7 +8,9 @@
 
 #include "../DataTypes.mqh"
 #include "../Defines.mqh"
+#ifdef __MQL4__
 #include <stdlib.mqh> // For ErrorDescription()
+#endif
 
 class TradeErrorHandler {
 public:
@@ -19,7 +21,11 @@ public:
    {
       string userMsg = "";
       ENUM_TRADE_ERROR_TYPE type = TRADE_ERR_BROKER;
+      #ifdef __MQL4__
       string desc = ErrorDescription(error);
+      #else
+      string desc = "Error " + IntegerToString(error);
+      #endif
 
       // Mapping Logic from Legacy Trade_Execution.mqh
       if(error == 130) {
