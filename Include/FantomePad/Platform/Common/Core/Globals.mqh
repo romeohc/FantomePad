@@ -53,8 +53,9 @@ datetime g_HistoryCustomEnd = 0;
 string g_HistoryFilterSymbol = ""; // Symbol filter string
 
 // --- AUTHENTICATION GLOBALS ---
-bool   g_IsLicensed = false; // Legacy flag, kept for compatibility, follows g_LicenseState
 ENUM_LICENSE_STATE g_LicenseState = LICENSE_NONE;
+#define g_IsLicensed (g_LicenseState == LICENSE_OK)
+bool   g_NeedsReinit = false;  // Flag for deferred GUI re-initialization
 uint   g_LastLicenseCheckTime = 0;
 
 string g_ActivationCode = "";

@@ -101,10 +101,17 @@ void GUI_OnTick()
 void GUI_OnTimer()
 {
    uint now = GetTickCount();
-   // 1. Permanent License Check & Soft LockPersistence 
-   HandleLicenseHeartbeat();
+    HandleLicenseHeartbeat();
 
-   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED) return; // Guard
+    // Deferred re-initialization (avoids recursive GUI_OnInit during timer)
+    if(g_NeedsReinit)
+    {
+        g_NeedsReinit = false;
+        GUI_OnInit();
+        return;
+    }
+
+    if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED) return; // Guard
    
    // 3. Debounced Save (Every 5 seconds if interaction occurred)
    static uint lastSave = 0;

@@ -30,7 +30,6 @@ void OnClick_AuthActivate()
    
    if(CheckLicense(code))
    {
-      g_IsLicensed = true;
       g_LicenseState = LICENSE_OK;
       g_ActivationCode = code;
       
@@ -58,7 +57,7 @@ void OnClick_AuthActivate()
    {
       string error = (g_AuthErrorMsg != "") ? g_AuthErrorMsg : "Erreur de connexion";
       UpdateAuthStatus(error, g_ColorRed);
-      g_IsLicensed = false;
+      g_LicenseState = LICENSE_NONE;
    }
    
    ChartRedraw();

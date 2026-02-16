@@ -104,7 +104,6 @@ void HandleInitialLicenseCheck()
    {
       if(CheckLicense(g_ActivationCode)) 
       {
-         g_IsLicensed = true;
          g_LicenseState = LICENSE_OK;
       }
       else
@@ -112,19 +111,16 @@ void HandleInitialLicenseCheck()
          if(OrdersTotal() > 0)
          {
              Print("FantomePad: License invalid but positions open. Entering Soft Lock.");
-             g_IsLicensed = false; 
              g_LicenseState = LICENSE_REVOKED;
          }
          else
          {
-             g_IsLicensed = false;
              g_LicenseState = LICENSE_NONE;
          }
       }
    }
    else if(OrdersTotal() > 0)
    {
-       g_IsLicensed = false;
        g_LicenseState = LICENSE_REVOKED;
    }
 }
@@ -143,7 +139,7 @@ void HandleLicenseHeartbeat()
    
    uint now = GetTickCount();
    
-   if((g_IsLicensed || g_LicenseState == LICENSE_REVOKED) && (now - lastHeartbeat > 1800000 || lastHeartbeat == 0)) 
+   if(g_LicenseState != LICENSE_NONE && (now - lastHeartbeat > 1800000 || lastHeartbeat == 0)) 
    {
       if(now - g_LastInteractionTime > 60000) 
       {
@@ -155,7 +151,6 @@ void HandleLicenseHeartbeat()
              if(g_AuthErrorMsg != "" && StringFind(g_AuthErrorMsg, "Serveur injoignable") < 0)
              {
                  Print("FantomePad: License Revoked/Invalidated. Enhancing Security.");
-                 g_IsLicensed = false; 
                  g_LicenseState = LICENSE_REVOKED;
                  ApplySoftLockMode();
              }
@@ -165,7 +160,6 @@ void HandleLicenseHeartbeat()
              if(g_LicenseState == LICENSE_REVOKED || g_LicenseState == LICENSE_NONE)
              {
                  g_LicenseState = LICENSE_OK;
-                 g_IsLicensed = true;
                  ClearSoftLockUI();
                  RefreshAllPanels();
              }
@@ -179,8 +173,7 @@ void HandleLicenseHeartbeat()
        {
            Print("FantomePad: No more positions. Redirecting to Auth.");
            g_LicenseState = LICENSE_NONE;
-           g_IsLicensed = false;
-           GUI_OnInit(); 
+           g_NeedsReinit = true;  // Deferred re-init
            return;
        }
        ApplySoftLockMode();
