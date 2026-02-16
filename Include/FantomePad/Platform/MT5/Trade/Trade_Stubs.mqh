@@ -6,33 +6,38 @@
 #ifndef _TRADE_STUBS_MQH_
 #define _TRADE_STUBS_MQH_
 
-// This file is a PLACEHOLDER for Phase 3 (Execution Engine).
-// It allows the GUI to compile on MT5 without the real trade engine being implemented yet.
+#include "../../Common/Core/DataTypes.mqh"
+#include "../../Common/Core/Engine/TradeOrchestrator.mqh"
 
-// --- Stub Functions ---
+// This file is a PLACEHOLDER for Phase 5 (Migration).
+// It allows legacy parts of the system to compile on MT5.
+// Note: Handlers should now use TradeOrchestrator directly.
 
-void ExecuteOrder(int cmd)
+// --- Stub Functions with Updated Signatures ---
+
+TradeResult ExecuteOrder(int cmd)
 {
-   Print("MT5 [STUB]: ExecuteOrder called with cmd: ", cmd);
-   // TODO:Implement logic in Phase 3
+   Print("MT5 [LEGACY]: ExecuteOrder called with cmd: ", cmd);
+   return MakeErrorResult(0, TRADE_ERR_UNKNOWN, "ExecuteOrder is deprecated in MT5. Use Handlers.");
 }
 
-bool SafeOrderClose(int ticket, double lots, double price, int slippage, int color_clr)
+TradeResult SafeOrderClose(long ticket, double lots, double price, int slippage, color clr)
 {
-   Print("MT5 [STUB]: SafeOrderClose called for ticket: ", ticket);
-   return false;
+   Print("MT5 [LEGACY]: SafeOrderClose called for ticket: ", ticket, ". Routing to Orchestrator.");
+   return TradeOrchestrator::ClosePosition(ticket, lots, "Legacy Close");
 }
 
-bool SafeOrderDelete(int ticket, int color_clr)
+TradeResult SafeOrderDelete(long ticket, color clr)
 {
-   Print("MT5 [STUB]: SafeOrderDelete called for ticket: ", ticket);
-   return false;
+   Print("MT5 [LEGACY]: SafeOrderDelete called for ticket: ", ticket, ". Routing to Orchestrator.");
+   return TradeOrchestrator::DeleteOrder(ticket);
 }
 
-bool SafeOrderModify(int ticket, double price, double sl, double tp, datetime expiration, int color_clr)
+TradeResult SafeOrderModify(long ticket, double price, double sl, double tp, datetime expiration, color clr)
 {
-   Print("MT5 [STUB]: SafeOrderModify called for ticket: ", ticket);
-   return false;
+   Print("MT5 [LEGACY]: SafeOrderModify called for ticket: ", ticket, ". Routing to Orchestrator.");
+   return TradeOrchestrator::ModifyPosition(ticket, sl, tp);
 }
 
 #endif
+

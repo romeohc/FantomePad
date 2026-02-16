@@ -442,7 +442,7 @@ if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
 }
 ```
 
-#### ✅ ÉTAPE 10 : Refonte `Handler_PositionActions.mqh` (Partial Close / Modify / Delete)
+#### ✅ [TERMINÉ] ÉTAPE 10 : Refonte `Handler_PositionActions.mqh` (Partial Close / Modify / Delete)
 **Localisation :** `Common/GUI/Events/Handlers/Handler_PositionActions.mqh`
 
 **Important :** Conserver intacte la logique de calcul de pourcentage (25%, 50%, 100%, BE).
