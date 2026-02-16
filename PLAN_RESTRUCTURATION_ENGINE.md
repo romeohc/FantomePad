@@ -234,7 +234,7 @@ virtual TradeResult Delete(long ticket) = 0;
 ```
 **Vérification :** Compile MT4 ✅, Compile MT5 ✅. Comportement identique.
 
-#### ✅ ÉTAPE 4 : Création `TradeErrorHandler.mqh`
+#### ✅ [TERMINÉ] ÉTAPE 4 : Création `TradeErrorHandler.mqh`
 **Localisation :** `Common/Core/Engine/TradeErrorHandler.mqh`
 **Source :** `Trade_Execution.mqh` (lignes 15-46) : `HandleTradeError()`, `HandleTradeMessage()`.
 
@@ -255,7 +255,7 @@ public:
 **Pourquoi une classe :** Permet le namespace et évite la pollution globale.
 **Vérification :** Compile MT4 ✅, Compile MT5 ✅.
 
-#### ✅ ÉTAPE 5 : Centralisation Validation (`TradeValidator.mqh`)
+#### ✅ [TERMINÉ] ÉTAPE 5 : Centralisation Validation (`TradeValidator.mqh`)
 **Localisation :** `Common/Core/Engine/TradeValidator.mqh`
 **Source :** Fusion de la validation de `Trade_Manager.mqh::ExecuteOrder()` (lignes 16-113) ET partielle de `Handler_Trading.mqh`.
 
