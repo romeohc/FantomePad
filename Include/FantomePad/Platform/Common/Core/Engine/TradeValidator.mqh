@@ -17,7 +17,7 @@ public:
    //+------------------------------------------------------------------+
    //| Validate a Trade Request against all rules                       |
    //+------------------------------------------------------------------+
-   static TradeResult Validate(const TradeRequest &req)
+   static TradeResult Validate(TradeRequest &req)
    {
       // --- Level 1: Input Check ---
       if(req.Symbol == "")
@@ -63,17 +63,20 @@ public:
       double maxLot = MarketInfo(req.Symbol, MODE_MAXLOT);
       double lotStep = MarketInfo(req.Symbol, MODE_LOTSTEP);
 
+      if(lotStep <= 0) lotStep = 0.01; // Safety fallback
+
+      // Normalize lots to LotStep (round DOWN to nearest step)
+      req.Lots = MathFloor(req.Lots / lotStep) * lotStep;
+      req.Lots = NormalizeDouble(req.Lots, 2); // Avoid floating point drift
+
       if(req.Lots < minLot)
-         return MakeErrorResult(0, TRADE_ERR_BROKER, "Volume Too Small", StringFormat("Min Lot: %.2f", minLot));
+         return MakeErrorResult(0, TRADE_ERR_BROKER, "Volume Too Small", 
+            StringFormat("Calculated: %.2f, Min: %.2f", req.Lots, minLot));
       
       if(req.Lots > maxLot)
-         return MakeErrorResult(0, TRADE_ERR_BROKER, "Volume Too Exceeds Limit", StringFormat("Max Lot: %.2f", maxLot));
-
-      // normalize lots to step check?
-      // Strict check: if (MathMod(req.Lots, lotStep) ... ) - floating point issues.
-      // We assume lots are normalized by caller or we trust the value roughly.
-      // But we can check if it aligns with step.
-      // For now, Min/Max is the critical broker rule.
+      {
+         req.Lots = maxLot; // Cap silently instead of rejecting
+      }
 
       // --- Level 5: Market Conditions ---
       
