@@ -16,7 +16,7 @@ bool Handle_ColorPicker_Events(string sparam)
     // 2. Clic sur le bouton de couleur personnalisée
     if(sparam == PREFIX + "CP_Btn_Custom")
     {
-        string hexStr = ObjectGetString(0, PREFIX + "CP_Edit_Custom", OBJPROP_TEXT);
+        string hexStr = FP_ObjectGetString(0, PREFIX + "CP_Edit_Custom", OBJPROP_TEXT);
         color pickedCol = HexStringToColor(hexStr);
         
         // --- ADD TO PALETTE IF NEW ---
@@ -43,7 +43,7 @@ bool Handle_ColorPicker_Events(string sparam)
     // 3. Click on a Color Picker Item -> Apply & Close
     if(StringFind(sparam, PREFIX + "CP_Item_") >= 0)
     {
-       color pickedCol = (color)ObjectGetInteger(0, sparam, OBJPROP_BGCOLOR);
+       color pickedCol = (color)FP_ObjectGetInteger(0, sparam, OBJPROP_BGCOLOR);
        ApplyColorChange(pickedCol);
        CloseColorPicker();
        return true;

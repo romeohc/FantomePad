@@ -34,16 +34,16 @@ void ApplySoftLockMode()
     
     // 3. Show Alert Banner (Red)
     string alertName = PREFIX + "LicenseAlert";
-    if(ObjectFind(0, alertName) < 0)
+    if(FP_ObjectFind(0, alertName) < 0)
     {
-        ObjectCreate(0, alertName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
-        ObjectSetInteger(0, alertName, OBJPROP_XDISTANCE, 0);
-        ObjectSetInteger(0, alertName, OBJPROP_YDISTANCE, 0);
-        ObjectSetInteger(0, alertName, OBJPROP_XSIZE, (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS));
-        ObjectSetInteger(0, alertName, OBJPROP_YSIZE, 30);
-        ObjectSetInteger(0, alertName, OBJPROP_BGCOLOR, g_ColorRed);
-        ObjectSetInteger(0, alertName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
-        ObjectSetInteger(0, alertName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+        FP_ObjectCreate(0, alertName, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_XDISTANCE, 0);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_YDISTANCE, 0);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_XSIZE, (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS));
+        FP_ObjectSetInteger(0, alertName, OBJPROP_YSIZE, 30);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_BGCOLOR, g_ColorRed);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+        FP_ObjectSetInteger(0, alertName, OBJPROP_CORNER, CORNER_LEFT_UPPER);
     }
     
     string alertTxt = PREFIX + "LicenseAlertTxt";
@@ -66,20 +66,20 @@ void ApplySoftLockMode()
     string fullMsg = reason + " - contact@fantomepad.com";
     int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
 
-    if(ObjectFind(0, alertTxt) < 0)
+    if(FP_ObjectFind(0, alertTxt) < 0)
     {
-        ObjectCreate(0, alertTxt, OBJ_LABEL, 0, 0, 0);
-        ObjectSetInteger(0, alertTxt, OBJPROP_CORNER, CORNER_LEFT_UPPER);
-        ObjectSetInteger(0, alertTxt, OBJPROP_YDISTANCE, 7); 
-        ObjectSetString(0, alertTxt, OBJPROP_FONT, "Trebuchet MS Bold"); // Use a naturally bolder font
-        ObjectSetInteger(0, alertTxt, OBJPROP_FONTSIZE, 10); // Slightly larger
-        ObjectSetInteger(0, alertTxt, OBJPROP_COLOR, clrWhite);
-        ObjectSetInteger(0, alertTxt, OBJPROP_ANCHOR, ANCHOR_UPPER); 
+        FP_ObjectCreate(0, alertTxt, OBJ_LABEL, 0, 0, 0);
+        FP_ObjectSetInteger(0, alertTxt, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+        FP_ObjectSetInteger(0, alertTxt, OBJPROP_YDISTANCE, 7); 
+        FP_ObjectSetString(0, alertTxt, OBJPROP_FONT, "Trebuchet MS Bold"); // Use a naturally bolder font
+        FP_ObjectSetInteger(0, alertTxt, OBJPROP_FONTSIZE, 10); // Slightly larger
+        FP_ObjectSetInteger(0, alertTxt, OBJPROP_COLOR, clrWhite);
+        FP_ObjectSetInteger(0, alertTxt, OBJPROP_ANCHOR, ANCHOR_UPPER); 
     }
     
     // Exact center position
-    ObjectSetInteger(0, alertTxt, OBJPROP_XDISTANCE, chartW / 2);
-    ObjectSetString(0, alertTxt, OBJPROP_TEXT, fullMsg);
+    FP_ObjectSetInteger(0, alertTxt, OBJPROP_XDISTANCE, chartW / 2);
+    FP_ObjectSetString(0, alertTxt, OBJPROP_TEXT, fullMsg);
     
     ChartRedraw();
 }
@@ -89,8 +89,8 @@ void ApplySoftLockMode()
 //+------------------------------------------------------------------+
 void ClearSoftLockUI()
 {
-    ObjectDelete(0, PREFIX + "LicenseAlert");
-    ObjectDelete(0, PREFIX + "LicenseAlertTxt");
+    FP_ObjectDelete(0, PREFIX + "LicenseAlert");
+    FP_ObjectDelete(0, PREFIX + "LicenseAlertTxt");
     ChartRedraw();
 }
 

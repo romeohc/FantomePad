@@ -10,7 +10,7 @@ bool Handle_PositionList_Events(string sparam)
    // 1. Clic sur le bouton de selection de position
    if(sparam == PREFIX + "Pos_Btn_Select")
    {
-      ObjectSetInteger(0, sparam, OBJPROP_STATE, false); 
+      FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false); 
       TogglePositionList();
       ChartRedraw();
       return true; 

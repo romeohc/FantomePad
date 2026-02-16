@@ -14,15 +14,15 @@ bool Handle_Settings_Events(string sparam)
       // RESET to Default Value
       if(RiskMode == 1) // Currency
       {
-         ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+         FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
       }
       else if(RiskMode == 2) // R
       {
-          ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+          FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
       }
       else // %
       {
-         ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+         FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
       }
       
       UpdateUIMode();
@@ -39,7 +39,7 @@ bool Handle_Settings_Events(string sparam)
        if(g_NavigationPosition > 5) g_NavigationPosition = 0;
        
        // Update Text
-       ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
+       FP_ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
        
        // Update Real Panel
        UpdateNavigationPanel();
@@ -54,8 +54,8 @@ bool Handle_Settings_Events(string sparam)
        // Update Text/Visuals
        string t = g_ShowOrderLines ? "ON" : "OFF";
        color b = g_ShowOrderLines ? g_ColorBtnActive : g_ColorInput;
-       ObjectSetString(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_TEXT, t);
-       ObjectSetInteger(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_BGCOLOR, b);
+       FP_ObjectSetString(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_TEXT, t);
+       FP_ObjectSetInteger(0, PREFIX + "Set_Btn_ShowLines", OBJPROP_BGCOLOR, b);
        
        UpdateChartLines(); 
        EffectButton(sparam);
@@ -70,8 +70,8 @@ bool Handle_Settings_Events(string sparam)
        // Update Text/Visuals
        string t2 = g_ShowPositionLines ? "ON" : "OFF";
        color b2 = g_ShowPositionLines ? g_ColorBtnActive : g_ColorInput;
-       ObjectSetString(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_TEXT, t2);
-       ObjectSetInteger(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_BGCOLOR, b2);
+       FP_ObjectSetString(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_TEXT, t2);
+       FP_ObjectSetInteger(0, PREFIX + "Set_Btn_ShowPosLines", OBJPROP_BGCOLOR, b2);
        
        UpdateOpenOrderLines(); // Refresh the open position lines
        EffectButton(sparam);

@@ -10,7 +10,7 @@ bool Handle_Validation_Events(string sparam)
     if(sparam == PREFIX + "ValErr_Close")
     {
         HideValidationError();
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+        FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
         ChartRedraw();
         return true;
     }
@@ -19,7 +19,7 @@ bool Handle_Validation_Events(string sparam)
     if(sparam == PREFIX + "PosValErr_Close")
     {
         HidePosValidationError();
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+        FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
         ChartRedraw();
         return true;
     }

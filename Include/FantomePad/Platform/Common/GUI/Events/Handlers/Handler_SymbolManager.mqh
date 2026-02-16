@@ -9,7 +9,7 @@ bool Handle_SymbolManager_Events(string sparam)
     // 1. OPEN MANAGER (From Navigation Panel)
     if(sparam == PREFIX + "List_Btn_Add")
     {
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+        FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
         CloseSymbolList();
         ToggleSymbolManager(true);
         return true;
@@ -20,7 +20,7 @@ bool Handle_SymbolManager_Events(string sparam)
     // 2. CLOSE MANAGER
     if(sparam == PREFIX + "SYM_Btn_Close")
     {
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+        FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
         ToggleSymbolManager(false);
         return true;
     }
@@ -35,7 +35,7 @@ bool Handle_SymbolManager_Events(string sparam)
         {
             g_SymMgr_CurrentCategory = g_SymMgr_Categories[idx];
             LoadSymbolsForCategory(g_SymMgr_CurrentCategory);
-            ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+            FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
             RefreshAllPanels();
         }
         return true;
@@ -65,7 +65,7 @@ bool Handle_SymbolManager_Events(string sparam)
                 ChartRedraw();
             }
         }
-        ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
+        FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
         return true;
     }
     

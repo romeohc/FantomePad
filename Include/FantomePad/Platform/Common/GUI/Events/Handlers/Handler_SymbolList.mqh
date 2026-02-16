@@ -8,7 +8,7 @@ bool Handle_SymbolList_Events(string sparam)
    // 1. Clic sur le bouton principal de l'actif
    if(sparam == PREFIX + "Nav_Btn_SymbolSelect")
    {
-      ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Désactiver l'état "enfoncé" pour garder la couleur d'origine
+      FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Désactiver l'état "enfoncé" pour garder la couleur d'origine
       ToggleSymbolList();
       ChartRedraw();
       return true; // On arrête là pour éviter les conflits
@@ -18,10 +18,10 @@ bool Handle_SymbolList_Events(string sparam)
    if(StringFind(sparam, PREFIX + "ListItem_") >= 0)
    {
       // Récupérer le nom du symbole depuis le texte du bouton cliqué
-      string selectedSymbol = ObjectGetString(0, sparam, OBJPROP_TEXT);
+      string selectedSymbol = FP_ObjectGetString(0, sparam, OBJPROP_TEXT);
       
       // Mettre à jour le bouton principal
-      ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, selectedSymbol);
+      FP_ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, selectedSymbol);
       
       // Changer le symbole du graphique en arrière-plan
       ChartSetSymbolPeriod(0, selectedSymbol, Period());
