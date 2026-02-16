@@ -3,6 +3,10 @@
 //+------------------------------------------------------------------+
 #property strict
 
+// New Engine System Includes
+#include "../../../Core/Engine/TradeOrchestrator.mqh"
+#include "../../../Core/Engine/TradeErrorHandler.mqh"
+
 bool Handle_PositionActions_Events(string sparam)
 {
     // --- PARTIAL CLOSE SHORTCUTS ---
@@ -205,21 +209,21 @@ bool Handle_PositionActions_Events(string sparam)
                   // If 100%, ensure close all despite rounding issues
                   if(pct >= 99.9) toClose = currentLots; 
                                     // Close
-                   int cmd = trade.Type;
-                   bool closed = false;
-                   
-                   if(cmd > 1) // Pending Order (Limit/Stop)
-                   {
-                      // For pending orders, "Close" means Delete. 
-                      // We ignore the percentage (toClose), assuming user wants to remove the order.
-                      closed = SafeOrderDelete(SelectedPositionTicket, clrGray);
-                   }
-                   else // Market Order
-                   {
-                      double closePrice = (cmd == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
-                      closed = SafeOrderClose(SelectedPositionTicket, toClose, 0, 10, clrGray); // Use SafeOrderClose with auto-price (0)
-                   }
-                  if(closed)
+                    TradeResult result;
+                    int cmd = trade.Type;
+                    
+                    if(cmd > 1) // Pending Order (Limit/Stop)
+                    {
+                       // For pending orders, "Close" means Delete. 
+                       // We ignore the percentage (toClose), assuming user wants to remove the order.
+                       result = TradeOrchestrator::DeleteOrder(SelectedPositionTicket);
+                    }
+                    else // Market Order
+                    {
+                       result = TradeOrchestrator::ClosePosition(SelectedPositionTicket, toClose, "Partial Close");
+                    }
+
+                  if(result.Success)
                   {
                       ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
                       g_PosPartialMode = 0; 
@@ -244,7 +248,7 @@ bool Handle_PositionActions_Events(string sparam)
                   }
                   else
                   {
-                      // Alert("Close Error: " + IntegerToString(GetLastError()));
+                      ShowPosValidationError(result.Message);
                   }
               }
                             // 2. HANDLE MODIFY (SL/TP)
@@ -275,8 +279,9 @@ bool Handle_PositionActions_Events(string sparam)
 
                   if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point || MathAbs(inputOpen - currentOpen) > Point)
                   {
-                      bool res = SafeOrderModify(SelectedPositionTicket, inputOpen, inputSL, inputTP, (datetime)0, clrBlue);
-                      if(res)
+                      TradeResult modifyRes = TradeOrchestrator::ModifyPosition(SelectedPositionTicket, inputSL, inputTP);
+                      
+                      if(modifyRes.Success)
                       {
                           g_LastPosSL = inputSL;
                           g_LastPosTP = inputTP;
@@ -294,7 +299,7 @@ bool Handle_PositionActions_Events(string sparam)
                       }
                       else
                       {
-                          // Alert("Modify Error: " + IntegerToString(GetLastError()));
+                          ShowPosValidationError(modifyRes.Message);
                       }
                   }
               }
