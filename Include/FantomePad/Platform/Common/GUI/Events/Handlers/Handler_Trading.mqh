@@ -95,11 +95,13 @@ bool Handle_Trading_Events(string sparam)
       req.Comment = "FantomePad";
       req.Magic = MagicNumber; // Assumes MagicNumber is global
       req.Expiration = 0;
+      req.RiskPercent = GetRiskPercentage(risk);
       
       // Execute via Orchestrator
       TradeResult result = TradeOrchestrator::Execute(req);
       
       if(result.Success) {
+         TradeErrorHandler::ShowTradeToast(result);
          ResetTradeUI();  
          UpdateChartLines();
          UpdateOpenOrderLines();
@@ -143,11 +145,13 @@ bool Handle_Trading_Events(string sparam)
       req.Comment = "FantomePad";
       req.Magic = MagicNumber;
       req.Expiration = 0;
+      req.RiskPercent = GetRiskPercentage(risk);
 
       // Execute via Orchestrator
       TradeResult result = TradeOrchestrator::Execute(req);
 
       if(result.Success) {
+         TradeErrorHandler::ShowTradeToast(result);
          ResetTradeUI();
          UpdateChartLines();
          UpdateOpenOrderLines();
@@ -200,10 +204,12 @@ bool Handle_Trading_Events(string sparam)
          req.Comment = "FantomePad";
          req.Magic = MagicNumber; // Global
          req.Expiration = 0;
+         req.RiskPercent = GetRiskPercentage(risk);
          
          TradeResult result = TradeOrchestrator::Execute(req);
          
          if(result.Success) {
+            TradeErrorHandler::ShowTradeToast(result);
             ResetTradeUI();
             UpdateChartLines();
             UpdateOpenOrderLines();

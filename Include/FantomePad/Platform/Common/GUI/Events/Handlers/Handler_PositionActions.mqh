@@ -198,6 +198,7 @@ bool Handle_PositionActions_Events(string sparam)
                   toClose = originLots * (pct / 100.0);
                                     // Normalize Lots
                    double step = MarketInfo(trade.Symbol, MODE_LOTSTEP);
+                   if(step <= 0) step = 0.01; // Safety fallback
                    double min = MarketInfo(trade.Symbol, MODE_MINLOT);
                   
                   // Round to step
