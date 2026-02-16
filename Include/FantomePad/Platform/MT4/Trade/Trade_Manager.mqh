@@ -112,8 +112,20 @@ void ExecuteOrder(int cmd)
         }
    }
    
-   int slippagePoints = (int)(MaxSlippage * MathPow(10, (digits == 3 || digits == 5) ? 1 : 0)); 
-   int ticket = SafeOrderSend(symbol, cmd, volume, price, slippagePoints, sl, tp, "ProPanel", MagicNumber, 0, clrNONE);
+   // --- BRIDGE MIGRATION: USE UNIFIED ENGINE ---
+   // We skip SafeOrderSend (Legacy) and use the new Engine
+   
+   long ticket = -1;
+   
+   if(cmd == OP_BUY || cmd == OP_SELL)
+   {
+      ticket = g_TradeEngine.OpenMarket(symbol, cmd, volume, price, sl, tp, "ProPanel", MagicNumber);
+   }
+   else 
+   {
+      // Pending Order (Use 0 expiration for GTC as per default)
+      ticket = g_TradeEngine.OpenPending(symbol, cmd, volume, price, sl, tp, "ProPanel", MagicNumber, 0);
+   }
    
    if(ticket >= 0) 
    {
@@ -123,7 +135,7 @@ void ExecuteOrder(int cmd)
       ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, "0.00000");
       ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, "0.00000");
       ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0.0");
-      ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, "0.00000");
+      ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, "0.00000"); // Reset price for pending too? YES
       
       UpdateChartLines(); 
       UpdateOpenOrderLines();
@@ -132,6 +144,9 @@ void ExecuteOrder(int cmd)
    }
    else
    {
+      // If Engine failed, it printed errors. We can also show general error toast here if needed.
+      if(g_LastTradeErrorMsg == "") g_LastTradeErrorMsg = "Execution Failed (Check Experts Tab)"; // Fallback
+      
       if(g_LastTradeErrorMsg != "")
       {
          ShowValidationError(g_LastTradeErrorMsg);

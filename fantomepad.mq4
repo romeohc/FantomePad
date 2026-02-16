@@ -19,6 +19,9 @@
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   // --- CORE ENGINE INIT ---
+   Bridge_InitEngine();
+
    // --- INPUT VALIDATION (SECURITY) ---
    if(MaxSlippage < 0)
    {
@@ -130,6 +133,9 @@ void OnDeinit(const int reason)
    ChartSetInteger(0, CHART_SHOW_DATE_SCALE, true);
    ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
    ChartSetInteger(0, CHART_KEYBOARD_CONTROL, true);
+
+   // --- ENGINE CLEANUP ---
+   Bridge_DeinitEngine();
 }
 
 //+------------------------------------------------------------------+

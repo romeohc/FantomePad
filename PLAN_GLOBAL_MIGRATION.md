@@ -49,22 +49,26 @@ Le code logique de FantomePad (stratégie, interface) ne parle **JAMAIS** direct
 
 ---
 
-## 🚧 PROCHAINE ÉTAPE : PHASE 3 (LE MOTEUR D'EXÉCUTION)
+## 🚧 PROCHAINE ÉTAPE : PHASE 3 (LE MOTEUR D'EXÉCUTION UNIFIÉ)
+**But :** Acheter et Vendre sans que le GUI sache si on est sur MT4 ou MT5.
 
-**État Actuel :** 
-- Le GUI compile et s'affiche sur MT5.
-- Les boutons "Achat/Vente" appellent des fonctions vides (`ExecuteOrder` dans `Trade_Stubs.mqh`).
-- **Objectif :** Remplacer les Stubs par un vrai moteur d'exécution MT5.
+### ÉTAPE 3.1 : L'INTERFACE COMMUNE (Le Contrat)
+- [ ] Créer `Common/Core/Engine/ITradeEngine.mqh` : Interface pure (`virtual`) définissant les méthodes `OpenMarket`, `OpenPending`, `Modify`, `Close`, `Delete`.
+- [ ] Utiliser exclusivement les types `FantomeTrade` (DTO) pour les paramètres.
 
-**Plan d'Action Phase 3 :**
-1.  **Supprimer `Trade_Stubs.mqh`** de `Bridge.mqh`.
-2.  **Activer `Trade_Execution.mqh`** (actuellement désactivé/revert). 
-3.  **Implémenter le moteur MT5 :**
-    - Utiliser la librairie standard `CTrade` pour la robustesse.
-    - Gérer les `MqlTradeRequest` et `MqlTradeResult`.
-    - Mapper les retours d'erreurs MT5 vers le système de Toast du GUI.
-    - Gérer les différences de "Position" vs "Ordre".
-4.  **Validation :** Tester l'ouverture, la fermeture et la modification d'ordres sur un compte Démo MT5.
+### ÉTAPE 3.2 : IMPLÉMENTATION MT4 (Le Legacy)
+- [ ] Créer `MT4/Engine/TradeEngineMT4.mqh` qui implémente `ITradeEngine`.
+- [ ] Migrer le code existant de `Trade_Execution.mqh` vers cette classe.
+
+### ÉTAPE 3.3 : IMPLÉMENTATION MT5 (Le Moderne)
+- [ ] Créer `MT5/Engine/TradeEngineMT5.mqh` qui implémente `ITradeEngine`.
+- [ ] Utiliser la classe standard `CTrade` (`#include <Trade/Trade.mqh>`) pour gérer les ordres MT5 de manière robuste.
+- [ ] Taper dans `MqlTradeRequest` et mapper les retours vers le format unifié.
+
+### ÉTAPE 3.4 : L'INJECTION DE DÉPENDANCE (Le Bridge)
+- [ ] Modifier `Bridge.mqh` pour instancier le bon moteur (`C_TradeEngineMT4` ou `MT5`) au démarrage.
+- [ ] Rendre ce moteur accessible via un Singleton ou une Variable Globale `g_TradeEngine`.
+- [ ] Connecter les boutons du GUI (Achat/Vente) à `g_TradeEngine.OpenMarket(...)`.
 
 ---
 
