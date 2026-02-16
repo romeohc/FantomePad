@@ -1,12 +1,10 @@
-//+------------------------------------------------------------------+
-//|                                                   Security.mqh   |
-//|                                              FantomePad Project  |
-//+------------------------------------------------------------------+
 #ifndef _SECURITY_MQH_
 #define _SECURITY_MQH_
 
 #property strict
 #include "Defines.mqh"
+#include "IO/HttpManager.mqh"
+#include "IO/FileManager.mqh"
 
 //+------------------------------------------------------------------+
 //| Generate a unique Hardware ID for the machine                    |
@@ -49,29 +47,12 @@ string GetSessionID()
 //+------------------------------------------------------------------+
 string GetSecretToken()
 {
-   string fileName = "fantome_cert.dat";
-   int handle = FileOpen(fileName, FILE_READ|FILE_BIN|FILE_COMMON);
-   
-   if(handle != INVALID_HANDLE)
-   {
-      string token = FileReadString(handle);
-      FileClose(handle);
-      if(token != "") return token;
-   }
-   
-   // Si le fichier n'existe pas, on générera un token lors de l'activation
-   return "";
+   return C_FileManager::Read("fantome_cert.dat");
 }
 
 void SaveSecretToken(string token)
 {
-   string fileName = "fantome_cert.dat";
-   int handle = FileOpen(fileName, FILE_WRITE|FILE_BIN|FILE_COMMON);
-   if(handle != INVALID_HANDLE)
-   {
-      FileWriteString(handle, token);
-      FileClose(handle);
-   }
+   C_FileManager::Write("fantome_cert.dat", token);
 }
 
 //+------------------------------------------------------------------+
@@ -95,19 +76,11 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    // Payload avec les 3 clés
    string payload = "{\"code\":\"" + cleanCode + "\", \"session_id\":\"" + sessionID + "\", \"secret_token\":\"" + secretToken + "\"}";
    
-   char data[], result[];
-   string responseHeaders;
-   StringToCharArray(payload, data, 0, StringLen(payload));
-   
-   string headers = "Content-Type: application/json\r\n";
-   
-   ResetLastError();
-   int res = WebRequest("POST", url, headers, timeout_ms, data, result, responseHeaders);
-   int lastError = GetLastError();
+   string response;
+   int res = C_HttpManager::Post(url, payload, response, timeout_ms);
    
    if(res == 200) 
    {
-      string response = CharArrayToString(result, 0, WHOLE_ARRAY, CP_UTF8);
       if(StringFind(response, "\"valid\":true") >= 0) 
       {
          g_AuthErrorMsg = ""; // Suppression des erreurs précédentes
@@ -136,7 +109,7 @@ bool CheckLicense(string code, int timeout_ms = 5000)
             // on supprime le fichier local pour permettre une ré-activation propre.
             if(StringFind(g_AuthErrorMsg, "Certificat") >= 0)
             {
-               FileDelete("fantome_cert.dat", FILE_COMMON);
+               C_FileManager::Delete("fantome_cert.dat");
             }
          }
          else g_AuthErrorMsg = "Réponse invalide du serveur";
@@ -144,16 +117,10 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    }
    else 
    {
-      if(res == -1)
-      {
-         if(lastError == 4060) g_AuthErrorMsg = "URL non ajouté dans les options";
-         else if(lastError == 4014) g_AuthErrorMsg = "Fonction non permise (Err 4014)";
-         else g_AuthErrorMsg = "Erreur Connexion (Err " + IntegerToString(lastError) + ")";
-      }
-      else
-      {
-         g_AuthErrorMsg = "Erreur Serveur (HTTP " + IntegerToString(res) + ")";
-      }
+      if(res == 4060) g_AuthErrorMsg = "URL non ajouté dans les options";
+      else if(res == 4014) g_AuthErrorMsg = "Fonction non permise (Err 4014)";
+      else if(res == -1) g_AuthErrorMsg = "Erreur Connexion (Err -1)";
+      else g_AuthErrorMsg = "Erreur Serveur (HTTP " + IntegerToString(res) + ")";
    }
    return false;
 }
