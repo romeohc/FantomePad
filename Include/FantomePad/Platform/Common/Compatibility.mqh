@@ -86,6 +86,7 @@
    #define MODE_TICKVALUE  SYMBOL_TRADE_TICK_VALUE
    #define MODE_TICKSIZE   SYMBOL_TRADE_TICK_SIZE
    #define MODE_MARGINREQUIRED 0 
+   #define OP_BALANCE -2  // Non-trade history deal type
 
    // --- SELECTION MAPPING ---
    #define MODE_TRADES 0
@@ -101,7 +102,7 @@
    
    int FP_OrdersHistoryTotal()
    {
-      HistorySelect(0, TimeCurrent());
+      if(!g_fp_history_loaded) HistorySelect(0, TimeCurrent());
       return HistoryDealsTotal();
    }
    
@@ -109,6 +110,20 @@
    static bool g_fp_is_position = false;
    static bool g_fp_is_history  = false;
    static ulong g_fp_selected_ticket = 0;
+   static bool g_fp_history_loaded = false;
+
+   // Call before iterating history
+   void FP_HistoryBegin()
+   {
+      HistorySelect(0, TimeCurrent());
+      g_fp_history_loaded = true;
+   }
+
+   // Call after done iterating
+   void FP_HistoryEnd()
+   {
+      g_fp_history_loaded = false;
+   }
 
    bool FP_OrderSelect(int index, int select, int pool=MODE_TRADES)
    {
@@ -162,7 +177,7 @@
       }
       else if(pool == MODE_HISTORY)
       {
-         HistorySelect(0, TimeCurrent());
+         if(!g_fp_history_loaded) HistorySelect(0, TimeCurrent());
          if(select == SELECT_BY_POS)
          {
             if(index < HistoryDealsTotal())
@@ -239,7 +254,9 @@
       if(g_fp_is_history)
       {
          long type = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TYPE);
-         return (type == DEAL_TYPE_BUY) ? OP_BUY : ((type == DEAL_TYPE_SELL) ? OP_SELL : -1);
+         if(type == DEAL_TYPE_BUY) return OP_BUY;
+         if(type == DEAL_TYPE_SELL) return OP_SELL;
+         return -2; // Non-trade deal (balance, credit, commission, etc.)
       }
       if(g_fp_is_position)
       {
@@ -277,7 +294,14 @@
    
    datetime FP_OrderCloseTime()
    { 
-      if(g_fp_is_history) return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
+      if(g_fp_is_history)
+      {
+         long entry = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ENTRY);
+         // Only return time for OUT or IN/OUT deals (closings)
+         if(entry == DEAL_ENTRY_OUT || entry == DEAL_ENTRY_INOUT)
+            return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
+         return 0; // Entry deals don't have a "close time"
+      }
       return 0; 
    }
 
