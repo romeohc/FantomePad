@@ -481,7 +481,7 @@ if(sparam == PREFIX + "Btn_Buy" && CurrentTypeIndex == 0)
 
 ### PHASE 7 : NETTOYAGE & VALIDATION
 
-#### ✅ ÉTAPE 13 : Suppression de l'ancien `TradeLogic.mqh` monolithique
+#### ✅ [TERMINÉ] ÉTAPE 13 : Suppression de l'ancien `TradeLogic.mqh` monolithique
 **Action :** Supprimer le fichier-agrégateur de transition créé à l'étape 3. Mettre à jour tous les `#include` qui pointaient vers `TradeLogic.mqh` pour pointer vers les trois sous-fichiers.
 
 #### ✅ ÉTAPE 14 : Checkpoint Compatibilité MT5

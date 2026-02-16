@@ -6,7 +6,9 @@
 
 // Includes
 #include "Components/Components.mqh"
-#include "../Core/TradeLogic.mqh"       // Replaces dependency on MT4/Trade.mqh
+#include "../Core/TradeLogic/TradeCalc.mqh"
+#include "../Core/TradeLogic/TradeVisuals.mqh"
+#include "../Core/TradeLogic/TradeUIInteraction.mqh"
 #include "Main/Panel_Main.mqh"
 #include "Settings/Panel_Settings.mqh"
 #include "Account/Panel_Account.mqh"
