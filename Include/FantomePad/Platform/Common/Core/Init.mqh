@@ -5,6 +5,20 @@
 #include "Globals.mqh"
 
 // --- INITIALIZATION HELPER ---
+//+------------------------------------------------------------------+
+//| INITIALIZATION FLOW:                                             |
+//| 1. Input params (Inputs.mqh) → set at compile time / EA startup  |
+//| 2. InitGlobals() → copies Input values into global g_* variables |
+//| 3. LoadConfig() → OVERRIDES g_* with saved user preferences      |
+//|                                                                  |
+//| Priority: LoadConfig > InitGlobals > Input defaults               |
+//| Input params only provide INITIAL defaults for first-run.         |
+//| After the user saves settings, LoadConfig values always win.      |
+//|                                                                  |
+//| Notable: g_MaxSpread is set from Input `MaxSpread` in InitGlobals|
+//| but is NOT currently saved/loaded from config, so Input always    |
+//| wins for this parameter. Change MaxSpread in EA inputs only.      |
+//+------------------------------------------------------------------+
 void InitGlobals()
 {
    // Init State Structs
