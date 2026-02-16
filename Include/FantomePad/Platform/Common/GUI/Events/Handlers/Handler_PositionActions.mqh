@@ -7,12 +7,72 @@
 #include "../../../Core/Engine/TradeOrchestrator.mqh"
 #include "../../../Core/Engine/TradeErrorHandler.mqh"
 
+//+------------------------------------------------------------------+
+//| HELPER: Execute Partial Close on selected position               |
+//+------------------------------------------------------------------+
+TradeResult ExecutePartialClose(FantomeTrade &trade, double pct)
+{
+    double currentLots = trade.Lots;
+    double toClose = 0.0;
+
+    // ALWAYS calc based on ORIGINAL lots (User Request)
+    double originLots = GetOriginalLotSize(SelectedPositionTicket);
+    if(originLots <= 0) originLots = currentLots;
+
+    toClose = originLots * (pct / 100.0);
+
+    // Normalize Lots
+    double step = MarketInfo(trade.Symbol, MODE_LOTSTEP);
+    if(step <= 0) step = 0.01; // Safety fallback
+    double min = MarketInfo(trade.Symbol, MODE_MINLOT);
+
+    toClose = MathFloor(toClose / step) * step;
+    if(toClose < min) toClose = min;
+    if(toClose > currentLots) toClose = currentLots;
+    if(pct >= 99.9) toClose = currentLots;
+
+    // Execute
+    int cmd = trade.Type;
+    if(cmd > 1) // Pending
+       return TradeOrchestrator::DeleteOrder(SelectedPositionTicket);
+    else
+       return TradeOrchestrator::ClosePosition(SelectedPositionTicket, toClose, "Partial Close");
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: Execute SL/TP Modification on selected position          |
+//+------------------------------------------------------------------+
+TradeResult ExecuteModifySLTP(FantomeTrade &trade)
+{
+    double inputSL = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+    double inputTP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+    double inputOpen = trade.OpenPrice;
+
+    if(trade.Type > 1)
+       inputOpen = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
+
+    if(g_PosBE_Active)
+       inputSL = trade.OpenPrice;
+
+    if(MathAbs(inputSL - trade.StopLoss) > Point ||
+       MathAbs(inputTP - trade.TakeProfit) > Point ||
+       MathAbs(inputOpen - trade.OpenPrice) > Point)
+    {
+       return TradeOrchestrator::ModifyPosition(SelectedPositionTicket, inputSL, inputTP);
+    }
+
+    return MakeSuccessResult(0, "No changes"); // Nothing to modify
+}
+
+//+------------------------------------------------------------------+
+//| Main Event Handler for Position Actions Panel                    |
+//+------------------------------------------------------------------+
 bool Handle_PositionActions_Events(string sparam)
 {
     // --- PARTIAL CLOSE SHORTCUTS ---
    if(sparam == PREFIX + "Pos_Btn_25") 
    {
-	  if(SelectedPositionTicket == -1) return true;
+      if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 25) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 25;
       
@@ -20,7 +80,7 @@ bool Handle_PositionActions_Events(string sparam)
       UpdatePartialButtonsVisuals();
       UpdatePositionsValues(); // For Validate Button
       EffectButton(sparam);
-      return true; // Added return true even though original didn't return, assuming these are buttons
+      return true;
    }
    
    if(sparam == PREFIX + "Pos_Btn_50") 
@@ -57,37 +117,30 @@ bool Handle_PositionActions_Events(string sparam)
           FantomeTrade trade;
           FP_GetTrade(trade);
           
-          // Check Eligibility (Profit/Loss)
           int type = trade.Type;
           double open = trade.OpenPrice;
           double current = (type == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
           
-          // Strict check: In Loss = cannot BE
           bool inLoss = (type == OP_BUY && current < open) || (type == OP_SELL && current > open);
-          
           if(inLoss) return true; // Cannot activate if in loss
           
-          // Toggle
           g_PosBE_Active = !g_PosBE_Active;
           
           if(g_PosBE_Active)
           {
-              // Activate BE
               color bg = (type == OP_BUY || type == OP_BUYLIMIT || type == OP_BUYSTOP) ? g_ColorGreen : g_ColorRed;
-              
               FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, bg);
               FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, clrWhite);
               FP_ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(open, _Digits));
           }
           else
           {
-              // Deactivate BE -> Restore Original SL
               FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
               FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
               FP_ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(trade.StopLoss, _Digits));
           }
           
-          UpdatePositionsValues(); // Trigger Validate Button Check
+          UpdatePositionsValues();
           EffectButton(sparam);
       }
       return true;
@@ -98,36 +151,11 @@ bool Handle_PositionActions_Events(string sparam)
    {
       EffectButton(sparam);
       
-      // --- SAFETY CHECK: AUTO-TRADING & LIVE TRADING ---
-      if(!IsExpertEnabled())
-      {
-         ShowPosValidationError("Auto-Trading is OFF!");
-         return true;
-      }
-      if(!IsTradeAllowed())
-      {
-         ShowPosValidationError("Live Trading disabled!");
-         return true;
-      }
+      if(!IsExpertEnabled()) { ShowPosValidationError("Auto-Trading is OFF!"); return true; }
+      if(!IsTradeAllowed()) { ShowPosValidationError("Live Trading disabled!"); return true; }
 
-      // --- VALIDATION CHECKS ---
-      // 1. Check if position is selected
-      if(SelectedPositionTicket == -1)
-      {
-          ShowPosValidationError("No position selected!");
-          ChartRedraw();
-          return true;
-      }
-      
-      // 2. Check if order can be selected
-      if(!OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
-      {
-          ShowPosValidationError("Position not found!");
-          ChartRedraw();
-          return true;
-      }
-      
-      // 3. Check if order is still open
+      if(SelectedPositionTicket == -1) { ShowPosValidationError("No position selected!"); ChartRedraw(); return true; }
+      if(!OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET)) { ShowPosValidationError("Position not found!"); ChartRedraw(); return true; }
       if(OrderCloseTime() != 0)
       {
           ShowPosValidationError("Position is already closed!");
@@ -137,14 +165,8 @@ bool Handle_PositionActions_Events(string sparam)
           return true;
       }
       
-      // 4. Check if any modifications were made
-       FantomeTrade trade;
-       FP_GetTrade(trade);
-       
-       double currentSL = trade.StopLoss;
-       double currentTP = trade.TakeProfit;
-       double currentOpen = trade.OpenPrice;
-       int orderType = trade.Type;
+      FantomeTrade trade;
+      FP_GetTrade(trade);
       
       double userSL = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
       double userTP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
@@ -152,159 +174,77 @@ bool Handle_PositionActions_Events(string sparam)
       double userClose = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
       double pctFromText = userClose;
       
-      // Use Button Mode if text is empty/zero
       if(pctFromText <= 0.001 && g_PosPartialMode > 0) pctFromText = (double)g_PosPartialMode;
       
       bool isModified = false;
-      
-      if(MathAbs(userSL - currentSL) > Point) isModified = true;
-      if(MathAbs(userTP - currentTP) > Point) isModified = true;
-      if(orderType > 1 && MathAbs(userEntry - currentOpen) > Point) isModified = true;
+      if(MathAbs(userSL - trade.StopLoss) > Point) isModified = true;
+      if(MathAbs(userTP - trade.TakeProfit) > Point) isModified = true;
+      if(trade.Type > 1 && MathAbs(userEntry - trade.OpenPrice) > Point) isModified = true;
       if(pctFromText > 0.001) isModified = true;
       if(g_PosBE_Active) isModified = true;
       
-      if(!isModified)
-      {
-          ShowPosValidationError("No modifications to apply!");
-          ChartRedraw();
-          return true;
-      }
+      if(!isModified) { ShowPosValidationError("No modifications to apply!"); ChartRedraw(); return true; }
       
-      // --- VALIDATION PASSED - HIDE ERROR AND PROCEED ---
       HidePosValidationError();
-            if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
-       {
-           FP_GetTrade(trade); // Reuse 'trade' variable from line 135 scope? 
-           // Wait, line 135 scope ends? No, line 135 is in the same function scope.
-           // So 'trade' variable declared at line 135 is still valid. We just refresh it.
-           
-           if(trade.CloseTime == 0) // Must be open
+      if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+      {
+          FP_GetTrade(trade);
+          if(trade.CloseTime == 0)
           {
-              // 1. HANDLE CLOSE
+              // 1. Handle Close
               double pct = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT));
-              
-              // Use Button Mode if text is empty/zero
               if(pct <= 0.001 && g_PosPartialMode > 0) pct = (double)g_PosPartialMode;
-              
+
               if(pct > 0)
               {
-                   double currentLots = trade.Lots;
-                   double toClose = 0.0;
-                   
-                   // ALWAYS calc based on ORIGINAL lots (User Request)
-                   double originLots = GetOriginalLotSize(SelectedPositionTicket);
-                   if(originLots <= 0) originLots = currentLots; // Safety fallback
-                  
-                  toClose = originLots * (pct / 100.0);
-                                    // Normalize Lots
-                   double step = MarketInfo(trade.Symbol, MODE_LOTSTEP);
-                   if(step <= 0) step = 0.01; // Safety fallback
-                   double min = MarketInfo(trade.Symbol, MODE_MINLOT);
-                  
-                  // Round to step
-                  toClose = MathFloor(toClose / step) * step;
-                  
-                  if(toClose < min) toClose = min; // At least close min
-                  if(toClose > currentLots) toClose = currentLots; // Max all
-                  
-                  // If 100%, ensure close all despite rounding issues
-                  if(pct >= 99.9) toClose = currentLots; 
-                                    // Close
-                    TradeResult result;
-                    int cmd = trade.Type;
-                    
-                    if(cmd > 1) // Pending Order (Limit/Stop)
-                    {
-                       // For pending orders, "Close" means Delete. 
-                       // We ignore the percentage (toClose), assuming user wants to remove the order.
-                       result = TradeOrchestrator::DeleteOrder(SelectedPositionTicket);
-                    }
-                    else // Market Order
-                    {
-                       result = TradeOrchestrator::ClosePosition(SelectedPositionTicket, toClose, "Partial Close");
-                    }
-
-                  if(result.Success)
+                  TradeResult closeRes = ExecutePartialClose(trade, pct);
+                  if(closeRes.Success)
                   {
-                      FP_ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0"); // Reset
+                      FP_ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, "0");
                       g_PosPartialMode = 0; 
                       UpdatePartialButtonsVisuals();
+                      UpdateOpenOrderLines();
+                      UpdateCalculatedLot();
                       
-                      UpdateOpenOrderLines(); // <--- INSTANT LINES UPDATE (FIXES LATENCY)
-                      UpdateCalculatedLot();  // <--- RECALC NEW LOTS (EQUITY CHANGED)
+                      if(g_PanelAccount.IsVisible) CreateAccountPanel();
+                      if(g_PanelHistory.IsVisible) CreateHistoryPanel();
                       
-                      if(g_PanelAccount.IsVisible) CreateAccountPanel();       // <--- UPDATE BALANCE/EQUITY
-                      if(g_PanelHistory.IsVisible) CreateHistoryPanel(); // <--- UPDATE HISTORY
-                      
-                      if(toClose >= currentLots) 
+                      if(pct >= 99.9) 
                       {
-                          SelectedPositionTicket = -1; // Fully Closed
+                          SelectedPositionTicket = -1;
                           UpdatePositionsValues();
                           ChartRedraw();
-                          return true; // Stop here
+                          return true;
                       }
-                      
-                      // Re-select if partial
                       if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET)) {}
                   }
-                  else
-                  {
-                      ShowPosValidationError(result.Message);
-                  }
+                  else ShowPosValidationError(closeRes.Message);
               }
-                            // 2. HANDLE MODIFY (SL/TP)
-               // Re-read incase partial close changed something (unlikely for SL/TP values but good practice)
-               if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
-               {
-                   FP_GetTrade(trade); // Refresh trade
-                   
-                   currentSL = trade.StopLoss;
-                   currentTP = trade.TakeProfit;
-                   currentOpen = trade.OpenPrice;
-                   
-                   double inputSL = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
-                   double inputTP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
-                   double inputOpen = currentOpen;
- 
-                   // Only update Entry Price for Pending Orders
-                   if(trade.Type > 1) 
-                  {
-                     inputOpen = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT));
-                  }
-                                    // Check if changed
-                   // If BE Active, override Input SL
-                   if(g_PosBE_Active)
-                   {
-                      inputSL = trade.OpenPrice;
-                   }
 
-                  if(MathAbs(inputSL - currentSL) > Point || MathAbs(inputTP - currentTP) > Point || MathAbs(inputOpen - currentOpen) > Point)
+              // 2. Handle Modify
+              if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+              {
+                  FP_GetTrade(trade);
+                  TradeResult modRes = ExecuteModifySLTP(trade);
+                  if(modRes.Success && modRes.Message != "No changes")
                   {
-                      TradeResult modifyRes = TradeOrchestrator::ModifyPosition(SelectedPositionTicket, inputSL, inputTP);
+                      g_LastPosSL = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT));
+                      g_LastPosTP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT));
+                      g_LastPosEntry = (trade.Type > 1) ? StringToDouble(FP_ObjectGetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT)) : trade.OpenPrice;
+                      if(g_PosBE_Active) g_LastPosSL = trade.OpenPrice;
+
+                      UpdateOpenOrderLines();
                       
-                      if(modifyRes.Success)
+                      if(g_PosBE_Active)
                       {
-                          g_LastPosSL = inputSL;
-                          g_LastPosTP = inputTP;
-                          g_LastPosEntry = inputOpen;
-                          
-                          UpdateOpenOrderLines(); // <--- INSTANT LINES UPDATE
-                          
-                          // Reset BE State
-                          if(g_PosBE_Active)
-                          {
-                              g_PosBE_Active = false;
-                              FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
-                              FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
-                          }
-                      }
-                      else
-                      {
-                          ShowPosValidationError(modifyRes.Message);
+                          g_PosBE_Active = false;
+                          FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                          FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
                       }
                   }
+                  else if(!modRes.Success) ShowPosValidationError(modRes.Message);
               }
-         }
+          }
       }
       
       UpdatePositionsValues();
