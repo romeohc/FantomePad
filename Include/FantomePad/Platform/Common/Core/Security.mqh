@@ -73,6 +73,12 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    string sessionID = GetSessionID();
    string secretToken = GetSecretToken();
    
+   // Sanitize all fields for JSON safety
+   StringReplace(sessionID, "\"", "");
+   StringReplace(sessionID, "\\", "");
+   StringReplace(secretToken, "\"", "");
+   StringReplace(secretToken, "\\", "");
+   
    // Payload avec les 3 clés
    string payload = "{\"code\":\"" + cleanCode + "\", \"session_id\":\"" + sessionID + "\", \"secret_token\":\"" + secretToken + "\"}";
    

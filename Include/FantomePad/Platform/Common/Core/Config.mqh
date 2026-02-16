@@ -56,6 +56,7 @@ void SaveConfigToFile()
    if(handle > 0)
    {
       // Format: Key=Value
+      FileWrite(handle, "ConfigVersion=2");
       // Changed: Default Risks removed
       FileWrite(handle, "OneRPercent=" + DoubleToString(g_OneRPercent, 2));
       FileWrite(handle, "MaxRiskPercent=" + DoubleToString(g_MaxRiskPercent, 2));
@@ -120,6 +121,7 @@ void SaveConfigToFile()
 
 void LoadConfig()
 {
+   int configVersion = 1; // Default to v1 for legacy files
    int handle = FileOpen(ConfigFileName, FILE_READ|FILE_TXT|FILE_COMMON);
    if(handle > 0)
    {
@@ -132,56 +134,56 @@ void LoadConfig()
             string key = sep[0];
             string val = sep[1];
             
-            if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
-            if(key == "MaxRiskPercent")   g_MaxRiskPercent   = StringToDouble(val);
-            if(key == "NavigationPosition")  g_NavigationPosition  = (int)StringToInteger(val);
-            if(key == "ActivationCode")   g_ActivationCode   = DecodeString(val);
-            if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
-            if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);
-            if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
-            if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
-            if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);
-      if(key == "ColorText")   g_ColorText   = (color)StringToInteger(val);
-            // Removed ColorLabel and ColorChartFg as requested to simplify to single text color
-            if(key == "ColorGreen")  g_ColorGreen  = (color)StringToInteger(val);
-            if(key == "ColorRed")    g_ColorRed    = (color)StringToInteger(val);
-            if(key == "ColorBtnValid")   g_ColorBtnValid   = (color)StringToInteger(val);
-            if(key == "ColorBtnInvalid") g_ColorBtnInvalid = (color)StringToInteger(val);
-            if(key == "ColorBtnActive")  g_ColorBtnActive  = (color)StringToInteger(val);
-            if(key == "ColorChartBg")g_ColorChartBg= (color)StringToInteger(val);
-            if(key == "ColorChartFg")g_ColorChartFg= (color)StringToInteger(val);
-            if(key == "ColorEntryLine")g_ColorEntryLine= (color)StringToInteger(val);
-            if(key == "ColorSLLine")   g_ColorSLLine   = (color)StringToInteger(val);
-            if(key == "ColorTPLine")   g_ColorTPLine   = (color)StringToInteger(val);
-            if(key == "ColorCandleUp")   g_ColorCandleUp = (color)StringToInteger(val);
-            if(key == "ColorCandleDown") g_ColorCandleDown = (color)StringToInteger(val);
-            if(key == "ColorListNormal") g_ColorListNormal = (color)StringToInteger(val);
-            if(key == "ColorListHover")  g_ColorListHover  = (color)StringToInteger(val);
-            if(key == "ColorPositive")   g_ColorPositive   = (color)StringToInteger(val);
-            if(key == "ColorNegative")   g_ColorNegative   = (color)StringToInteger(val);
+            if(key == "ConfigVersion")    configVersion      = (int)StringToInteger(val);
+            else if(key == "OneRPercent")      g_OneRPercent      = StringToDouble(val);
+            else if(key == "MaxRiskPercent")   g_MaxRiskPercent   = StringToDouble(val);
+            else if(key == "NavigationPosition")  g_NavigationPosition  = (int)StringToInteger(val);
+            else if(key == "ActivationCode")   g_ActivationCode   = DecodeString(val);
+            else if(key == "ShowOrderLines")   g_ShowOrderLines   = (bool)StringToInteger(val);
+            else if(key == "ShowPositionLines")g_ShowPositionLines= (bool)StringToInteger(val);
+            else if(key == "ColorBg")     g_ColorBg     = (color)StringToInteger(val);
+            else if(key == "ColorHeader") g_ColorHeader = (color)StringToInteger(val);
+            else if(key == "ColorInput")  g_ColorInput  = (color)StringToInteger(val);
+            else if(key == "ColorText")   g_ColorText   = (color)StringToInteger(val);
+            else if(key == "ColorGreen")  g_ColorGreen  = (color)StringToInteger(val);
+            else if(key == "ColorRed")    g_ColorRed    = (color)StringToInteger(val);
+            else if(key == "ColorBtnValid")   g_ColorBtnValid   = (color)StringToInteger(val);
+            else if(key == "ColorBtnInvalid") g_ColorBtnInvalid = (color)StringToInteger(val);
+            else if(key == "ColorBtnActive")  g_ColorBtnActive  = (color)StringToInteger(val);
+            else if(key == "ColorChartBg")g_ColorChartBg= (color)StringToInteger(val);
+            else if(key == "ColorChartFg")g_ColorChartFg= (color)StringToInteger(val);
+            else if(key == "ColorEntryLine")g_ColorEntryLine= (color)StringToInteger(val);
+            else if(key == "ColorSLLine")   g_ColorSLLine   = (color)StringToInteger(val);
+            else if(key == "ColorTPLine")   g_ColorTPLine   = (color)StringToInteger(val);
+            else if(key == "ColorCandleUp")   g_ColorCandleUp = (color)StringToInteger(val);
+            else if(key == "ColorCandleDown") g_ColorCandleDown = (color)StringToInteger(val);
+            else if(key == "ColorListNormal") g_ColorListNormal = (color)StringToInteger(val);
+            else if(key == "ColorListHover")  g_ColorListHover  = (color)StringToInteger(val);
+            else if(key == "ColorPositive")   g_ColorPositive   = (color)StringToInteger(val);
+            else if(key == "ColorNegative")   g_ColorNegative   = (color)StringToInteger(val);
             
             // Panel States & Positions
-            if(key == "IsMainPanelVisible") g_PanelMain.IsVisible = (bool)StringToInteger(val);
-            if(key == "PanelX") g_PanelMain.X = (int)StringToInteger(val);
-            if(key == "PanelY") g_PanelMain.Y = (int)StringToInteger(val);
+            else if(key == "IsMainPanelVisible") g_PanelMain.IsVisible = (bool)StringToInteger(val);
+            else if(key == "PanelX") g_PanelMain.X = (int)StringToInteger(val);
+            else if(key == "PanelY") g_PanelMain.Y = (int)StringToInteger(val);
             
-            if(key == "IsPositionsPanelVisible") g_PanelPositions.IsVisible = (bool)StringToInteger(val);
-            if(key == "PositionsPanelX") g_PanelPositions.X = (int)StringToInteger(val);
-            if(key == "PositionsPanelY") g_PanelPositions.Y = (int)StringToInteger(val);
+            else if(key == "IsPositionsPanelVisible") g_PanelPositions.IsVisible = (bool)StringToInteger(val);
+            else if(key == "PositionsPanelX") g_PanelPositions.X = (int)StringToInteger(val);
+            else if(key == "PositionsPanelY") g_PanelPositions.Y = (int)StringToInteger(val);
             
-            if(key == "IsAccountPanelVisible") g_PanelAccount.IsVisible = (bool)StringToInteger(val);
-            if(key == "AccountPanelX") g_PanelAccount.X = (int)StringToInteger(val);
-            if(key == "AccountPanelY") g_PanelAccount.Y = (int)StringToInteger(val);
+            else if(key == "IsAccountPanelVisible") g_PanelAccount.IsVisible = (bool)StringToInteger(val);
+            else if(key == "AccountPanelX") g_PanelAccount.X = (int)StringToInteger(val);
+            else if(key == "AccountPanelY") g_PanelAccount.Y = (int)StringToInteger(val);
             
-            if(key == "IsHistoryPanelVisible") g_PanelHistory.IsVisible = (bool)StringToInteger(val);
-            if(key == "HistoryPanelX") g_PanelHistory.X = (int)StringToInteger(val);
-            if(key == "HistoryPanelY") g_PanelHistory.Y = (int)StringToInteger(val);
+            else if(key == "IsHistoryPanelVisible") g_PanelHistory.IsVisible = (bool)StringToInteger(val);
+            else if(key == "HistoryPanelX") g_PanelHistory.X = (int)StringToInteger(val);
+            else if(key == "HistoryPanelY") g_PanelHistory.Y = (int)StringToInteger(val);
             
-            if(key == "IsSettingsOpen") g_PanelSettings.IsVisible = (bool)StringToInteger(val);
-            if(key == "SettingsX") g_PanelSettings.X = (int)StringToInteger(val);
-            if(key == "SettingsY") g_PanelSettings.Y = (int)StringToInteger(val);
+            else if(key == "IsSettingsOpen") g_PanelSettings.IsVisible = (bool)StringToInteger(val);
+            else if(key == "SettingsX") g_PanelSettings.X = (int)StringToInteger(val);
+            else if(key == "SettingsY") g_PanelSettings.Y = (int)StringToInteger(val);
             
-            if(key == "UserPalette") {
+            else if(key == "UserPalette") {
                string cols[];
                if(StringSplit(val, ',', cols) > 0) {
                   ArrayResize(g_ColorPalette, ArraySize(cols));
@@ -191,6 +193,13 @@ void LoadConfig()
          }
       }
       FileClose(handle);
+
+      // Config migration
+      if(configVersion < 2)
+      {
+         Print("FantomePad: Migrating config from v" + IntegerToString(configVersion) + " to v2");
+         SaveConfigToFile(); // Re-save with new version
+      }
    }
 }
 #endif
