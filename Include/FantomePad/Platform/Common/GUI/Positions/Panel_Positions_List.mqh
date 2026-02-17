@@ -28,10 +28,10 @@ void ClosePositionList()
 
 void DrawPositionList()
 {
-   long x = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XDISTANCE);
-   long y = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YDISTANCE);
-   long w = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE);
-   long h = ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE);
+   int x = (int)ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XDISTANCE);
+   int y = (int)ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YDISTANCE);
+   int w = (int)ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_XSIZE);
+   int h = (int)ObjectGetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_YSIZE);
    
    long tickets[];
    int count = 0;
@@ -43,7 +43,7 @@ void DrawPositionList()
           if(type == OP_BUY || type == OP_SELL || type == OP_BUYLIMIT || type == OP_SELLLIMIT || type == OP_BUYSTOP || type == OP_SELLSTOP)
           {
              ArrayResize(tickets, count+1);
-             tickets[count] = OrderTicket();
+             tickets[count] = (long)OrderTicket();
              count++;
           }
       }
@@ -54,12 +54,12 @@ void DrawPositionList()
       ClosePositionList();
       
       int itemHeight = 25;
-      int startY = (int)y + (int)h + 2; 
-      CreateRect("PosListContainer", (int)x, startY - 2, (int)w, itemHeight + 4, g_ColorBg, BORDER_FLAT);
+      int startY = y + h + 2; 
+      CreateRect("PosListContainer", x, startY - 2, w, itemHeight + 4, g_ColorBg, BORDER_FLAT);
       ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
       ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
       
-      CreateButton("PosListItem_None", "No Positions", (int)x + 2, startY, (int)w - 4, itemHeight, g_ColorInput, g_ColorText);
+      CreateButton("PosListItem_None", "No Positions", x + 2, startY, w - 4, itemHeight, g_ColorInput, g_ColorText);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
       ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false);
       IsPosListOpen = true;
@@ -77,16 +77,16 @@ void DrawPositionList()
    
    bool showScroll = (count > maxVis);
    
-   int startY = (int)y + (int)h + 2; 
+   int startY = y + h + 2; 
    int contentHeight = visibleCount * itemHeight;
-   int containerWidth = (int)w;
+   int containerWidth = w;
    
-   CreateRect("PosListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
+   CreateRect("PosListContainer", x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
    ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
-   int itemX = (int)x + 2;
+   int itemX = x + 2;
    int currentY = startY;
    for(int i = 0; i < visibleCount; i++)
    {
@@ -118,7 +118,7 @@ void DrawPositionList()
    
    if(showScroll)
    {
-       int trackX = (int)x + containerWidth - scrollBarWidth - 2;
+       int trackX = x + containerWidth - scrollBarWidth - 2;
        int trackH = contentHeight;
        int trackY = startY;
        

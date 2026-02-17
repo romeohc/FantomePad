@@ -108,9 +108,9 @@ bool CheckAndSetNewAccount()
 {
    if(IsTesting()) return false;
    string gvName = "FantomePad_LastAccount";
-   long currentAccount = AccountNumber();
-   long lastAccount = 0;
-   if(GlobalVariableCheck(gvName)) lastAccount = (long)GlobalVariableGet(gvName);
+   int currentAccount = (int)AccountNumber();
+   int lastAccount = 0;
+   if(GlobalVariableCheck(gvName)) lastAccount = (int)GlobalVariableGet(gvName);
    if(currentAccount != lastAccount)
    {
       GlobalVariableSet(gvName, (double)currentAccount);

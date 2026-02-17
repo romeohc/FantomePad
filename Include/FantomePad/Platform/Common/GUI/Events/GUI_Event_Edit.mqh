@@ -121,18 +121,24 @@ void OnEvent_ObjectDrag(string sparam)
    
    if(sparam == PREFIX + "Line_SL")
    {
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
       ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;
    }
    if(sparam == PREFIX + "Line_TP")
    {
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
       ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;
    }
    if(sparam == PREFIX + "Line_Price")
    {
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
+      ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
       ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;

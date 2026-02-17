@@ -26,10 +26,11 @@ void UpdateSingleLine(string lineSuffix, string editSuffix, color col)
       if(FP_ObjectFind(0, lineName) < 0)
       {
          FP_ObjectCreate(0, lineName, OBJ_HLINE, 0, 0, price);
-         FP_ObjectSetInteger(0, lineName, OBJPROP_SELECTABLE, true);
-         FP_ObjectSetInteger(0, lineName, OBJPROP_SELECTED, true); 
          FP_ObjectSetString(0, lineName, OBJPROP_TEXT, lineSuffix); 
       }
+      
+      FP_ObjectSetInteger(0, lineName, OBJPROP_SELECTABLE, true);
+      FP_ObjectSetInteger(0, lineName, OBJPROP_SELECTED, true); 
       
       FP_ObjectSetInteger(0, lineName, OBJPROP_COLOR, col);
       FP_ObjectSetInteger(0, lineName, OBJPROP_WIDTH, 2);
