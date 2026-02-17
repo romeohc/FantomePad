@@ -107,24 +107,26 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
 bool CheckAndSetNewAccount()
 {
    if(IsTesting()) return false;
-   string gvName = "FantomePad_LastAccount";
+   
+   // FIX: At startup, AccountNumber() can be 0 until connection is stable.
+   // We skip the logic if we don't have a valid account yet to avoid false resets.
    int currentAccount = (int)AccountNumber();
+   if(currentAccount <= 0) return false;
+
+   string gvName = "FantomePad_LastAccount";
    int lastAccount = 0;
+   
    if(GlobalVariableCheck(gvName)) lastAccount = (int)GlobalVariableGet(gvName);
+   
    if(currentAccount != lastAccount)
    {
       GlobalVariableSet(gvName, (double)currentAccount);
-      int total = SymbolsTotal(true);
-      if(total > 0)
-      {
-         string firstSymbol = SymbolName(0, true);
-         if(Symbol() != firstSymbol)
-         {
-            Print("FantomePad: Account Change (" + IntegerToString(lastAccount) + " -> " + IntegerToString(currentAccount) + "). Switching to: " + firstSymbol);
-            ChartSetSymbolPeriod(0, firstSymbol, Period());
-            return true;
-         }
-      }
+      Print("FantomePad: Account Change Detected (" + IntegerToString(lastAccount) + " -> " + IntegerToString(currentAccount) + ").");
+      
+      // Removed ChartSetSymbolPeriod call. Forcing a symbol change during OnInit 
+      // often causes MT5 to eject/deselect the Expert Advisor upon restart, 
+      // especially under Wine/Mac environments.
+      return true;
    }
    return false;
 }
