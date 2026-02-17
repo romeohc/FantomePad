@@ -23,10 +23,51 @@ void UpdateUIMode()
    
    int paddingX = 20;
    int inputH   = 28;
-   int gapY     = 8;
    int sectionGap = 20;
+   int halfWidth = (g_PanelMain.Width - (paddingX*2) - 10) / 2;
    
    int currentY = startY + 20; 
+   
+   // DRAG OPTIMIZATION
+   if(g_PanelMain.IsDragging && ObjectFind(0, PREFIX + "Bg") >= 0)
+   {
+       SetObjPosition("Bg", startX, startY);
+       SetObjPosition("Btn_Type", startX + paddingX, currentY);
+       currentY += inputH + sectionGap;
+       
+       if(CurrentTypeIndex != 0)
+       {
+           SetObjPosition("Label_Price", startX + paddingX, currentY); currentY += 15;
+           SetObjPosition("Edit_Price", startX + paddingX, currentY); currentY += inputH + sectionGap;
+       }
+       
+       SetObjPosition("Label_SL", startX + paddingX, currentY);
+       SetObjPosition("Label_TP", startX + paddingX + halfWidth + 10, currentY);
+       currentY += 15;
+       
+       SetObjPosition("Edit_SL", startX + paddingX, currentY);
+       SetObjPosition("Edit_TP", startX + paddingX + halfWidth + 10, currentY);
+       currentY += inputH + sectionGap;
+       
+       SetObjPosition("Label_Risk", startX + paddingX, currentY);
+       SetObjPosition("Label_Lot", startX + paddingX + halfWidth + 10, currentY);
+       currentY += 15;
+       
+       SetObjPosition("Edit_Risk", startX + paddingX, currentY);
+       SetObjPosition("Label_RiskPerc", startX + paddingX + halfWidth - 37, currentY + 4);
+       SetObjPosition("Edit_Lot", startX + paddingX + halfWidth + 10, currentY);
+       currentY += inputH + sectionGap;
+       
+       if(CurrentTypeIndex == 0)
+       {
+           if(CurrentDirection == 0) SetObjPosition("Btn_Buy", startX + paddingX, currentY);
+           else                    SetObjPosition("Btn_Sell", startX + paddingX, currentY);
+       }
+       else SetObjPosition("Btn_Action", startX + paddingX, currentY);
+       
+       ChartRedraw();
+       return;
+   }
    
    SetObjPosition("Bg", startX, startY);
    
@@ -98,8 +139,6 @@ void UpdateUIMode()
       
       currentY += inputH + sectionGap; 
    }
-   
-   int halfWidth = (g_PanelMain.Width - (paddingX*2) - 10) / 2;
    
    SetObjPosition("Label_SL", startX + paddingX, currentY);
    SetObjVisible("Label_SL", true);

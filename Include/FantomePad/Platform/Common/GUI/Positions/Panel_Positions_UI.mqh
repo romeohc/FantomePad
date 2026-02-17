@@ -247,7 +247,7 @@ void CreatePositionsPanel()
    CreateEdit("Pos_Edit_Close", "0", 0, 0, 45, 28);
    
    // 7. Validate
-   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 45, g_ColorBtnActive, g_ColorText);
+   CreateButton("Pos_Btn_Validate", "VALIDATE", 0, 0, width - 40, 45, g_ColorBtnInvalid, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONTSIZE, 11);
    ObjectSetString(0, PREFIX + "Pos_Btn_Validate", OBJPROP_FONT, "Trebuchet MS Bold");
  

@@ -30,7 +30,8 @@ void ProcessDragLogic(int mouseX, int mouseY)
     bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || g_PanelSymbolManager.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging;
     if(anyDrag || isOverList)
     {
-        ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+        if(ChartGetInteger(0, CHART_MOUSE_SCROLL))
+           ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
     }
  
     // --- 0. DRAG SCROLLBAR (SYMBOL LIST) ---
@@ -300,12 +301,14 @@ void ProcessDragEnd()
    // Re-enable chart scroll ONLY if not over list and not in other modal state
    if(!isOverList) 
    {
-       ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
+       if(!ChartGetInteger(0, CHART_MOUSE_SCROLL))
+          ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
    }
    else
    {
        // Keep disabled if hovering list to allow wheel scroll without chart scroll
-       ChartSetInteger(0, CHART_MOUSE_SCROLL, false); 
+       if(ChartGetInteger(0, CHART_MOUSE_SCROLL))
+          ChartSetInteger(0, CHART_MOUSE_SCROLL, false); 
    }
    ChartRedraw();
 }

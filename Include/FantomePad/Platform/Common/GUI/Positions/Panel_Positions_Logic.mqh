@@ -249,8 +249,11 @@ void UpdatePositionsValues()
                  valCol = g_ColorBtnActive;
              }
              
-             ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
-             ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, valCol);
+             if((color)ObjectGetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR) != valCol)
+             {
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
+                 ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, valCol);
+             }
              
              g_LastPosTicket = SelectedPositionTicket;
              return; 

@@ -15,6 +15,32 @@ void DrawHistoryToolbar(int startX, int startY, int headerHeight)
    int gap = 10;
    int curBtnX = startX + 15;
    
+   // DRAG OPTIMIZATION: Only update positions if already created
+   if(g_PanelHistory.IsDragging && ObjectFind(0, PREFIX + "Hist_Btn_Daily") >= 0)
+   {
+       SetObjPosition("Hist_Btn_Daily", curBtnX, btnY); curBtnX += btnW + gap;
+       SetObjPosition("Hist_Btn_Weekly", curBtnX, btnY); curBtnX += btnW + gap;
+       SetObjPosition("Hist_Btn_Monthly", curBtnX, btnY); curBtnX += btnW + gap;
+       SetObjPosition("Hist_Btn_All", curBtnX, btnY); curBtnX += 50 + gap;
+       SetObjPosition("Hist_Btn_Custom", curBtnX, btnY);
+       
+       int symX = curBtnX + btnW + 30;
+       SetObjPosition("Hist_Lbl_SymFilter", symX, btnY+3);
+       SetObjPosition("Hist_Input_Symbol", symX + 40, btnY);
+       
+       if(g_HistoryFilterMode == H_FILTER_CUSTOM)
+       {
+           int inpY = btnY + btnH + 5;
+           int cursorX = startX + 50;
+           SetObjPosition("Hist_Lbl_From", cursorX, inpY+3);
+           SetObjPosition("Hist_Input_Start", cursorX + 35, inpY);
+           cursorX = cursorX + 35 + 100 + 20;
+           SetObjPosition("Hist_Lbl_To", cursorX, inpY+3);
+           SetObjPosition("Hist_Input_End", cursorX + 25, inpY);
+       }
+       return;
+   }
+
    color bgDaily   = (g_HistoryFilterMode == H_FILTER_DAILY) ? g_ColorBtnActive : g_ColorInput;
    color bgWeekly  = (g_HistoryFilterMode == H_FILTER_WEEKLY) ? g_ColorBtnActive : g_ColorInput;
    color bgMonthly = (g_HistoryFilterMode == H_FILTER_MONTHLY) ? g_ColorBtnActive : g_ColorInput;
@@ -73,13 +99,6 @@ void DrawHistoryToolbar(int startX, int startY, int headerHeight)
 //+------------------------------------------------------------------+
 void DrawHistoryContent(int x, int y, int w, int rowH)
 {
-   // Cleanup old items
-   for(int i = ObjectsTotal(0, -1, -1) - 1; i >= 0; i--)
-   {
-       string name = ObjectName(0, i);
-       if(StringFind(name, PREFIX + "Hist_Item_") >= 0) ObjectDelete(0, name);
-   }
-
    int total = ArraySize(g_HistoryFilteredIndices);
    g_ScrollHistory.ContentHeight = total * rowH;
    
@@ -104,22 +123,61 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
    int wProf  = 120;
    int wRetP  = 90;
 
-   for(int i = 0; i < maxVisibleRows; i++)
+   // Reuse objects: We always handle up to a reasonable max or current maxVisibleRows
+   // This avoids the expensive ObjectDelete loop during high-frequency calls like Drag
+   for(int i = 0; i < 50; i++) // Fixed pool of 50 items is enough for this panel
    {
+       string sfx = "_" + IntegerToString(i);
+       string bgName = "Hist_Item_Bg" + sfx;
+       
+       if(i >= maxVisibleRows || i >= total)
+       {
+           // Hide unused slots
+           if(ObjectFind(0, PREFIX + bgName) >= 0)
+           {
+               SetObjVisible(bgName, false);
+               SetObjVisible("Hist_Item_Time"+sfx, false);
+               SetObjVisible("Hist_Item_Type"+sfx, false);
+               SetObjVisible("Hist_Item_Sym"+sfx, false);
+               SetObjVisible("Hist_Item_Fees"+sfx, false);
+               SetObjVisible("Hist_Item_Prof"+sfx, false);
+               SetObjVisible("Hist_Item_RetP"+sfx, false);
+               SetObjVisible("Hist_Item_RetR"+sfx, false);
+           }
+           continue; 
+       }
+
        int logicalIndex = startIdx + i;
        int arrayIndex = total - 1 - logicalIndex;
        
        if(arrayIndex < 0) break;
        
        int orderIndex = g_HistoryFilteredIndices[arrayIndex];
-       
+       int itemY = currentY + (i * rowH);
+       int txtY = itemY + 6;
+       int colX = x + paddingX;
+
+       // Optimization: If dragging, ONLY update positions of existing objects.
+       // Skip data fetching and text setting to keep it smooth as butter.
+       if(g_PanelHistory.IsDragging && ObjectFind(0, PREFIX + bgName) >= 0)
+       {
+           SetObjPosition(bgName, x + 5, itemY);
+           SetObjPosition("Hist_Item_Time"+sfx, colX, txtY);
+           SetObjPosition("Hist_Item_Type"+sfx, colX + wTime, txtY);
+           SetObjPosition("Hist_Item_Sym"+sfx, colX + wTime + wType, txtY);
+           SetObjPosition("Hist_Item_Fees"+sfx, colX + wTime + wType + wSym, txtY);
+           SetObjPosition("Hist_Item_Prof"+sfx, colX + wTime + wType + wSym + wFees, txtY);
+           SetObjPosition("Hist_Item_RetP"+sfx, colX + wTime + wType + wSym + wFees + wProf, txtY);
+           SetObjPosition("Hist_Item_RetR"+sfx, colX + wTime + wType + wSym + wFees + wProf + wRetP, txtY);
+           continue;
+       }
+
        if(OrderSelect(orderIndex, SELECT_BY_POS, MODE_HISTORY))
        {
-           string sfx = "_" + IntegerToString(logicalIndex);
-           int itemY = currentY + (i * rowH);
+           // Ensure visible
+           SetObjVisible(bgName, true);
            
            // Background
-           string bgName = "Hist_Item_Bg" + sfx;
            CreateButton(bgName, "", x + 5, itemY, w - 25, rowH - 2, g_ColorInput, clrNONE);
            ObjectSetInteger(0, PREFIX + bgName, OBJPROP_BORDER_COLOR, g_ColorBg);
            ObjectSetInteger(0, PREFIX + bgName, OBJPROP_ZORDER, 10);
@@ -147,9 +205,6 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            
            color profCol = (prof >= 0) ? g_ColorPositive : g_ColorNegative;
            color typeCol = (type==OP_BUY || type==OP_BUYLIMIT || type==OP_BUYSTOP) ? g_ColorPositive : g_ColorNegative;
-           
-           int txtY = itemY + 6;
-           int colX = x + paddingX;
            
            CreateLabel("Hist_Item_Time"+sfx, timeStr, colX, txtY, 8, g_ColorText, "Trebuchet MS");
            CreateLabel("Hist_Item_Type"+sfx, typeStr, colX + wTime, txtY, 8, typeCol, "Trebuchet MS");
@@ -180,9 +235,6 @@ void DrawHistoryScrollbar(int x, int y, int w)
    int trackX = x + w - trackW - 5;
    int trackY = y;
    
-   CreateRect("Hist_ScrollTrack", trackX, trackY, trackW, trackH, g_ColorInput, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
-   
    int contentH = g_ScrollHistory.ContentHeight;
    if(contentH <= g_ScrollHistory.ViewportHeight) contentH = g_ScrollHistory.ViewportHeight + 1; 
    
@@ -202,6 +254,17 @@ void DrawHistoryScrollbar(int x, int y, int w)
        int availableTrack = trackH - thumbH;
        thumbY = trackY + (int)(scrollPrc * availableTrack);
    }
+
+   // DRAG OPTIMIZATION
+   if(g_PanelHistory.IsDragging && ObjectFind(0, PREFIX + "Hist_ScrollTrack") >= 0)
+   {
+       SetObjPosition("Hist_ScrollTrack", trackX, trackY);
+       SetObjPosition("Hist_ScrollThumb", trackX + 1, thumbY);
+       return;
+   }
+   
+   CreateRect("Hist_ScrollTrack", trackX, trackY, trackW, trackH, g_ColorInput, BORDER_FLAT);
+   ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
    
    CreateRect("Hist_ScrollThumb", trackX + 1, thumbY, trackW - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);
@@ -213,6 +276,29 @@ void DrawHistoryScrollbar(int x, int y, int w)
 //+------------------------------------------------------------------+
 void DrawHistoryFooter(int x, int y, int w, int h)
 {
+   int paddingX = 20;
+   int colX = x + paddingX;
+   
+   int wTime  = 150;
+   int wType  = 100;
+   int wSym   = 100;
+   int wFees  = 100;
+   int wProf  = 120;
+   int wRetP  = 90;
+   int textY  = y + 10;
+
+   // DRAG OPTIMIZATION
+   if(g_PanelHistory.IsDragging && ObjectFind(0, PREFIX + "Hist_Footer_Line") >= 0)
+   {
+       SetObjPosition("Hist_Footer_Line", x, y);
+       SetObjPosition("Hist_Foot_Fees", colX + wTime + wType + wSym, textY);
+       SetObjPosition("Hist_Foot_Prof", colX + wTime + wType + wSym + wFees, textY);
+       SetObjPosition("Hist_Foot_RetP", colX + wTime + wType + wSym + wFees + wProf, textY);
+       SetObjPosition("Hist_Foot_RetR", colX + wTime + wType + wSym + wFees + wProf + wRetP, textY);
+       SetObjPosition("Hist_Foot_Label", x + 15, textY);
+       return;
+   }
+
    double sumFees = 0.0;
    double sumProf = 0.0;
    
@@ -237,16 +323,6 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    if(bal > 0) totalRetP = (sumProf / bal) * 100.0;
    if(g_OneRPercent > 0) totalRetR = totalRetP / g_OneRPercent;
    
-   int paddingX = 20;
-   int colX = x + paddingX;
-   
-   int wTime  = 150;
-   int wType  = 100;
-   int wSym   = 100;
-   int wFees  = 100;
-   int wProf  = 120;
-   int wRetP  = 90;
-   
    string sFees = DoubleToString(sumFees, 2);
    string sProf = DoubleToString(sumProf, 2);
    string sRetP = DoubleToString(totalRetP, 2) + "%";
@@ -256,7 +332,6 @@ void DrawHistoryFooter(int x, int y, int w, int h)
    
    CreateRect("Hist_Footer_Line", x, y, w, 1, C'50,50,50', BORDER_FLAT);
    
-   int textY = y + 10;
    CreateLabel("Hist_Foot_Fees", sFees, colX + wTime + wType + wSym, textY, 8, g_ColorText, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_Prof", sProf, colX + wTime + wType + wSym + wFees, textY, 8, colProf, "Trebuchet MS Bold");
    CreateLabel("Hist_Foot_RetP", sRetP, colX + wTime + wType + wSym + wFees + wProf, textY, 8, colProf, "Trebuchet MS Bold");

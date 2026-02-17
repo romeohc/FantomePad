@@ -129,32 +129,73 @@ void CreateSymbolManagerPanel()
    int y = g_PanelSymbolManager.Y;
    int w = g_PanelSymbolManager.Width;
    int h = g_PanelSymbolManager.Height;
+   int headerH = 20;
+   int catListW = 180;
+   int contentY = y + headerH;
+   int contentH = h - headerH;
    
-   // 1. MAIN WINDOW (SYM_ prefix for Trigram compliance)
+   int gridX = x + catListW + 10;
+   int gridY = contentY + 10;
+   int gridW = w - catListW - 20;
+   int gridH = contentH - 20;
+   
+   // DRAG OPTIMIZATION
+   if(g_PanelSymbolManager.IsDragging && ObjectFind(0, PREFIX + "SYM_Bg") >= 0)
+   {
+       SetObjPosition("SYM_Bg", x, y);
+       SetObjPosition("SYM_CatBg", x, contentY);
+       SetObjPosition("SYM_Sep", x + catListW, contentY + 10);
+       
+       int catStartY = contentY + 10;
+       for(int i=0; i<g_SymMgr_CategoryCount; i++)
+       {
+           SetObjPosition("SYM_Cat_" + IntegerToString(i), x + 5, catStartY);
+           catStartY += 25 + 2;
+           if(catStartY > y + h - 10) break;
+       }
+       
+       int cols_drag = 3;
+       int cellW_drag = (gridW / cols_drag) - 5;
+       int cellH_drag = 30;
+       
+       for(int i=0; i<g_SymMgr_MaxVisible; i++)
+       {
+           if(g_SymMgr_ScrollOffset + i >= g_SymMgr_SymbolCount) break;
+           int col = i % cols_drag;
+           int row = i / cols_drag;
+           SetObjPosition("SYM_Sym_" + IntegerToString(i), gridX + (col * (cellW_drag + 5)), gridY + (row * (cellH_drag + 5)));
+       }
+       
+       if(ObjectFind(0, PREFIX + "SYM_ScrollTrack") >= 0)
+       {
+           SetObjPosition("SYM_ScrollTrack", x + w - 15, gridY);
+           // Thumb pos is dynamic based on offset, but offset doesn't change during drag
+           long thumbH = ObjectGetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_YSIZE);
+           int totalRows = (g_SymMgr_SymbolCount + cols_drag - 1) / cols_drag;
+           int visibleRows = gridH / (cellH_drag + 5);
+           int maxScrollRows = totalRows - visibleRows;
+           int currentRow = g_SymMgr_ScrollOffset / cols_drag;
+           int thumbY = gridY + (int)((double)currentRow / (double)maxScrollRows * (gridH - (int)thumbH));
+           SetObjPosition("SYM_ScrollThumb", x + w - 15, thumbY);
+       }
+       
+       ChartRedraw();
+       return;
+   }
+
+   // 1. MAIN WINDOW
    CreateRect("SYM_Bg", x, y, w, h, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_ZORDER, 141);
    ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
    ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_WIDTH, 2); 
 
-   // 2. MARGIN (Replaces Header)
-   int headerH = 20;
-   
-   /* 
-   // Close Button
-   int closeBtnSize = 24;
-   CreateButton("SYM_Btn_Close", "X", x + w - closeBtnSize - 10, y + 8, closeBtnSize, closeBtnSize, g_ColorBtnInvalid, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "SYM_Btn_Close", OBJPROP_ZORDER, 143);
-   */
+   // 2. MARGIN
+   SetObjVisible("SYM_Header", false); // Not used
 
-   // 3. CATEGORY LIST (LEFT SIDE)
-   int catListW = 180;
-   int contentY = y + headerH;
-   int contentH = h - headerH;
-   
+   // 3. CATEGORY LIST
    CreateRect("SYM_CatBg", x, contentY, catListW, contentH, g_ColorBg, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "SYM_CatBg", OBJPROP_ZORDER, 142);
    
-   // Vertical Separator
    CreateRect("SYM_Sep", x + catListW, contentY + 10, 1, contentH - 20, C'50,50,50', BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "SYM_Sep", OBJPROP_ZORDER, 142);
    
@@ -163,8 +204,6 @@ void CreateSymbolManagerPanel()
    
    for(int i=0; i<g_SymMgr_CategoryCount; i++)
    {
-       if(catStartY + catItemH > y + h - 10) break; 
-       
        string catName = g_SymMgr_Categories[i];
        bool isSelected = (catName == g_SymMgr_CurrentCategory);
        color catBg = isSelected ? g_ColorBtnActive : g_ColorBg;
@@ -174,15 +213,12 @@ void CreateSymbolManagerPanel()
        CreateButton(btnName, catName, x + 5, catStartY, catListW - 10, catItemH, catBg, catTxt);
        ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
        ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ALIGN, ALIGN_LEFT);
+       SetObjVisible(btnName, (catStartY + catItemH <= y + h - 10));
        
        catStartY += catItemH + 2;
    }
    
-   // 4. SYMBOL GRID (RIGHT SIDE)
-   int gridX = x + catListW + 10;
-   int gridY = contentY + 10;
-   int gridW = w - catListW - 20;
-   int gridH = contentH - 20;
+   // 4. SYMBOL GRID
    
    int cols = 3;
    int cellW = (gridW / cols) - 5;
@@ -191,11 +227,16 @@ void CreateSymbolManagerPanel()
    int rows = gridH / (cellH + 5);
    g_SymMgr_MaxVisible = rows * cols; 
    
-   int drawnCount = 0;
-   for(int i=0; i<g_SymMgr_MaxVisible; i++)
+   for(int i=0; i<100; i++) // Fixed pool
    {
+       string btnName = "SYM_Sym_" + IntegerToString(i);
        int dataIdx = g_SymMgr_ScrollOffset + i;
-       if(dataIdx >= g_SymMgr_SymbolCount) break;
+       
+       if(i >= g_SymMgr_MaxVisible || dataIdx >= g_SymMgr_SymbolCount)
+       {
+           SetObjVisible(btnName, false);
+           continue; 
+       }
        
        string sym = g_SymMgr_SymbolsInCat[dataIdx];
        int col = i % cols;
@@ -203,56 +244,47 @@ void CreateSymbolManagerPanel()
        int cellX = gridX + (col * (cellW + 5));
        int cellY = gridY + (row * (cellH + 5));
        
-       string btnName = "SYM_Sym_" + IntegerToString(i);
        bool isInMarket = (bool)SymbolInfoInteger(sym, SYMBOL_SELECT);
-       color cellBg = isInMarket ? g_ColorBtnActive : g_ColorBg; // Mint if added, Dark if not
+       color cellBg = isInMarket ? g_ColorBtnActive : g_ColorBg; 
        
        CreateButton(btnName, sym, cellX, cellY, cellW, cellH, cellBg, g_ColorText);
        ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
-       drawnCount++;
+       SetObjVisible(btnName, true);
    }
    
-   for(int j=drawnCount; j<100; j++) 
+   // 5. SCROLLBAR
+   int totalRows = (g_SymMgr_SymbolCount + cols - 1) / cols;
+   int visibleRows = rows;
+   
+   if(totalRows > visibleRows)
    {
-       string btnName = PREFIX + "SYM_Sym_" + IntegerToString(j);
-       if(ObjectFind(0, btnName) >= 0) ObjectDelete(0, btnName);
+       int scrollX = x + w - 15;
+       int trackY = gridY;
+       int trackH = gridH;
+       int trackW = 8;
+       
+       CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorBg, BORDER_FLAT);
+       ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
+       
+       int maxScrollRows = totalRows - visibleRows;
+       g_ScrollSymbolManager.ViewportHeight = trackH;
+       g_ScrollSymbolManager.ContentHeight = totalRows * 35; 
+       
+       int thumbH = (int)((double)visibleRows / (double)totalRows * trackH);
+       if(thumbH < 20) thumbH = 20;
+       
+       int currentRow = g_SymMgr_ScrollOffset / cols;
+       int thumbY = trackY + (int)((double)currentRow / (double)maxScrollRows * (trackH - thumbH));
+       
+       CreateRect("SYM_ScrollThumb", scrollX, thumbY, trackW, thumbH, g_ColorText, BORDER_FLAT);
+       ObjectSetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_ZORDER, 143);
    }
-      // 5. SCROLLBAR
-    int totalRows = (g_SymMgr_SymbolCount + cols - 1) / cols;
-    int visibleRows = rows;
-    
-    if(totalRows > visibleRows)
-    {
-        int scrollX = x + w - 15;
-        int trackY = gridY;
-        int trackH = gridH;
-        int trackW = 8;
-        
-        // Track
-        CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorBg, BORDER_FLAT);
-        ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
-        
-        // Thumb Calculation
-        int maxScrollRows = totalRows - visibleRows;
-        g_ScrollSymbolManager.ViewportHeight = trackH;
-        g_ScrollSymbolManager.ContentHeight = totalRows * 35; // Approximation for ratio
-        
-        int thumbH = (int)((double)visibleRows / (double)totalRows * trackH);
-        if(thumbH < 20) thumbH = 20;
-        
-        // Current Scroll Y mapping
-        // g_SymMgr_ScrollOffset is index of first visible symbol. 
-        // We want g_SymMgr_ScrollOffset / cols to be the current row.
-        int currentRow = g_SymMgr_ScrollOffset / cols;
-        int thumbY = trackY + (int)((double)currentRow / (double)maxScrollRows * (trackH - thumbH));
-        
-        CreateRect("SYM_ScrollThumb", scrollX, thumbY, trackW, thumbH, g_ColorText, BORDER_FLAT);
-        ObjectSetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_ZORDER, 143);
-    }
-    else
-    {
-        ObjectsDeleteAll(0, PREFIX + "SYM_Scroll");
-    }
+   else
+   {
+       SetObjVisible("SYM_ScrollTrack", false);
+       SetObjVisible("SYM_ScrollThumb", false);
+   }
+   ChartRedraw();
 }
 
 //+------------------------------------------------------------------+
