@@ -33,6 +33,12 @@ void ProcessDragLogic(int mouseX, int mouseY)
         if(ChartGetInteger(0, CHART_MOUSE_SCROLL))
            ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
     }
+    else
+    {
+        // FIX: Ensure chart scroll is enabled if we are dragging the background (Native Chart Pan)
+        if(!ChartGetInteger(0, CHART_MOUSE_SCROLL))
+           ChartSetInteger(0, CHART_MOUSE_SCROLL, true);
+    }
  
     // --- 0. DRAG SCROLLBAR (SYMBOL LIST) ---
     if(IsListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !g_ScrollSettings.IsDragging)

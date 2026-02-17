@@ -63,6 +63,9 @@ int OnInit()
    ChartSetInteger(0, CHART_SHOW_TRADE_LEVELS, false);
    ChartSetInteger(0, CHART_SHOW_BID_LINE, false);
    ChartSetInteger(0, CHART_SHOW_ASK_LINE, false);
+   // Disable AutoScroll to prevent chart snapping back on ticks
+   ChartSetInteger(0, CHART_AUTOSCROLL, false);
+
    ChartRedraw();
 
    GUI_OnInit();
