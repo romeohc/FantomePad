@@ -28,6 +28,8 @@ void UpdateUIMode()
    
    int currentY = startY + 20; 
    
+   UpdateValidationErrorPosition();
+   
    // DRAG OPTIMIZATION
    if(g_PanelMain.IsDragging && ObjectFind(0, PREFIX + "Bg") >= 0)
    {

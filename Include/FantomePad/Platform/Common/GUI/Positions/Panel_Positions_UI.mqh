@@ -16,6 +16,8 @@ void UpdatePositionsLayout()
    
    int currentY = startY + 20; 
    
+   UpdatePosValidationErrorPosition();
+   
    SetObjPosition("Pos_Bg", startX, startY);
    
    // --- Select Key ---

@@ -26,6 +26,7 @@ public:
    // From Error
    static void ShowValidationError(string msg);
    static void HideValidationError();
+   static void UpdateValidationErrorPosition();
    
    // From Events
    static bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam);
@@ -42,6 +43,7 @@ public:
 #define CreatePanel                CPanel_Main::CreatePanel
 #define ShowValidationError        CPanel_Main::ShowValidationError
 #define HideValidationError        CPanel_Main::HideValidationError
+#define UpdateValidationErrorPosition CPanel_Main::UpdateValidationErrorPosition
 #define PanelMain_OnEvent          CPanel_Main::PanelMain_OnEvent
 
 

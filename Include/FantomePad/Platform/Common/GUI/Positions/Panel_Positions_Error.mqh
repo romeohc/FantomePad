@@ -9,11 +9,28 @@
 //+------------------------------------------------------------------+
 // Displays an error message in a red cell below the Position Manager panel
 // with white text and a close button (X) in the top right corner.
+//+------------------------------------------------------------------+
+//| SHOW POSITION VALIDATION ERROR MESSAGE                           |
+//+------------------------------------------------------------------+
+// Displays an error message in a red cell below the Position Manager panel
+// with white text and a close button (X) in the top right corner.
 void ShowPosValidationError(string message)
 {
+   g_PosValidationErrorVisible = true;
+   UpdatePosValidationErrorPosition(message);
+}
+
+//+------------------------------------------------------------------+
+//| UPDATE POSITION VALIDATION ERROR POSITION                        |
+//+------------------------------------------------------------------+
+// Keeps the error message synchronized with the position panel position
+void UpdatePosValidationErrorPosition(string message = "")
+{
+   if(!g_PosValidationErrorVisible) return;
+
    // Calculate position (below the positions panel)
-   int panelX = g_PanelPositions.X;
-   int panelY = g_PanelPositions.Y;
+   int panelX = (int)g_PanelPositions.X;
+   int panelY = (int)g_PanelPositions.Y;
    
    // Get actual panel height
    long panelH = ObjectGetInteger(0, PREFIX + "Pos_Bg", OBJPROP_YSIZE);
@@ -42,9 +59,12 @@ void ShowPosValidationError(string message)
    // 2. Error Text (White)
    string txtName = PREFIX + "PosValErr_Txt";
    if(ObjectFind(0, txtName) < 0) ObjectCreate(0, txtName, OBJ_LABEL, 0, 0, 0);
+   
+   // Only update text if a new message is provided
+   if(message != "") ObjectSetString(0, txtName, OBJPROP_TEXT, message);
+   
    ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, errorX + 15);
    ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, errorY + 14);
-   ObjectSetString(0, txtName, OBJPROP_TEXT, message);
    ObjectSetString(0, txtName, OBJPROP_FONT, "Trebuchet MS Bold");
    ObjectSetInteger(0, txtName, OBJPROP_FONTSIZE, 9);
    ObjectSetInteger(0, txtName, OBJPROP_COLOR, clrWhite);
@@ -80,6 +100,8 @@ void ShowPosValidationError(string message)
 // Closes and removes the position validation error message display
 void HidePosValidationError()
 {
+   g_PosValidationErrorVisible = false;
+
    // Delete all error message objects
    string bgName = PREFIX + "PosValErr_Bg";
    string txtName = PREFIX + "PosValErr_Txt";

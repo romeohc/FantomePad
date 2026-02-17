@@ -106,6 +106,7 @@ color  g_ToastColor = C'214,48,49'; // Red by default
 // --- VALIDATION ERROR MESSAGE GLOBALS ---
 string g_ValidationErrorMsg = "";     // Current error message to display
 bool   g_ValidationErrorVisible = false; // Is the error message currently visible
+bool   g_PosValidationErrorVisible = false; // Is the position error message currently visible
 string g_LastTradeErrorMsg = "";      // Last error from trading logic (to be picked up by GUI)
 
 // --- SYMBOL MANAGER GLOBALS ---

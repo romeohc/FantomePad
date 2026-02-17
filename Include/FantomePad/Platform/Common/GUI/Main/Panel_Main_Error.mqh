@@ -18,6 +18,17 @@ void ShowValidationError(string message)
    g_ValidationErrorMsg = message;
    g_ValidationErrorVisible = true;
    
+   UpdateValidationErrorPosition();
+}
+
+//+------------------------------------------------------------------+
+//| UPDATE VALIDATION ERROR POSITION                                 |
+//+------------------------------------------------------------------+
+// Moves the error message to stay synchronized with the main panel
+void UpdateValidationErrorPosition()
+{
+   if(!g_ValidationErrorVisible) return;
+
    int panelX = g_PanelMain.X;
    int panelY = g_PanelMain.Y;
    
@@ -47,7 +58,7 @@ void ShowValidationError(string message)
    if(ObjectFind(0, txtName) < 0) ObjectCreate(0, txtName, OBJ_LABEL, 0, 0, 0);
    ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, errorX + 15);
    ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, errorY + 14);
-   ObjectSetString(0, txtName, OBJPROP_TEXT, message);
+   ObjectSetString(0, txtName, OBJPROP_TEXT, g_ValidationErrorMsg);
    ObjectSetString(0, txtName, OBJPROP_FONT, "Trebuchet MS Bold");
    ObjectSetInteger(0, txtName, OBJPROP_FONTSIZE, 9);
    ObjectSetInteger(0, txtName, OBJPROP_COLOR, clrWhite);
