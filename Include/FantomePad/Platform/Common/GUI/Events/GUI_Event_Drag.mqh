@@ -194,6 +194,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
           UpdateUIMode();
        }
     }
+   if(anyDrag) ChartRedraw();
 }
 
 //+------------------------------------------------------------------+

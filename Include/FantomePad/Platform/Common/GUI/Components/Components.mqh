@@ -144,7 +144,8 @@ bool HandlePanelDrag(bool &dragging_state, int &pos_x, int &pos_y, int &offset_x
          dragging_state = true;
          offset_x = mouse_x - pos_x;
          offset_y = mouse_y - pos_y;
-         ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+         if(ChartGetInteger(0, CHART_MOUSE_SCROLL))
+            ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
          return true;
       }
    }
@@ -174,7 +175,8 @@ bool HandleScrollDrag(bool &scroll_dragging, int &scroll_anchor_y, int &scroll_c
          {
              scroll_dragging = true;
              scroll_anchor_y = mouse_y;
-             ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
+             if(ChartGetInteger(0, CHART_MOUSE_SCROLL))
+                 ChartSetInteger(0, CHART_MOUSE_SCROLL, false);
              return true; 
          }
     }

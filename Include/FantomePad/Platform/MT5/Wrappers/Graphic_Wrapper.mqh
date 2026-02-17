@@ -14,7 +14,6 @@ bool FP_ObjectCreate(long chart_id, string name, int type, int nwin, datetime ti
 //--- Wrapper for ObjectSetInteger
 bool FP_ObjectSetInteger(long chart_id, string name, int prop_id, long value)
 {
-   // Cast prop_id int to ENUM_OBJECT_PROPERTY_INTEGER
    return ObjectSetInteger(chart_id, name, (ENUM_OBJECT_PROPERTY_INTEGER)prop_id, value);
 }
 
