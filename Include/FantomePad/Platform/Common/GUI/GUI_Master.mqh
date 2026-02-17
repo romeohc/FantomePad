@@ -32,6 +32,17 @@ void GUI_OnInit()
    {
       SelectedPositionTicket = (long)GlobalVariableGet("FantomePad_LastSelectedTicket");
       GlobalVariableDel("FantomePad_LastSelectedTicket");
+      
+      // --- RESTORE PARTIAL/BE MODES (UX) ---
+      if(GlobalVariableCheck("FantomePad_LastPartialMode")) {
+          g_PosPartialMode = (int)GlobalVariableGet("FantomePad_LastPartialMode");
+          GlobalVariableDel("FantomePad_LastPartialMode");
+      }
+      if(GlobalVariableCheck("FantomePad_LastBEMode")) {
+          g_PosBE_Active = true;
+          GlobalVariableDel("FantomePad_LastBEMode");
+      }
+
       g_PanelPositions.IsVisible = true;
       
       // --- INSTANT LINES UPDATE (FIXES LATENCY ON SYMBOL CHANGE) ---

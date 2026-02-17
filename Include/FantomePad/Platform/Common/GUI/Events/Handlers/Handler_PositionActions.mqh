@@ -72,6 +72,7 @@ bool Handle_PositionActions_Events(string sparam)
     // --- PARTIAL CLOSE SHORTCUTS ---
    if(sparam == PREFIX + "Pos_Btn_25") 
    {
+      CheckAndSelectFirstPosition(25);
       if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 25) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 25;
@@ -85,6 +86,7 @@ bool Handle_PositionActions_Events(string sparam)
    
    if(sparam == PREFIX + "Pos_Btn_50") 
    {
+      CheckAndSelectFirstPosition(50);
       if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 50) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 50;
@@ -98,6 +100,7 @@ bool Handle_PositionActions_Events(string sparam)
    
    if(sparam == PREFIX + "Pos_Btn_100") 
    {
+      CheckAndSelectFirstPosition(100);
       if(SelectedPositionTicket == -1) return true;
       if(g_PosPartialMode == 100) g_PosPartialMode = 0; // Toggle Off
       else g_PosPartialMode = 100;
@@ -112,6 +115,7 @@ bool Handle_PositionActions_Events(string sparam)
    // --- BE BUTTON LOGIC ---
    if(sparam == PREFIX + "Pos_Btn_BE")
    {
+      CheckAndSelectFirstPosition(0, true);
       if(SelectedPositionTicket != -1 && OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
       {
           FantomeTrade trade;
@@ -216,7 +220,19 @@ bool Handle_PositionActions_Events(string sparam)
                           ChartRedraw();
                           return true;
                       }
-                      if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET)) {}
+                      
+                      // For MT4: Partial Close often creates a new ticket. Find it to maintain selection.
+                      #ifdef __MQL4__
+                      if(!OrderSelect((int)SelectedPositionTicket, SELECT_BY_TICKET) || OrderCloseTime() != 0)
+                      {
+                          long nextTicket = FindMT4SuccessorTicket(SelectedPositionTicket);
+                          if(nextTicket != -1)
+                          {
+                              SelectedPositionTicket = nextTicket;
+                              OrderSelect((int)SelectedPositionTicket, SELECT_BY_TICKET);
+                          }
+                      }
+                      #endif
                   }
                   else ShowPosValidationError(closeRes.Message);
               }

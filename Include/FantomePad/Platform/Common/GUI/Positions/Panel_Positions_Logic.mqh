@@ -5,6 +5,61 @@
 #property strict
 
 //+------------------------------------------------------------------+
+//| HELPER: FIND SUCCESSOR TICKET (MT4 PARTIAL CLOSE)                |
+//+------------------------------------------------------------------+
+long FindMT4SuccessorTicket(long oldTicket)
+{
+    string search = "from #" + IntegerToString((int)oldTicket);
+    for(int i = OrdersTotal() - 1; i >= 0; i--)
+    {
+       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+       {
+          if(StringFind(OrderComment(), search) >= 0)
+             return (long)OrderTicket();
+       }
+    }
+    return -1;
+}
+
+//+------------------------------------------------------------------+
+//| HELPER: SELECT FIRST POSITION IF NONE SELECTED                   |
+//+------------------------------------------------------------------+
+void CheckAndSelectFirstPosition(int targetPartial = 0, bool targetBE = false)
+{
+    if(SelectedPositionTicket != -1) return;
+    
+    for(int i=0; i<OrdersTotal(); i++)
+    {
+       if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+       {
+          int type = OrderType();
+          if(type <= 5) // All trade types (MT4: 0-5, MT5: maps via FantomeTrade)
+          {
+             SelectedPositionTicket = OrderTicket();
+             
+             // Auto-switch chart if needed (same logic as SelectNextPosition)
+             if(OrderSymbol() != Symbol())
+             {
+                GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
+                
+                // Save target modes to persist across symbol switch (Advanced UX)
+                if(targetPartial > 0) GlobalVariableSet("FantomePad_LastPartialMode", (double)targetPartial);
+                if(targetBE) GlobalVariableSet("FantomePad_LastBEMode", 1.0);
+                
+                ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+             }
+             else
+             {
+                UpdateOpenOrderLines();
+                UpdatePositionsValues();
+             }
+             break;
+          }
+       }
+    }
+}
+
+//+------------------------------------------------------------------+
 //| HELPER: VISUAL UPDATE FOR PARTIAL BUTTONS                        |
 //+------------------------------------------------------------------+
 void UpdatePartialButtonsVisuals()
@@ -68,7 +123,7 @@ void UpdatePositionsValues()
          FantomeTrade trade;
          FP_GetTrade(trade);
          
-         if(trade.CloseTime == 0 && trade.Symbol == Symbol())
+         if(trade.CloseTime == 0)
          {
              double lots = trade.Lots;
              double profit = trade.Profit;
@@ -125,8 +180,8 @@ void UpdatePositionsValues()
                  }
                  else
                  {
-                     double tickSize = MarketInfo(Symbol(), MODE_TICKSIZE);
-                     double tickVal  = MarketInfo(Symbol(), MODE_TICKVALUE);
+                     double tickSize = MarketInfo(trade.Symbol, MODE_TICKSIZE);
+                     double tickVal  = MarketInfo(trade.Symbol, MODE_TICKVALUE);
                      if(tickSize > 0)
                      {
                          double dist = MathAbs(open - sl);
@@ -156,21 +211,21 @@ void UpdatePositionsValues()
              
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              
-             if(ticketChanged || MathAbs(sl - g_LastPosSL) > Point)
+             if(ticketChanged || MathAbs(sl - g_LastPosSL) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(sl, Digits));
+                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(sl, trade.TradeDigits));
                  g_LastPosSL = sl;
              }
              
-             if(ticketChanged || MathAbs(tp - g_LastPosTP) > Point)
+             if(ticketChanged || MathAbs(tp - g_LastPosTP) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, DoubleToString(tp, Digits));
+                 ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, DoubleToString(tp, trade.TradeDigits));
                  g_LastPosTP = tp;
              }
              
-             if(ticketChanged || MathAbs(open - g_LastPosEntry) > Point)
+             if(ticketChanged || MathAbs(open - g_LastPosEntry) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, DoubleToString(open, Digits));
+                 ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, DoubleToString(open, trade.TradeDigits));
                  g_LastPosEntry = open;
              }
              
@@ -231,12 +286,12 @@ void UpdatePositionsValues()
              
              bool isModified = false;
              
-             if(MathAbs(userSL - sl) > Point) isModified = true;
-             if(MathAbs(userTP - tp) > Point) isModified = true;
+             if(MathAbs(userSL - sl) > trade.TradePoint) isModified = true;
+             if(MathAbs(userTP - tp) > trade.TradePoint) isModified = true;
              
              if(type > 1) 
              {
-                 if(MathAbs(userEntry - open) > Point) isModified = true;
+                 if(MathAbs(userEntry - open) > trade.TradePoint) isModified = true;
              }
              
              if(userClose > 0.001) isModified = true;
