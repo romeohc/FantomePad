@@ -265,6 +265,7 @@ void CreateSymbolManagerPanel()
        
        CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorBg, BORDER_FLAT);
        ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
+        SetObjVisible("SYM_ScrollTrack", true);
        
        int maxScrollRows = totalRows - visibleRows;
        g_ScrollSymbolManager.ViewportHeight = trackH;
@@ -278,6 +279,7 @@ void CreateSymbolManagerPanel()
        
        CreateRect("SYM_ScrollThumb", scrollX, thumbY, trackW, thumbH, g_ColorText, BORDER_FLAT);
        ObjectSetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_ZORDER, 143);
+        SetObjVisible("SYM_ScrollThumb", true);
    }
    else
    {
