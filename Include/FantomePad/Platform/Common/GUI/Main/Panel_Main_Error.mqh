@@ -33,7 +33,11 @@ void UpdateValidationErrorPosition()
    int panelY = g_PanelMain.Y;
    
    long panelH = ObjectGetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE);
-   if(panelH < 50) panelH = 300;
+   if(panelH < 50) 
+   {
+       // Fallback logic if object not ready yet
+       panelH = (CurrentTypeIndex == 0) ? 300 : 450; 
+   }
    
    int errorX = panelX;
    int errorY = (int)(panelY + panelH + 10);

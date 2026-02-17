@@ -20,6 +20,8 @@
 //+------------------------------------------------------------------+
 void OnEvent_ObjectClick(string sparam)
 {
+    // DEBOUNCE: Prevent double events or click-throughs (e.g. closing error popup -> clicking button behind)
+    if(GetTickCount() - LastClickTime < 200) return;
     // MT5 FIX: Always reset button state to prevent double-toggle/lag bug.
     // On MT5, OBJ_BUTTON toggles OBJPROP_STATE on each click. Without this reset,
     // the state remains "true" (pressed), causing erratic toggle behavior where
