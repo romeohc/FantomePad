@@ -58,6 +58,9 @@ ENUM_LICENSE_STATE g_LicenseState = LICENSE_NONE;
 bool   g_NeedsReinit = false;  // Flag for deferred GUI re-initialization
 uint   g_LastLicenseCheckTime = 0;
 
+int    g_MagicNumber;    // Secure Magic Number (forced > 0)
+int    g_MaxSlippage;    // Secure Max Slippage (forced > 0)
+
 string g_ActivationCode = "";
 string g_AuthErrorMsg    = ""; // Stores the last error from the server
 

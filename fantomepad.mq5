@@ -33,22 +33,27 @@ int OnInit()
       return(INIT_SUCCEEDED); 
    }
 
-   // --- NORMAL ENGINE INIT ---
+   // --- CORE ENGINE INIT ---
    Bridge_InitEngine();
 
-   // Input Validation
-   if(MaxSlippage < 0) Alert("FantomePad Error: MaxSlippage cannot be negative. Using default (10).");
-   if(OneRPercent <= 0) Alert("FantomePad Error: OneRPercent must be greater than 0.");
-   if(MaxRiskPercent > 100.0 || MaxRiskPercent <= 0) Alert("FantomePad Error: MaxRiskPercent must be between 0.1 and 100.");
-   if(MagicNumber <= 0) { Alert("FantomePad Error: MagicNumber must be a positive integer."); return INIT_PARAMETERS_INCORRECT; }
-   if(MagicNumber == 123456 || MagicNumber == 11111 || MagicNumber == 123)
-      Print("FantomePad Warning: Common MagicNumber (" + IntegerToString(MagicNumber) + "). Ensure uniqueness.");
-
+   // 1. Init Globals (Inputs -> Globals)
    InitGlobals();
+
+   // 2. Load Config (File -> Globals override)
    LoadConfig();
 
-   if(g_MaxRiskPercent <= 0) g_MaxRiskPercent = 2.0;
+   // --- GLOBAL STATE SAFETY ENFORCEMENT (SILENT CORRECTION) ---
+   // Fix W3 & W1: One R Percent Safety
+   if(g_OneRPercent <= 0) g_OneRPercent = 2.0; 
+   
+   // Fix W1: Max Risk Percent Safety (Cap at 100%, Floor at 0.1%)
+   if(g_MaxRiskPercent <= 0) g_MaxRiskPercent = 2.0; 
    if(g_MaxRiskPercent > 100.0) g_MaxRiskPercent = 100.0;
+   
+   // Magic Number Check (Print only, no blocking return to avoid freeze)
+   if(MagicNumber <= 0 && !IsTesting())
+       Print("FantomePad Error: MagicNumber is invalid (<=0).");
+   // -----------------------------------------------------------
 
    ChartSetInteger(0, CHART_EVENT_MOUSE_MOVE, true);
    EventSetMillisecondTimer(200);

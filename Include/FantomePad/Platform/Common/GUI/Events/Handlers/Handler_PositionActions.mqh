@@ -32,11 +32,7 @@ TradeResult ExecutePartialClose(FantomeTrade &trade, double pct)
     if(pct >= 99.9) toClose = currentLots;
 
     // Execute
-    int cmd = trade.Type;
-    if(cmd > 1) // Pending
-       return TradeOrchestrator::DeleteOrder(SelectedPositionTicket);
-    else
-       return TradeOrchestrator::ClosePosition(SelectedPositionTicket, toClose, "Partial Close");
+    return TradeOrchestrator::ClosePosition(SelectedPositionTicket, toClose, "Partial Close");
 }
 
 //+------------------------------------------------------------------+
@@ -221,8 +217,7 @@ bool Handle_PositionActions_Events(string sparam)
                           return true;
                       }
                       
-                      // For MT4: Partial Close often creates a new ticket. Find it to maintain selection.
-                      #ifdef __MQL4__
+                      // Maintain Selection: If ticket changed or closed (Partial Close result), find successor
                       if(!OrderSelect((int)SelectedPositionTicket, SELECT_BY_TICKET) || OrderCloseTime() != 0)
                       {
                           long nextTicket = FindMT4SuccessorTicket(SelectedPositionTicket);
@@ -232,7 +227,6 @@ bool Handle_PositionActions_Events(string sparam)
                               OrderSelect((int)SelectedPositionTicket, SELECT_BY_TICKET);
                           }
                       }
-                      #endif
                   }
                   else ShowPosValidationError(closeRes.Message);
               }

@@ -131,11 +131,44 @@ bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dpara
    // 3. EDIT EVENTS
    if(id == CHARTEVENT_OBJECT_ENDEDIT)
    {
-       // Removed Default Risk Handlers
-       
-       if(sparam == PREFIX + "Set_Edit_OneRPercent") {
+       // --- One R Percent Handler ---
+       if(sparam == PREFIX + "Set_Edit_OneRPercent") 
+       {
            double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_OneRPercent", OBJPROP_TEXT));
-           if(r > 0) { g_OneRPercent = r; SaveConfigToFile(); RefreshAllPanels(); }
+           
+           // Silent Correction: Force valid range
+           if(r <= 0) r = 1.0; 
+           
+           // Apply
+           g_OneRPercent = r; 
+           
+           // FORCE REFRESH: Delete object to kill edit session state
+           ObjectDelete(0, PREFIX + "Set_Edit_OneRPercent");
+           
+           SaveConfigToFile(); 
+           RefreshAllPanels(); 
+           ChartRedraw();
+           return true;
+       }
+       
+       // --- Max Risk Percent Handler ---
+       if(sparam == PREFIX + "Set_Edit_MaxRiskPercent") 
+       {
+           double r = StringToDouble(ObjectGetString(0, PREFIX + "Set_Edit_MaxRiskPercent", OBJPROP_TEXT));
+           
+           // Silent Correction: Clamp
+           if(r <= 0)     r = 0.1;
+           if(r > 100.0)  r = 100.0;
+           
+           // Apply
+           g_MaxRiskPercent = r;
+           
+           // FORCE REFRESH: Delete object to kill edit session state
+           ObjectDelete(0, PREFIX + "Set_Edit_MaxRiskPercent");
+           
+           SaveConfigToFile();
+           RefreshAllPanels();
+           ChartRedraw();
            return true;
        }
    }

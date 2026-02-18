@@ -30,9 +30,29 @@ class C_TradeEngineMT5 : public ITradeEngine
 private:
    CTrade            m_trade;       // Standard Library Trade Object
    int               m_slippage;    // Default deviation
+   int               m_maxRetries;  // Max retries for trade operations
+   int               m_retryDelay;  // Delay in ms between retries
+
+   //Helper: Check if error is retryable
+   bool IsRetryableError(uint retcode)
+     {
+      // 10004: TRADE_RETCODE_REQUOTE
+      // 10006: TRADE_RETCODE_REJECT
+      // 10012: TRADE_RETCODE_CONNECTION
+      // 10015: TRADE_RETCODE_TIMEOUT
+      // 10020: TRADE_RETCODE_PRICE_CHANGED
+      // 10021: TRADE_RETCODE_PRICE_OFF
+      // 10024: TRADE_RETCODE_TOO_MANY_REQUESTS
+      // 10028: TRADE_RETCODE_LOCKED
+      if(retcode == 10004 || retcode == 10006 || retcode == 10012 || 
+         retcode == 10015 || retcode == 10020 || retcode == 10021 || 
+         retcode == 10024 || retcode == 10028)
+         return true;
+      return false;
+     }
 
 public:
-                     C_TradeEngineMT5(void) : m_slippage(10) 
+                     C_TradeEngineMT5(void) : m_slippage(1000), m_maxRetries(3), m_retryDelay(100) 
      {
       // Log level can be adjusted
       m_trade.LogLevel(LOG_LEVEL_ERRORS);
@@ -55,21 +75,36 @@ public:
      {
       // Configure Request
       m_trade.SetExpertMagicNumber(magic);
-      m_trade.SetDeviationInPoints(m_slippage);
+      m_trade.SetDeviationInPoints(g_MaxSlippage);
 
       // Execute Type Mapping and Validation
-      // Assumes 'type' matches MT4 OP_BUY/OP_SELL which match MT5 ORDER_TYPE_BUY/SELL
       ENUM_ORDER_TYPE order_type = (ENUM_ORDER_TYPE)type;
+      uint retcode = 0;
 
-      // Executing
-      // We use PositionOpen for explicitly opening a position at market
-      if(!m_trade.PositionOpen(symbol, order_type, lots, price, sl, tp, comment))
+      for(int i = 0; i < m_maxRetries; i++)
         {
-         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "OpenMarket");
+         // 1. Refresh Price (In MT5, SymbolInfoTick is better for fresh Bid/Ask)
+         double sendPrice = price;
+         if(order_type == ORDER_TYPE_BUY) sendPrice = SymbolInfoDouble(symbol, SYMBOL_ASK);
+         else if(order_type == ORDER_TYPE_SELL) sendPrice = SymbolInfoDouble(symbol, SYMBOL_BID);
+
+         // 2. Execute
+         if(m_trade.PositionOpen(symbol, order_type, lots, sendPrice, sl, tp, comment))
+           {
+            return MakeSuccessResult(m_trade.ResultOrder());
+           }
+
+         // 3. Handle Error
+         retcode = m_trade.ResultRetcode();
+         if(IsRetryableError(retcode))
+           {
+            Sleep(m_retryDelay);
+            continue;
+           }
+         else break;
         }
 
-      // Return the Deal Order Ticket (which becomes the Position Ticket in Hedging)
-      return MakeSuccessResult(m_trade.ResultOrder());
+      return TradeErrorHandler::FromMT5RetCode(retcode, "OpenMarket");
      }
 
    //+------------------------------------------------------------------+
@@ -96,13 +131,24 @@ public:
          return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Expiration time in the past");
       }
 
-      // limit_price is 0 for standard pending orders (StopLimit not supported nicely in this unified interface yet)
-      if(!m_trade.OrderOpen(symbol, order_type, lots, 0.0, price, sl, tp, type_time, expiration, comment))
+      uint retcode = 0;
+      for(int i = 0; i < m_maxRetries; i++)
         {
-         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "OpenPending");
+         if(m_trade.OrderOpen(symbol, order_type, lots, 0.0, price, sl, tp, type_time, expiration, comment))
+           {
+            return MakeSuccessResult(m_trade.ResultOrder());
+           }
+
+         retcode = m_trade.ResultRetcode();
+         if(IsRetryableError(retcode))
+           {
+            Sleep(m_retryDelay);
+            continue;
+           }
+         else break;
         }
 
-      return MakeSuccessResult(m_trade.ResultOrder());
+      return TradeErrorHandler::FromMT5RetCode(retcode, "OpenPending");
      }
 
    //+------------------------------------------------------------------+
@@ -112,21 +158,34 @@ public:
                        double sl,
                        double tp)
      {
+      uint retcode = 0;
+
       // Try to modify as Position first (Live Trade)
       if(PositionSelectByTicket(ticket))
-        {
-         if(!m_trade.PositionModify(ticket, sl, tp))
+      {
+         for(int i = 0; i < m_maxRetries; i++)
            {
-            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Modify Position");
+            if(m_trade.PositionModify(ticket, sl, tp))
+              {
+               return MakeSuccessResult(ticket);
+              }
+
+            retcode = m_trade.ResultRetcode();
+            if(IsRetryableError(retcode))
+              {
+               Sleep(m_retryDelay);
+               continue;
+              }
+            else break;
            }
-         return MakeSuccessResult(ticket);
-        }
+         return TradeErrorHandler::FromMT5RetCode(retcode, "Modify Position");
+      }
       
       // If not position, try to modify as Pending Order
       // Check if order exists
       // Note: We use native OrderSelect (1 arg) here because we undefined the macro above!
       if(OrderSelect(ticket)) 
-        {
+      {
          // OrderModify in CTrade wraps OrderSend with REQUEST_MODIFY
          // Note: CTrade::OrderModify requires price, type_time, expiration.
          // We must fetch them to keep them unchanged.
@@ -135,72 +194,146 @@ public:
          datetime expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
          ENUM_ORDER_TYPE_TIME type_time = (ENUM_ORDER_TYPE_TIME)OrderGetInteger(ORDER_TYPE_TIME);
          
-         if(!m_trade.OrderModify(ticket, price, sl, tp, type_time, expiration))
+         for(int i = 0; i < m_maxRetries; i++)
            {
-            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Modify Order");
+            if(m_trade.OrderModify(ticket, price, sl, tp, type_time, expiration))
+              {
+               return MakeSuccessResult(ticket);
+              }
+
+            retcode = m_trade.ResultRetcode();
+            if(IsRetryableError(retcode))
+              {
+               Sleep(m_retryDelay);
+               continue;
+              }
+            else break;
            }
-         return MakeSuccessResult(ticket);
-        }
+         return TradeErrorHandler::FromMT5RetCode(retcode, "Modify Order");
+      }
 
       return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Ticket not found (neither Position nor Order)");
      }
 
    //+------------------------------------------------------------------+
-   //| Close Market Order (Position)                                    |
+   //| Close Market Order (Position) or Pending Order                   |
    //+------------------------------------------------------------------+
    virtual TradeResult Close(long ticket,
                       double lots,
                       string comment)
      {
-      // Check if ticket exists
-      if(!PositionSelectByTicket(ticket))
-        {
-         return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Position not found for close");
-        }
-        
-      double vol = PositionGetDouble(POSITION_VOLUME);
-      
-      if(lots < vol - 0.000001) // Partial close
+      // Try to select as Position first
+      if(PositionSelectByTicket(ticket))
       {
-         // Fix: Proper initialization of MqlTradeRequest to avoid 'cannot convert 0 to enum' error
-         MqlTradeRequest request;
-         ZeroMemory(request);
+         double vol = PositionGetDouble(POSITION_VOLUME);
+         uint retcode = 0;
          
-         MqlTradeResult  result;
-         ZeroMemory(result);
-         
-         request.action = TRADE_ACTION_DEAL;
-         request.position = ticket;
-         request.symbol = PositionGetString(POSITION_SYMBOL);
-         request.volume = lots;
-         request.deviation = m_slippage;
-         request.magic = m_trade.RequestMagic();
-         
-         // OPPOSITE TYPE
-         long type = PositionGetInteger(POSITION_TYPE);
-         if(type == POSITION_TYPE_BUY) request.type = ORDER_TYPE_SELL;
-         else                          request.type = ORDER_TYPE_BUY;
-         
-         // PRICE
-         // We need current Bid/Ask
-         if(request.type == ORDER_TYPE_BUY) request.price = SymbolInfoDouble(request.symbol, SYMBOL_ASK);
-         else                               request.price = SymbolInfoDouble(request.symbol, SYMBOL_BID);
-         
-         if(!OrderSend(request, result))
+         if(lots < vol - 0.000001) // Partial close
          {
-             return TradeErrorHandler::FromMT5RetCode(result.retcode, "Partial Close");
+            MqlTradeRequest request;
+            MqlTradeResult  result;
+            
+            for(int i = 0; i < m_maxRetries; i++)
+            {
+               ZeroMemory(request);
+               ZeroMemory(result);
+               
+               request.action = TRADE_ACTION_DEAL;
+               request.position = ticket;
+               request.symbol = PositionGetString(POSITION_SYMBOL);
+               request.volume = lots;
+               request.deviation = g_MaxSlippage;
+               request.magic = m_trade.RequestMagic();
+               request.comment = comment; // Pass the comment
+               
+               long type = PositionGetInteger(POSITION_TYPE);
+               if(type == POSITION_TYPE_BUY) request.type = ORDER_TYPE_SELL;
+               else                          request.type = ORDER_TYPE_BUY;
+               
+               if(request.type == ORDER_TYPE_BUY) request.price = SymbolInfoDouble(request.symbol, SYMBOL_ASK);
+               else                               request.price = SymbolInfoDouble(request.symbol, SYMBOL_BID);
+               
+               if(OrderSend(request, result))
+               {
+                  return MakeSuccessResult(result.order);
+               }
+
+               retcode = result.retcode;
+               if(IsRetryableError(retcode))
+               {
+                  Sleep(m_retryDelay);
+                  continue;
+               }
+               else break;
+            }
+            return TradeErrorHandler::FromMT5RetCode(retcode, "Partial Close");
          }
-         return MakeSuccessResult(result.order);
+         else
+         {
+            // Full close
+            for(int i = 0; i < m_maxRetries; i++)
+            {
+               if(m_trade.PositionClose(ticket, g_MaxSlippage))
+               {
+                  return MakeSuccessResult(ticket);
+               }
+
+               retcode = m_trade.ResultRetcode();
+               if(IsRetryableError(retcode))
+               {
+                  Sleep(m_retryDelay);
+                  continue;
+               }
+               else break;
+            }
+            return TradeErrorHandler::FromMT5RetCode(retcode, "Close");
+         }
       }
-      else
+      // If not position, try to select as Pending Order
+      else if(OrderSelect(ticket))
       {
-         // Full close
-         if(!m_trade.PositionClose(ticket, m_slippage))
-           {
-            return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Close");
-           }
-         return MakeSuccessResult(ticket);
+         double currentLots = OrderGetDouble(ORDER_VOLUME_INITIAL);
+         if(lots >= currentLots - 0.00001) 
+         {
+            return Delete(ticket); // Full close = Delete
+         }
+         
+         // Simulation of Partial Close for Pending
+         double remainLots = currentLots - lots;
+         double price = OrderGetDouble(ORDER_PRICE_OPEN);
+         double sl = OrderGetDouble(ORDER_SL);
+         double tp = OrderGetDouble(ORDER_TP);
+         int magic = (int)OrderGetInteger(ORDER_MAGIC);
+         datetime exp = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+         string sym = OrderGetString(ORDER_SYMBOL);
+         int pType = (int)OrderGetInteger(ORDER_TYPE);
+         
+         // 1. Delete
+         TradeResult delRes = Delete(ticket);
+         if(!delRes.Success) return delRes;
+         
+         
+         // --- ROBUST TAGGING for Original Lots ---
+         string baseComment = OrderGetString(ORDER_COMMENT);
+         string tag = "";
+         int tagPos = StringFind(baseComment, "Org:");
+         if(tagPos >= 0)
+         {
+             string sub = StringSubstr(baseComment, tagPos + 4);
+             double val = StringToDouble(sub);
+             tag = "Org:" + DoubleToString(val, 2); 
+         }
+         else
+         {
+             tag = "Org:" + DoubleToString(currentLots, 2);
+         }
+         
+         // 2. Re-Open with reduced lots
+         string newComment = tag + " from #" + IntegerToString((int)ticket);
+         return OpenPending(sym, pType, remainLots, price, sl, tp, newComment, magic, exp);
       }
+      
+      return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Ticket not found for close");
      }
 
    //+------------------------------------------------------------------+
@@ -208,11 +341,24 @@ public:
    //+------------------------------------------------------------------+
    virtual TradeResult Delete(long ticket)
      {
-      if(!m_trade.OrderDelete(ticket))
+      uint retcode = 0;
+      for(int i = 0; i < m_maxRetries; i++)
         {
-         return TradeErrorHandler::FromMT5RetCode(m_trade.ResultRetcode(), "Delete");
+         if(m_trade.OrderDelete(ticket))
+           {
+            return MakeSuccessResult(ticket);
+           }
+
+         retcode = m_trade.ResultRetcode();
+         if(IsRetryableError(retcode))
+           {
+            Sleep(m_retryDelay);
+            continue;
+           }
+         else break;
         }
-      return MakeSuccessResult(ticket);
+
+      return TradeErrorHandler::FromMT5RetCode(retcode, "Delete");
      }
   };
 

@@ -37,7 +37,7 @@ private:
      }
 
 public:
-                     C_TradeEngineMT4(void) : m_slippage(10), m_maxRetries(3), m_retryDelay(100) {};
+                     C_TradeEngineMT4(void) : m_slippage(1000), m_maxRetries(3), m_retryDelay(100) {};
                     ~C_TradeEngineMT4(void) {};
 
    //+------------------------------------------------------------------+
@@ -86,7 +86,7 @@ public:
          double normTP = NormalizeDouble(tp, digits);
 
          // 3. Execute
-         ticket = OrderSend(symbol, type, lots, sendPrice, m_slippage, normSL, normTP, comment, magic, 0, arrow_color);
+         ticket = OrderSend(symbol, type, lots, sendPrice, GetSlippagePoints(g_MaxSlippage), normSL, normTP, comment, magic, 0, arrow_color);
 
          if(ticket > 0)
            {
@@ -146,7 +146,7 @@ public:
          double normSL = NormalizeDouble(sl, digits);
          double normTP = NormalizeDouble(tp, digits);
 
-         ticket = OrderSend(symbol, type, lots, normPrice, m_slippage, normSL, normTP, comment, magic, expiration, arrow_color);
+         ticket = OrderSend(symbol, type, lots, normPrice, GetSlippagePoints(g_MaxSlippage), normSL, normTP, comment, magic, expiration, arrow_color);
 
          if(ticket > 0)
            {
@@ -266,20 +266,97 @@ public:
          int type = OrderType();
          double closePrice = 0.0;
 
-         if(type == OP_BUY) closePrice = MarketInfo(symbol, MODE_BID);
-         else if(type == OP_SELL) closePrice = MarketInfo(symbol, MODE_ASK);
-         else 
-           {
-             return MakeErrorResult(0, TRADE_ERR_VALIDATION, "Cannot Close pending order");
-           }
+         // Handle Pending Orders vs Market Positions
+         if(type <= OP_SELL) // Market
+         {
+             if(type == OP_BUY) closePrice = MarketInfo(symbol, MODE_BID);
+             else               closePrice = MarketInfo(symbol, MODE_ASK);
+             
+             int digits = (int)MarketInfo(symbol, MODE_DIGITS);
+             closePrice = NormalizeDouble(closePrice, digits);
+             color arrow_color = (type == OP_BUY) ? clrRed : clrBlue;
 
-         int digits = (int)MarketInfo(symbol, MODE_DIGITS);
-         closePrice = NormalizeDouble(closePrice, digits);
-         color arrow_color = (type == OP_BUY) ? clrRed : clrBlue;
-
-         bool res = OrderClose(tkt, lots, closePrice, m_slippage, arrow_color);
-         
-         if(res) return MakeSuccessResult(ticket, "Order Closed");
+             // --- ROBUST TAGGING for Original Lots (MT4 Market) ---
+             // Since we cannot change comments on live orders, we use GlobalVariables as a "Tag" system.
+             // Protocol: When closing ticket T1, we store "FP_ORIG_LOTS_{T1}" = OriginalLots.
+             // When the partial close happens, the new ticket T2 will be created.
+             // We need to pass the " Soul" of T1 to T2.
+             // But we don't know T2 yet.
+             // HOWEVER, the new order will likely have comment "from #T1".
+             
+             // 1. Ensure we have the original lots recorded for THIS ticket
+             double origLots = GetOriginalLotSize(tkt);
+             if(origLots <= 0) origLots = OrderLots();
+             
+             // Store it in a Global Variable with a unique key based on the ticket
+             string gvarName = "FP_ORG_" + IntegerToString(tkt);
+             GlobalVariableSet(gvarName, origLots);
+             
+             // Also, since MT4's "from #ticket" comment is automatic on partial close,
+             // our GetOriginalLotSize function needs to check GlobalVariables too!
+             // (We will update TradeCalc.mqh next)
+             
+             bool res = OrderClose(tkt, lots, closePrice, GetSlippagePoints(g_MaxSlippage), arrow_color);
+             if(res) return MakeSuccessResult(ticket, "Order Closed");
+         }
+         else // Pending
+         {
+             double currentLots = OrderLots();
+             if(lots >= currentLots - 0.001) 
+             {
+                return Delete(ticket); // Full close = Delete
+             }
+             
+             // Simulation of Partial Close for Pending
+             double remainLots = currentLots - lots;
+             double price = OrderOpenPrice();
+             double sl = OrderStopLoss();
+             double tp = OrderTakeProfit();
+             int magic = OrderMagicNumber();
+             datetime exp = OrderExpiration();
+             string sym = OrderSymbol();
+             int pType = OrderType();
+             
+             // Extract optional user comment parts (if any)
+             // Extract optional user comment parts (if any)
+             string baseComment = OrderComment();
+             
+             // --- ROBUST TAGGING for Original Lots ---
+             string tag = "";
+             int tagPos = StringFind(baseComment, "Org:");
+             if(tagPos >= 0)
+             {
+                 // Preserve existing tag
+                 // Simple parse: extract until end or space
+                 string sub = StringSubstr(baseComment, tagPos + 4);
+                 double val = StringToDouble(sub);
+                 tag = "Org:" + DoubleToString(val, 2); 
+             }
+             else
+             {
+                 // Create new tag from current total
+                 tag = "Org:" + DoubleToString(currentLots, 2);
+             }
+             
+             // Combine tag with trace info
+             string newComment = tag + " from #" + IntegerToString((int)ticket);
+             
+             // 1. Delete
+             if(!OrderDelete(tkt, clrNONE))
+             {
+                err = GetLastError();
+                if(IsRetryableError(err)) { Sleep(m_retryDelay); continue; }
+                break;
+             }
+             
+             // 2. Re-Open with reduced lots
+             TradeResult openRes = OpenPending(sym, pType, remainLots, price, sl, tp, newComment, magic, exp);
+             if(openRes.Success)
+             {
+                return MakeSuccessResult(openRes.Ticket, "Pending Order Partially Closed (Simulated)");
+             }
+             return openRes; // Return error from OpenPending
+         }
          
          err = GetLastError();
          if(IsRetryableError(err))

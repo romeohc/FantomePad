@@ -174,6 +174,28 @@ void CreatePositionsPanel()
 {
    int width = 280; 
    
+   // --- PRE-FETCH DATA FOR UI INIT (Fixes 'Ghost 0' Bug) ---
+   string initEntry = "0";
+   string initSL    = "0";
+   string initTP    = "0";
+   
+   if(SelectedPositionTicket != -1)
+   {
+      if(OrderSelect(SelectedPositionTicket, SELECT_BY_TICKET))
+      {
+         int digits = (int)MarketInfo(OrderSymbol(), MODE_DIGITS);
+         initEntry  = DoubleToString(OrderOpenPrice(), digits);
+         initSL     = DoubleToString(OrderStopLoss(), digits);
+         initTP     = DoubleToString(OrderTakeProfit(), digits);
+         
+         // Sync trackers immediately so UpdatePositionsValues doesn't think they changed
+         g_LastPosEntry = OrderOpenPrice();
+         g_LastPosSL    = OrderStopLoss();
+         g_LastPosTP    = OrderTakeProfit();
+         g_LastPosTicket = SelectedPositionTicket;
+      }
+   }
+   
    // 1. Fond
    CreateRect("Pos_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
    ObjectSetInteger(0, PREFIX + "Pos_Bg", OBJPROP_ZORDER, 0);
@@ -215,21 +237,21 @@ void CreatePositionsPanel()
    if(ObjectFind(0, PREFIX + "Pos_Val_Risk") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_Risk");
    if(ObjectFind(0, PREFIX + "Pos_Val_RiskMoney") >= 0) ObjectDelete(0, PREFIX + "Pos_Val_RiskMoney");
    
-   // 4. Entry Price
+   // 4. Entry Price (Use initEntry)
    CreateLabel("Pos_Lbl_Entry", "Entry Price", 0, 0, 8, g_ColorText, "Trebuchet MS");
-   CreateEdit("Pos_Edit_Entry", "0", 0, 0, width - 40, 28);
+   CreateEdit("Pos_Edit_Entry", initEntry, 0, 0, width - 40, 28);
  
-   // 5. Protection (SL & BE)
+   // 5. Protection (SL & BE) (Use initSL)
    CreateLabel("Pos_Lbl_SL", "Stop loss", 0, 0, 8, g_ColorText, "Trebuchet MS");
-   CreateEdit("Pos_Edit_SL", "0", 0, 0, 80, 28);
+   CreateEdit("Pos_Edit_SL", initSL, 0, 0, 80, 28);
    
    CreateButton("Pos_Btn_BE", "BE", 0, 0, 35, 28, g_ColorInput, g_ColorText);
    ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONTSIZE, 8); 
    ObjectSetString(0, PREFIX + "Pos_Btn_BE", OBJPROP_FONT, "Trebuchet MS Bold");
  
-   // 5. TP (Below)
+   // 5. TP (Below) (Use initTP)
    CreateLabel("Pos_Lbl_TP", "Take profit", 0, 0, 8, g_ColorText, "Trebuchet MS");
-   CreateEdit("Pos_Edit_TP", "0", 0, 0, 80, 28);
+   CreateEdit("Pos_Edit_TP", initTP, 0, 0, 80, 28);
    
    // 6. Close Section
    CreateLabel("Pos_Lbl_Close", "Partial Close", 0, 0, 8, g_ColorText, "Trebuchet MS");

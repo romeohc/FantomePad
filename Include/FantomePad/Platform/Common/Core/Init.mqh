@@ -97,6 +97,14 @@ void InitGlobals()
    g_HistoryCustomStart = TimeCurrent() - 7 * 24 * 3600;
    g_HistoryCustomEnd = TimeCurrent() + 24 * 3600;
    
+   // --- SILENT SAFETY CORRECTIONS ---
+   // Force MagicNumber to a safe default if user left it at 0 or negative
+   g_MagicNumber = (MagicNumber <= 0) ? 123456 : MagicNumber;
+   
+   // Force MaxSlippage to a safe default (1000 points) if user put <= 0 (e.g. 0 or negative)
+   // This ensures execution even in high volatility if user ignored the setting.
+   g_MaxSlippage = (MaxSlippage <= 0) ? 1000 : MaxSlippage;
+   
    // Init Color Palette
    color Defaults[] = {
       // Darks

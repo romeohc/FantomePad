@@ -93,7 +93,7 @@ bool Handle_Trading_Events(string sparam)
       req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
       req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
       req.Comment = "FantomePad";
-      req.Magic = MagicNumber; // Assumes MagicNumber is global
+      req.Magic = g_MagicNumber; // Core Identity
       req.Expiration = 0;
       req.RiskPercent = GetRiskPercentage(risk);
       
@@ -144,7 +144,7 @@ bool Handle_Trading_Events(string sparam)
       req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
       req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
       req.Comment = "FantomePad";
-      req.Magic = MagicNumber;
+      req.Magic = g_MagicNumber;
       req.Expiration = 0;
       req.RiskPercent = GetRiskPercentage(risk);
 
@@ -204,7 +204,7 @@ bool Handle_Trading_Events(string sparam)
          req.TP = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT));
          req.Lots = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Lot", OBJPROP_TEXT));
          req.Comment = "FantomePad";
-         req.Magic = MagicNumber; // Global
+         req.Magic = g_MagicNumber; // Global
          req.Expiration = 0;
          req.RiskPercent = GetRiskPercentage(risk);
          

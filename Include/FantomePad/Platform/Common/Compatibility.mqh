@@ -122,6 +122,7 @@
    // Selection state tracking (MUST be declared before functions that use them)
    static bool g_fp_is_position = false;
    static bool g_fp_is_history  = false;
+   static bool g_fp_is_hist_order = false;
    static ulong g_fp_selected_ticket = 0;
    static bool g_fp_history_loaded = false;
 
@@ -158,6 +159,7 @@
    {
       g_fp_is_position = false;
       g_fp_is_history = false;
+      g_fp_is_hist_order = false;
       g_fp_selected_ticket = 0;
 
       if(pool == MODE_TRADES)
@@ -229,6 +231,14 @@
             if(HistoryDealSelect((ulong)index))
             {
                g_fp_is_history = true;
+               g_fp_is_hist_order = false;
+               g_fp_selected_ticket = (ulong)index;
+               return true;
+            }
+            if(HistoryOrderSelect((ulong)index))
+            {
+               g_fp_is_history = true;
+               g_fp_is_hist_order = true;
                g_fp_selected_ticket = (ulong)index;
                return true;
             }
@@ -245,13 +255,18 @@
    // --- ORDER PROPERTIES MAPPING ---
    double FP_OrderOpenPrice() 
    { 
-      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PRICE);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return HistoryOrderGetDouble(g_fp_selected_ticket, ORDER_PRICE_OPEN);
+         return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PRICE);
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_PRICE_OPEN) : OrderGetDouble(ORDER_PRICE_OPEN); 
    }
    double FP_OrderStopLoss()  
    { 
       if(g_fp_is_history)
       {
+         if(g_fp_is_hist_order) return HistoryOrderGetDouble(g_fp_selected_ticket, ORDER_SL);
          ulong ord_ticket = (ulong)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ORDER);
          if(HistoryOrderSelect(ord_ticket)) return HistoryOrderGetDouble(ord_ticket, ORDER_SL);
          return 0;
@@ -262,6 +277,7 @@
    { 
       if(g_fp_is_history)
       {
+         if(g_fp_is_hist_order) return HistoryOrderGetDouble(g_fp_selected_ticket, ORDER_TP);
          ulong ord_ticket = (ulong)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ORDER);
          if(HistoryOrderSelect(ord_ticket)) return HistoryOrderGetDouble(ord_ticket, ORDER_TP);
          return 0;
@@ -270,7 +286,11 @@
    }
    double FP_OrderLots()      
    { 
-      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_VOLUME);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return HistoryOrderGetDouble(g_fp_selected_ticket, ORDER_VOLUME_INITIAL);
+         return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_VOLUME);
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_VOLUME) : OrderGetDouble(ORDER_VOLUME_INITIAL); 
    }
    long   FP_OrderTicket()    
@@ -279,13 +299,21 @@
    }
    string FP_OrderSymbol()    
    { 
-      if(g_fp_is_history) return HistoryDealGetString(g_fp_selected_ticket, DEAL_SYMBOL);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return HistoryOrderGetString(g_fp_selected_ticket, ORDER_SYMBOL);
+         return HistoryDealGetString(g_fp_selected_ticket, DEAL_SYMBOL);
+      }
       return g_fp_is_position ? PositionGetString(POSITION_SYMBOL) : OrderGetString(ORDER_SYMBOL); 
    }
    int    FP_OrderType()      
    { 
       if(g_fp_is_history)
       {
+         if(g_fp_is_hist_order)
+         {
+            return (int)HistoryOrderGetInteger(g_fp_selected_ticket, ORDER_TYPE);
+         }
          long type = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TYPE);
          if(type == DEAL_TYPE_BUY) return OP_BUY;
          if(type == DEAL_TYPE_SELL) return OP_SELL;
@@ -301,28 +329,48 @@
    }
    double FP_OrderProfit()    
    { 
-      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PROFIT);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return 0;
+         return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_PROFIT);
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_PROFIT) : 0; 
    }
    double FP_OrderSwap()      
    { 
-      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_SWAP);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return 0;
+         return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_SWAP);
+      }
       return g_fp_is_position ? PositionGetDouble(POSITION_SWAP) : 0; 
    }
    string FP_OrderComment()   
    { 
-      if(g_fp_is_history) return HistoryDealGetString(g_fp_selected_ticket, DEAL_COMMENT);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return HistoryOrderGetString(g_fp_selected_ticket, ORDER_COMMENT);
+         return HistoryDealGetString(g_fp_selected_ticket, DEAL_COMMENT);
+      }
       return g_fp_is_position ? PositionGetString(POSITION_COMMENT) : OrderGetString(ORDER_COMMENT); 
    }
    double FP_OrderCommission() 
    { 
-      if(g_fp_is_history) return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_COMMISSION);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return 0;
+         return HistoryDealGetDouble(g_fp_selected_ticket, DEAL_COMMISSION);
+      }
       return 0.0; 
    }
    
    datetime FP_OrderOpenTime()
    { 
-      if(g_fp_is_history) return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return (datetime)HistoryOrderGetInteger(g_fp_selected_ticket, ORDER_TIME_SETUP);
+         return (datetime)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_TIME);
+      }
       return (datetime)(g_fp_is_position ? PositionGetInteger(POSITION_TIME) : OrderGetInteger(ORDER_TIME_SETUP)); 
    }
    
@@ -330,6 +378,11 @@
    { 
       if(g_fp_is_history)
       {
+         if(g_fp_is_hist_order) 
+         {
+            // For historical orders, setups an "expiration" or "done" time as close time if it was canceled/deleted
+            return (datetime)HistoryOrderGetInteger(g_fp_selected_ticket, ORDER_TIME_DONE);
+         }
          long entry = HistoryDealGetInteger(g_fp_selected_ticket, DEAL_ENTRY);
          // Only return time for OUT or IN/OUT deals (closings)
          if(entry == DEAL_ENTRY_OUT || entry == DEAL_ENTRY_INOUT)
@@ -341,7 +394,11 @@
 
    int FP_OrderMagic()
    {
-      if(g_fp_is_history) return (int)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_MAGIC);
+      if(g_fp_is_history) 
+      {
+         if(g_fp_is_hist_order) return (int)HistoryOrderGetInteger(g_fp_selected_ticket, ORDER_MAGIC);
+         return (int)HistoryDealGetInteger(g_fp_selected_ticket, DEAL_MAGIC);
+      }
       return (int)(g_fp_is_position ? PositionGetInteger(POSITION_MAGIC) : OrderGetInteger(ORDER_MAGIC));
    }
 

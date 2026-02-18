@@ -10,15 +10,40 @@
 long FindMT4SuccessorTicket(long oldTicket)
 {
     string search = "from #" + IntegerToString((int)oldTicket);
+    long successor = -1;
+    
     for(int i = OrdersTotal() - 1; i >= 0; i--)
     {
        if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
        {
           if(StringFind(OrderComment(), search) >= 0)
-             return (long)OrderTicket();
+          {
+             successor = (long)OrderTicket();
+             break;
+          }
        }
     }
-    return -1;
+    
+    // --- TRANSFER GLOBAL VARIABLE TAG ---
+    // If we found a successor, we must ensure the "Tag" is transferred/created for the NEW ticket
+    // because the old GlobalVariable was for the old ticket.
+    if(successor != -1)
+    {
+       string oldGvar = "FP_ORG_" + IntegerToString((int)oldTicket);
+       if(GlobalVariableCheck(oldGvar))
+       {
+          double origLots = GlobalVariableGet(oldGvar);
+          
+          // Create new GVar for new ticket
+          string newGvar = "FP_ORG_" + IntegerToString((int)successor);
+          GlobalVariableSet(newGvar, origLots);
+          
+          // Clean up old GVar to keep the registry clean
+          GlobalVariableDel(oldGvar);
+       }
+    }
+    
+    return successor;
 }
 
 //+------------------------------------------------------------------+
@@ -113,6 +138,9 @@ void UpdatePositionsValues()
    if(!wasVisible)
    {
       g_LastPosTicket = -1;
+      g_LastPosSL = -1;
+      g_LastPosTP = -1;
+      g_LastPosEntry = -1;
       wasVisible = true;
    }
    

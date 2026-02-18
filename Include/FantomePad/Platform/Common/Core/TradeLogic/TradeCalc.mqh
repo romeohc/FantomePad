@@ -102,9 +102,10 @@ double CalculateLotSize(string symbol, double entryPrice, double slPrice, double
 
 int GetSlippagePoints(int slippagePips)
 {
+   int safeSlippage = MathAbs(slippagePips);
    int digits = (int)MarketInfo(Symbol(), MODE_DIGITS);
-   if(digits == 3 || digits == 5) return slippagePips * 10;
-   return slippagePips;
+   if(digits == 3 || digits == 5) return safeSlippage * 10;
+   return safeSlippage;
 }
 
 
@@ -115,20 +116,92 @@ double GetOriginalLotSize(long ticket)
 {
    if(!OrderSelect(ticket, SELECT_BY_TICKET)) return 0.0;
    
-   double totalLots = OrderLots();
+   double currentLots = OrderLots();
    string comment = OrderComment();
    
-   // Loop back through history to find parents
+   // --- METHOD 1: CHECK FOR EXPLICIT "Org:TAG" (Priority 1) ---
+   // This solves the Pending Order "Inflation" bug by avoiding history math entirely.
+   int tagPos = StringFind(comment, "Org:");
+   if(tagPos >= 0)
+   {
+      string subTag = StringSubstr(comment, tagPos + 4);
+      double taggedLots = StringToDouble(subTag);
+      if(taggedLots > 0) return taggedLots;
+   }
+   
+   // --- METHOD 2: CHECK FOR GLOBAL VARIABLE TAG (MT4 Market Fallback) ---
+   // Used when comments cannot be modified (Live Market Orders on MT4).
+   string gvarName = "FP_ORG_" + IntegerToString((int)ticket);
+   if(GlobalVariableCheck(gvarName))
+   {
+      double gvarLots = GlobalVariableGet(gvarName);
+      if(gvarLots > 0) return gvarLots;
+   }
+   
+   // --- METHOD 3: MT5 NATIVE POSITION HISTORY (Priority 3) ---
+   // Only for Market Orders (Positions Identifier) on MT5
+   #ifdef __MQL5__
+      if(OrderType() <= 1) // OP_BUY or OP_SELL
+      {
+         long posID = (long)PositionGetInteger(POSITION_IDENTIFIER);
+         if(posID > 0)
+         {
+            if(HistorySelectByPosition(posID))
+            {
+               int deals = HistoryDealsTotal();
+               // Iterate to find the very first DEAL_ENTRY_IN
+               for(int i = 0; i < deals; i++)
+               {
+                  ulong dealTicket = HistoryDealGetTicket(i);
+                  if(dealTicket > 0)
+                  {
+                     long entry = HistoryDealGetInteger(dealTicket, DEAL_ENTRY);
+                     if(entry == DEAL_ENTRY_IN)
+                     {
+                        // Found original entry
+                        return HistoryDealGetDouble(dealTicket, DEAL_VOLUME);
+                     }
+                  }
+               }
+            }
+         }
+      }
+   #endif
+
+   // --- METHOD 3: MT4 MARKET ORDER TRACE (Fallback) ---
+   // For legacy MT4 Market orders where tickets change and "from #" is used.
+   // We only use this if NO tag was found.
+   
+   double totalLots = currentLots;
    int safety = 0;
+   
    while(StringFind(comment, "from #") >= 0 && safety < 50)
    {
       int pos = StringFind(comment, "from #");
+      // Extract ticket number carefully
       string sub = StringSubstr(comment, pos + 6);
+      
+      // Stop at next space or non-digit (in case comment continues)
+      int endPos = -1;
+      int subLen = StringLen(sub);
+      for(int k=0; k<subLen; k++) {
+         #ifdef __MQL5__
+            ushort charCode = StringGetCharacter(sub, k);
+         #else
+            int charCode = StringGetChar(sub, k);
+         #endif
+         if(charCode < '0' || charCode > '9') { endPos = k; break; }
+      }
+      if(endPos != -1) sub = StringSubstr(sub, 0, endPos);
+      
       long prevTicket = StringToInteger(sub);
       
       if(OrderSelect(prevTicket, SELECT_BY_TICKET, MODE_HISTORY))
       {
-         totalLots += OrderLots(); // Add the closed amount
+         // CRITICAL CORRECTION:
+         // In MT4, the history order represents the CLOSED part.
+         // We add it to our running total.
+         totalLots += OrderLots(); 
          comment = OrderComment();
       }
       else break;

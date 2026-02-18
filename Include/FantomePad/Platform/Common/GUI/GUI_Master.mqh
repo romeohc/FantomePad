@@ -28,9 +28,29 @@
 //+------------------------------------------------------------------+
 void GUI_OnInit()
 {
-   if(GlobalVariableCheck("FantomePad_LastSelectedTicket"))
+   string gvName = "FantomePad_Selected_" + IntegerToString(ChartID());
+   if(GlobalVariableCheck("FantomePad_LastSelectedTicket") || GlobalVariableCheck(gvName + "_Flag"))
    {
-      SelectedPositionTicket = (long)GlobalVariableGet("FantomePad_LastSelectedTicket");
+
+      
+      // Check for the new robust format first
+      if(GlobalVariableCheck(gvName + "_Flag"))
+      {
+         long hi = (long)GlobalVariableGet(gvName + "_Hi");
+         long lo = (long)GlobalVariableGet(gvName + "_Lo");
+         
+         SelectedPositionTicket = (hi << 32) | (lo & 0xFFFFFFFF);
+         
+         GlobalVariableDel(gvName + "_Hi");
+         GlobalVariableDel(gvName + "_Lo");
+         GlobalVariableDel(gvName + "_Flag");
+      }
+      else
+      {
+         // Fallback for legacy/simple format (should not be reached with new saver, but good for safety)
+         SelectedPositionTicket = (long)GlobalVariableGet("FantomePad_LastSelectedTicket");
+      }
+      
       GlobalVariableDel("FantomePad_LastSelectedTicket");
       
       // --- RESTORE PARTIAL/BE MODES (UX) ---

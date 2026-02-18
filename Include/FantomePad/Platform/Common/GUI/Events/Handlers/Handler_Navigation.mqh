@@ -119,7 +119,16 @@ bool Handle_Navigation_Events(string sparam)
           if(symbol != "" && symbol != Symbol())
           {
              // Save ticket to global variable so it persists after EA reload
-             GlobalVariableSet("FantomePad_LastSelectedTicket", (double)ticket);
+             // Save ticket to global variable (Splitting 64-bit long into 2 doubles to avoid precision loss on large tickets)
+             // Also using ChartID to prevent conflicts between multiple charts
+             string gvName = "FantomePad_Selected_" + IntegerToString(ChartID());
+             
+             uint lo = (uint)(ticket & 0xFFFFFFFF);
+             uint hi = (uint)(ticket >> 32);
+             
+             GlobalVariableSet(gvName + "_Hi", (double)hi);
+             GlobalVariableSet(gvName + "_Lo", (double)lo);
+             GlobalVariableSet(gvName + "_Flag", 1.0); // Flag to indicate valid save
              ChartSetSymbolPeriod(0, symbol, Period());
              // Note: Changing symbol triggers EA reload
           }
