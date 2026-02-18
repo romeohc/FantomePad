@@ -30,6 +30,21 @@ After this audit passes with no CRITICAL findings, we can guarantee:
 
 ## How to use it
 
+### PHASE 0 — BACKEND INTROSPECTION (Supabase)
+
+Before starting the file analysis, perform a **read-only** reconnaissance of the Supabase backend to inform the audit:
+
+1.  **Check Security Advisors**: Run `get_advisors(type='security')` to identify flagged vulnerabilities in the database.
+2.  **Verify RLS**: Run a **SELECT-only** query to check Row Level Security on the `Licence` table:
+    ```sql
+    SELECT tablename, policyname, roles, cmd, qual 
+    FROM pg_policies 
+    WHERE tablename = 'Licence';
+    ```
+3.  **Schema Check**: Run `list_tables` and use `execute_sql` (SELECT only) to understand the `Licence` table structure (constraints, indices).
+
+---
+
 ### PHASE 1 — FILE COLLECTION (Mandatory Reading List)
 
 Read **ALL** of these files in full before starting any analysis.
@@ -84,10 +99,10 @@ Verdicts: ✅ **PASS**, ❌ **FAIL (CRITICAL)**, ⚠️ **WARN**
 
 | # | Check | What to verify |
 |---|-------|----------------|
-| C1 | **XOR key exposure** | Is `XOR_KEY = "FPad2026Sec"` hardcoded in source? Is this acceptable for obfuscation (not encryption)? |
+| C1 | **XOR Key Scope** | Is the key used only for local config/cert obfuscation? If yes, a hardcoded key is **ACCEPTABLE**. Do NOT flag as a warning unless the key is used for actual server-side encryption secrets. |
 | C2 | **Encode/Decode symmetry** | Does `DecodeString(EncodeString(x)) == x` for all inputs? |
 | C3 | **Legacy compatibility** | Does `DecodeString()` handle plain-text (non-hex) input from old config files? |
-| C4 | **Purpose clarity** | Is XOR used ONLY for local config obfuscation (not for security-critical operations)? |
+| C4 | **XOR Logic** | Ensure XOR is not used for data integrity (signing). It is for curiosity-protection only. |
 
 #### Block D — Soft-Lock Mode (`SoftLock.mqh`)
 
@@ -116,11 +131,11 @@ Verdicts: ✅ **PASS**, ❌ **FAIL (CRITICAL)**, ⚠️ **WARN**
 
 | # | Check | What to verify |
 |---|-------|----------------|
-| F1 | **Licence table RLS** | Are Row-Level Security policies active? Can a user read/modify licenses of other users? |
-| F2 | **Edge function validation** | Does `verify-license` validate all 3 keys (code, session_id, secret_token)? |
-| F3 | **Rate limiting** | Is there protection against brute-force license code attempts? |
+| F1 | **Licence table RLS** | **ACTION: Run SQL SELECT on `pg_policies`.** Are policies active? Can a user read/modify licenses of other users? |
+| F2 | **Edge function validation** | Does `verify-license` validate all 3 keys (code, session_id, secret_token)? (Use `list_edge_functions` to verify existence). |
+| F3 | **Database Advisors** | **ACTION: Use `get_advisors`.** Are there any performance or security issues flagged for the license tables? |
 | F4 | **Token rotation** | When `new_token` is returned on first activation, is the old token invalidated server-side? |
-| F5 | **HTTPS** | Is the URL `https://` (not `http://`)? |
+| F5 | **HTTPS** | Is the URL `https://` (not `http://`)? check `HttpManager.mqh`. |
 
 #### Block G — License Guard Completeness
 
@@ -192,7 +207,7 @@ Create a file named **`AUDIT_LICENSE_SECURITY.md`** at the project root:
 ## Constraints
 
 - **READ-ONLY (ABSOLUTE)**: NEVER modify any code file or database record. ONLY output is the `.md` report.
-- **SUPABASE READ-ONLY**: Use `list_tables`, `execute_sql` (SELECT only), `get_advisors` — NEVER write operations.
+- **SUPABASE READ-ONLY (MANDATORY)**: Use `list_tables`, `execute_sql` (SELECT only), `get_advisors`. **Interdiction formelle** de toute commande SQL de type `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, `GRANT`, or `REVOKE`. Toute modification de la base de données est un échec critique de la mission.
 - **EXHAUSTIVE**: Read EVERY file in Phase 1. Skipping is FORBIDDEN.
 - **ATTACKER MINDSET**: Think like someone trying to USE PhantomPad without paying. What would they try? Can they succeed?
 - **SCOPE LIMIT**: Do NOT analyze lot calculation or execution engine logic. Those are other skills' responsibility. Focus ONLY on authentication, license, and access control.
