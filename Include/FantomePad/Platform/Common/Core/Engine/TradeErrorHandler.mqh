@@ -97,7 +97,7 @@ public:
       else if(retcode == 10017) { userMsg = "Trade Disabled"; type = TRADE_ERR_PERMISSION; }
       else if(retcode == 10018) { userMsg = "Market Closed"; type = TRADE_ERR_MARKET; }
       else if(retcode == 10019) { userMsg = "No Money"; type = TRADE_ERR_MARGIN; }
-      else if(retcode == 10026) { userMsg = "Autotrading Disabled"; type = TRADE_ERR_PERMISSION; }
+      else if(retcode == 10026) { userMsg = "Algo trading Disabled"; type = TRADE_ERR_PERMISSION; }
       else if(retcode == 10027) { userMsg = "EA Disabled by Server"; type = TRADE_ERR_PERMISSION; }
       
       string techDetail = "RetCode " + IntegerToString(retcode);

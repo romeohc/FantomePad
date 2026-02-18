@@ -158,13 +158,13 @@ public:
       // --- Level 6: Permissions ---
 #ifdef __MQL5__
       if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
-          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "AutoTrading Disabled", "AutoTrading button is off in Terminal");
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Algo trading Disabled", "Algo trading button is off in Terminal");
       
       if(!AccountInfoInteger(ACCOUNT_TRADE_ALLOWED))
           return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Account Trading Disabled", "Investor password or broker restriction");
 #else
       if(!IsTradeAllowed())
-          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "AutoTrading Disabled", "Check 'Allow Live Trading' in EA properties or AutoTrading button");
+          return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Auto-trading Disabled", "Check 'Allow Live Trading' in EA properties or Auto-trading button");
       
       if(!IsExpertEnabled())
           return MakeErrorResult(0, TRADE_ERR_PERMISSION, "Expert Trading Disabled", "Expert Advisors are disabled in terminal");

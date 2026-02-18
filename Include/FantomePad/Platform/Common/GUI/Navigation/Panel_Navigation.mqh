@@ -30,10 +30,18 @@ void UpdateAutoTradingWarning()
        // Safety: Put below if too close to top
        if(rectY < 5) rectY = g_PanelNavigation.Y + g_PanelNavigation.Height + 5; 
        
+       // Define Message and Color
+       string msg = "AutoTrading Disabled";
+       #ifdef __MQL5__
+           msg = "Algo Trading Disabled";
+       #endif
+       
+       color warnBg = C'214,48,49'; // Premium Red (Same as Toast)
+       
        // 1. Draw Background (Red Cell)
        if(ObjectFind(0, bgName) < 0)
        {
-           CreateRect("Nav_Warn_Bg", rectX, rectY, rectW, rectH, g_ColorRed, BORDER_FLAT);
+           CreateRect("Nav_Warn_Bg", rectX, rectY, rectW, rectH, warnBg, BORDER_FLAT);
            ObjectSetInteger(0, bgName, OBJPROP_ZORDER, 100);
        }
        else
@@ -42,13 +50,13 @@ void UpdateAutoTradingWarning()
            ObjectSetInteger(0, bgName, OBJPROP_YDISTANCE, rectY);
            ObjectSetInteger(0, bgName, OBJPROP_XSIZE, rectW);
            ObjectSetInteger(0, bgName, OBJPROP_YSIZE, rectH);
-           ObjectSetInteger(0, bgName, OBJPROP_BGCOLOR, g_ColorRed);
+           ObjectSetInteger(0, bgName, OBJPROP_BGCOLOR, warnBg);
        }
        
-       // 2. Draw Text (White, No Emoji)
+       // 2. Draw Text (White)
        if(ObjectFind(0, txtName) < 0)
        {
-           CreateLabel("Nav_Warn_Txt", "AutoTrading Disabled", panelCenterX, rectY + 2, 8, clrWhite, "Trebuchet MS Bold");
+           CreateLabel("Nav_Warn_Txt", msg, panelCenterX, rectY + 2, 8, clrWhite, "Trebuchet MS Bold");
            ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_UPPER);
            ObjectSetInteger(0, txtName, OBJPROP_ZORDER, 101);
        }
@@ -56,7 +64,7 @@ void UpdateAutoTradingWarning()
        {
            ObjectSetInteger(0, txtName, OBJPROP_XDISTANCE, panelCenterX);
            ObjectSetInteger(0, txtName, OBJPROP_YDISTANCE, rectY + 2);
-           ObjectSetString(0, txtName, OBJPROP_TEXT, "AutoTrading Disabled"); 
+           ObjectSetString(0, txtName, OBJPROP_TEXT, msg); 
            ObjectSetInteger(0, txtName, OBJPROP_COLOR, clrWhite);
            ObjectSetInteger(0, txtName, OBJPROP_ANCHOR, ANCHOR_UPPER); 
        }
