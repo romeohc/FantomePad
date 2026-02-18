@@ -43,7 +43,9 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     const tutorialSteps = [
         {
             title: "1. Intégration",
-            description: "File > Open Data Folder > MQL4 > Experts + Collez fichier fantomepad.ex4",
+            description: platform === "mt5"
+                ? "File > Open Data Folder > MQL5 > Experts + Collez fichier fantomepad.ex5"
+                : "File > Open Data Folder > MQL4 > Experts + Collez fichier fantomepad.ex4",
         },
         {
             title: "2. Autorisation",
@@ -51,7 +53,9 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         },
         {
             title: "3. Actualisation",
-            description: "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh",
+            description: platform === "mt5"
+                ? "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh"
+                : "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh", // This one is actually the same
         },
         {
             title: "4. Lancement",
@@ -344,19 +348,23 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         </div>
 
                                         {/* MT4 Download Action (Right Aligned Logo) */}
-                                        {platform === "mt4" && (
+                                        {(platform === "mt4" || platform === "mt5") && (
                                             <a
-                                                href={os === "mac"
-                                                    ? "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/MetaTrader4.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt4.macos"
-                                                    : "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/mt4setup.exe?utm_source=www.metatrader4.com&utm_campaign=download"
+                                                href={platform === "mt4"
+                                                    ? (os === "mac"
+                                                        ? "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/MetaTrader4.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt4.macos"
+                                                        : "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/mt4setup.exe?utm_source=www.metatrader4.com&utm_campaign=download")
+                                                    : (os === "mac"
+                                                        ? "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/MetaTrader5.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt5.macos"
+                                                        : "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader4.com&utm_campaign=download")
                                                 }
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-white/40 hover:text-white transition-colors p-4"
-                                                title={`Télécharger MT4 pour ${os === "mac" ? "Mac" : "Windows"}`}
+                                                className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl"
+                                                title={`Télécharger ${platform?.toUpperCase()} pour ${os === "mac" ? "Mac" : "Windows"}`}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <Download className="h-8 w-8 transition-transform group-hover/dl:scale-110" />
+                                                <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
                                             </a>
                                         )}
                                     </div>
@@ -408,15 +416,15 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         </div>
 
                                         {/* FantomePad Download Action (Right Aligned Logo) */}
-                                        {platform === "mt4" && (
+                                        {(platform === "mt4" || platform === "mt5") && (
                                             <a
-                                                href="/FantomePad.ex4"
-                                                download="FantomePad.ex4"
-                                                className="text-white/40 hover:text-white transition-colors p-4"
-                                                title="Télécharger FantomePad.ex4"
+                                                href={platform === "mt4" ? "/FantomePad.ex4" : "/FantomePad.ex5"}
+                                                download={platform === "mt4" ? "FantomePad.ex4" : "FantomePad.ex5"}
+                                                className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl"
+                                                title={`Télécharger FantomePad.${platform === "mt4" ? "ex4" : "ex5"}`}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <Download className="h-8 w-8 transition-transform group-hover/dl:scale-110" />
+                                                <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
                                             </a>
                                         )}
                                     </div>
