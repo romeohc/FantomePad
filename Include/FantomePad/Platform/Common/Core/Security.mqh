@@ -67,7 +67,7 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    StringReplace(cleanCode, "\"", "");
    StringReplace(cleanCode, "\\", "");
    
-   string url = "https://zxgkjytxqqxkizqcrdwf.functions.supabase.co/verify-license";
+   string url = "https://api.fantomepad.com/verify-license";
    
    // Préparation des IDs
    string sessionID = GetSessionID();

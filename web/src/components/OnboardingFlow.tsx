@@ -584,7 +584,11 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                     {/* Step 2 URL Action */}
                                                     {tutorialStep === 1 && (
                                                         <button
-                                                            onClick={handleCopyUrl}
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText("https://api.fantomepad.com");
+                                                                setUrlCopied(true);
+                                                                setTimeout(() => setUrlCopied(false), 2000);
+                                                            }}
                                                             className="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-brand-blue/20 transition-all max-w-full h-auto whitespace-normal break-all text-center leading-tight"
                                                         >
                                                             {urlCopied ? (
@@ -592,7 +596,11 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                             ) : (
                                                                 <Copy className="h-3.5 w-3.5 shrink-0" />
                                                             )}
-                                                            <span>{urlCopied ? "URL Copiée" : "https://zxgkjytxqqxkizqcrdwf.functions.supabase.co"}</span>
+                                                            {urlCopied ? (
+                                                                <span className="uppercase">URL Copiée</span>
+                                                            ) : (
+                                                                <span className="lowercase">https://api.fantomepad.com</span>
+                                                            )}
                                                         </button>
                                                     )}
                                                 </div>
