@@ -54,10 +54,14 @@ bool Handle_Trading_Events(string sparam)
       else // Buy Limit(1) -> Sell Limit(2) -> Buy Stop(3) -> Sell Stop(4)
       {
          CurrentTypeIndex++;
+         // Derive Direction from Type for Pending Orders
+         if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3) CurrentDirection = 0; // Buy
+         else                                               CurrentDirection = 1; // Sell
       }
 
       UpdateUIMode(); 
-      UpdateCalculatedLot(); // Mise à jour immédiate des états de boutons
+      ApplyDefaultTradeValues(); // Ensure logical Entry/SL/TP based on new type
+      UpdateCalculatedLot(); // Immediate update of button states
       ChartRedraw();
       return true;
    }
