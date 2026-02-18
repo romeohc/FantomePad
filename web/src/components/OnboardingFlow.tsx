@@ -418,10 +418,10 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         {/* FantomePad Download Action (Right Aligned Logo) */}
                                         {(platform === "mt4" || platform === "mt5") && (
                                             <a
-                                                href={platform === "mt4" ? "/FantomePad.ex4" : "/FantomePad.ex5"}
-                                                download={platform === "mt4" ? "FantomePad.ex4" : "FantomePad.ex5"}
+                                                href={platform === "mt4" ? "/fantomepad.ex4" : "/fantomepad.ex5"}
+                                                download={platform === "mt4" ? "fantomepad.ex4" : "fantomepad.ex5"}
                                                 className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl"
-                                                title={`Télécharger FantomePad.${platform === "mt4" ? "ex4" : "ex5"}`}
+                                                title={`Télécharger fantomepad.${platform === "mt4" ? "ex4" : "ex5"}`}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
