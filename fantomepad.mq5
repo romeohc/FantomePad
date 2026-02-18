@@ -23,6 +23,17 @@
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   // --- PRIORITY: ACCOUNT CHANGE DETECTION & AUTO-SWITCH ---
+   // We check this at the very beginning to avoid running weightier logic/GUI on the "old" symbol.
+   bool accountChanged = false;
+   if(CheckAndSetNewAccount(accountChanged)) 
+   {
+      // If a symbol switch was triggered, we stop here. 
+      // MT5 will automatically restart OnInit on the new symbol.
+      return(INIT_SUCCEEDED); 
+   }
+
+   // --- NORMAL ENGINE INIT ---
    Bridge_InitEngine();
 
    // Input Validation
@@ -35,10 +46,6 @@ int OnInit()
 
    InitGlobals();
    LoadConfig();
-
-   bool accountChanged = CheckAndSetNewAccount();
-   if(accountChanged && !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
-      Print("FantomePad Info: AutoTrading disabled by MT security setting.");
 
    if(g_MaxRiskPercent <= 0) g_MaxRiskPercent = 2.0;
    if(g_MaxRiskPercent > 100.0) g_MaxRiskPercent = 100.0;
@@ -105,31 +112,45 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
 }
 
 //+------------------------------------------------------------------+
-//| Helper: Check for Account Change                                 |
+//| Helper: Check for Account Change & Auto-Select First Symbol      |
 //+------------------------------------------------------------------+
-bool CheckAndSetNewAccount()
+bool CheckAndSetNewAccount(bool &accountChanged)
 {
+   accountChanged = false;
    if(IsTesting()) return false;
    
-   // FIX: At startup, AccountNumber() can be 0 until connection is stable.
-   // We skip the logic if we don't have a valid account yet to avoid false resets.
-   int currentAccount = (int)AccountNumber();
+   long currentAccount = AccountNumber();
    if(currentAccount <= 0) return false;
 
    string gvName = "FantomePad_LastAccount";
-   int lastAccount = 0;
+   long lastAccount = 0;
    
-   if(GlobalVariableCheck(gvName)) lastAccount = (int)GlobalVariableGet(gvName);
+   if(GlobalVariableCheck(gvName)) lastAccount = (long)GlobalVariableGet(gvName);
    
    if(currentAccount != lastAccount)
    {
-      GlobalVariableSet(gvName, (double)currentAccount);
-      Print("FantomePad: Account Change Detected (" + IntegerToString(lastAccount) + " -> " + IntegerToString(currentAccount) + ").");
+      // Get the first symbol from the Market Watch (User's list)
+      int total = SymbolsTotal(true); // true = only selected symbols
+      if(total > 0)
+      {
+         string firstSymbol = SymbolName(0, true);
+         
+         // Only switch if we are not already on it
+         if(Symbol() != firstSymbol)
+         {
+            // We do NOT update the GV yet. The next OnInit (on the new symbol) 
+            // will detect the account mismatch again and finalize the change.
+            Print("FantomePad: Account Change Detected (", lastAccount, " -> ", currentAccount, "). Auto-switching to first symbol: ", firstSymbol);
+            ChartSetSymbolPeriod(0, firstSymbol, Period());
+            return true; // Urgent switch triggered, stop current execution!
+         }
+      }
       
-      // Removed ChartSetSymbolPeriod call. Forcing a symbol change during OnInit 
-      // often causes MT5 to eject/deselect the Expert Advisor upon restart, 
-      // especially under Wine/Mac environments.
-      return true;
+      // If we reach here, we are either already on the correct symbol 
+      // or there's no symbol to switch to. Finalize account change record.
+      GlobalVariableSet(gvName, (double)currentAccount);
+      accountChanged = true;
+      return false; // No switch needed, continue normally
    }
    return false;
 }
