@@ -24,6 +24,14 @@ export default function Home() {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Memoize the supabase client to prevent recreation on every render
   const supabase = useMemo(() => createClient(), []);
@@ -157,12 +165,87 @@ export default function Home() {
   }
 
   // Auth & Onboarding View (Centered Card)
+  // Auth & Onboarding View (Centered Card)
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 bg-brand-bg select-none">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full" />
-        <div className="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full" />
-      </div>
+    <main className="flex min-h-screen items-center justify-center p-4 bg-[#050505] select-none relative overflow-hidden">
+      {!session && (
+        <div className="absolute inset-0 z-0">
+          {/* Base Dark Layer */}
+          <div className="absolute inset-0 bg-[#050505]" />
+
+          {/* 3D Perspective Grid - Pure CSS for stability */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ perspective: '800px' }}>
+            <div className="absolute bottom-[-200px] left-[-50%] w-[200%] h-[700px] opacity-40"
+              style={{
+                transform: 'rotateX(65deg)',
+                transformOrigin: 'center bottom'
+              }}>
+              <motion.div
+                animate={{ backgroundPosition: ['0px 0px', '0px 60px'] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="w-full h-full bg-[linear-gradient(to_right,#ffffff26_1px,transparent_1px),linear-gradient(to_bottom,#ffffff26_1px,transparent_1px)]"
+                style={{ backgroundSize: '60px 60px' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Glowing Neural Data Particles - Laser Focused */}
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(isMobile ? 12 : 25)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{
+                  x: Math.random() * 100 + "%",
+                  y: "110%",
+                }}
+                animate={{
+                  y: ["110%", "-10%"],
+                  opacity: [0, 0.9, 0],
+                  scale: [1, 2, 1]
+                }}
+                transition={{
+                  duration: Math.random() * 4 + 2,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                  delay: Math.random() * 5
+                }}
+                className="absolute w-[2px] h-[2px] bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_rgba(255,255,255,0.6)]"
+              />
+            ))}
+          </div>
+
+          {/* High-Impact Energy Beams - Monochromatic Cyber */}
+          <div className="absolute inset-0 flex justify-around pointer-events-none">
+            {[...Array(isMobile ? 3 : 6)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  y: ['-100%', '200%'],
+                  opacity: [0, 0.6, 0]
+                }}
+                transition={{
+                  duration: Math.random() * 2 + 1,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: Math.random() * 5
+                }}
+                className="w-[1px] h-[500px] bg-gradient-to-b from-transparent via-white to-transparent shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+              />
+            ))}
+          </div>
+
+          {/* Vignette Overlay for Depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+        </div>
+      )}
+
+      {session && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full" />
+          <div className="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-brand-blue/5 blur-[120px] rounded-full" />
+        </div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -178,17 +261,9 @@ export default function Home() {
             onComplete={() => fetchLicense(session.user.email || "")}
           />
         ) : (
-          <div className="relative">
-            {/* Mobile/Tablet Recommendation Alert - Positioned above the card */}
-            <div className="lg:hidden flex justify-center mb-6 absolute -top-16 left-0 right-0 z-20">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in-down backdrop-blur-sm">
-                <Monitor className="h-3.5 w-3.5 text-blue-400" />
-                <span className="text-[11px] font-bold text-blue-200">Installation recommandée sur Ordinateur</span>
-              </div>
-            </div>
-
+          <div className="relative space-y-6">
             <div className="p-[1px] rounded-2xl bg-gradient-to-b from-brand-border to-transparent">
-              <div className="bg-brand-bg rounded-2xl p-8 md:p-12 border border-brand-border/50 min-h-[500px] flex flex-col justify-center relative z-10">
+              <div className="bg-brand-bg rounded-2xl p-8 md:p-12 border border-brand-border/50 min-h-[500px] flex flex-col justify-center relative z-10 shadow-2xl">
                 {/* Login Form State */}
                 <header className="text-center mb-10">
                   <motion.span
@@ -294,6 +369,23 @@ export default function Home() {
                 </footer>
               </div>
             </div>
+            {/* Shop Button below Auth Card */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="flex justify-center"
+            >
+              <a
+                href="https://fantomepad.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 backdrop-blur-sm"
+              >
+                <span className="text-xs font-bold text-brand-gray group-hover:text-white transition-colors">Visiter la boutique</span>
+                <ArrowRight className="h-3.5 w-3.5 text-brand-gray group-hover:text-white group-hover:translate-x-1 transition-all" />
+              </a>
+            </motion.div>
           </div>
         )}
       </motion.div>
