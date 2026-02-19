@@ -1,7 +1,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircle, Loader2, Monitor, LogOut, KeyRound, Maximize } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import SpaceBackground from "@/components/SpaceBackground";
@@ -49,7 +49,30 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         }
     }, [step]);
 
-    const tutorialSteps = [
+    const isSpecialMT4Mac = platform === "mt4" && os === "mac";
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const tutorialSteps = isSpecialMT4Mac ? [
+        {
+            title: "1. Intégration",
+            description: "Installez le fichier FantomePad dans le dossier Experts de votre plateforme.",
+            video: "/video/onboarding/MT4/1-mt4-mac.mp4"
+        },
+        {
+            title: "2. Autorisation",
+            description: "Autorisez le Trading Automatique et configurez la connexion sécurisée.",
+            video: "/video/onboarding/MT4/2-mt4-mac.mp4"
+        },
+        {
+            title: "3. Lancement",
+            description: "Initialisez FantomePad sur votre graphique pour commencer.",
+            video: "/video/onboarding/MT4/3-mt4-mac.mp4"
+        },
+        {
+            title: "Votre code d'activation",
+            description: "Copiez votre code d'activation pour commencer à trader ;)",
+        }
+    ] : [
         {
             title: "1. Intégration",
             description: platform === "mt5"
@@ -64,7 +87,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
             title: "3. Actualisation",
             description: platform === "mt5"
                 ? "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh"
-                : "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh", // This one is actually the same
+                : "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh",
         },
         {
             title: "4. Lancement",
@@ -75,6 +98,8 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
             description: "Copiez votre code d'activation pour commencer à trader ;)",
         }
     ];
+
+    const isLastTutorialStep = tutorialStep === tutorialSteps.length - 1;
 
     const [urlCopied, setUrlCopied] = useState(false);
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -87,6 +112,13 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
             setTimeout(() => setUrlCopied(false), 2000);
         }
     };
+
+    // Clamp tutorial step to bounds if the steps array changes
+    useEffect(() => {
+        if (tutorialStep >= tutorialSteps.length) {
+            setTutorialStep(Math.max(0, tutorialSteps.length - 1));
+        }
+    }, [tutorialSteps.length, tutorialStep]);
 
     const nextTutorialStep = () => {
         if (tutorialStep < tutorialSteps.length - 1) {
@@ -137,6 +169,18 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         { id: "activation", label: "Activation" },
     ];
 
+    const handleFullscreen = () => {
+        if (videoRef.current) {
+            if (videoRef.current.requestFullscreen) {
+                videoRef.current.requestFullscreen();
+            } else if ((videoRef.current as any).webkitRequestFullscreen) {
+                (videoRef.current as any).webkitRequestFullscreen();
+            } else if ((videoRef.current as any).msRequestFullscreen) {
+                (videoRef.current as any).msRequestFullscreen();
+            }
+        }
+    };
+
     const currentStepIndex = steps.findIndex(s => s.id === step);
 
     return (
@@ -149,19 +193,17 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
 
             {/* Mobile Desktop Recommendation Alert */}
-            {
-                step === "platform_selection" && (
-                    <div className="md:hidden flex justify-center mb-2">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in-down">
-                            <Monitor className="h-3.5 w-3.5 text-blue-400" />
-                            <span className="text-[11px] font-bold text-blue-200">Installation recommandée sur Ordinateur</span>
-                        </div>
+            {step === "platform_selection" && (
+                <div className="md:hidden flex justify-center">
+                    <div className="flex items-center gap-3 px-5 py-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl animate-fade-in-down">
+                        <Monitor className="h-4.5 w-4.5 text-blue-400" />
+                        <span className="text-[13px] font-bold text-blue-200">Installation recommandée sur Ordinateur</span>
                     </div>
-                )
-            }
+                </div>
+            )}
 
             {/* Progress Bar Container - Detached on Mobile */}
-            <div className="md:hidden flex justify-center py-4">
+            <div className="md:hidden flex justify-center pb-4 pt-2">
                 <div className="flex items-center gap-6 relative px-4">
                     {steps.map((s, idx) => (
                         <div key={s.id} className="flex flex-col items-center gap-2 relative">
@@ -360,8 +402,6 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                         ? "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/MetaTrader5.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt5.macos"
                                                         : "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader4.com&utm_campaign=download")
                                                 }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
                                                 className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl"
                                                 title={`Télécharger ${platform?.toUpperCase()} pour ${os === "mac" ? "Mac" : "Windows"}`}
                                                 onClick={(e) => e.stopPropagation()}
@@ -487,14 +527,36 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             {/* Video Container - 16:9 Aspect Ratio */}
                                             <div className="w-full aspect-video bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden shadow-2xl relative mb-8 group">
                                                 {/* Video Player */}
-                                                {tutorialStep < 4 ? (
+                                                {!isLastTutorialStep && tutorialSteps[tutorialStep] ? (
                                                     <div className="absolute inset-0 w-full h-full bg-black">
-                                                        {/* Placeholder (No Video) */}
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                                                            <div className="text-white/5 font-bold text-8xl select-none">
-                                                                {tutorialStep + 1}
+                                                        {tutorialSteps[tutorialStep].video ? (
+                                                            <>
+                                                                <video
+                                                                    ref={videoRef}
+                                                                    key={tutorialSteps[tutorialStep].video}
+                                                                    src={tutorialSteps[tutorialStep].video}
+                                                                    className="w-full h-full object-cover"
+                                                                    autoPlay
+                                                                    loop
+                                                                    muted
+                                                                    playsInline
+                                                                />
+                                                                {/* Fullscreen Button */}
+                                                                <button
+                                                                    onClick={handleFullscreen}
+                                                                    className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-lg text-white border border-white/10 transition-all opacity-0 group-hover:opacity-100 z-30"
+                                                                    title="Plein écran"
+                                                                >
+                                                                    <Maximize className="h-4 w-4" />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
+                                                                <div className="text-white/5 font-bold text-8xl select-none">
+                                                                    {tutorialStep + 1}
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     /* Background placeholder when no video */
@@ -502,7 +564,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 )}
 
                                                 {/* Step 5 Special Overlay: License Key - Professional Redesign */}
-                                                {tutorialStep === 4 && !loading && (
+                                                {isLastTutorialStep && !loading && (
                                                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 text-center animate-fade-in z-20 overflow-hidden">
                                                         <SpaceBackground isMobile={isMobile} />
 
@@ -544,10 +606,10 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 {/* Center: Text Content */}
                                                 <div className="flex-1 text-center space-y-2 min-w-0">
                                                     <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight break-words">
-                                                        {tutorialSteps[tutorialStep].title}
+                                                        {tutorialSteps[tutorialStep]?.title || ""}
                                                     </h3>
                                                     <p className="text-brand-gray text-sm md:text-base leading-relaxed max-w-xl mx-auto break-words">
-                                                        {tutorialSteps[tutorialStep].description}
+                                                        {tutorialSteps[tutorialStep]?.description || ""}
                                                     </p>
 
                                                     {/* Step 2 URL Action */}
