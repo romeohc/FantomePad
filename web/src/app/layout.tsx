@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "FantomePad | Setup",
   description: "The new standard is here.",
   icons: {
-    icon: "/logo-blanc.svg",
+    icon: "/Logo/logo-blanc.svg",
   },
 };
 

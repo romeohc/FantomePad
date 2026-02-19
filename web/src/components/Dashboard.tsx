@@ -230,7 +230,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         className="absolute inset-0 z-50 bg-[#0F0F0F] p-6 flex flex-col md:hidden"
                     >
                         <div className="flex items-center justify-center mb-12 relative h-10">
-                            <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
+                            <Image src="/Logo/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
                             <button onClick={() => setMobileMenuOpen(false)} className="absolute right-0 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
                                 <X className="h-6 w-6 text-white" />
                             </button>
@@ -254,7 +254,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
             {/* Sidebar (Desktop) */}
             <div className="hidden md:flex w-72 border-r border-white/5 flex-col p-6 space-y-8 bg-[#0F0F0F]">
                 <div className="flex items-center justify-center px-2">
-                    <Image src="/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
+                    <Image src="/Logo/logo_long_noir-removebg-preview.png" alt="FantomePad" width={144} height={36} className="h-7 w-auto brightness-0 invert" />
                 </div>
 
                 <div className="space-y-2 flex-1 pt-6">
@@ -374,11 +374,15 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* FantomePad MT4 */}
-                                        <button className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden">
+                                        <a
+                                            href="/EA/fantomepad.ex4"
+                                            download="fantomepad.ex4"
+                                            className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden"
+                                        >
                                             <div className="flex items-center gap-6 relative z-10">
                                                 <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
                                                     <Image
-                                                        src="/logo-blanc.svg"
+                                                        src="/Logo/logo-blanc.svg"
                                                         alt="FantomePad"
                                                         width={40}
                                                         height={40}
@@ -395,14 +399,18 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                             <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
                                                 <Download className="h-5 w-5" />
                                             </div>
-                                        </button>
+                                        </a>
 
                                         {/* FantomePad MT5 */}
-                                        <button className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden">
+                                        <a
+                                            href="/EA/fantomepad.ex5"
+                                            download="fantomepad.ex5"
+                                            className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden"
+                                        >
                                             <div className="flex items-center gap-6 relative z-10">
                                                 <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
                                                     <Image
-                                                        src="/logo-blanc.svg"
+                                                        src="/Logo/logo-blanc.svg"
                                                         alt="FantomePad"
                                                         width={40}
                                                         height={40}
@@ -419,7 +427,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                             <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
                                                 <Download className="h-5 w-5" />
                                             </div>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
 

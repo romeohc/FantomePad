@@ -76,13 +76,6 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         }
     ];
 
-    const videoPaths = [
-        "/video/step1.mp4",
-        "/video/step2.mp4",
-        "/video/step3.mp4",
-        "/video/step4.mp4"
-    ];
-
     const [urlCopied, setUrlCopied] = useState(false);
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -261,7 +254,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/logo mt4.png" alt="MT4" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <Image src="/Icone/logo mt4.png" alt="MT4" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
                                             <span className="text-lg font-bold text-white">MT4</span>
                                         </div>
                                     </button>
@@ -274,7 +267,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/logo mt5.png" alt="MT5" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <Image src="/Icone/logo mt5.png" alt="MT5" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
                                             <span className="text-lg font-bold text-white">MT5</span>
                                         </div>
                                     </button>
@@ -289,7 +282,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/logo windows.png" alt="Windows" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <Image src="/Icone/logo windows.png" alt="Windows" width={40} height={40} className="h-10 w-10 object-contain" />
                                             <span className="text-lg font-bold text-white">Windows</span>
                                         </div>
                                     </button>
@@ -302,7 +295,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/logo apple.png" alt="Mac" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <Image src="/Icone/logo apple.png" alt="Mac" width={40} height={40} className="h-10 w-10 object-contain" />
                                             <span className="text-lg font-bold text-white">Mac</span>
                                         </div>
                                     </button>
@@ -343,7 +336,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         <div className="flex items-center gap-6">
                                             <div className="p-1 rounded-2xl flex items-center justify-center">
                                                 <Image
-                                                    src={platform === "mt4" ? "/logo mt4.png" : "/logo mt5.png"}
+                                                    src={platform === "mt4" ? "/Icone/logo mt4.png" : "/Icone/logo mt5.png"}
                                                     alt={platform?.toUpperCase() || "Platform"}
                                                     width={40}
                                                     height={40}
@@ -411,7 +404,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         <div className="flex items-center gap-6">
                                             <div className="p-1 rounded-2xl flex items-center justify-center">
                                                 <Image
-                                                    src="/logo-blanc.svg"
+                                                    src="/Logo/logo-blanc.svg"
                                                     alt="FantomePad"
                                                     width={40}
                                                     height={40}
@@ -427,7 +420,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         {/* FantomePad Download Action (Right Aligned Logo) */}
                                         {(platform === "mt4" || platform === "mt5") && (
                                             <a
-                                                href={platform === "mt4" ? "/fantomepad.ex4" : "/fantomepad.ex5"}
+                                                href={platform === "mt4" ? "/EA/fantomepad.ex4" : "/EA/fantomepad.ex5"}
                                                 download={platform === "mt4" ? "fantomepad.ex4" : "fantomepad.ex5"}
                                                 className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl"
                                                 title={`Télécharger fantomepad.${platform === "mt4" ? "ex4" : "ex5"}`}
@@ -496,48 +489,12 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 {/* Video Player */}
                                                 {tutorialStep < 4 ? (
                                                     <div className="absolute inset-0 w-full h-full bg-black">
-                                                        {platform === "mt4" ? (
-                                                            <>
-                                                                <video
-                                                                    key={tutorialStep}
-                                                                    src={videoPaths[tutorialStep]}
-                                                                    className="w-full h-full object-contain"
-                                                                    autoPlay
-                                                                    muted
-                                                                    loop
-                                                                    playsInline
-                                                                    id={`video-step-${tutorialStep}`}
-                                                                    onError={(e) => console.error(`Error loading video for step ${tutorialStep + 1}:`, e)}
-                                                                />
-
-                                                                {/* Maximize Button - Always visible, bottom right */}
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const video = document.getElementById(`video-step-${tutorialStep}`) as HTMLVideoElement;
-                                                                        if (video) {
-                                                                            if (video.requestFullscreen) {
-                                                                                video.requestFullscreen();
-                                                                            } else if ((video as any).webkitRequestFullscreen) {
-                                                                                (video as any).webkitRequestFullscreen();
-                                                                            } else if ((video as any).msRequestFullscreen) {
-                                                                                (video as any).msRequestFullscreen();
-                                                                            }
-                                                                        }
-                                                                    }}
-                                                                    className="absolute bottom-4 right-4 p-2.5 rounded-lg bg-black/60 hover:bg-brand-blue text-white/90 hover:text-black backdrop-blur-md transition-all z-30 pointer-events-auto border border-white/10 hover:border-brand-blue shadow-lg"
-                                                                    title="Mode Plein Écran"
-                                                                >
-                                                                    <Maximize className="h-5 w-5" />
-                                                                </button>
-                                                            </>
-                                                        ) : (
-                                                            /* Placeholder for MT5 (No Video) */
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                                                                <div className="text-white/5 font-bold text-8xl select-none">
-                                                                    {tutorialStep + 1}
-                                                                </div>
+                                                        {/* Placeholder (No Video) */}
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
+                                                            <div className="text-white/5 font-bold text-8xl select-none">
+                                                                {tutorialStep + 1}
                                                             </div>
-                                                        )}
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     /* Background placeholder when no video */
