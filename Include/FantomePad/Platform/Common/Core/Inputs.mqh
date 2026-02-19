@@ -29,7 +29,7 @@ input color    ColorEntryLine = C'255,255,255';      // Entry Line Color (White)
 input color    ColorSLLine   = C'161,161,166';   // Stop Loss Line Color (Gray)
 input color    ColorTPLine   = C'41,98,255';   // Take Profit Line Color (Blue)
 input int      MaxSlippage   = 10;             // Max Slippage (Pips)
-input int      MaxSpread     = 50;             // Max Spread (Points)
+input int      MaxSpread     = 3000;           // Max Spread (Points)
 
 //--- Couleurs pour la liste
 color ColorListNormal = C'12,12,12';   // List Item (Black)

@@ -19,7 +19,7 @@ void CreateAuthUI()
    int chart_h = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    
    // Professional Background Overlay
-   CreateRect("Auth_Overlay", 0, 0, chart_w, chart_h, COLOR_BRAND_BG, BORDER_FLAT);
+   CreateRect("Auth_Overlay", 0, 0, 5000, 5000, COLOR_BRAND_BG, BORDER_FLAT);
    ObjectSetInteger(0, PREFIX + "Auth_Overlay", OBJPROP_ZORDER, 0);
    
    // Window size (Increased height slightly for the new spacing)
@@ -61,13 +61,11 @@ void CreateAuthUI()
    ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_COLOR, COLOR_BRAND_WHITE);
    
    // 5. ACTION BUTTON
-   CreateButton(p + "BtnActive", "ACTIVER LE LOGICIEL", x + 75, y + 210, w - 150, 45, COLOR_BRAND_WHITE, clrBlack);
+   CreateButton(p + "BtnActive", "ACTIVER FANTOMEPAD", x + 75, y + 210, w - 150, 45, COLOR_BRAND_WHITE, clrBlack);
    ObjectSetString(0, PREFIX + p + "BtnActive", OBJPROP_FONT, "Segoe UI Bold");
    ObjectSetInteger(0, PREFIX + p + "BtnActive", OBJPROP_FONTSIZE, 10);
    
-   // 6. ERROR/STATUS AREA
-   CreateLabel(p + "StatusMsg_0", "", centerX, y + 270, 9, COLOR_BRAND_GRAY, "Arial");
-   ObjectSetInteger(0, PREFIX + p + "StatusMsg_0", OBJPROP_ANCHOR, ANCHOR_CENTER);
+   // 6. ERROR/STATUS AREA (No initial creation to avoid ghost labels)
    
    // 7. FOOTER (Moved up slightly to reduce gap from button)
    CreateLabel(p + "Help", "Besoin d'aide ? contact@fantomepad.com", centerX, y + 315, 9, COLOR_BRAND_GRAY, "Arial");

@@ -108,12 +108,18 @@ bool CheckLicense(string code, int timeout_ms = 5000)
          {
             string sub = StringSubstr(response, errPos + 9);
             int endPos = StringFind(sub, "\"");
-            if(endPos > 0) g_AuthErrorMsg = StringSubstr(sub, 0, endPos);
+            if(endPos > 0) 
+            {
+               g_AuthErrorMsg = StringSubstr(sub, 0, endPos);
+               // Simplify message if it's a device mismatch
+               if(StringFind(g_AuthErrorMsg, "activé sur un autre appareil") >= 0)
+                  g_AuthErrorMsg = "Déjà activé sur un autre appareil";
+            }
             else g_AuthErrorMsg = "Erreur inconnue";
             
             // SELF-HEALING: Si le token est invalide (fichier corrompu ou reset serveur),
             // on supprime le fichier local pour permettre une ré-activation propre.
-            if(StringFind(g_AuthErrorMsg, "Certificat") >= 0)
+            if(StringFind(g_AuthErrorMsg, "Certificat") >= 0 || StringFind(g_AuthErrorMsg, "appareil") >= 0)
             {
                C_FileManager::Delete("fantome_cert.dat");
             }
@@ -123,8 +129,7 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    }
    else 
    {
-      if(res == 4060) g_AuthErrorMsg = "URL non ajouté dans les options";
-      else if(res == 4014) g_AuthErrorMsg = "Fonction non permise (Err 4014)";
+      if(res == 4060 || res == 4014) g_AuthErrorMsg = "Fantomepad n'est pas connecté";
       else if(res == -1) g_AuthErrorMsg = "Erreur Connexion (Err -1)";
       else g_AuthErrorMsg = "Erreur Serveur (HTTP " + IntegerToString(res) + ")";
    }

@@ -99,6 +99,14 @@ int OnInit()
    // Disable AutoScroll to prevent chart snapping back on ticks
    ChartSetInteger(0, CHART_AUTOSCROLL, false);
    
+   // --- INSTANT AUTH BLACKOUT (Consistency Fix) ---
+   // We perform a preliminary check to see if we should start with a black chart.
+   HandleInitialLicenseCheck(); 
+   if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
+   {
+      SyncChartUI(); 
+   }
+
    // Rendu immédiat pour éviter les clignotements au chargement
    ChartRedraw();
    

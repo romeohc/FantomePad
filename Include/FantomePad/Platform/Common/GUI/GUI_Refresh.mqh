@@ -91,10 +91,28 @@ void SyncChartUI()
    if(ChartGetInteger(0, CHART_KEYBOARD_CONTROL) != (long)!isAuthMode)
       ChartSetInteger(0, CHART_KEYBOARD_CONTROL, !isAuthMode);
    
-   // Special: Grid is handled by aesthetic preference in licensed mode, 
-   // but always OFF in Auth mode.
-   if(isAuthMode && ChartGetInteger(0, CHART_SHOW_GRID) != 0) 
-      ChartSetInteger(0, CHART_SHOW_GRID, false);
+   if(isAuthMode)
+   {
+      if(ChartGetInteger(0, CHART_SHOW_GRID) != 0) ChartSetInteger(0, CHART_SHOW_GRID, false);
+      
+      // Force Brand Background during Auth to hide axes and flickering 
+      // (Using the exact color from Panel_Auth_UI.mqh)
+      color brandBg = C'18,18,18';
+      if(ChartGetInteger(0, CHART_COLOR_BACKGROUND) != (long)brandBg)
+         ChartSetInteger(0, CHART_COLOR_BACKGROUND, brandBg);
+         
+      if(ChartGetInteger(0, CHART_COLOR_FOREGROUND) != (long)brandBg)
+         ChartSetInteger(0, CHART_COLOR_FOREGROUND, brandBg);
+   }
+   else 
+   {
+      // Restore Aesthetics
+      if(ChartGetInteger(0, CHART_COLOR_BACKGROUND) != (long)g_ColorChartBg)
+         ChartSetInteger(0, CHART_COLOR_BACKGROUND, g_ColorChartBg);
+         
+      if(ChartGetInteger(0, CHART_COLOR_FOREGROUND) != (long)g_ColorChartFg)
+         ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
+   }
 }
 
 #endif

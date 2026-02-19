@@ -84,11 +84,12 @@ public:
       if(req.Type == OP_BUY || req.Type == OP_SELL)
       {
          int currentSpread = (int)MarketInfo(req.Symbol, MODE_SPREAD); // Points
-         // g_MaxSpread is in Points
-         if(currentSpread > g_MaxSpread && g_MaxSpread > 0)
+         int maxSpreadP = (g_MaxSpread <= 0) ? 1000 : g_MaxSpread; // Safety fallback
+         
+         if(currentSpread > maxSpreadP)
          {
             return MakeErrorResult(0, TRADE_ERR_MARKET, "Spread Too High", 
-               StringFormat("Spread: %d > Max: %d", currentSpread, g_MaxSpread));
+               StringFormat("Symbol: %s, Current Spread: %d, Max Allowed: %d. Please increase MaxSpread in settings.", req.Symbol, currentSpread, maxSpreadP));
          }
       }
 

@@ -74,6 +74,7 @@ void GUI_OnInit()
 
    if(!g_IsLicensed && g_LicenseState != LICENSE_REVOKED)
    {
+      SyncChartUI(); // Hide UI/Axes first
       CreateAuthUI();
       ShowAuthPanel(true);
       
@@ -86,7 +87,6 @@ void GUI_OnInit()
       // Hide navigation
       ObjectsDeleteAll(0, PREFIX + "Nav_");
       
-      SyncChartUI(); // Hide UI
       return; 
    }
    else 

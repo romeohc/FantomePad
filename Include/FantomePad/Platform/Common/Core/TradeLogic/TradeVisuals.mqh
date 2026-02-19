@@ -153,7 +153,7 @@ void UpdateOpenOrderLines()
             string tPrefix = PREFIX + "Open_" + IntegerToString(ticket);
             int d = (int)MarketInfo(Symbol(), MODE_DIGITS);
             
-            CreateHLine(tPrefix + "_Ent", op, clrWhite, STYLE_DOT, 1, entryLabel + " - " + DoubleToString(op, d));
+            CreateHLine(tPrefix + "_Ent", op, g_ColorEntryLine, STYLE_DOT, 1, entryLabel + " - " + DoubleToString(op, d));
             
             if(sl > 0) CreateHLine(tPrefix + "_SL", sl, g_ColorSLLine, STYLE_DOT, 1, "SL - " + DoubleToString(sl, d));
             else {

@@ -105,6 +105,11 @@ void InitGlobals()
    // This ensures execution even in high volatility if user ignored the setting.
    g_MaxSlippage = (MaxSlippage <= 0) ? 1000 : MaxSlippage;
    
+   // Force MaxSpread to a safe high default (3000 points) to avoid blocking trades on high-spread symbols
+   // If user has old default (50) or forgot to set it, we upgrade it.
+   if(MaxSpread <= 500) g_MaxSpread = 3000;
+   else g_MaxSpread = MaxSpread;
+   
    // Init Color Palette
    color Defaults[] = {
       // Darks

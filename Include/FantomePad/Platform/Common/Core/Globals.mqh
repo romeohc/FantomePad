@@ -99,7 +99,7 @@ int    g_ColorPickerH = 0;
 color  g_ColorPalette[]; 
 
 // --- SPREAD PROTECTION GLOBAL ---
-int    g_MaxSpread = 50; 
+int    g_MaxSpread = 3000; 
 
 // --- TOAST NOTIFICATION GLOBALS ---
 string g_ToastMsg = "";

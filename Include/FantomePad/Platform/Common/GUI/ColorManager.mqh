@@ -34,7 +34,7 @@ void ApplyColorChange(color pickedCol)
            ChartSetInteger(0, CHART_COLOR_FOREGROUND, g_ColorChartFg);
        }
        
-       if(StringFind(g_ColorPickerTarget, "_EntLine") > 0)     g_ColorEntryLine = (color)pickedCol;
+       if(StringFind(g_ColorPickerTarget, "_EntryLine") > 0)   g_ColorEntryLine = (color)pickedCol;
        if(StringFind(g_ColorPickerTarget, "_SLLine") > 0)      g_ColorSLLine = (color)pickedCol;
        if(StringFind(g_ColorPickerTarget, "_TPLine") > 0)      g_ColorTPLine = (color)pickedCol;
        if(StringFind(g_ColorPickerTarget, "_BtnVal") > 0)      g_ColorBtnValid = (color)pickedCol;
