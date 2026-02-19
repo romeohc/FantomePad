@@ -374,11 +374,7 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* FantomePad MT4 */}
-                                        <a
-                                            href="/EA/fantomepad.ex4"
-                                            download="fantomepad.ex4"
-                                            className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden"
-                                        >
+                                        <div className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden cursor-default">
                                             <div className="flex items-center gap-6 relative z-10">
                                                 <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
                                                     <Image
@@ -392,21 +388,22 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                                 <div>
                                                     <div className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">FantomePad pour MT4</div>
                                                     <div className="text-xs text-brand-gray mt-1 font-medium text-left flex items-center gap-2">
-                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v2.4.1</span>
+                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v1.0.0</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
-                                                <Download className="h-5 w-5" />
-                                            </div>
-                                        </a>
+                                            <a
+                                                href="/EA/fantomepad.ex4"
+                                                download="fantomepad.ex4"
+                                                className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl z-20"
+                                                title="Télécharger FantomePad pour MT4"
+                                            >
+                                                <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
+                                            </a>
+                                        </div>
 
                                         {/* FantomePad MT5 */}
-                                        <a
-                                            href="/EA/fantomepad.ex5"
-                                            download="fantomepad.ex5"
-                                            className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden"
-                                        >
+                                        <div className="text-left w-full group p-6 bg-[#151515] border-2 border-white/5 rounded-3xl flex items-center justify-between hover:border-brand-blue/30 hover:bg-[#1A1A1A] transition-all relative overflow-hidden cursor-default">
                                             <div className="flex items-center gap-6 relative z-10">
                                                 <div className="p-1 rounded-2xl flex items-center justify-center bg-white border border-white/5 h-16 w-16 group-hover:scale-105 transition-transform">
                                                     <Image
@@ -420,14 +417,19 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                                                 <div>
                                                     <div className="text-lg font-bold text-white group-hover:text-brand-blue transition-colors">FantomePad pour MT5</div>
                                                     <div className="text-xs text-brand-gray mt-1 font-medium text-left flex items-center gap-2">
-                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v2.4.1</span>
+                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">v1.0.0</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-black transition-all">
-                                                <Download className="h-5 w-5" />
-                                            </div>
-                                        </a>
+                                            <a
+                                                href="/EA/fantomepad.ex5"
+                                                download="fantomepad.ex5"
+                                                className="h-11 w-11 bg-white text-black rounded-xl flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg hover:shadow-white/10 group/dl z-20"
+                                                title="Télécharger FantomePad pour MT5"
+                                            >
+                                                <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -510,13 +512,13 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                             <div className="space-y-4 max-w-4xl mx-auto">
                                 {[
                                     {
-                                        version: "v2.4.1",
+                                        version: "v1.0.0",
                                         date: "7 Fév 2026",
                                         title: "Mise à jour de performance critique",
                                         desc: "Amélioration significative de la vitesse d'exécution des ordres sur les marchés volatils. Correction de bugs mineurs sur l'affichage."
                                     },
                                     {
-                                        version: "v2.4.0",
+                                        version: "v0.9.0",
                                         date: "1 Fév 2026",
                                         title: "Nouvelle interface Dashboard",
                                         desc: "Refonte complète de l'expérience utilisateur. Le dashboard est maintenant plus rapide, plus fluide et entièrement responsive mobile."
