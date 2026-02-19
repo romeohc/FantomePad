@@ -50,23 +50,26 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     }, [step]);
 
     const isSpecialMT4Mac = platform === "mt4" && os === "mac";
+    const isSpecialMT5Mac = platform === "mt5" && os === "mac";
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    const tutorialSteps = isSpecialMT4Mac ? [
+    const tutorialSteps = (isSpecialMT4Mac || isSpecialMT5Mac) ? [
         {
             title: "1. Intégration",
             description: "Installez le fichier FantomePad dans le dossier Experts de votre plateforme.",
-            video: "/video/onboarding/MT4/1-mt4-mac.mp4"
+            video: isSpecialMT4Mac ? "/video/onboarding/MT4/1-mt4-mac.mp4" : "/video/onboarding/MT5/1-mt5-mac.mp4"
         },
         {
             title: "2. Autorisation",
-            description: "Autorisez le Trading Automatique et configurez la connexion sécurisée.",
-            video: "/video/onboarding/MT4/2-mt4-mac.mp4"
+            description: isSpecialMT5Mac
+                ? "Autorisez l'Algo Trading et configurez la connexion sécurisée."
+                : "Autorisez le Trading Automatique et configurez la connexion sécurisée.",
+            video: isSpecialMT4Mac ? "/video/onboarding/MT4/2-mt4-mac.mp4" : "/video/onboarding/MT5/2-mt5-mac.mp4"
         },
         {
             title: "3. Lancement",
             description: "Initialisez FantomePad sur votre graphique pour commencer.",
-            video: "/video/onboarding/MT4/3-mt4-mac.mp4"
+            video: isSpecialMT4Mac ? "/video/onboarding/MT4/3-mt4-mac.mp4" : "/video/onboarding/MT5/3-mt5-mac.mp4"
         },
         {
             title: "Votre code d'activation",
@@ -612,11 +615,14 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                         {tutorialSteps[tutorialStep]?.description || ""}
                                                     </p>
 
-                                                    {/* Step 2 URL Action */}
-                                                    {tutorialStep === 1 && (
+                                                    {/* Step 1 or 2 URL/Path Action */}
+                                                    {((tutorialStep === 1) || (tutorialStep === 0 && isSpecialMT5Mac)) && (
                                                         <button
                                                             onClick={() => {
-                                                                navigator.clipboard.writeText("https://api.fantomepad.com");
+                                                                const textToCopy = (tutorialStep === 0 && isSpecialMT5Mac)
+                                                                    ? "~/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts/"
+                                                                    : "https://api.fantomepad.com";
+                                                                navigator.clipboard.writeText(textToCopy);
                                                                 setUrlCopied(true);
                                                                 setTimeout(() => setUrlCopied(false), 2000);
                                                             }}
@@ -628,9 +634,15 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                                 <Copy className="h-3.5 w-3.5 shrink-0" />
                                                             )}
                                                             {urlCopied ? (
-                                                                <span className="uppercase">URL Copiée</span>
+                                                                <span className="uppercase">
+                                                                    {(tutorialStep === 0 && isSpecialMT5Mac) ? "Chemin Copié !" : "URL Copiée !"}
+                                                                </span>
                                                             ) : (
-                                                                <span className="lowercase">https://api.fantomepad.com</span>
+                                                                <span className="lowercase">
+                                                                    {(tutorialStep === 0 && isSpecialMT5Mac)
+                                                                        ? "~/Library/Application Support/.../Experts/"
+                                                                        : "https://api.fantomepad.com"}
+                                                                </span>
                                                             )}
                                                         </button>
                                                     )}
