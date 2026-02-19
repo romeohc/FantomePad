@@ -4,6 +4,7 @@ import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircl
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import SpaceBackground from "@/components/SpaceBackground";
 import Image from "next/image";
 
 interface LicenseData {
@@ -32,6 +33,14 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
     const [copied, setCopied] = useState(false);
     const [tutorialStep, setTutorialStep] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Reset tutorial step when leaving/entering
     useEffect(() => {
@@ -531,20 +540,23 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    /* Background for License Step */
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50" />
+                                                    /* Background placeholder when no video */
+                                                    <div className="absolute inset-0 bg-[#050505]" />
                                                 )}
 
                                                 {/* Step 5 Special Overlay: License Key - Professional Redesign */}
                                                 {tutorialStep === 4 && !loading && (
-                                                    <div className="absolute inset-0 bg-[#050505] flex flex-col items-center justify-center p-4 md:p-8 text-center animate-fade-in z-20">
-                                                        <div className="bg-brand-blue/10 p-3 md:p-4 rounded-full mb-4 md:mb-6">
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 text-center animate-fade-in z-20 overflow-hidden">
+                                                        <SpaceBackground isMobile={isMobile} />
+
+                                                        {/* Gradient overlay for readability */}
+                                                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
+
+                                                        <div className="relative z-10 bg-brand-blue/10 p-3 md:p-4 rounded-full mb-4 md:mb-8">
                                                             <KeyRound className="h-6 w-6 md:h-8 md:w-8 text-brand-blue" />
                                                         </div>
 
-                                                        <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-8">Votre code d'activation</h3>
-
-                                                        <div className="w-full max-w-[280px] md:max-w-sm">
+                                                        <div className="relative z-10 w-full max-w-[280px] md:max-w-sm">
                                                             <button
                                                                 onClick={handleCopy}
                                                                 className="w-full bg-[#111] border border-white/10 hover:border-brand-blue/50 rounded-lg p-1.5 pl-3 md:pl-4 flex items-center justify-between transition-all group/btn"
