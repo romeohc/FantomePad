@@ -51,25 +51,32 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
     const isSpecialMT4Mac = platform === "mt4" && os === "mac";
     const isSpecialMT5Mac = platform === "mt5" && os === "mac";
+    const isWindows = os === "windows";
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    const tutorialSteps = (isSpecialMT4Mac || isSpecialMT5Mac) ? [
+    const tutorialSteps = (isSpecialMT4Mac || isSpecialMT5Mac || isWindows) ? [
         {
             title: "1. Intégration",
             description: "Installez le fichier FantomePad dans le dossier Experts de votre plateforme.",
-            video: isSpecialMT4Mac ? "/video/onboarding/MT4/1-mt4-mac.mp4" : "/video/onboarding/MT5/1-mt5-mac.mp4"
+            video: isWindows
+                ? "/video/onboarding/MT5/1-mt5-windows.mp4"
+                : (isSpecialMT4Mac ? "/video/onboarding/MT4/1-mt4-mac.mp4" : "/video/onboarding/MT5/1-mt5-mac.mp4")
         },
         {
             title: "2. Autorisation",
-            description: isSpecialMT5Mac
+            description: (platform === "mt5")
                 ? "Autorisez l'Algo Trading et configurez la connexion sécurisée."
                 : "Autorisez le Trading Automatique et configurez la connexion sécurisée.",
-            video: isSpecialMT4Mac ? "/video/onboarding/MT4/2-mt4-mac.mp4" : "/video/onboarding/MT5/2-mt5-mac.mp4"
+            video: isWindows
+                ? "/video/onboarding/MT5/2-mt5-windows.mp4"
+                : (isSpecialMT4Mac ? "/video/onboarding/MT4/2-mt4-mac.mp4" : "/video/onboarding/MT5/2-mt5-mac.mp4")
         },
         {
             title: "3. Lancement",
             description: "Initialisez FantomePad sur votre graphique pour commencer.",
-            video: isSpecialMT4Mac ? "/video/onboarding/MT4/3-mt4-mac.mp4" : "/video/onboarding/MT5/3-mt5-mac.mp4"
+            video: isWindows
+                ? "/video/onboarding/MT5/3-mt5-windows.mp4"
+                : (isSpecialMT4Mac ? "/video/onboarding/MT4/3-mt4-mac.mp4" : "/video/onboarding/MT5/3-mt5-mac.mp4")
         },
         {
             title: "Votre code d'activation",
