@@ -84,6 +84,10 @@ int OnInit()
       SyncChartUI(); 
    }
 
+   // --- AUTO-SCROLL TO PRESENT ---
+   // Par défaut on affiche toujours la fin du graphique (le présent) à chaque changement d'actif
+   ChartNavigate(0, CHART_END, 0);
+
    ChartRedraw();
 
    GUI_OnInit();
