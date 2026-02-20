@@ -10,6 +10,23 @@ void OnEvent_Resize()
 {
    static bool isRunning = false;
    if(isRunning) return;
+   
+   // --- MT5 SCROLLING FIX ---
+   // MT5 triggers CHARTEVENT_CHART_CHANGE heavily on simple chart scrolling.
+   // We only want to process resize logic if the actual window dimensions changed.
+   static int prevWidth = 0;
+   static int prevHeight = 0;
+   int curWidth = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
+   int curHeight = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
+   
+   if(curWidth == prevWidth && curHeight == prevHeight)
+   {
+       return; // Chart just scrolled or properties changed without resizing
+   }
+   
+   prevWidth = curWidth;
+   prevHeight = curHeight;
+   
    isRunning = true;
 
    // --- AUTH PANEL RESIZE ---
