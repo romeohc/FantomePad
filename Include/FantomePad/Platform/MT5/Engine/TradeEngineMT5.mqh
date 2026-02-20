@@ -51,6 +51,31 @@ private:
       return false;
      }
 
+   // Helper: Automatically set the correct Filling Mode for a given symbol
+   void SetCorrectFillingMode(string symbol)
+     {
+      int executionInfo = (int)SymbolInfoInteger(symbol, SYMBOL_FILLING_MODE);
+      
+      // We prioritize FOK (Fill Or Kill), then IOC, then Return.
+      if((executionInfo & SYMBOL_FILLING_FOK) == SYMBOL_FILLING_FOK)
+        {
+         m_trade.SetTypeFilling(ORDER_FILLING_FOK);
+        }
+      else if((executionInfo & SYMBOL_FILLING_IOC) == SYMBOL_FILLING_IOC)
+        {
+         m_trade.SetTypeFilling(ORDER_FILLING_IOC);
+        }
+      else if((executionInfo & SYMBOL_FILLING_BOC) == SYMBOL_FILLING_BOC) // Sometimes called BOC instead of Return internally on very rare occasion but Return is standard
+        {
+         m_trade.SetTypeFilling(ORDER_FILLING_RETURN);
+        }
+      else
+        {
+         // Default fallback if we cannot read correctly. The standard is Return.
+         m_trade.SetTypeFilling(ORDER_FILLING_RETURN);
+        }
+     }
+
 public:
                      C_TradeEngineMT5(void) : m_slippage(1000), m_maxRetries(3), m_retryDelay(100) 
      {
@@ -79,6 +104,10 @@ public:
 
       // Execute Type Mapping and Validation
       ENUM_ORDER_TYPE order_type = (ENUM_ORDER_TYPE)type;
+      
+      // Auto-Detect and apply filling mode
+      SetCorrectFillingMode(symbol);
+      
       uint retcode = 0;
 
       for(int i = 0; i < m_maxRetries; i++)
@@ -124,6 +153,9 @@ public:
       
       ENUM_ORDER_TYPE order_type = (ENUM_ORDER_TYPE)type;
       ENUM_ORDER_TYPE_TIME type_time = (expiration > 0) ? ORDER_TIME_SPECIFIED : ORDER_TIME_GTC;
+
+      // Auto-Detect and apply filling mode
+      SetCorrectFillingMode(symbol);
 
       // Ensure expiration is valid if specified
       if(type_time == ORDER_TIME_SPECIFIED && expiration <= TimeCurrent())

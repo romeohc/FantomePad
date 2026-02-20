@@ -15,6 +15,8 @@
 //+------------------------------------------------------------------+
 void UpdateUIMode()
 {
+   if(!g_PanelMain.IsVisible) return;
+   
    int chartW = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS);
    int chartH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS);
    

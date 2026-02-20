@@ -99,6 +99,7 @@ public:
       else if(retcode == 10019) { userMsg = "No Money"; type = TRADE_ERR_MARGIN; }
       else if(retcode == 10026) { userMsg = "Algo trading Disabled"; type = TRADE_ERR_PERMISSION; }
       else if(retcode == 10027) { userMsg = "EA Disabled by Server"; type = TRADE_ERR_PERMISSION; }
+      else if(retcode == 10030) { userMsg = "Unsupported Filling Mode"; type = TRADE_ERR_VALIDATION; }
       
       string techDetail = "RetCode " + IntegerToString(retcode);
       if(context != "") techDetail += " (" + context + ")";

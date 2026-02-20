@@ -67,6 +67,8 @@ void HideAccountOrdersScrollbar()
 //+------------------------------------------------------------------+
 void UpdateAccountLayout()
 {
+   if(!g_PanelAccount.IsVisible) return;
+   
    int startX = g_PanelAccount.X;
    int startY = g_PanelAccount.Y;
    int width  = 260; // Wider Panel for better spacing

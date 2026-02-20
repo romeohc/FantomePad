@@ -9,6 +9,8 @@
 //+------------------------------------------------------------------+
 void UpdatePositionsLayout()
 {
+   if(!g_PanelPositions.IsVisible) return;
+   
    int startX = (int)g_PanelPositions.X;
    int startY = (int)g_PanelPositions.Y;
    int width  = 280; 

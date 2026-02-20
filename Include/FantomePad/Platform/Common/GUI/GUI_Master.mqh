@@ -238,6 +238,9 @@ void GUI_OnChartEvent(const int id,
    if(id == CHARTEVENT_OBJECT_CLICK)
    {
        OnEvent_ObjectClick(sparam);
+       // MT5 Windows Fix: Update timestamp AFTER processing to prevent immediate close by queued CHART_CLICK
+       // Since operations like ScanCategories() can take >100ms, the queued CHART_CLICK would otherwise falsely evaluate as a new click
+       LastClickTime = GetTickCount(); 
    }
    
    // 6. OBJECT END EDIT

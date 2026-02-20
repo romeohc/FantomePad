@@ -176,6 +176,13 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
        {
            // Ensure visible
            SetObjVisible(bgName, true);
+           SetObjVisible("Hist_Item_Time"+sfx, true);
+           SetObjVisible("Hist_Item_Type"+sfx, true);
+           SetObjVisible("Hist_Item_Sym"+sfx, true);
+           SetObjVisible("Hist_Item_Fees"+sfx, true);
+           SetObjVisible("Hist_Item_Prof"+sfx, true);
+           SetObjVisible("Hist_Item_RetP"+sfx, true);
+           SetObjVisible("Hist_Item_RetR"+sfx, true);
            
            // Background
            CreateButton(bgName, "", x + 5, itemY, w - 25, rowH - 2, g_ColorInput, clrNONE);

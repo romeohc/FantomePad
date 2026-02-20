@@ -14,6 +14,9 @@
 #include "Include/FantomePad/Platform/Bridge.mqh"
 #include "Include/FantomePad/Platform/Common/GUI/GUI_Master.mqh"
 
+// --- FORCE SCROLL FLAG ---
+uint g_ForceScrollUntil = 0;
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -108,6 +111,7 @@ int OnInit()
    // --- AUTO-SCROLL TO PRESENT ---
    // Par défaut on affiche toujours la fin du graphique (le présent) à chaque changement d'actif
    ChartNavigate(0, CHART_END, 0);
+   g_ForceScrollUntil = GetTickCount() + 1000; // Lock to the present for 1 full second
 
    // Rendu immédiat pour éviter les clignotements au chargement
    ChartRedraw();
@@ -144,6 +148,9 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
+   // Force keep to right for 1s explicitly ignoring new scrolls
+   if(GetTickCount() < g_ForceScrollUntil) { ChartNavigate(0, CHART_END, 0); }
+
    if(!g_IsLicensed) 
    {
       GUI_OnTick(); // Still need to update Auth UI if visible
@@ -167,6 +174,9 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
+   // Force keep to right for 1s explicitly ignoring new scrolls
+   if(GetTickCount() < g_ForceScrollUntil) { ChartNavigate(0, CHART_END, 0); }
+
    GUI_OnTick(); // Keep tick logic alive if market is slow (optional, but good for clock)
    GUI_OnTimer();
 }
@@ -179,6 +189,9 @@ void OnChartEvent(const int id,
                   const double &dparam,
                   const string &sparam)
 {
+   // Force keep to right for 1s explicitly ignoring new scrolls
+   if(GetTickCount() < g_ForceScrollUntil) { ChartNavigate(0, CHART_END, 0); }
+
    // Déléguer entièrement au Master Controller
    GUI_OnChartEvent(id, lparam, dparam, sparam);
 }
