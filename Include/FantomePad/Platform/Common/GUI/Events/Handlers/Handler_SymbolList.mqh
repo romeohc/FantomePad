@@ -17,6 +17,15 @@ bool Handle_SymbolList_Events(string sparam)
    // 2. Clic sur un élément de la liste (Actif spécifique)
    if(StringFind(sparam, PREFIX + "ListItem_") >= 0)
    {
+      // Check if account is connected before processing symbol change
+      if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+      {
+         CloseSymbolList();
+         MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         ChartRedraw();
+         return true;
+      }
+      
       // Récupérer le nom du symbole depuis le texte du bouton cliqué
       string selectedSymbol = FP_ObjectGetString(0, sparam, OBJPROP_TEXT);
       

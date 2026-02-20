@@ -103,6 +103,14 @@ void SelectSymbol()
    string sym = SymbolName(g_SymbolHoverIndex, true);
    
    // Execute selection logic
+   if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+   {
+      CloseSymbolList();
+      MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+      ChartRedraw();
+      return;
+   }
+   
    ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, sym);
    ChartSetSymbolPeriod(0, sym, Period());
    
@@ -162,8 +170,15 @@ void SelectNextPosition()
    {
       if(OrderSymbol() != Symbol())
       {
-         GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
-         ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+         if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+         {
+            MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         }
+         else
+         {
+            GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
+            ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+         }
       }
       else
       {

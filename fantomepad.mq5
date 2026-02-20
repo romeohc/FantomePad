@@ -146,8 +146,8 @@ bool CheckAndSetNewAccount(bool &accountChanged)
       {
          string firstSymbol = SymbolName(0, true);
          
-         // Only switch if we are not already on it
-         if(Symbol() != firstSymbol)
+         // Only switch if we have a valid symbol and we are not already on it
+         if(firstSymbol != "" && Symbol() != firstSymbol)
          {
             // We do NOT update the GV yet. The next OnInit (on the new symbol) 
             // will detect the account mismatch again and finalize the change.

@@ -65,13 +65,20 @@ void CheckAndSelectFirstPosition(int targetPartial = 0, bool targetBE = false)
              // Auto-switch chart if needed (same logic as SelectNextPosition)
              if(OrderSymbol() != Symbol())
              {
-                GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
-                
-                // Save target modes to persist across symbol switch (Advanced UX)
-                if(targetPartial > 0) GlobalVariableSet("FantomePad_LastPartialMode", (double)targetPartial);
-                if(targetBE) GlobalVariableSet("FantomePad_LastBEMode", 1.0);
-                
-                ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+                if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+                {
+                   MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+                }
+                else
+                {
+                   GlobalVariableSet("FantomePad_LastSelectedTicket", (double)SelectedPositionTicket);
+                   
+                   // Save target modes to persist across symbol switch (Advanced UX)
+                   if(targetPartial > 0) GlobalVariableSet("FantomePad_LastPartialMode", (double)targetPartial);
+                   if(targetBE) GlobalVariableSet("FantomePad_LastBEMode", 1.0);
+                   
+                   ChartSetSymbolPeriod(0, OrderSymbol(), Period());
+                }
              }
              else
              {

@@ -151,6 +151,14 @@ bool Handle_PositionActions_Events(string sparam)
    {
       EffectButton(sparam);
       
+      // Check if account is connected before processing validate
+      if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+      {
+         MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         ChartRedraw();
+         return true;
+      }
+      
       if(!IsExpertEnabled()) { ShowPosValidationError("Auto-Trading is OFF!"); return true; }
       if(!IsTradeAllowed()) { ShowPosValidationError("Live Trading disabled!"); return true; }
 

@@ -72,6 +72,14 @@ bool Handle_Trading_Events(string sparam)
       EffectButton(sparam);
       HideValidationError();
       
+      // Check if account is connected
+      if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+      {
+         MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         ChartRedraw();
+         return true;
+      }
+      
       // UX Validation Only (Empty Fields)
       double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
       double risk = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -123,6 +131,14 @@ bool Handle_Trading_Events(string sparam)
       EffectButton(sparam);
       HideValidationError();
       
+      // Check if account is connected
+      if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+      {
+         MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         ChartRedraw();
+         return true;
+      }
+      
       // UX Validation Only
       double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));
       double risk = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT));
@@ -173,6 +189,14 @@ bool Handle_Trading_Events(string sparam)
    {
       EffectButton(sparam);
       HideValidationError();
+      
+      // Check if account is connected
+      if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+      {
+         MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+         ChartRedraw();
+         return true;
+      }
       
       // UX Validation
       double sl = StringToDouble(FP_ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT));

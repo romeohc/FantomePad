@@ -118,19 +118,26 @@ bool Handle_Navigation_Events(string sparam)
           // 3. Switch Chart if different symbol
           if(symbol != "" && symbol != Symbol())
           {
-             // Save ticket to global variable so it persists after EA reload
-             // Save ticket to global variable (Splitting 64-bit long into 2 doubles to avoid precision loss on large tickets)
-             // Also using ChartID to prevent conflicts between multiple charts
-             string gvName = "FantomePad_Selected_" + IntegerToString(ChartID());
-             
-             uint lo = (uint)(ticket & 0xFFFFFFFF);
-             uint hi = (uint)(ticket >> 32);
-             
-             GlobalVariableSet(gvName + "_Hi", (double)hi);
-             GlobalVariableSet(gvName + "_Lo", (double)lo);
-             GlobalVariableSet(gvName + "_Flag", 1.0); // Flag to indicate valid save
-             ChartSetSymbolPeriod(0, symbol, Period());
-             // Note: Changing symbol triggers EA reload
+             if(AccountInfoInteger(ACCOUNT_LOGIN) == 0)
+             {
+                MessageBox("Please connect a MetaTrader account (File -> Login to Trade Account) to use FantomePad fully.", "No Account Connected", MB_OK | MB_ICONWARNING);
+             }
+             else
+             {
+                // Save ticket to global variable so it persists after EA reload
+                // Save ticket to global variable (Splitting 64-bit long into 2 doubles to avoid precision loss on large tickets)
+                // Also using ChartID to prevent conflicts between multiple charts
+                string gvName = "FantomePad_Selected_" + IntegerToString(ChartID());
+                
+                uint lo = (uint)(ticket & 0xFFFFFFFF);
+                uint hi = (uint)(ticket >> 32);
+                
+                GlobalVariableSet(gvName + "_Hi", (double)hi);
+                GlobalVariableSet(gvName + "_Lo", (double)lo);
+                GlobalVariableSet(gvName + "_Flag", 1.0); // Flag to indicate valid save
+                ChartSetSymbolPeriod(0, symbol, Period());
+                // Note: Changing symbol triggers EA reload
+             }
           }
            else
            {
