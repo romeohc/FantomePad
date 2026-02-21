@@ -73,7 +73,14 @@ void NavigateSymbols(int direction)
    if(!IsListOpen) 
    {
       IsListOpen = true;
-      g_SymbolHoverIndex = 0;
+      g_SymbolHoverIndex = GetSymbolIndex(Symbol());
+      if(g_SymbolHoverIndex < 0) g_SymbolHoverIndex = 0;
+      
+      // Auto-scroll to current symbol
+      int total = SymbolsTotal(true);
+      g_SymbolListOffset = g_SymbolHoverIndex - (g_SymbolListMaxVisible / 2);
+      if(g_SymbolListOffset > total - g_SymbolListMaxVisible) g_SymbolListOffset = total - g_SymbolListMaxVisible;
+      if(g_SymbolListOffset < 0) g_SymbolListOffset = 0;
    }
    else
    {

@@ -15,6 +15,7 @@ public:
    // AutoSwitchOrderType moved to global TradeLogic.mqh
    static void ApplyDefaultTradeValues();
    static void GetVisibleChartPriceRange(double &minP, double &maxP);
+   static void InvertTradeInputs(int oldDir, int newDir, int oldType, int newType);
    
    // From Layout
    static void UpdateUIMode();
@@ -38,6 +39,7 @@ public:
 // #define AutoSwitchOrderType        CPanel_Main::AutoSwitchOrderType (Moved to global)
 #define ApplyDefaultTradeValues    CPanel_Main::ApplyDefaultTradeValues
 #define GetVisibleChartPriceRange  CPanel_Main::GetVisibleChartPriceRange
+#define InvertTradeInputs          CPanel_Main::InvertTradeInputs
 #define UpdateUIMode               CPanel_Main::UpdateUIMode
 #define ToggleMainPanel            CPanel_Main::ToggleMainPanel
 #define CreatePanel                CPanel_Main::CreatePanel

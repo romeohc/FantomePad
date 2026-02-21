@@ -35,32 +35,41 @@ bool Handle_Trading_Events(string sparam)
    }
 
    // Cycle Type d'Ordre
+   // Cycle Type d'Ordre
    if(sparam == PREFIX + "Btn_Type")
    {
-      if(CurrentTypeIndex == 0 && CurrentDirection == 0) // Market Buy -> Market Sell
+      int oldType = CurrentTypeIndex;
+      int oldDir = CurrentDirection;
+      int newType = oldType;
+      int newDir = oldDir;
+      
+      if(oldType == 0 && oldDir == 0) // Market Buy -> Market Sell
       {
-         CurrentDirection = 1;
+         newDir = 1;
       }
-      else if(CurrentTypeIndex == 0 && CurrentDirection == 1) // Market Sell -> Buy Limit
+      else if(oldType == 0 && oldDir == 1) // Market Sell -> Buy Limit
       {
-         CurrentTypeIndex = 1;
-         CurrentDirection = 0;
+         newType = 1;
+         newDir = 0;
       }
-      else if(CurrentTypeIndex == 4) // Sell Stop -> Market Buy
+      else if(oldType == 4) // Sell Stop -> Market Buy
       {
-         CurrentTypeIndex = 0;
-         CurrentDirection = 0;
+         newType = 0;
+         newDir = 0;
       }
       else // Buy Limit(1) -> Sell Limit(2) -> Buy Stop(3) -> Sell Stop(4)
       {
-         CurrentTypeIndex++;
+         newType++;
          // Derive Direction from Type for Pending Orders
-         if(CurrentTypeIndex == 1 || CurrentTypeIndex == 3) CurrentDirection = 0; // Buy
-         else                                               CurrentDirection = 1; // Sell
+         if(newType == 1 || newType == 3) newDir = 0; // Buy
+         else                             newDir = 1; // Sell
       }
 
+      InvertTradeInputs(oldDir, newDir, oldType, newType);
+      CurrentTypeIndex = newType;
+      CurrentDirection = newDir;
+
       UpdateUIMode(); 
-      ApplyDefaultTradeValues(); // Ensure logical Entry/SL/TP based on new type
       UpdateCalculatedLot(); // Immediate update of button states
       ChartRedraw();
       return true;

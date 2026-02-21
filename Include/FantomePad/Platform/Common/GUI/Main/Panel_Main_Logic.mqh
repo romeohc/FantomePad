@@ -129,4 +129,72 @@ void ApplyDefaultTradeValues()
    UpdateChartLines();
    UpdateCalculatedLot();
 }
+
+//+------------------------------------------------------------------+
+//| INVERT VALUES WHEN SWITCHING DIRECTION                           |
+//+------------------------------------------------------------------+
+void InvertTradeInputs(int oldDir, int newDir, int oldType, int newType)
+{
+   if(oldDir == newDir) return;
+   
+   string symbol = ObjectGetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT);
+   if(symbol == "") symbol = Symbol();
+   int digits = (int)MarketInfo(symbol, MODE_DIGITS);
+   
+   double entryPrice = 0;
+   if(oldType == 0) // Market
+   {
+       entryPrice = (oldDir == 0) ? MarketInfo(symbol, MODE_ASK) : MarketInfo(symbol, MODE_BID);
+   }
+   else // Pending
+   {
+       string entryStr = ObjectGetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT);
+       entryPrice = StringToDouble(entryStr);
+   }
+   
+   if(entryPrice <= 0) return;
+   
+   double newEntryPrice = entryPrice;
+   if(newType == 0)
+   {
+       newEntryPrice = (newDir == 0) ? MarketInfo(symbol, MODE_ASK) : MarketInfo(symbol, MODE_BID);
+   }
+   else if (oldType == 0 && newType != 0)
+   {
+       newEntryPrice = (newDir == 0) ? MarketInfo(symbol, MODE_ASK) : MarketInfo(symbol, MODE_BID);
+   }
+   
+   string slStr = ObjectGetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT);
+   string tpStr = ObjectGetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT);
+   if(slStr == "" || tpStr == "") return;
+   
+   double sl = StringToDouble(slStr);
+   double tp = StringToDouble(tpStr);
+   if(sl <= 0) return;
+   
+   double distSL = MathAbs(entryPrice - sl);
+   double distTP = 0;
+   if(tp > 0) distTP = MathAbs(entryPrice - tp);
+   
+   if(newDir == 0)
+   {
+       sl = newEntryPrice - distSL;
+       if(tp > 0) tp = newEntryPrice + distTP;
+   }
+   else
+   {
+       sl = newEntryPrice + distSL;
+       if(tp > 0) tp = newEntryPrice - distTP;
+   }
+   
+   ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
+   if(tp > 0) ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
+   else       ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, "0");
+   
+   if(newType != 0)
+   {
+       ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(newEntryPrice, digits));
+   }
+}
+
 #endif

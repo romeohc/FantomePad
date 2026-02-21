@@ -203,6 +203,7 @@ void CloseSymbolList()
    IsListOpen = false;
    VisibleListItems = 0;
    g_SymbolListOffset = 0; 
+   g_SymbolHoverIndex = -1; // Reset hover index on close
    ChartRedraw();
 }
 
@@ -276,7 +277,8 @@ void DrawSymbolList()
       string symName = SymbolName(dataIdx, true);
       string btnName = "ListItem_" + IntegerToString(i);
       
-      color itemBg = (dataIdx == g_SymbolHoverIndex) ? g_ColorBtnActive : g_ColorInput;
+      bool isCurrent = (symName == Symbol());
+      color itemBg = (dataIdx == g_SymbolHoverIndex || isCurrent) ? g_ColorBtnActive : g_ColorInput;
       
       CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, itemBg, g_ColorText);
       ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); 
@@ -323,6 +325,24 @@ void ToggleSymbolList()
    else 
    {
       IsListOpen = true;
+      
+      // Auto-select current symbol
+      string currSym = Symbol();
+      g_SymbolHoverIndex = GetSymbolIndex(currSym);
+      
+      // Auto-scroll to current symbol
+      if(g_SymbolHoverIndex >= 0)
+      {
+         int total = SymbolsTotal(true);
+         g_SymbolListOffset = g_SymbolHoverIndex - (g_SymbolListMaxVisible / 2);
+         if(g_SymbolListOffset > total - g_SymbolListMaxVisible) g_SymbolListOffset = total - g_SymbolListMaxVisible;
+         if(g_SymbolListOffset < 0) g_SymbolListOffset = 0;
+      }
+      else
+      {
+         g_SymbolListOffset = 0;
+      }
+      
       DrawSymbolList();
    }
 }

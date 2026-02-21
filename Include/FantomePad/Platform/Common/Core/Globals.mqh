@@ -120,4 +120,17 @@ int    g_SymMgr_MaxVisible = 20;      // Max visible rows in grid
 string g_SymMgr_SearchQuery = "";     // Optional search query logic for future use
 string g_SymMgr_SelectedSymbol = "";  // Currently selected symbol in manager
 
+//+------------------------------------------------------------------+
+//| HELPER: Get Symbol Index in Market Watch                         |
+//+------------------------------------------------------------------+
+int GetSymbolIndex(string sym)
+{
+   int total = SymbolsTotal(true);
+   for(int i = 0; i < total; i++)
+   {
+      if(SymbolName(i, true) == sym) return i;
+   }
+   return -1;
+}
+
 #endif

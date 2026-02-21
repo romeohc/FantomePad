@@ -80,24 +80,30 @@ void OnEvent_Key(long lparam)
    if(cmdCode == 91911) // BUY
    {
       EnsureTradePanel();
+      if(g_PanelMain.IsVisible) InvertTradeInputs(CurrentDirection, 0, CurrentTypeIndex, 0);
       CurrentTypeIndex = 0; CurrentDirection = 0;
       changed = true; executed = true;
    }
    else if(cmdCode == 91912) // SELL
    {
       EnsureTradePanel();
+      if(g_PanelMain.IsVisible) InvertTradeInputs(CurrentDirection, 1, CurrentTypeIndex, 0);
       CurrentTypeIndex = 0; CurrentDirection = 1;
       changed = true; executed = true;
    }
    else if(cmdCode == 91913) // LIMIT
    {
       EnsureTradePanel();
+      int newType = (CurrentDirection == 0) ? 1 : 2;
+      if(g_PanelMain.IsVisible) InvertTradeInputs(CurrentDirection, CurrentDirection, CurrentTypeIndex, newType);
       if(CurrentDirection == 0) CurrentTypeIndex = 1; else CurrentTypeIndex = 2;
       changed = true; executed = true;
    }
    else if(cmdCode == 91914) // STOP
    {
       EnsureTradePanel();
+      int newType = (CurrentDirection == 0) ? 3 : 4;
+      if(g_PanelMain.IsVisible) InvertTradeInputs(CurrentDirection, CurrentDirection, CurrentTypeIndex, newType);
       if(CurrentDirection == 0) CurrentTypeIndex = 3; else CurrentTypeIndex = 4;
       changed = true; executed = true;
    }

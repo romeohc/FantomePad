@@ -119,27 +119,35 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
    if(id == CHARTEVENT_KEYDOWN)
    {
         bool changed = false;
-        if(lparam == 55) { CurrentTypeIndex = 0; CurrentDirection = 0; changed = true; } // 7
-        if(lparam == 56) { CurrentTypeIndex = 0; CurrentDirection = 1; changed = true; } // 8
+        int oldType  = CurrentTypeIndex;
+        int oldDir   = CurrentDirection;
+        int newType  = oldType;
+        int newDir   = oldDir;
+
+        if(lparam == 55) { newType = 0; newDir = 0; changed = true; } // 7
+        if(lparam == 56) { newType = 0; newDir = 1; changed = true; } // 8
         
         if(lparam == 57) // 9
         {
            changed = true;
-           if(CurrentDirection == 0) {
-              if(CurrentTypeIndex == 0) CurrentTypeIndex = 1;
-              else if(CurrentTypeIndex == 1) CurrentTypeIndex = 3;
-              else CurrentTypeIndex = 0;
+           if(oldDir == 0) {
+              if(oldType == 0) newType = 1;
+              else if(oldType == 1) newType = 3;
+              else newType = 0;
            } else {
-              if(CurrentTypeIndex == 0) CurrentTypeIndex = 2;
-              else if(CurrentTypeIndex == 2) CurrentTypeIndex = 4;
-              else CurrentTypeIndex = 0;
+              if(oldType == 0) newType = 2;
+              else if(oldType == 2) newType = 4;
+              else newType = 0;
            }
         }
         
         if(changed)
         {
+           InvertTradeInputs(oldDir, newDir, oldType, newType);
+           CurrentTypeIndex = newType;
+           CurrentDirection = newDir;
+
            UpdateUIMode();
-           ApplyDefaultTradeValues();
            UpdateCalculatedLot();
            ChartRedraw();
            return true;

@@ -28,6 +28,7 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
    // --- DETECT HOVER ON LIST (UI UPDATES) ---
    if(IsListOpen && !g_PanelMain.IsDragging && !g_PanelSettings.IsDragging && !IsScrollDragging)
    {
+      string currentSym = Symbol();
       // On boucle uniquement sur les items visibles pour optimiser
       for(int i = 0; i < VisibleListItems; i++)
       {
@@ -40,11 +41,18 @@ void OnEvent_MouseMove(int mouseX, int mouseY, int buttons)
          long w = ObjectGetInteger(0, btnName, OBJPROP_XSIZE);
          long h = ObjectGetInteger(0, btnName, OBJPROP_YSIZE);
          
+         // Détection si le symbole actuel ou l'index de navigation est celui de cet item
+         int dataIdx = g_SymbolListOffset + i;
+         bool isCurrent = (SymbolName(dataIdx, true) == currentSym);
+         color normalColor = (isCurrent || dataIdx == g_SymbolHoverIndex) ? g_ColorBtnActive : g_ColorInput;
+         
          // Détection si la souris est dessus
-         color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) ? g_ColorListHover : g_ColorInput;
+         color targetColor = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) ? g_ColorListHover : normalColor;
+         
          if((color)ObjectGetInteger(0, btnName, OBJPROP_BGCOLOR) != targetColor)
          {
             ObjectSetInteger(0, btnName, OBJPROP_BGCOLOR, targetColor);
+            ObjectSetInteger(0, btnName, OBJPROP_BORDER_COLOR, targetColor); // Keep border synced
             needsRedraw = true;
          }
       }
