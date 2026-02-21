@@ -42,7 +42,9 @@ void OnEvent_ObjectClick(string sparam)
     }
 
     // --- SAFETY BLOCK AFTER DRAG ---
-    if(g_BlockClick || IsScrollDragging)
+    bool anyScrollDrag = IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging || g_ScrollSymbolManager.IsDragging;
+
+    if(g_BlockClick || anyScrollDrag)
     {
         g_BlockClick = false;
         ObjectSetInteger(0, sparam, OBJPROP_STATE, false); // Reset visual state

@@ -27,7 +27,7 @@ void ProcessDragLogic(int mouseX, int mouseY)
         }
     }
 
-    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || g_PanelSymbolManager.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging;
+    bool anyDrag = g_PanelMain.IsDragging || g_PanelSettings.IsDragging || g_PanelAccount.IsDragging || g_PanelPositions.IsDragging || g_PanelHistory.IsDragging || g_PanelSymbolManager.IsDragging || IsScrollDragging || g_ScrollSettings.IsDragging || g_ScrollHistory.IsDragging || g_ScrollAccountOrders.IsDragging || g_ScrollSymbolManager.IsDragging;
     if(anyDrag || isOverList)
     {
         if(ChartGetInteger(0, CHART_MOUSE_SCROLL))

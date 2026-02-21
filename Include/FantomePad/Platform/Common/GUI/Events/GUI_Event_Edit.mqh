@@ -110,6 +110,31 @@ void OnEvent_EndEdit(string sparam)
        UpdateHistoryFilter();
        CreateHistoryPanel(); // Redraw with new filter
    }
+
+   // --- SYMBOL MANAGER SEARCH AUTO-UPDATE ---
+   if(sparam == PREFIX + "SYM_Input_Search")
+   {
+       string sSearch = ObjectGetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TEXT);
+       StringTrimLeft(sSearch);
+       StringTrimRight(sSearch);
+       
+       g_SymMgr_SearchText = sSearch;
+       
+       if(g_SymMgr_SearchText != "")
+       {
+           LoadSymbolsForSearch(g_SymMgr_SearchText);
+       }
+       else
+       {
+           // Fallback to current category
+           if(g_SymMgr_CurrentCategory != "")
+           {
+               LoadSymbolsForCategory(g_SymMgr_CurrentCategory);
+           }
+       }
+       
+       CreateSymbolManagerPanel();
+   }
 }
 
 //+------------------------------------------------------------------+

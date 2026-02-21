@@ -9,6 +9,8 @@ string g_SymMgr_Categories[];
 int    g_SymMgr_CategoryCount = 0;
 string g_SymMgr_SymbolsInCat[];      // Symbols in current category
 int    g_SymMgr_SymbolCount = 0;     // Count of symbols in current category
+string g_SymMgr_SearchText = "";     // Current search filter
+
 
 //+------------------------------------------------------------------+
 //| HELPER: EXTRACT PARENT PATH (Définit la catégorie)               |
@@ -103,6 +105,41 @@ void LoadSymbolsForCategory(string category)
 }
 
 //+------------------------------------------------------------------+
+//| HELPER: LOAD SYMBOLS FOR SEARCH                                  |
+//+------------------------------------------------------------------+
+void LoadSymbolsForSearch(string prefixFilter)
+{
+   int total = SymbolsTotal(false);
+   string tempSyms[];
+   int count = 0;
+   ArrayResize(tempSyms, 200);
+   
+   string searchUpper = prefixFilter;
+   StringToUpper(searchUpper);
+   
+   for(int i=0; i<total; i++)
+   {
+      string name = SymbolName(i, false);
+      string nameUp = name;
+      StringToUpper(nameUp);
+      
+      if(StringFind(nameUp, searchUpper) >= 0)
+      {
+         if(count >= ArraySize(tempSyms)) ArrayResize(tempSyms, ArraySize(tempSyms) + 100);
+         tempSyms[count] = name;
+         count++;
+      }
+   }
+   
+   ArrayResize(g_SymMgr_SymbolsInCat, count);
+   for(int k=0; k<count; k++) g_SymMgr_SymbolsInCat[k] = tempSyms[k];
+   g_SymMgr_SymbolCount = count;
+   
+   // Reset scroll
+   g_SymMgr_ScrollOffset = 0;
+}
+
+//+------------------------------------------------------------------+
 //| MAIN DRAW FUNCTION                                               |
 //+------------------------------------------------------------------+
 void CreateSymbolManagerPanel()
@@ -146,7 +183,10 @@ void CreateSymbolManagerPanel()
        SetObjPosition("SYM_CatBg", x, contentY);
        SetObjPosition("SYM_Sep", x + catListW, contentY + 10);
        
-       int catStartY = contentY + 10;
+       SetObjPosition("SYM_Lbl_SearchTitle", x + (catListW / 2) - 22, y + 8);
+       SetObjPosition("SYM_Input_Search", x + 5, y + 30);
+       
+       int catStartY = y + 30 + 25 + 10;
        for(int i=0; i<g_SymMgr_CategoryCount; i++)
        {
            SetObjPosition("SYM_Cat_" + IntegerToString(i), x + 5, catStartY);
@@ -200,7 +240,23 @@ void CreateSymbolManagerPanel()
    ObjectSetInteger(0, PREFIX + "SYM_Sep", OBJPROP_ZORDER, 142);
    
    int catItemH = 25;
-   int catStartY = contentY + 10;
+   
+   // SEARCH HEADER & TEXT BOX
+   // Centered horizontally by offset: (180/2 - approx 22px for "Search...")
+   CreateLabel("SYM_Lbl_SearchTitle", "Search...", x + (catListW / 2) - 22, y + 8, 9, C'160,160,160', "Trebuchet MS");
+   ObjectSetInteger(0, PREFIX + "SYM_Lbl_SearchTitle", OBJPROP_ZORDER, 143);
+   SetObjVisible("SYM_Lbl_SearchTitle", true);
+   
+   CreateEdit("SYM_Input_Search", g_SymMgr_SearchText, x + 5, y + 30, catListW - 10, catItemH, false);
+   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BGCOLOR, g_ColorInput);
+   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_COLOR, g_ColorText);
+   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BORDER_COLOR, g_ColorInput);
+   ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TOOLTIP, "Click here and type to filter...");
+   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_ZORDER, 143);
+   SetObjVisible("SYM_Input_Search", true);
+   
+   int catStartY = y + 30 + catItemH + 10;
+
    
    for(int i=0; i<g_SymMgr_CategoryCount; i++)
    {
@@ -300,6 +356,7 @@ void ToggleSymbolManager(bool force = false)
     if(!g_PanelSymbolManager.IsVisible)
     {
         ObjectsDeleteAll(0, PREFIX + "SYM_");
+        g_SymMgr_SearchText = ""; // Clear search on close
     }
     
     RefreshAllPanels();

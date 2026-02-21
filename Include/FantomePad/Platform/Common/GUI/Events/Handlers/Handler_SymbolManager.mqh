@@ -34,6 +34,11 @@ bool Handle_SymbolManager_Events(string sparam)
         if(idx >= 0 && idx < g_SymMgr_CategoryCount)
         {
             g_SymMgr_CurrentCategory = g_SymMgr_Categories[idx];
+            
+            // Clear search filter when a category is manually clicked
+            g_SymMgr_SearchText = "";
+            ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TEXT, g_SymMgr_SearchText);
+            
             LoadSymbolsForCategory(g_SymMgr_CurrentCategory);
             FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);
             RefreshAllPanels();
