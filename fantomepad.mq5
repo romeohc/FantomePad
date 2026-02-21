@@ -73,6 +73,8 @@ int OnInit()
    ChartSetInteger(0, CHART_SHOW_PERIOD_SEP, false);
    ChartSetInteger(0, CHART_SHOW_VOLUMES, false);
    ChartSetInteger(0, CHART_SHOW_OHLC, false);
+   ChartSetInteger(0, CHART_SHOW_TICKER, false);
+   ChartSetInteger(0, CHART_SHOW_TRADE_HISTORY, false);
    ChartSetInteger(0, CHART_SHOW_ONE_CLICK, false);
    ChartSetInteger(0, CHART_FOREGROUND, false);
    ChartSetInteger(0, CHART_SHOW_TRADE_LEVELS, false);
@@ -148,10 +150,13 @@ bool CheckAndSetNewAccount(bool &accountChanged)
    if(IsTesting()) return false;
    
    long currentAccount = AccountNumber();
+   
+   // DO NOT process account switch logic if we are not logged into an account.
+   // This correctly preserves the last connected account ID in global memory.
    if(currentAccount <= 0) return false;
 
    string gvName = "FantomePad_LastAccount";
-   long lastAccount = 0;
+   long lastAccount = -1; // Default to -1 so 0 is recognized as a change if it's the first run
    
    if(GlobalVariableCheck(gvName)) lastAccount = (long)GlobalVariableGet(gvName);
    
@@ -169,8 +174,19 @@ bool CheckAndSetNewAccount(bool &accountChanged)
             // We do NOT update the GV yet. The next OnInit (on the new symbol) 
             // will detect the account mismatch again and finalize the change.
             Print("FantomePad: Account Change Detected (", lastAccount, " -> ", currentAccount, "). Auto-switching to first symbol: ", firstSymbol);
-            ChartSetSymbolPeriod(0, firstSymbol, Period());
-            return true; // Urgent switch triggered, stop current execution!
+            
+            // To prevent Wine MT5 crash loops on Mac when the chart isn't ready or hasn't loaded data,
+            // we should only attempt to change symbol if there's no major stall.
+            // MT5 `ChartSetSymbolPeriod` can cause "WAITING FOR UPDATE" if the history for the new symbol is completely empty.
+            if(SeriesInfoInteger(firstSymbol, Period(), SERIES_BARS_COUNT) > 0)
+            {
+               ChartSetSymbolPeriod(0, firstSymbol, Period());
+               return true; // Urgent switch triggered, stop current execution!
+            }
+            else
+            {
+               Print("FantomePad: Skipping auto-switch to " + firstSymbol + " because it has no downloaded data (avoids 'Waiting for update' loop).");
+            }
          }
       }
       

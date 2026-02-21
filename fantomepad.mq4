@@ -203,13 +203,15 @@ bool CheckAndSetNewAccount()
 {
    if(IsTesting()) return false; 
 
+   long currentAccount = AccountNumber();
+
    // Security: If not connected to an account, don't trigger auto-switch logic
    // This prevents infinite loops and unnecessary restarts when account number is 0.
-   long currentAccount = AccountNumber();
+   // This also allows the EA to load the Auth window when not connected to an account.
    if(currentAccount <= 0) return false;
 
    string gvName = "FantomePad_LastAccount";
-   long lastAccount = 0;
+   long lastAccount = -1; // Default to -1 so 0 is recognized as a change if it's the first run
 
    // Check if global variable exists and retrieve value
    if(GlobalVariableCheck(gvName))
@@ -230,8 +232,18 @@ bool CheckAndSetNewAccount()
          if(firstSymbol != "" && Symbol() != firstSymbol)
          {
             Print("FantomePad: Account Change Detected (", lastAccount, " -> ", currentAccount, "). Auto-switching to first symbol: ", firstSymbol);
-            ChartSetSymbolPeriod(0, firstSymbol, Period());
-            return true;
+            
+            // Fix "Waiting for update" bug on MT4 Mac/Wine 
+            // We only switch if there is at least some history data available locally
+            if(iBars(firstSymbol, Period()) > 0)
+            {
+               ChartSetSymbolPeriod(0, firstSymbol, Period());
+               return true;
+            }
+            else
+            {
+               Print("FantomePad: Skipping auto-switch to " + firstSymbol + " because it has no downloaded data (avoids 'Waiting for update' loop).");
+            }
          }
       }
       
