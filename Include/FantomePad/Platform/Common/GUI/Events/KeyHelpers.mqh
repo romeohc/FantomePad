@@ -233,6 +233,20 @@ void ExecuteGlobalCancel()
    // --- LICENSE REVOKED GUARD ---
    if(g_LicenseState == LICENSE_REVOKED) return; // Don't allow closing things or clearing selection
 
+   // Close Symbol Manager (Overlay) if open
+   if(g_PanelSymbolManager.IsVisible)
+   {
+      ToggleSymbolManager(false);
+      return;
+   }
+
+   // Close Symbol List (Dropdown) if open
+   if(IsListOpen)
+   {
+      CloseSymbolList();
+      return;
+   }
+
    // Close Settings if open
    if(g_PanelSettings.IsVisible)
    {
