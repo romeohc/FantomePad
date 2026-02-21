@@ -98,30 +98,47 @@ void ClearSoftLockUI()
 //+------------------------------------------------------------------+
 //| CORE: INITIAL LICENSE CHECK                                      |
 //+------------------------------------------------------------------+
-void HandleInitialLicenseCheck()
+void HandleInitialLicenseCheck(bool isOnInit = true)
 {
    if(g_ActivationCode != "")
    {
-      if(CheckLicense(g_ActivationCode)) 
+      if(!isOnInit)
       {
-         g_LicenseState = LICENSE_OK;
+          if(CheckLicense(g_ActivationCode)) 
+          {
+             g_LicenseState = LICENSE_OK;
+          }
+          else
+          {
+             if(OrdersTotal() > 0)
+             {
+                 Print("FantomePad: License invalid but positions open. Entering Soft Lock.");
+                 g_LicenseState = LICENSE_REVOKED;
+             }
+             else
+             {
+                 g_LicenseState = LICENSE_NONE;
+             }
+          }
       }
       else
       {
-         if(OrdersTotal() > 0)
-         {
-             Print("FantomePad: License invalid but positions open. Entering Soft Lock.");
-             g_LicenseState = LICENSE_REVOKED;
-         }
-         else
-         {
-             g_LicenseState = LICENSE_NONE;
-         }
+         // Deferred network check. We temporarily assume it evaluates to true 
+         // so MT4/MT5 doesn't panic and unload the EA on restart due to WebRequest in OnInit.
+         // The first OnTimer tick will validate it via HandleLicenseHeartbeat().
+         g_LicenseState = LICENSE_OK; 
       }
    }
-   else if(OrdersTotal() > 0)
+   else 
    {
-       g_LicenseState = LICENSE_REVOKED;
+       if(OrdersTotal() > 0)
+       {
+           g_LicenseState = LICENSE_REVOKED;
+       }
+       else
+       {
+           g_LicenseState = LICENSE_NONE;
+       }
    }
 }
 
@@ -141,7 +158,8 @@ void HandleLicenseHeartbeat()
    
    if(g_LicenseState != LICENSE_NONE && (now - lastHeartbeat > 1800000 || lastHeartbeat == 0)) 
    {
-      if(now - g_LastInteractionTime > 60000) 
+      // Check immediately if lastHeartbeat == 0 (Deferred startup check) OR idle
+      if(lastHeartbeat == 0 || now - g_LastInteractionTime > 60000) 
       {
          lastHeartbeat = now;
          bool isValid = CheckLicense(g_ActivationCode, 1500);
@@ -150,9 +168,19 @@ void HandleLicenseHeartbeat()
          {
              if(g_AuthErrorMsg != "" && StringFind(g_AuthErrorMsg, "Serveur injoignable") < 0)
              {
-                 Print("FantomePad: License Revoked/Invalidated. Enhancing Security.");
-                 g_LicenseState = LICENSE_REVOKED;
-                 ApplySoftLockMode();
+                 if(OrdersTotal() == 0)
+                 {
+                     Print("FantomePad: License Invalid. Fast-failing to Auth UI.");
+                     g_LicenseState = LICENSE_NONE;
+                     g_NeedsReinit = true;
+                     return;
+                 }
+                 else 
+                 {
+                     Print("FantomePad: License Revoked/Invalidated. Enhancing Security.");
+                     g_LicenseState = LICENSE_REVOKED;
+                     ApplySoftLockMode();
+                 }
              }
          }
          else
@@ -166,6 +194,7 @@ void HandleLicenseHeartbeat()
          }
       }
    }
+   
 
    if(g_LicenseState == LICENSE_REVOKED)
    {
