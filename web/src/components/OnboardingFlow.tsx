@@ -1,10 +1,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircle, Loader2, Monitor, LogOut, KeyRound, Maximize } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircle, Loader2, Monitor, LogOut, KeyRound } from "lucide-react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase";
 import { useOnboarding } from "@/hooks/useOnboarding";
-import SpaceBackground from "@/components/SpaceBackground";
 import Image from "next/image";
 
 interface LicenseData {
@@ -32,7 +31,6 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     } = useOnboarding(email, initialData);
 
     const [copied, setCopied] = useState(false);
-    const [tutorialStep, setTutorialStep] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -42,105 +40,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Reset tutorial step when leaving/entering
-    useEffect(() => {
-        if (step !== "activation") {
-            setTutorialStep(0);
-        }
-    }, [step]);
-
-    const isSpecialMT4Mac = platform === "mt4" && os === "mac";
-    const isSpecialMT5Mac = platform === "mt5" && os === "mac";
-    const isWindows = os === "windows";
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    const tutorialSteps = (isSpecialMT4Mac || isSpecialMT5Mac || isWindows) ? [
-        {
-            title: "1. Intégration",
-            description: "Installez le fichier FantomePad dans le dossier Experts de votre plateforme.",
-            video: isWindows
-                ? "/video/onboarding/MT5/1-mt5-windows.mp4"
-                : (isSpecialMT4Mac ? "/video/onboarding/MT4/1-mt4-mac.mp4" : "/video/onboarding/MT5/1-mt5-mac.mp4")
-        },
-        {
-            title: "2. Autorisation",
-            description: (platform === "mt5")
-                ? "Autorisez l'Algo Trading et configurez la connexion sécurisée."
-                : "Autorisez le Trading Automatique et configurez la connexion sécurisée.",
-            video: isWindows
-                ? "/video/onboarding/MT5/2-mt5-windows.mp4"
-                : (isSpecialMT4Mac ? "/video/onboarding/MT4/2-mt4-mac.mp4" : "/video/onboarding/MT5/2-mt5-mac.mp4")
-        },
-        {
-            title: "3. Lancement",
-            description: "Initialisez FantomePad sur votre graphique pour commencer.",
-            video: isWindows
-                ? "/video/onboarding/MT5/3-mt5-windows.mp4"
-                : (isSpecialMT4Mac ? "/video/onboarding/MT4/3-mt4-mac.mp4" : "/video/onboarding/MT5/3-mt5-mac.mp4")
-        },
-        {
-            title: "Votre code d'activation",
-            description: "Copiez votre code d'activation pour commencer à trader ;)",
-        }
-    ] : [
-        {
-            title: "1. Intégration",
-            description: platform === "mt5"
-                ? "File > Open Data Folder > MQL5 > Experts + Collez fichier fantomepad.ex5"
-                : "File > Open Data Folder > MQL4 > Experts + Collez fichier fantomepad.ex4",
-        },
-        {
-            title: "2. Autorisation",
-            description: "Réglages 'Auto Trading' + Collez URL dans 'Allow WebRequest'",
-        },
-        {
-            title: "3. Actualisation",
-            description: platform === "mt5"
-                ? "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh"
-                : "Ouvrir Navigator + Clic droit sur 'Expert Advisors' + Refresh",
-        },
-        {
-            title: "4. Lancement",
-            description: "Nettoyez fenêtres + Glissez déposez FantomePad + Activez AutoTrading",
-        },
-        {
-            title: "5. Activation",
-            description: "Copiez votre code d'activation pour commencer à trader ;)",
-        }
-    ];
-
-    const isLastTutorialStep = tutorialStep === tutorialSteps.length - 1;
-
     const [urlCopied, setUrlCopied] = useState(false);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    const handleCopyUrl = () => {
-        if (supabaseUrl) {
-            const functionsUrl = supabaseUrl.replace('.supabase.co', '.functions.supabase.co');
-            navigator.clipboard.writeText(functionsUrl);
-            setUrlCopied(true);
-            setTimeout(() => setUrlCopied(false), 2000);
-        }
-    };
-
-    // Clamp tutorial step to bounds if the steps array changes
-    useEffect(() => {
-        if (tutorialStep >= tutorialSteps.length) {
-            setTutorialStep(Math.max(0, tutorialSteps.length - 1));
-        }
-    }, [tutorialSteps.length, tutorialStep]);
-
-    const nextTutorialStep = () => {
-        if (tutorialStep < tutorialSteps.length - 1) {
-            setTutorialStep(tutorialStep + 1);
-        }
-    };
-
-    const prevTutorialStep = () => {
-        if (tutorialStep > 0) {
-            setTutorialStep(tutorialStep - 1);
-        }
-    };
 
     // Poll for status update when in activation step
     useEffect(() => {
@@ -179,17 +79,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         { id: "activation", label: "Activation" },
     ];
 
-    const handleFullscreen = () => {
-        if (videoRef.current) {
-            if (videoRef.current.requestFullscreen) {
-                videoRef.current.requestFullscreen();
-            } else if ((videoRef.current as any).webkitRequestFullscreen) {
-                (videoRef.current as any).webkitRequestFullscreen();
-            } else if ((videoRef.current as any).msRequestFullscreen) {
-                (videoRef.current as any).msRequestFullscreen();
-            }
-        }
-    };
+
 
     const currentStepIndex = steps.findIndex(s => s.id === step);
 
@@ -529,151 +419,76 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col h-full relative pt-4">
+                                    <div className="flex flex-col h-full relative pt-4 pb-1">
 
-                                        {/* Main Content Area - Reduced Width */}
-                                        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
+                                        {/* Main Content Area */}
+                                        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-4xl mx-auto space-y-4">
 
-                                            {/* Video Container - 16:9 Aspect Ratio */}
-                                            <div className="w-full aspect-video bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden shadow-2xl relative mb-8 group">
-                                                {/* Video Player */}
-                                                {!isLastTutorialStep && tutorialSteps[tutorialStep] ? (
-                                                    <div className="absolute inset-0 w-full h-full bg-black">
-                                                        {tutorialSteps[tutorialStep].video ? (
-                                                            <>
-                                                                <video
-                                                                    ref={videoRef}
-                                                                    key={tutorialSteps[tutorialStep].video}
-                                                                    src={tutorialSteps[tutorialStep].video}
-                                                                    className="w-full h-full object-cover"
-                                                                    autoPlay
-                                                                    loop
-                                                                    muted
-                                                                    playsInline
-                                                                />
-                                                                {/* Fullscreen Button */}
-                                                                <button
-                                                                    onClick={handleFullscreen}
-                                                                    className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-lg text-white border border-white/10 transition-all opacity-0 group-hover:opacity-100 z-30"
-                                                                    title="Plein écran"
-                                                                >
-                                                                    <Maximize className="h-4 w-4" />
-                                                                </button>
-                                                            </>
-                                                        ) : (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                                                                <div className="text-white/5 font-bold text-8xl select-none">
-                                                                    {tutorialStep + 1}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    /* Background placeholder when no video */
-                                                    <div className="absolute inset-0 bg-[#050505]" />
-                                                )}
+                                            {/* Video Container - Empty for now */}
+                                            <div className="w-full aspect-video bg-[#050505] border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative flex items-center justify-center">
+                                                <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-0 pointer-events-none" />
 
-                                                {/* Step 5 Special Overlay: License Key - Professional Redesign */}
-                                                {isLastTutorialStep && !loading && (
-                                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 text-center animate-fade-in z-20 overflow-hidden">
-                                                        <SpaceBackground isMobile={isMobile} />
-
-                                                        {/* Gradient overlay for readability */}
-                                                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
-
-                                                        <div className="relative z-10 bg-brand-blue/10 p-3 md:p-4 rounded-full mb-4 md:mb-8">
-                                                            <KeyRound className="h-6 w-6 md:h-8 md:w-8 text-brand-blue" />
-                                                        </div>
-
-                                                        <div className="relative z-10 w-full max-w-[280px] md:max-w-sm">
-                                                            <button
-                                                                onClick={handleCopy}
-                                                                className="w-full bg-[#111] border border-white/10 hover:border-brand-blue/50 rounded-lg p-1.5 pl-3 md:pl-4 flex items-center justify-between transition-all group/btn"
-                                                            >
-                                                                <code className="font-mono text-sm md:text-lg font-bold tracking-wider text-white group-hover/btn:text-brand-blue transition-colors truncate mr-2">
-                                                                    {activationCode || "FP-XXXX-XXXX"}
-                                                                </code>
-                                                                <div className={`h-8 w-8 md:h-10 md:w-10 rounded-md flex items-center justify-center transition-all shrink-0 ${copied ? "bg-green-500/20 text-green-500" : "bg-white/5 group-hover/btn:bg-brand-blue group-hover/btn:text-black"}`}>
-                                                                    {copied ? <Check className="h-4 w-4 md:h-5 md:w-5" /> : <Copy className="h-4 w-4 md:h-5 md:w-5" />}
-                                                                </div>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                <div className="flex flex-col items-center gap-4 opacity-40">
+                                                    <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-brand-blue/50" />
+                                                    <span className="text-xs md:text-sm font-black text-brand-gray tracking-[0.2em] uppercase text-center px-4">
+                                                        Vidéo explicative à venir
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            {/* Unified Controls & Text Bar */}
-                                            <div className="w-full flex items-center gap-2 md:gap-8 justify-between px-2 md:px-4">
-                                                {/* Left: Navigation */}
-                                                <button
-                                                    onClick={prevTutorialStep}
-                                                    disabled={tutorialStep === 0}
-                                                    className="h-10 w-10 md:h-12 md:w-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all shrink-0"
-                                                >
-                                                    <ChevronLeft className="h-5 w-5" />
-                                                </button>
+                                            {/* Unified Data section */}
+                                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                                {/* API URL Container */}
+                                                <div className="p-3 md:p-4 bg-[#0A0A0A] border border-white/5 rounded-2xl md:rounded-3xl flex flex-col justify-center space-y-2 relative overflow-hidden shadow-lg">
+                                                    <div className="absolute inset-0 bg-brand-blue/5 opacity-0 pointer-events-none" />
 
-                                                {/* Center: Text Content */}
-                                                <div className="flex-1 text-center space-y-2 min-w-0">
-                                                    <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight break-words">
-                                                        {tutorialSteps[tutorialStep]?.title || ""}
-                                                    </h3>
-                                                    <p className="text-brand-gray text-sm md:text-base leading-relaxed max-w-xl mx-auto break-words">
-                                                        {tutorialSteps[tutorialStep]?.description || ""}
-                                                    </p>
+                                                    <div className="flex items-center gap-3 relative z-10">
+                                                        <div className="w-2 h-2 rounded-full bg-brand-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                                                        <span className="text-brand-gray text-[10px] md:text-xs font-bold uppercase tracking-widest">
+                                                            URL API
+                                                        </span>
+                                                    </div>
 
-                                                    {/* Step 1 or 2 URL/Path Action */}
-                                                    {((tutorialStep === 1) || (tutorialStep === 0 && isSpecialMT5Mac)) && (
-                                                        <button
-                                                            onClick={() => {
-                                                                const textToCopy = (tutorialStep === 0 && isSpecialMT5Mac)
-                                                                    ? "~/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts/"
-                                                                    : "https://api.fantomepad.com";
-                                                                navigator.clipboard.writeText(textToCopy);
-                                                                setUrlCopied(true);
-                                                                setTimeout(() => setUrlCopied(false), 2000);
-                                                            }}
-                                                            className="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-brand-blue/20 transition-all max-w-full h-auto whitespace-normal break-all text-center leading-tight"
-                                                        >
-                                                            {urlCopied ? (
-                                                                <Check className="h-3.5 w-3.5 shrink-0" />
-                                                            ) : (
-                                                                <Copy className="h-3.5 w-3.5 shrink-0" />
-                                                            )}
-                                                            {urlCopied ? (
-                                                                <span className="uppercase">
-                                                                    {(tutorialStep === 0 && isSpecialMT5Mac) ? "Chemin Copié !" : "URL Copiée !"}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="lowercase">
-                                                                    {(tutorialStep === 0 && isSpecialMT5Mac)
-                                                                        ? "~/Library/Application Support/.../Experts/"
-                                                                        : "https://api.fantomepad.com"}
-                                                                </span>
-                                                            )}
-                                                        </button>
-                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText("https://api.fantomepad.com");
+                                                            setUrlCopied(true);
+                                                            setTimeout(() => setUrlCopied(false), 2000);
+                                                        }}
+                                                        className="w-full bg-[#111] border border-white/10 hover:border-brand-blue/50 rounded-xl p-2 md:p-3 flex items-center justify-between transition-all duration-300 relative z-10 group/btn"
+                                                    >
+                                                        <code className="font-mono text-xs md:text-sm font-bold tracking-widest text-white group-hover/btn:text-brand-blue transition-colors truncate mr-2">
+                                                            https://api.fantomepad.com
+                                                        </code>
+                                                        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0 ${urlCopied ? "bg-green-500/20 text-green-500 scale-110" : "bg-white/5 group-hover/btn:bg-brand-blue group-hover/btn:text-black group-hover/btn:scale-105"}`}>
+                                                            {urlCopied ? <Check className="h-4 w-4 md:h-5 md:w-5" /> : <Copy className="h-4 w-4 md:h-5 md:w-5" />}
+                                                        </div>
+                                                    </button>
                                                 </div>
 
-                                                {/* Right: Navigation */}
-                                                <button
-                                                    onClick={nextTutorialStep}
-                                                    disabled={tutorialStep === tutorialSteps.length - 1}
-                                                    className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-brand-blue text-black flex items-center justify-center hover:bg-brand-blue/90 disabled:bg-white/10 disabled:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-blue/20 shrink-0"
-                                                >
-                                                    <ChevronRight className="h-5 w-5" />
-                                                </button>
-                                            </div>
+                                                {/* Activation Key Container */}
+                                                <div className="p-3 md:p-4 bg-[#0A0A0A] border border-white/5 rounded-2xl md:rounded-3xl flex flex-col justify-center space-y-2 relative overflow-hidden shadow-lg">
+                                                    <div className="absolute inset-0 bg-brand-blue/5 opacity-0 pointer-events-none" />
 
-                                            {/* Progress Dots */}
-                                            <div className="flex justify-center gap-2 mt-8">
-                                                {tutorialSteps.map((_, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === tutorialStep ? "w-8 bg-brand-blue" : "w-1.5 bg-white/10"
-                                                            }`}
-                                                    />
-                                                ))}
+                                                    <div className="flex items-center gap-3 relative z-10">
+                                                        <div className="w-2 h-2 rounded-full bg-brand-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                                                        <span className="text-brand-gray text-[10px] md:text-xs font-bold uppercase tracking-widest">
+                                                            Code d'activation
+                                                        </span>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={handleCopy}
+                                                        className="w-full bg-[#111] border border-white/10 hover:border-brand-blue/50 rounded-xl p-2 md:p-3 flex items-center justify-between transition-all duration-300 relative z-10 group/btn"
+                                                    >
+                                                        <code className="font-mono text-xs md:text-sm font-bold tracking-widest text-white group-hover/btn:text-brand-blue transition-colors truncate mr-2">
+                                                            {activationCode || "FP-XXXX-XXXX"}
+                                                        </code>
+                                                        <div className={`h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0 ${copied ? "bg-green-500/20 text-green-500 scale-110" : "bg-white/5 group-hover/btn:bg-brand-blue group-hover/btn:text-black group-hover/btn:scale-105"}`}>
+                                                            {copied ? <Check className="h-4 w-4 md:h-5 md:w-5" /> : <Copy className="h-4 w-4 md:h-5 md:w-5" />}
+                                                        </div>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
