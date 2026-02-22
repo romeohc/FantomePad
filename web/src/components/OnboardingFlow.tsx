@@ -1,10 +1,13 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Copy, Check, ChevronLeft, ChevronRight, Download, PlayCircle, Loader2, Monitor, LogOut, KeyRound } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
 import { createClient } from "@/utils/supabase";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import Image from "next/image";
+import SpaceBackground from "./SpaceBackground";
+
 
 interface LicenseData {
     activation_code?: string;
@@ -30,8 +33,19 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
         loading
     } = useOnboarding(email, initialData);
 
+
     const [copied, setCopied] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoTimeRef = useRef(0);
+
+
+    // Reset video state only if platform or OS changes
+    useEffect(() => {
+        setIsPlaying(false);
+        videoTimeRef.current = 0;
+    }, [platform, os]);
+
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -73,11 +87,12 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     };
 
     const steps = [
-        { id: "platform_selection", label: "Plateforme" },
-        { id: "install", label: "Installation" },
-        { id: "download", label: "Logiciel" },
+        { id: "platform_selection", label: "Configuration" },
+        { id: "install", label: "MetaTrader" },
+        { id: "download", label: "Fantomepad" },
         { id: "activation", label: "Activation" },
     ];
+
 
 
 
@@ -287,7 +302,9 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             </div>
                                             <div>
                                                 <div className="text-lg font-bold text-white">Télécharger {platform?.toUpperCase()}</div>
-                                                <div className="text-xs text-brand-gray mt-1 font-medium italic opacity-60 text-left">Version officielle MetaQuotes</div>
+                                                <div className="text-xs text-brand-gray mt-1 font-medium italic opacity-60 text-left">
+                                                    {platform === "mt4" && os === "windows" ? "Version officielle Pepperstone" : "Version officielle MetaQuotes"}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -297,7 +314,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 href={platform === "mt4"
                                                     ? (os === "mac"
                                                         ? "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/MetaTrader4.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt4.macos"
-                                                        : "https://download.terminal.free/cdn/web/metaquotes.software.corp/mt4/mt4setup.exe?utm_source=www.metatrader4.com&utm_campaign=download")
+                                                        : "https://download.terminal.free/cdn/web/pepperstone.group.limited/mt4/pepperstone4setup.exe")
                                                     : (os === "mac"
                                                         ? "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/MetaTrader5.pkg.zip?utm_source=www.metatrader4.com&utm_campaign=download.mt5.macos"
                                                         : "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader4.com&utm_campaign=download")
@@ -309,6 +326,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                                 <Download className="h-5 w-5 transition-transform group-hover/dl:scale-110" />
                                             </a>
                                         )}
+
                                     </div>
 
                                     <button
@@ -422,18 +440,55 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                     <div className="flex flex-col h-full relative pt-4 pb-1">
 
                                         {/* Main Content Area */}
-                                        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-4xl mx-auto space-y-4">
+                                        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-4xl mx-auto space-y-10">
 
-                                            {/* Video Container - Empty for now */}
-                                            <div className="w-full aspect-video bg-[#050505] border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative flex items-center justify-center">
-                                                <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-0 pointer-events-none" />
 
-                                                <div className="flex flex-col items-center gap-4 opacity-40">
-                                                    <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-brand-blue/50" />
-                                                    <span className="text-xs md:text-sm font-black text-brand-gray tracking-[0.2em] uppercase text-center px-4">
-                                                        Vidéo explicative à venir
-                                                    </span>
-                                                </div>
+                                            {/* Video Container */}
+                                            <div className="w-full aspect-video bg-black border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative flex items-center justify-center group/video">
+                                                {os === "windows" ? (
+                                                    !isPlaying ? (
+                                                        <div className="absolute inset-0 z-0 cursor-pointer group/preview flex flex-col items-center justify-center" onClick={() => setIsPlaying(true)}>
+                                                            <SpaceBackground isMobile={isMobile} />
+                                                            <div className="relative z-10 flex flex-col items-center">
+                                                                <div className="relative h-20 w-20 md:h-24 md:w-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover/preview:border-brand-blue/50 group-hover/preview:bg-white/15 transition-all">
+                                                                    <PlayCircle className="w-10 h-10 md:w-12 md:h-12 text-white fill-white/10 group-hover/preview:text-brand-blue group-hover/preview:fill-brand-blue/10 transition-all ml-1" />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                    ) : (
+                                                        <video
+                                                            key={`${os}-${platform}`}
+                                                            className="w-full h-full object-contain relative z-10"
+                                                            controls
+                                                            autoPlay
+                                                            preload="auto"
+                                                            onTimeUpdate={(e) => {
+                                                                videoTimeRef.current = e.currentTarget.currentTime;
+                                                            }}
+                                                            onLoadedMetadata={(e) => {
+                                                                if (videoTimeRef.current > 0) {
+                                                                    e.currentTarget.currentTime = videoTimeRef.current;
+                                                                }
+                                                            }}
+                                                        >
+
+                                                            <source src={`/video/onboarding/windows-${platform}.mp4`} type="video/mp4" />
+                                                            Votre navigateur ne supporte pas la lecture de vidéos.
+                                                        </video>
+                                                    )
+                                                ) : (
+                                                    <>
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-0 pointer-events-none" />
+                                                        <div className="flex flex-col items-center gap-4 opacity-40">
+                                                            <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-brand-blue/50" />
+                                                            <span className="text-xs md:text-sm font-black text-brand-gray tracking-[0.2em] uppercase text-center px-4">
+                                                                Vidéo explicative à venir {os === "mac" ? "pour Mac" : ""}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
 
                                             {/* Unified Data section */}
