@@ -114,7 +114,7 @@ void OnEvent_Key(long lparam)
       
       // Reset risk value on switch to avoid carrying over large numbers (e.g. 500$ -> 500%)
       string resetVal = (RiskMode == 1) ? "0" : "0.0";
-      ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, resetVal);
+      FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, resetVal);
       
       changed = true; executed = true;
    }

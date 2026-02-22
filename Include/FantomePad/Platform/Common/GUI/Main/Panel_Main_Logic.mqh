@@ -121,10 +121,10 @@ void ApplyDefaultTradeValues()
    if(tp > clampMax) tp = clampMax;
    
    if(CurrentTypeIndex != 0)
-      ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(entry, digits));
+      FP_ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(entry, digits));
    
-   ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
-   ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
+   FP_ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
+   FP_ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
    
    UpdateChartLines();
    UpdateCalculatedLot();
@@ -187,13 +187,13 @@ void InvertTradeInputs(int oldDir, int newDir, int oldType, int newType)
        if(tp > 0) tp = newEntryPrice - distTP;
    }
    
-   ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
-   if(tp > 0) ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
-   else       ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(sl, digits));
+   if(tp > 0) FP_ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(tp, digits));
+   else       FP_ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, "0");
    
    if(newType != 0)
    {
-       ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(newEntryPrice, digits));
+       FP_ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(newEntryPrice, digits));
    }
 }
 

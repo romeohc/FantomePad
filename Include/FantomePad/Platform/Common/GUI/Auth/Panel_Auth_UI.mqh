@@ -20,7 +20,7 @@ void CreateAuthUI()
    
    // Professional Background Overlay
    CreateRect("Auth_Overlay", 0, 0, 5000, 5000, COLOR_BRAND_BG, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Auth_Overlay", OBJPROP_ZORDER, 0);
+   FP_ObjectSetInteger(0, PREFIX + "Auth_Overlay", OBJPROP_ZORDER, 0);
    
    // Window size (Increased height slightly for the new spacing)
    g_PanelAuth.Width = 450;
@@ -39,7 +39,7 @@ void CreateAuthUI()
    
    // 1. Main Container
    CreateRect(p + "Bg", x, y, w, h, COLOR_BRAND_BG, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + p + "Bg", OBJPROP_COLOR, COLOR_BRAND_BORDER); 
+   FP_ObjectSetInteger(0, PREFIX + p + "Bg", OBJPROP_COLOR, COLOR_BRAND_BORDER); 
    
    // 2. Minimalist White Top Accent
    CreateRect(p + "Accent", x, y, w, 2, COLOR_BRAND_WHITE, BORDER_FLAT);
@@ -48,28 +48,28 @@ void CreateAuthUI()
    // "WELCOME TO FANTOMEPAD" REMOVED AS REQUESTED
    
    CreateLabel(p + "Title", "The new standard is here.", centerX, y + 60, 20, COLOR_BRAND_WHITE, "Trebuchet MS Bold");
-   ObjectSetInteger(0, PREFIX + p + "Title", OBJPROP_ANCHOR, ANCHOR_CENTER);
+   FP_ObjectSetInteger(0, PREFIX + p + "Title", OBJPROP_ANCHOR, ANCHOR_CENTER);
    
    // 4. ACTIVATION SECTION
    CreateLabel(p + "Notes", "Code d'Activation", centerX, y + 130, 8, COLOR_BRAND_GRAY, "Arial Bold");
-   ObjectSetInteger(0, PREFIX + p + "Notes", OBJPROP_ANCHOR, ANCHOR_CENTER);
+   FP_ObjectSetInteger(0, PREFIX + p + "Notes", OBJPROP_ANCHOR, ANCHOR_CENTER);
    
    CreateEdit(p + "Input", "", x + 75, y + 147, w - 150, 35);
-   ObjectSetString(0, PREFIX + p + "Input", OBJPROP_TEXT, ""); // FORCE EMPTY
-   ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BGCOLOR, C'28,28,28'); 
-   ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BORDER_COLOR, COLOR_BRAND_BORDER);
-   ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_COLOR, COLOR_BRAND_WHITE);
+   FP_ObjectSetString(0, PREFIX + p + "Input", OBJPROP_TEXT, ""); // FORCE EMPTY
+   FP_ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BGCOLOR, C'28,28,28'); 
+   FP_ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_BORDER_COLOR, COLOR_BRAND_BORDER);
+   FP_ObjectSetInteger(0, PREFIX + p + "Input", OBJPROP_COLOR, COLOR_BRAND_WHITE);
    
    // 5. ACTION BUTTON
    CreateButton(p + "BtnActive", "ACTIVER FANTOMEPAD", x + 75, y + 210, w - 150, 45, COLOR_BRAND_WHITE, clrBlack);
-   ObjectSetString(0, PREFIX + p + "BtnActive", OBJPROP_FONT, "Segoe UI Bold");
-   ObjectSetInteger(0, PREFIX + p + "BtnActive", OBJPROP_FONTSIZE, 10);
+   FP_ObjectSetString(0, PREFIX + p + "BtnActive", OBJPROP_FONT, "Segoe UI Bold");
+   FP_ObjectSetInteger(0, PREFIX + p + "BtnActive", OBJPROP_FONTSIZE, 10);
    
    // 6. ERROR/STATUS AREA (No initial creation to avoid ghost labels)
    
    // 7. FOOTER (Moved up slightly to reduce gap from button)
    CreateLabel(p + "Help", "Besoin d'aide ? contact@fantomepad.com", centerX, y + 315, 9, COLOR_BRAND_GRAY, "Arial");
-   ObjectSetInteger(0, PREFIX + p + "Help", OBJPROP_ANCHOR, ANCHOR_CENTER);
+   FP_ObjectSetInteger(0, PREFIX + p + "Help", OBJPROP_ANCHOR, ANCHOR_CENTER);
 }
 
 void ShowAuthPanel(bool show)
@@ -123,7 +123,7 @@ void UpdateAuthStatus(string msg, color col)
    {
       string name = p + "StatusMsg_" + IntegerToString(i);
       CreateLabel(name, parts[i], centerX, startY + (i * 18), 9, col, "Arial");
-      ObjectSetInteger(0, PREFIX + name, OBJPROP_ANCHOR, ANCHOR_CENTER);
+      FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_ANCHOR, ANCHOR_CENTER);
    }
    
    ChartRedraw();

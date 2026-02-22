@@ -25,11 +25,26 @@ string GetOrderTypeStrShort(int type)
 //+------------------------------------------------------------------+
 void GetAccountHistoryStats(double &outDeposit, double &outWithdraw, double &outNetProfit)
 {
+   static double cached_deposit = 0;
+   static double cached_withdraw = 0;
+   static double cached_netprofit = 0;
+   static int    cached_total = -1;
+   
+   int total = OrdersHistoryTotal();
+   
+   // MT5 Cache Flush Protection: if history temporarily disappears, use cached data
+   if(total == 0 && cached_total > 0)
+   {
+      outDeposit = cached_deposit;
+      outWithdraw = cached_withdraw;
+      outNetProfit = cached_netprofit;
+      return;
+   }
+   
    outDeposit = 0;
    outWithdraw = 0;
    outNetProfit = 0;
    
-   int total = OrdersHistoryTotal();
    for(int i=0; i<total; i++)
    {
       if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
@@ -48,6 +63,15 @@ void GetAccountHistoryStats(double &outDeposit, double &outWithdraw, double &out
             outNetProfit += (OrderProfit() + OrderCommission() + OrderSwap());
          }
       }
+   }
+   
+   // Update Cache
+   if(total > 0 || cached_total == -1)
+   {
+      cached_deposit = outDeposit;
+      cached_withdraw = outWithdraw;
+      cached_netprofit = outNetProfit;
+      cached_total = total;
    }
 }
 

@@ -20,7 +20,7 @@ void OnEvent_EndEdit(string sparam)
           
           if(StringFind(txt, "%") < 0)
           {
-             ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, DoubleToString(val, 0) + "%");
+             FP_ObjectSetString(0, PREFIX + "Pos_Edit_Close", OBJPROP_TEXT, DoubleToString(val, 0) + "%");
           }
       }
       UpdatePositionsValues();
@@ -92,7 +92,7 @@ void OnEvent_EndEdit(string sparam)
        StringTrimRight(sSym);
        
        g_HistoryFilterSymbol = sSym;
-       ObjectSetString(0, PREFIX + "Hist_Input_Symbol", OBJPROP_TEXT, g_HistoryFilterSymbol);
+       FP_ObjectSetString(0, PREFIX + "Hist_Input_Symbol", OBJPROP_TEXT, g_HistoryFilterSymbol);
        
        UpdateHistoryFilter();
        CreateHistoryPanel();
@@ -149,7 +149,7 @@ void OnEvent_ObjectDrag(string sparam)
       ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
       ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
-      ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(price, _Digits));
+      FP_ObjectSetString(0, PREFIX + "Edit_SL", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;
    }
    if(sparam == PREFIX + "Line_TP")
@@ -157,7 +157,7 @@ void OnEvent_ObjectDrag(string sparam)
       ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
       ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
-      ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(price, _Digits));
+      FP_ObjectSetString(0, PREFIX + "Edit_TP", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;
    }
    if(sparam == PREFIX + "Line_Price")
@@ -165,7 +165,7 @@ void OnEvent_ObjectDrag(string sparam)
       ObjectSetInteger(0, sparam, OBJPROP_SELECTABLE, true);
       ObjectSetInteger(0, sparam, OBJPROP_SELECTED, true);
       double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
-      ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(price, _Digits));
+      FP_ObjectSetString(0, PREFIX + "Edit_Price", OBJPROP_TEXT, DoubleToString(price, _Digits));
       dragged = true;
    }
    

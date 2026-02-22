@@ -56,12 +56,12 @@ void DrawPositionList()
       int itemHeight = 25;
       int startY = y + h + 2; 
       CreateRect("PosListContainer", x, startY - 2, w, itemHeight + 4, g_ColorBg, BORDER_FLAT);
-      ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
-      ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
+      FP_ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
+      FP_ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
       
       CreateButton("PosListItem_None", "No Positions", x + 2, startY, w - 4, itemHeight, g_ColorInput, g_ColorText);
-      ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
-      ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false);
+      FP_ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_ZORDER, 16);
+      FP_ObjectSetInteger(0, PREFIX + "PosListItem_None", OBJPROP_STATE, false);
       IsPosListOpen = true;
       return; 
    }
@@ -82,8 +82,8 @@ void DrawPositionList()
    int containerWidth = w;
    
    CreateRect("PosListContainer", x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
-   ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
+   FP_ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_ZORDER, 15);
+   FP_ObjectSetInteger(0, PREFIX + "PosListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = x + 2;
@@ -109,8 +109,8 @@ void DrawPositionList()
          string btnName = "PosListItem_" + IntegerToString(tck);
          
          CreateButton(btnName, txt, itemX, currentY, itemWidth, itemHeight, g_ColorInput, g_ColorText);
-         ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 16);
-         ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
+         FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 16);
+         FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, g_ColorInput);
          
          currentY += itemHeight;
       }
@@ -123,7 +123,7 @@ void DrawPositionList()
        int trackY = startY;
        
        CreateRect("PosListScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "PosListScrollTrack", OBJPROP_ZORDER, 16);
+       FP_ObjectSetInteger(0, PREFIX + "PosListScrollTrack", OBJPROP_ZORDER, 16);
        
        double ratio = (double)visibleCount / (double)count;
        int thumbH = (int)(trackH * ratio);
@@ -134,7 +134,7 @@ void DrawPositionList()
        int relativeY = (int)(scrollPrc * (trackH - thumbH));
        
        CreateRect("PosListScrollThumb", trackX + 1, trackY + relativeY, scrollBarWidth - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "PosListScrollThumb", OBJPROP_ZORDER, 17);
+       FP_ObjectSetInteger(0, PREFIX + "PosListScrollThumb", OBJPROP_ZORDER, 17);
    }
    
    ChartRedraw();

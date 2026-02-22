@@ -129,7 +129,7 @@
    // Call before iterating history
    void FP_HistoryBegin()
    {
-      HistorySelect(0, TimeCurrent());
+      HistorySelect(0, TimeCurrent() + 31536000);
       g_fp_history_loaded = true;
    }
 
@@ -147,11 +147,8 @@
    
    int FP_OrdersHistoryTotal()
    {
-      if(!g_fp_history_loaded)
-      {
-         HistorySelect(0, TimeCurrent());
-         g_fp_history_loaded = true;
-      }
+      HistorySelect(0, TimeCurrent() + 31536000);
+      g_fp_history_loaded = true;
       return HistoryDealsTotal();
    }
 
@@ -208,9 +205,9 @@
       }
       else if(pool == MODE_HISTORY)
       {
-         if(!g_fp_history_loaded)
+          if(!g_fp_history_loaded)
          {
-            HistorySelect(0, TimeCurrent());
+            HistorySelect(0, TimeCurrent() + 31536000);
             g_fp_history_loaded = true;
          }
          if(select == SELECT_BY_POS)

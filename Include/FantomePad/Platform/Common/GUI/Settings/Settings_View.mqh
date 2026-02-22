@@ -33,9 +33,9 @@ void OpenSettings()
    
    // --- MAIN CONTAINER ---
    CreateRect("Set_Bg", x, y, w, h, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_ZORDER, 100);
-   ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_BORDER_COLOR, C'80,80,80');
-   ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_WIDTH, 1);
+   FP_ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_ZORDER, 100);
+   FP_ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_BORDER_COLOR, C'80,80,80');
+   FP_ObjectSetInteger(0, PREFIX + "Set_Bg", OBJPROP_WIDTH, 1);
    
    // --- CONTENT GENERATION ---
    int relY = 10; // Start slightly below top margin
@@ -49,7 +49,7 @@ void OpenSettings()
    // 0. GENERAL
    bool v = CHECK_VIS(25);
    string n = "Set_Lbl_Cat_Gen";
-   if(v) { CreateLabel(n, "GENERAL", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold"); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
+   if(v) { CreateLabel(n, "GENERAL", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold"); FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
    else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -58,10 +58,10 @@ void OpenSettings()
    n = "Set_Lbl_NavPos"; string nb = "Set_Btn_NavPos";
    if(v) {
        CreateLabel(n, "Panel Position", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
        
        CreateButton(nb, NavigationPositions[g_NavigationPosition], x + w - 140, SCREEN_Y, 120, 25, g_ColorInput, g_ColorText);
-       ObjectSetInteger(0, PREFIX + nb, OBJPROP_ZORDER, 102); 
+       FP_ObjectSetInteger(0, PREFIX + nb, OBJPROP_ZORDER, 102); 
        SetObjVisible(nb, true);
    } else {
        if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
@@ -74,13 +74,13 @@ void OpenSettings()
    n = "Set_Lbl_ShowLines"; string nb2 = "Set_Btn_ShowLines";
    if(v) {
        CreateLabel(n, "Show Order Lines", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
        
        string txtLines = g_ShowOrderLines ? "ON" : "OFF";
        color bgLines = g_ShowOrderLines ? g_ColorBtnActive : g_ColorInput;
        
        CreateButton(nb2, txtLines, x + w - 80, SCREEN_Y, 60, 25, bgLines, g_ColorText);
-       ObjectSetInteger(0, PREFIX + nb2, OBJPROP_ZORDER, 102); 
+       FP_ObjectSetInteger(0, PREFIX + nb2, OBJPROP_ZORDER, 102); 
        SetObjVisible(nb2, true);
    } else {
        if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
@@ -93,13 +93,13 @@ void OpenSettings()
    n = "Set_Lbl_ShowPosLines"; string nb3 = "Set_Btn_ShowPosLines";
    if(v) {
        CreateLabel(n, "Show Position Lines", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
 
        string txtPosLines = g_ShowPositionLines ? "ON" : "OFF";
        color bgPosLines = g_ShowPositionLines ? g_ColorBtnActive : g_ColorInput;
 
        CreateButton(nb3, txtPosLines, x + w - 80, SCREEN_Y, 60, 25, bgPosLines, g_ColorText);
-       ObjectSetInteger(0, PREFIX + nb3, OBJPROP_ZORDER, 102); 
+       FP_ObjectSetInteger(0, PREFIX + nb3, OBJPROP_ZORDER, 102); 
        SetObjVisible(nb3, true);
    } else {
        if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
@@ -110,14 +110,14 @@ void OpenSettings()
    // --- Separator ---
    v = CHECK_VIS(1);
    n = "Set_Sep_Gen";
-   if(v) { CreateRect(n, x + padX, SCREEN_Y, w - (padX*2) - 15, 1, C'50,50,50', BORDER_FLAT); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
+   if(v) { CreateRect(n, x + padX, SCREEN_Y, w - (padX*2) - 15, 1, C'50,50,50', BORDER_FLAT); FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
    else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
    // 1. RISK
    v = CHECK_VIS(25);
    n = "Set_Lbl_Cat1";
-   if(v) { CreateLabel(n, "RISK MANAGEMENT", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold"); ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
+   if(v) { CreateLabel(n, "RISK MANAGEMENT", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold"); FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true); }
    else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -126,25 +126,25 @@ void OpenSettings()
    n = "Set_Lbl_OneRPercent"; string ne = "Set_Edit_OneRPercent";
    if(v) {
        CreateLabel(n, "1R Value (%)", x + padX, SCREEN_Y + 3, 9, g_ColorText, "Trebuchet MS");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
        CreateEdit(ne, DoubleToString(g_OneRPercent, 2), x + w - 80, SCREEN_Y, 60, 25);
-       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
-       ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
-       ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
-       ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
-       ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
+       FP_ObjectSetInteger(0, PREFIX + ne, OBJPROP_ZORDER, 102);
+       FP_ObjectSetInteger(0, PREFIX + ne, OBJPROP_BGCOLOR, g_ColorInput);
+       FP_ObjectSetInteger(0, PREFIX + ne, OBJPROP_COLOR, g_ColorText);
+       FP_ObjectSetInteger(0, PREFIX + ne, OBJPROP_BORDER_COLOR, C'60,64,72');
+       FP_ObjectSetInteger(0, PREFIX + ne, OBJPROP_ALIGN, ALIGN_CENTER);
        SetObjVisible(ne, true);
 
        // --- MAX RISK (%) ---
        string nRisk = "Set_Lbl_MaxRiskPercent"; string neRisk = "Set_Edit_MaxRiskPercent";
        CreateLabel(nRisk, "Max Risk (%)", x + padX, SCREEN_Y + 33, 9, g_ColorText, "Trebuchet MS");
-       ObjectSetInteger(0, PREFIX + nRisk, OBJPROP_ZORDER, 102); SetObjVisible(nRisk, true);
+       FP_ObjectSetInteger(0, PREFIX + nRisk, OBJPROP_ZORDER, 102); SetObjVisible(nRisk, true);
        CreateEdit(neRisk, DoubleToString(g_MaxRiskPercent, 2), x + w - 80, SCREEN_Y + 30, 60, 25);
-       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ZORDER, 102);
-       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BGCOLOR, g_ColorInput);
-       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_COLOR, g_ColorText);
-       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BORDER_COLOR, C'60,64,72');
-       ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ALIGN, ALIGN_CENTER);
+       FP_ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ZORDER, 102);
+       FP_ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BGCOLOR, g_ColorInput);
+       FP_ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_COLOR, g_ColorText);
+       FP_ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_BORDER_COLOR, C'60,64,72');
+       FP_ObjectSetInteger(0, PREFIX + neRisk, OBJPROP_ALIGN, ALIGN_CENTER);
        SetObjVisible(neRisk, true);
    } else {
        if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
@@ -160,7 +160,7 @@ void OpenSettings()
    n = "Set_Sep1";
    if(v) {
        CreateRect(n, x + padX, SCREEN_Y, w - (padX*2) - 15, 1, C'50,50,50', BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 20;
 
@@ -169,7 +169,7 @@ void OpenSettings()
    n = "Set_Lbl_Cat2";
    if(v) {
        CreateLabel(n, "INTERFACE COLORS", x + padX, SCREEN_Y, 9, g_ColorText, "Trebuchet MS Bold");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -182,7 +182,7 @@ void OpenSettings()
    n = "Set_Sub_Theme";
    if(v) {
        CreateLabel(n, "General Theme", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -208,7 +208,7 @@ void OpenSettings()
    n = "Set_Sub_Chart";
    if(v) {
        CreateLabel(n, "Chart & Candles", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -229,7 +229,7 @@ void OpenSettings()
    n = "Set_Sub_DynInd";
    if(v) {
        CreateLabel(n, "Dynamic Indicators", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 
@@ -244,7 +244,7 @@ void OpenSettings()
    n = "Set_Sub_Trade";
    if(v) {
        CreateLabel(n, "Trading Action", x + padX, SCREEN_Y + 5, 8, g_ColorText, "Trebuchet MS Bold");
-       ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
+       FP_ObjectSetInteger(0, PREFIX + n, OBJPROP_ZORDER, 102); SetObjVisible(n, true);
    } else if(ObjectFind(0, PREFIX + n) >= 0) SetObjVisible(n, false);
    relY += 30;
 

@@ -50,9 +50,9 @@ void CreateColorPicker()
    
    // Bg - Flat Modern Style (No more BORDER_RAISED)
    CreateRect("CP_Bg", x, y, w, h, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_ZORDER, 200);
-   ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_BORDER_COLOR, C'60,60,60'); // Subtle border
-   ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_WIDTH, 1);
+   FP_ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_ZORDER, 200);
+   FP_ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_BORDER_COLOR, C'60,60,60'); // Subtle border
+   FP_ObjectSetInteger(0, PREFIX + "CP_Bg", OBJPROP_WIDTH, 1);
    
    // Grid Positioning
    // Center Grid: 5 cols * 35 + 4 gaps * 8 = 175 + 32 = 207 px
@@ -70,8 +70,8 @@ void CreateColorPicker()
       
       string name = "CP_Item_" + IntegerToString(i);
       CreateButton(name, "", posX, posY, btnSize, btnSize, g_ColorPalette[i], clrNONE);
-      ObjectSetInteger(0, PREFIX + name, OBJPROP_ZORDER, 201);
-      ObjectSetInteger(0, PREFIX + name, OBJPROP_BORDER_COLOR, clrNONE);
+      FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_ZORDER, 201);
+      FP_ObjectSetInteger(0, PREFIX + name, OBJPROP_BORDER_COLOR, clrNONE);
     }
     
     // --- Custom Color Section ---
@@ -88,16 +88,16 @@ void CreateColorPicker()
     
     // Input
     CreateEdit("CP_Edit_Custom", "#FFFFFF", groupX, customY, inputW, 30);
-    ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ZORDER, 201);
-    ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BGCOLOR, g_ColorInput);
-    ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_COLOR, g_ColorText);
-    ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BORDER_COLOR, C'60,64,72');
-    ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ALIGN, ALIGN_CENTER);
+    FP_ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ZORDER, 201);
+    FP_ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BGCOLOR, g_ColorInput);
+    FP_ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_COLOR, g_ColorText);
+    FP_ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_BORDER_COLOR, C'60,64,72');
+    FP_ObjectSetInteger(0, PREFIX + "CP_Edit_Custom", OBJPROP_ALIGN, ALIGN_CENTER);
     
     // Button
     CreateButton("CP_Btn_Custom", "ADD", groupX + inputW + spacing, customY, btnW, 30, g_ColorBtnActive, g_ColorText);
-    ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_ZORDER, 201);
-    ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_BORDER_COLOR, C'0,122,255');
-    ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONTSIZE, 8);
-    ObjectSetString(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONT, "Trebuchet MS Bold");
+    FP_ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_ZORDER, 201);
+    FP_ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_BORDER_COLOR, C'0,122,255');
+    FP_ObjectSetInteger(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONTSIZE, 8);
+    FP_ObjectSetString(0, PREFIX + "CP_Btn_Custom", OBJPROP_FONT, "Trebuchet MS Bold");
 }

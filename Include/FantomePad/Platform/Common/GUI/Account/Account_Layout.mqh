@@ -18,11 +18,11 @@ void DrawAccountOrdersScrollbar(int trackX, int trackY, int trackH, int totalOrd
       CreateRect("Account_Ord_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
    }
    SetObjPosition("Account_Ord_ScrollTrack", trackX, trackY);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_XSIZE, scrollBarWidth);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_YSIZE, trackH);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_BGCOLOR, g_ColorBg);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_ZORDER, 16);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_XSIZE, scrollBarWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_YSIZE, trackH);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_BGCOLOR, g_ColorBg);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollTrack", OBJPROP_ZORDER, 16);
    
    // 2. Thumb
    double ratio = (double)maxVisible / (double)totalOrders;
@@ -46,11 +46,11 @@ void DrawAccountOrdersScrollbar(int trackX, int trackY, int trackH, int totalOrd
       CreateButton("Account_Ord_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorText, clrNONE);
    }
    SetObjPosition("Account_Ord_ScrollThumb", trackX + 1, thumbY);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_XSIZE, scrollBarWidth - 2);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_YSIZE, thumbH);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_ZORDER, 17);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_XSIZE, scrollBarWidth - 2);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_YSIZE, thumbH);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Ord_ScrollThumb", OBJPROP_ZORDER, 17);
 }
 
 //+------------------------------------------------------------------+
@@ -84,17 +84,17 @@ void UpdateAccountLayout()
    SetObjPosition("Account_Bg", startX, startY);
    SetObjPosition("Account_Header", startX, startY);
    SetObjPosition("Account_Title", startX + (width / 2), startY + 12);
-   ObjectSetInteger(0, PREFIX + "Account_Title", OBJPROP_ANCHOR, ANCHOR_UPPER);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Title", OBJPROP_ANCHOR, ANCHOR_UPPER);
    
-   ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_XSIZE, width);
-   ObjectSetInteger(0, PREFIX + "Account_Header", OBJPROP_XSIZE, width);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_XSIZE, width);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Header", OBJPROP_XSIZE, width);
    
    // --- ACCOUNT SECTION (GROUPED) ---
    int statsBgH = 200; // Reduced height to remove extra space (was 245)
    
    SetObjPosition("Account_Stats_Bg", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_XSIZE, width - (paddingX*2));
-   ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_YSIZE, statsBgH);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_XSIZE, width - (paddingX*2));
+   FP_ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_YSIZE, statsBgH);
    
    int statsDescX = startX + paddingX + 15;
    int statsTopY  = currentY + 10;
@@ -148,7 +148,7 @@ void UpdateAccountLayout()
    
    // --- SEPARATOR ---
    SetObjPosition("Account_Sep", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Account_Sep", OBJPROP_XSIZE, width - (paddingX*2));
+   FP_ObjectSetInteger(0, PREFIX + "Account_Sep", OBJPROP_XSIZE, width - (paddingX*2));
    
    currentY += 15;
    
@@ -182,8 +182,8 @@ void UpdateAccountLayout()
       
       // Background Card
       SetObjPosition("Account_Ord_Bg" + suffix, startX + paddingX, currentY);
-      ObjectSetInteger(0, PREFIX + "Account_Ord_Bg" + suffix, OBJPROP_XSIZE, itemWidth);
-      ObjectSetInteger(0, PREFIX + "Account_Ord_Bg" + suffix, OBJPROP_YSIZE, rowH);
+      FP_ObjectSetInteger(0, PREFIX + "Account_Ord_Bg" + suffix, OBJPROP_XSIZE, itemWidth);
+      FP_ObjectSetInteger(0, PREFIX + "Account_Ord_Bg" + suffix, OBJPROP_YSIZE, rowH);
       
       // Symbol (Left)
       SetObjPosition("Account_Ord_Sym" + suffix, startX + paddingX + 8, currentY + 6);
@@ -226,7 +226,7 @@ void UpdateAccountLayout()
    
    // Ajustement hauteur fond
    int totalHeight = currentY - startY + 15;
-   ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_YSIZE, totalHeight);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_YSIZE, totalHeight);
    
    ChartRedraw();
 }

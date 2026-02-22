@@ -37,7 +37,7 @@ bool Handle_SymbolManager_Events(string sparam)
             
             // Clear search filter when a category is manually clicked
             g_SymMgr_SearchText = "";
-            ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TEXT, g_SymMgr_SearchText);
+            FP_ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TEXT, g_SymMgr_SearchText);
             
             LoadSymbolsForCategory(g_SymMgr_CurrentCategory);
             FP_ObjectSetInteger(0, sparam, OBJPROP_STATE, false);

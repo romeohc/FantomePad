@@ -63,7 +63,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
           RiskMode++;
           if(RiskMode > 2) RiskMode = 0;
           
-          ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
+          FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0");
           
           UpdateUIMode();
           UpdateCalculatedLot();
@@ -107,7 +107,7 @@ bool PanelMain_OnEvent(const int id, const long &lparam, const double &dparam, c
            if(sparam == PREFIX + "Line_Price") editName = "Edit_Price";
            
            double price = ObjectGetDouble(0, sparam, OBJPROP_PRICE1);
-           ObjectSetString(0, PREFIX + editName, OBJPROP_TEXT, DoubleToString(price, _Digits));
+           FP_ObjectSetString(0, PREFIX + editName, OBJPROP_TEXT, DoubleToString(price, _Digits));
            
            if(AutoSwitchOrderType()) UpdateUIMode();
            UpdateCalculatedLot();

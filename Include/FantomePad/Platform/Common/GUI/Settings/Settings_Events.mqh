@@ -73,7 +73,7 @@ bool PanelSettings_OnEvent(const int id, const long &lparam, const double &dpara
        {
            g_NavigationPosition++;
            if(g_NavigationPosition > 5) g_NavigationPosition = 0;
-           ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
+           FP_ObjectSetString(0, PREFIX + "Set_Btn_NavPos", OBJPROP_TEXT, NavigationPositions[g_NavigationPosition]);
            UpdateNavigationPanel(); 
            EffectButton(sparam);
            return true; 

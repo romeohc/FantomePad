@@ -76,8 +76,8 @@ void UpdateUIMode()
    SetObjPosition("Bg", startX, startY);
    
    SetObjPosition("Btn_Type", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_YSIZE, inputH);
+   FP_ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
+   FP_ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_YSIZE, inputH);
    
    string currentSymbol = ObjectGetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT);
    if(currentSymbol == "") currentSymbol = Symbol();
@@ -117,10 +117,10 @@ void UpdateUIMode()
    // Format: Symbol · OrderType
    typeText = currentSymbol + "  ·  " + typeText;
    
-   ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_TEXT, typeText);
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BGCOLOR, typeBgColor);
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BORDER_COLOR, typeBorderColor);
-   ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetString(0, PREFIX + "Btn_Type", OBJPROP_TEXT, typeText);
+   FP_ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BGCOLOR, typeBgColor);
+   FP_ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_BORDER_COLOR, typeBorderColor);
+   FP_ObjectSetInteger(0, PREFIX + "Btn_Type", OBJPROP_COLOR, g_ColorText);
    
    currentY += inputH + sectionGap;
    
@@ -138,8 +138,8 @@ void UpdateUIMode()
       currentY += 15;
       
       SetObjPosition("Edit_Price", startX + paddingX, currentY);
-      ObjectSetInteger(0, PREFIX + "Edit_Price", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
-      ObjectSetInteger(0, PREFIX + "Edit_Price", OBJPROP_YSIZE, inputH);
+      FP_ObjectSetInteger(0, PREFIX + "Edit_Price", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
+      FP_ObjectSetInteger(0, PREFIX + "Edit_Price", OBJPROP_YSIZE, inputH);
       
       currentY += inputH + sectionGap; 
    }
@@ -153,12 +153,12 @@ void UpdateUIMode()
    currentY += 15;
    
    SetObjPosition("Edit_SL", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Edit_SL", OBJPROP_XSIZE, halfWidth);
-   ObjectSetInteger(0, PREFIX + "Edit_SL", OBJPROP_YSIZE, inputH);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_SL", OBJPROP_XSIZE, halfWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_SL", OBJPROP_YSIZE, inputH);
    
    SetObjPosition("Edit_TP", startX + paddingX + halfWidth + 10, currentY);
-   ObjectSetInteger(0, PREFIX + "Edit_TP", OBJPROP_XSIZE, halfWidth);
-   ObjectSetInteger(0, PREFIX + "Edit_TP", OBJPROP_YSIZE, inputH);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_TP", OBJPROP_XSIZE, halfWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_TP", OBJPROP_YSIZE, inputH);
    
    currentY += inputH + sectionGap;
    
@@ -168,23 +168,23 @@ void UpdateUIMode()
    currentY += 15;
    
    SetObjPosition("Edit_Risk", startX + paddingX, currentY);
-   ObjectSetInteger(0, PREFIX + "Edit_Risk", OBJPROP_XSIZE, halfWidth);
-   ObjectSetInteger(0, PREFIX + "Edit_Risk", OBJPROP_YSIZE, inputH);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_Risk", OBJPROP_XSIZE, halfWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_Risk", OBJPROP_YSIZE, inputH);
    
    string riskUnit = "%";
    if(RiskMode == 1) riskUnit = AccountCurrency();
    else if(RiskMode == 2) riskUnit = "R";
-   ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_TEXT, riskUnit);
+   FP_ObjectSetString(0, PREFIX + "Label_RiskPerc", OBJPROP_TEXT, riskUnit);
    
    int unitWidth = 35; 
    SetObjPosition("Label_RiskPerc", startX + paddingX + halfWidth - unitWidth - 2, currentY + 4);
-   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_XSIZE, unitWidth);
-   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_YSIZE, 20);
-   ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
+   FP_ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_XSIZE, unitWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_YSIZE, 20);
+   FP_ObjectSetInteger(0, PREFIX + "Label_RiskPerc", OBJPROP_ZORDER, 10);
    
    SetObjPosition("Edit_Lot", startX + paddingX + halfWidth + 10, currentY);
-   ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_XSIZE, halfWidth);
-   ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_YSIZE, inputH);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_XSIZE, halfWidth);
+   FP_ObjectSetInteger(0, PREFIX + "Edit_Lot", OBJPROP_YSIZE, inputH);
    
    currentY += inputH + sectionGap;
    
@@ -196,18 +196,16 @@ void UpdateUIMode()
          SetObjVisible("Btn_Buy", true);
          SetObjVisible("Btn_Sell", false);
          SetObjPosition("Btn_Buy", startX + paddingX, currentY);
-         ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
-         ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_YSIZE, 45);
-         ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_BGCOLOR, g_ColorBtnActive);
+         FP_ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
+         FP_ObjectSetInteger(0, PREFIX + "Btn_Buy", OBJPROP_YSIZE, 45);
       }
       else
       {
          SetObjVisible("Btn_Buy", false);
          SetObjVisible("Btn_Sell", true);
          SetObjPosition("Btn_Sell", startX + paddingX, currentY);
-         ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
-         ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_YSIZE, 45); 
-         ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_BGCOLOR, g_ColorBtnActive); 
+         FP_ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
+         FP_ObjectSetInteger(0, PREFIX + "Btn_Sell", OBJPROP_YSIZE, 45); 
       }
    }
    else
@@ -216,15 +214,14 @@ void UpdateUIMode()
       SetObjVisible("Btn_Buy", false);
       SetObjVisible("Btn_Sell", false);
       SetObjPosition("Btn_Action", startX + paddingX, currentY);
-      ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
-      ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_YSIZE, 45);
-      ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_BGCOLOR, g_ColorBtnActive);
+      FP_ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_XSIZE, g_PanelMain.Width - (paddingX*2));
+      FP_ObjectSetInteger(0, PREFIX + "Btn_Action", OBJPROP_YSIZE, 45);
    }
    
     currentY += 45 + 20; // Button height (45) + Bottom margin (20)
     
     int totalHeight = currentY - startY; 
-    ObjectSetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE, totalHeight);
+    FP_ObjectSetInteger(0, PREFIX + "Bg", OBJPROP_YSIZE, totalHeight);
    
    UpdateChartLines();
    UpdateCalculatedLot();

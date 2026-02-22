@@ -100,12 +100,12 @@ void UpdatePartialButtonsVisuals()
    
    if(SelectedPositionTicket == -1)
    {
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, g_ColorInput);
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, g_ColorText);
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, g_ColorInput);
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, g_ColorText);
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, g_ColorInput);
-       ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, g_ColorText);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, g_ColorInput);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, g_ColorText);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, g_ColorInput);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, g_ColorText);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, g_ColorInput);
+       FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, g_ColorText);
        ChartRedraw();
        return;
    }
@@ -113,18 +113,18 @@ void UpdatePartialButtonsVisuals()
 
    // Button 25
    bool is25 = (g_PosPartialMode == 25);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, is25 ? activeCol : g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, is25 ? clrWhite : g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_BGCOLOR, is25 ? activeCol : g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_25", OBJPROP_COLOR, is25 ? clrWhite : g_ColorText);
    
    // Button 50
    bool is50 = (g_PosPartialMode == 50);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, is50 ? activeCol : g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, is50 ? clrWhite : g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_BGCOLOR, is50 ? activeCol : g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_50", OBJPROP_COLOR, is50 ? clrWhite : g_ColorText);
 
    // Button 100
    bool is100 = (g_PosPartialMode == 100);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, is100 ? activeCol : g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, is100 ? clrWhite : g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_BGCOLOR, is100 ? activeCol : g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_100", OBJPROP_COLOR, is100 ? clrWhite : g_ColorText);
    
    ChartRedraw();
 }
@@ -168,11 +168,11 @@ void UpdatePositionsValues()
              double sl = trade.StopLoss;
              double tp = trade.TakeProfit;
              
-             ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, DoubleToString(lots, 2));
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, DoubleToString(lots, 2));
              
              string sProfit = DoubleToString(profit, 2) + " " + AccountCurrency();
-             ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, sProfit);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, sProfit);
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
 
              double bal = AccountBalance();
              double profitPrc = 0.0;
@@ -181,18 +181,18 @@ void UpdatePositionsValues()
              if(g_OneRPercent > 0) profitR = profitPrc / g_OneRPercent;
              
              string sProfitR = DoubleToString(profitR, 2) + " R";
-             ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, sProfitR);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, sProfitR);
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
 
              string sProfitPrc = DoubleToString(profitPrc, 2) + "%";
-             ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, sProfitPrc);
-             ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, sProfitPrc);
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, (profit >= 0) ? g_ColorPositive : g_ColorNegative);
              
              string sComm = DoubleToString(comm, 2) + " " + AccountCurrency();
-             ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, sComm);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, sComm);
              
              string sSwap = DoubleToString(swap, 2) + " " + AccountCurrency();
-             ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, sSwap);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, sSwap);
              
              // --- RISK CALCULATION ---
              string sRiskR = "-";
@@ -241,26 +241,26 @@ void UpdatePositionsValues()
                 sRiskPrc = "No SL";
              }
              
-             ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, sRiskR);
-             ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, sRiskPrc);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, sRiskR);
+             FP_ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, sRiskPrc);
              
              bool ticketChanged = (SelectedPositionTicket != g_LastPosTicket);
              
              if(ticketChanged || MathAbs(sl - g_LastPosSL) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(sl, trade.TradeDigits));
+                 FP_ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, DoubleToString(sl, trade.TradeDigits));
                  g_LastPosSL = sl;
              }
              
              if(ticketChanged || MathAbs(tp - g_LastPosTP) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, DoubleToString(tp, trade.TradeDigits));
+                 FP_ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, DoubleToString(tp, trade.TradeDigits));
                  g_LastPosTP = tp;
              }
              
              if(ticketChanged || MathAbs(open - g_LastPosEntry) > trade.TradePoint)
              {
-                 ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, DoubleToString(open, trade.TradeDigits));
+                 FP_ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, DoubleToString(open, trade.TradeDigits));
                  g_LastPosEntry = open;
              }
              
@@ -270,8 +270,8 @@ void UpdatePositionsValues()
                  g_PosPartialMode = 0; 
                  UpdatePartialButtonsVisuals(); 
                  
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
                  
                  UpdatePositionsLayout(); // Refresh dynamic visibility (Entry Price hide/show)
              }
@@ -286,10 +286,10 @@ void UpdatePositionsValues()
              else if(type == OP_BUYSTOP) typeBg = g_ColorPositive;
              else if(type == OP_SELLSTOP) typeBg = g_ColorNegative;
              
-             ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, trade.Symbol + "  ·  " + DoubleToString(lots, 2));
-             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
-             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
-             ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
+             FP_ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, trade.Symbol + "  ·  " + DoubleToString(lots, 2));
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, typeBg);
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, typeBg);
+             FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, clrWhite);
              
              // BE BUTTON STATE (IN LOSS CHECKS)
              double current = (type == OP_BUY) ? MarketInfo(trade.Symbol, MODE_BID) : MarketInfo(trade.Symbol, MODE_ASK);
@@ -298,19 +298,19 @@ void UpdatePositionsValues()
              if(inLoss)
              {
                  g_PosBE_Active = false; // Force Disable
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput); // INACTIVE COLOR
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText); 
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput); // INACTIVE COLOR
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText); 
              }
              else if(!g_PosBE_Active)
              {
                  // If eligible but not active, use Inactive/Default color
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorInput);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, g_ColorText);
              }
              else
              {
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnActive);
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, clrWhite);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_BGCOLOR, g_ColorBtnActive);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_BE", OBJPROP_COLOR, clrWhite);
              }
              
              // Update Validate Button State
@@ -341,8 +341,8 @@ void UpdatePositionsValues()
              
              if((color)ObjectGetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR) != valCol)
              {
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
-                 ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, valCol);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, valCol);
+                 FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, valCol);
              }
              
              g_LastPosTicket = SelectedPositionTicket;
@@ -355,26 +355,26 @@ void UpdatePositionsValues()
    
    UpdatePartialButtonsVisuals(); // Ensure buttons update to inactive state
    
-   ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "Select Position...");
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetString(0, PREFIX + "Pos_Btn_Select", OBJPROP_TEXT, "Select Position...");
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BGCOLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_BORDER_COLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Select", OBJPROP_COLOR, g_ColorText);
    
-   ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, "-");
-   ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, g_ColorText);
-   ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, "0");
-   ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, "0");
-   ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
-   ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, "-");
-   ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, "-");
-   ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_Size", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_Profit", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_TEXT, "-");
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitR", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Val_ProfitPrc", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetString(0, PREFIX + "Pos_Edit_SL", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Pos_Edit_Entry", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Pos_Edit_TP", OBJPROP_TEXT, "0");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_Comm", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_Swap", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_RiskR", OBJPROP_TEXT, "-");
+   FP_ObjectSetString(0, PREFIX + "Pos_Val_RiskPrc", OBJPROP_TEXT, "-");
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Val_Profit", OBJPROP_COLOR, g_ColorText);
    
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
-   ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, g_ColorBtnInvalid);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BGCOLOR, g_ColorBtnInvalid);
+   FP_ObjectSetInteger(0, PREFIX + "Pos_Btn_Validate", OBJPROP_BORDER_COLOR, g_ColorBtnInvalid);
 }

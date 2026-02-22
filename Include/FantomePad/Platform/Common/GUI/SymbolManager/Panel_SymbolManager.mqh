@@ -225,34 +225,34 @@ void CreateSymbolManagerPanel()
 
    // 1. MAIN WINDOW
    CreateRect("SYM_Bg", x, y, w, h, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_ZORDER, 141);
-   ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_WIDTH, 2); 
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_ZORDER, 141);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Bg", OBJPROP_WIDTH, 2); 
 
    // 2. MARGIN
    SetObjVisible("SYM_Header", false); // Not used
 
    // 3. CATEGORY LIST
    CreateRect("SYM_CatBg", x, contentY, catListW, contentH, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "SYM_CatBg", OBJPROP_ZORDER, 142);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_CatBg", OBJPROP_ZORDER, 142);
    
    CreateRect("SYM_Sep", x + catListW, contentY + 10, 1, contentH - 20, C'50,50,50', BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "SYM_Sep", OBJPROP_ZORDER, 142);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Sep", OBJPROP_ZORDER, 142);
    
    int catItemH = 25;
    
    // SEARCH HEADER & TEXT BOX
    // Centered horizontally by offset: (180/2 - approx 22px for "Search...")
    CreateLabel("SYM_Lbl_SearchTitle", "Search...", x + (catListW / 2) - 22, y + 8, 9, C'160,160,160', "Trebuchet MS");
-   ObjectSetInteger(0, PREFIX + "SYM_Lbl_SearchTitle", OBJPROP_ZORDER, 143);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Lbl_SearchTitle", OBJPROP_ZORDER, 143);
    SetObjVisible("SYM_Lbl_SearchTitle", true);
    
    CreateEdit("SYM_Input_Search", g_SymMgr_SearchText, x + 5, y + 30, catListW - 10, catItemH, false);
-   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BGCOLOR, g_ColorInput);
-   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_COLOR, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BORDER_COLOR, g_ColorInput);
-   ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TOOLTIP, "Click here and type to filter...");
-   ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_ZORDER, 143);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BGCOLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_BORDER_COLOR, g_ColorInput);
+   FP_ObjectSetString(0, PREFIX + "SYM_Input_Search", OBJPROP_TOOLTIP, "Click here and type to filter...");
+   FP_ObjectSetInteger(0, PREFIX + "SYM_Input_Search", OBJPROP_ZORDER, 143);
    SetObjVisible("SYM_Input_Search", true);
    
    int catStartY = y + 30 + catItemH + 10;
@@ -267,8 +267,8 @@ void CreateSymbolManagerPanel()
        
        string btnName = "SYM_Cat_" + IntegerToString(i);
        CreateButton(btnName, catName, x + 5, catStartY, catListW - 10, catItemH, catBg, catTxt);
-       ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
-       ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ALIGN, ALIGN_LEFT);
+       FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
+       FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ALIGN, ALIGN_LEFT);
        SetObjVisible(btnName, (catStartY + catItemH <= y + h - 10));
        
        catStartY += catItemH + 2;
@@ -304,7 +304,7 @@ void CreateSymbolManagerPanel()
        color cellBg = isInMarket ? g_ColorBtnActive : g_ColorBg; 
        
        CreateButton(btnName, sym, cellX, cellY, cellW, cellH, cellBg, g_ColorText);
-       ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
+       FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 143);
        SetObjVisible(btnName, true);
    }
    
@@ -320,7 +320,7 @@ void CreateSymbolManagerPanel()
        int trackW = 8;
        
        CreateRect("SYM_ScrollTrack", scrollX, trackY, trackW, trackH, g_ColorBg, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
+       FP_ObjectSetInteger(0, PREFIX + "SYM_ScrollTrack", OBJPROP_ZORDER, 142);
         SetObjVisible("SYM_ScrollTrack", true);
        
        int maxScrollRows = totalRows - visibleRows;
@@ -334,7 +334,7 @@ void CreateSymbolManagerPanel()
        int thumbY = trackY + (int)((double)currentRow / (double)maxScrollRows * (trackH - thumbH));
        
        CreateRect("SYM_ScrollThumb", scrollX, thumbY, trackW, thumbH, g_ColorText, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_ZORDER, 143);
+       FP_ObjectSetInteger(0, PREFIX + "SYM_ScrollThumb", OBJPROP_ZORDER, 143);
         SetObjVisible("SYM_ScrollThumb", true);
    }
    else

@@ -18,7 +18,7 @@ void CreateAccountPanel()
    
    // 1. Fond & Header
    CreateRect("Account_Bg", 0, 0, width, 100, g_ColorBg, BORDER_FLAT); 
-   ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_ZORDER, 0); // Explicitly lower than child rects
+   FP_ObjectSetInteger(0, PREFIX + "Account_Bg", OBJPROP_ZORDER, 0); // Explicitly lower than child rects
    CreateRect("Account_Header", 0, 0, width, 45, g_ColorBg, BORDER_FLAT);
    long login = AccountInfoInteger(ACCOUNT_LOGIN);
    string accountName = AccountInfoString(ACCOUNT_NAME);
@@ -38,7 +38,7 @@ void CreateAccountPanel()
    
    // 2. Account Data
    CreateRect("Account_Stats_Bg", 0, 0, width - 40, 110, g_ColorInput, BORDER_FLAT); // Grouping Box
-   ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Stats_Bg", OBJPROP_BORDER_COLOR, g_ColorInput);
  
    CreateLabel("Account_Lbl_Balance", "BALANCE", 0, 0, 7, g_ColorText, "Trebuchet MS");
    CreateLabel("Account_Val_Balance", "...", 0, 0, 9, g_ColorText, "Trebuchet MS Bold"); // Reduced to 9
@@ -94,9 +94,9 @@ void UpdateAccountPanel()
    string sEqu = DoubleToString(equ, 2);
    string sMarg = DoubleToString(marg, 2);
    
-   ObjectSetString(0, PREFIX + "Account_Val_Balance", OBJPROP_TEXT, sBal);
-   ObjectSetString(0, PREFIX + "Account_Val_Equity", OBJPROP_TEXT, sEqu);
-   ObjectSetString(0, PREFIX + "Account_Val_Margin", OBJPROP_TEXT, sMarg);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_Balance", OBJPROP_TEXT, sBal);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_Equity", OBJPROP_TEXT, sEqu);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_Margin", OBJPROP_TEXT, sMarg);
    
    // --- DEPOSIT / WITHDRAW UPDATE ---
    double deps = 0, wits = 0, netProfitFromHistory = 0;
@@ -112,8 +112,8 @@ void UpdateAccountPanel()
    string sDeps = DoubleToString(deps, 2);
    string sWits = DoubleToString(wits, 2);
    
-   ObjectSetString(0, PREFIX + "Account_Val_Deposit", OBJPROP_TEXT, sDeps);
-   ObjectSetString(0, PREFIX + "Account_Val_Withdraw", OBJPROP_TEXT, sWits);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_Deposit", OBJPROP_TEXT, sDeps);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_Withdraw", OBJPROP_TEXT, sWits);
    
    // --- CALCUL P&L et PERF ---
    // P&L is simply the sum of all visible trades in history
@@ -133,17 +133,17 @@ void UpdateAccountPanel()
    string sPerfP = (perfP >= 0 ? "+" : "") + DoubleToString(perfP, 2) + " %";
    string sPerfR = (perfR >= 0 ? "+" : "") + DoubleToString(perfR, 2) + " R";
    
-   ObjectSetString(0, PREFIX + "Account_Val_PnL", OBJPROP_TEXT, sPnL);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, (pnl >= 0) ? g_ColorPositive : g_ColorNegative);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_PnL", OBJPROP_TEXT, sPnL);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Val_PnL", OBJPROP_COLOR, (pnl >= 0) ? g_ColorPositive : g_ColorNegative);
    
-   ObjectSetString(0, PREFIX + "Account_Val_PerfP", OBJPROP_TEXT, sPerfP);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, (perfP >= 0) ? g_ColorPositive : g_ColorNegative);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_PerfP", OBJPROP_TEXT, sPerfP);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Val_PerfP", OBJPROP_COLOR, (perfP >= 0) ? g_ColorPositive : g_ColorNegative);
    
-   ObjectSetString(0, PREFIX + "Account_Val_PerfR", OBJPROP_TEXT, sPerfR);
-   ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, (perfR >= 0) ? g_ColorPositive : g_ColorNegative);
+   FP_ObjectSetString(0, PREFIX + "Account_Val_PerfR", OBJPROP_TEXT, sPerfR);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Val_PerfR", OBJPROP_COLOR, (perfR >= 0) ? g_ColorPositive : g_ColorNegative);
    
    // Ensure colors are consistent if they were changed elsewhere
-   ObjectSetInteger(0, PREFIX + "Account_Val_Balance", OBJPROP_COLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Account_Val_Balance", OBJPROP_COLOR, g_ColorText);
    
    // --- ORDER LIST UPDATES ---
    // First pass: Count total orders and collect tickets
@@ -212,14 +212,14 @@ void UpdateAccountPanel()
          // 2. Symbol Label
          string nameSym = "Account_Ord_Sym" + suffix;
          if(ObjectFind(0, PREFIX + nameSym) < 0) CreateLabel(nameSym, symbol, 0, 0, 9, clrWhite, "Trebuchet MS Bold");
-         ObjectSetString(0, PREFIX + nameSym, OBJPROP_TEXT, symbol);
+         FP_ObjectSetString(0, PREFIX + nameSym, OBJPROP_TEXT, symbol);
          SetObjVisible(nameSym, true);
          
          // 3. Type Label
          string nameTyp = "Account_Ord_Typ" + suffix;
          if(ObjectFind(0, PREFIX + nameTyp) < 0) CreateLabel(nameTyp, typeStr, 0, 0, 8, typeColor, "Trebuchet MS");
-         ObjectSetString(0, PREFIX + nameTyp, OBJPROP_TEXT, typeStr);
-         ObjectSetInteger(0, PREFIX + nameTyp, OBJPROP_COLOR, typeColor);
+         FP_ObjectSetString(0, PREFIX + nameTyp, OBJPROP_TEXT, typeStr);
+         FP_ObjectSetInteger(0, PREFIX + nameTyp, OBJPROP_COLOR, typeColor);
          SetObjVisible(nameTyp, true);
          
          visualIndex++;

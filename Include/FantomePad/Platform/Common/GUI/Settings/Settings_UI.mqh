@@ -32,14 +32,14 @@ void CreateColorRow(string suffix, string label, int x, int y, color col, bool v
    if(visible)
    {
       CreateLabel(lblName, label, x, y + 4, 8, g_ColorText, "Trebuchet MS");
-      ObjectSetInteger(0, PREFIX + lblName, OBJPROP_ZORDER, 102);
+      FP_ObjectSetInteger(0, PREFIX + lblName, OBJPROP_ZORDER, 102);
       SetObjVisible(lblName, true);
       
       // Box at relative right of column (approx 130px width per col)
       int boxX = x + 110; 
       CreateButton(btnName, "", boxX, y, 25, 25, col, clrNONE);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 102);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, C'100,100,100');
+      FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 102);
+      FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, C'100,100,100');
       SetObjVisible(btnName, true);
    }
    else
@@ -59,8 +59,8 @@ void DrawSettingsScrollbar(int x, int y)
    
    // 1. Track
    CreateRect("Set_ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_ZORDER, 115);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
+   FP_ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_ZORDER, 115);
+   FP_ObjectSetInteger(0, PREFIX + "Set_ScrollTrack", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    // 2. Thumb
    // Calculate Height Ratio
@@ -87,6 +87,6 @@ void DrawSettingsScrollbar(int x, int y)
    int thumbY = trackY + (int)(p * maxThumb);
    
    CreateButton("Set_ScrollThumb", "", trackX + 1, thumbY, scrollBarWidth - 2, thumbH, g_ColorText, clrNONE);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_ZORDER, 116);
-   ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText); 
+   FP_ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_ZORDER, 116);
+   FP_ObjectSetInteger(0, PREFIX + "Set_ScrollThumb", OBJPROP_BORDER_COLOR, g_ColorText); 
 }

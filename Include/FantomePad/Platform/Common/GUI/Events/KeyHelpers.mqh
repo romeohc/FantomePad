@@ -59,7 +59,7 @@ void ResetRisk()
 {
    if(g_LicenseState == LICENSE_REVOKED) return; // Guard
    EnsureTradePanel();
-   ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0.0");
+   FP_ObjectSetString(0, PREFIX + "Edit_Risk", OBJPROP_TEXT, "0.0");
    UpdateCalculatedLot();
    ChartRedraw();
 }
@@ -118,7 +118,7 @@ void SelectSymbol()
       return;
    }
    
-   ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, sym);
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_SymbolSelect", OBJPROP_TEXT, sym);
    ChartSetSymbolPeriod(0, sym, Period());
    
    CloseSymbolList();

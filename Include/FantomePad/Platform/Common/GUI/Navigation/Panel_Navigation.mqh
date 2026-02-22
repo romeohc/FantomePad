@@ -142,31 +142,31 @@ void CreateNavigationPanel()
    // Button 1: Trade Panel (Toggle Main)
    color bgTrade = g_PanelMain.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Nav_Btn_Main", "Trade", startX, startY, btnW, btnH, bgTrade, g_ColorText);
-   ObjectSetString(0, PREFIX + "Nav_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_Main", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // Button 2: Positions Panel (Toggle Positions) -> "Position"
    int currentX = startX + btnW + margin;
    color bgPos = g_PanelPositions.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Nav_Btn_Pos", "Position", currentX, startY, btnW, btnH, bgPos, g_ColorText);
-   ObjectSetString(0, PREFIX + "Nav_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_Pos", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 3: Account Panel (Toggle Account Info) -> "Account"
    currentX += btnW + margin;
    color bgAccount = g_PanelAccount.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Nav_Btn_Account", "Account", currentX, startY, btnW, btnH, bgAccount, g_ColorText);
-   ObjectSetString(0, PREFIX + "Nav_Btn_Account", OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_Account", OBJPROP_FONT, "Trebuchet MS Bold");
 
    // Button 4: History -> "History"
    currentX += btnW + margin;
    color bgHist = g_PanelHistory.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Nav_Btn_History", "History", currentX, startY, btnW, btnH, bgHist, g_ColorText);
-   ObjectSetString(0, PREFIX + "Nav_Btn_History", OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_History", OBJPROP_FONT, "Trebuchet MS Bold");
    
    // Button 5: Settings (Toggle Config) -> "Settings"
    currentX += btnW + margin;
    color bgSet = g_PanelSettings.IsVisible ? g_ColorBtnActive : g_ColorBtnInvalid;
    CreateButton("Nav_Btn_Settings", "Settings", currentX, startY, btnW, btnH, bgSet, g_ColorText);
-   ObjectSetString(0, PREFIX + "Nav_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetString(0, PREFIX + "Nav_Btn_Settings", OBJPROP_FONT, "Trebuchet MS Bold");
 
     // Button 6: Symbol Select
     currentX += btnW + margin;
@@ -249,9 +249,9 @@ void DrawSymbolList()
    }
    
    CreateRect("ListContainer", (int)x, startY - 2, containerWidth, contentHeight + 4, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
-   ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
+   FP_ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_ZORDER, 9); 
+   FP_ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BGCOLOR, g_ColorBg); 
+   FP_ObjectSetInteger(0, PREFIX + "ListContainer", OBJPROP_BORDER_COLOR, g_ColorBg);
    
    int itemWidth = showScroll ? containerWidth - scrollBarWidth - 2 : containerWidth - 4;
    int itemX = (int)x + 2;
@@ -264,8 +264,8 @@ void DrawSymbolList()
    // Create Add Button
    string addBtnName = "List_Btn_Add";
    CreateButton(addBtnName, "Edit", itemX, currentY, itemWidth, 25, g_ColorBtnActive, g_ColorText);
-   ObjectSetInteger(0, PREFIX + addBtnName, OBJPROP_ZORDER, 10);
-   ObjectSetString(0, PREFIX + addBtnName, OBJPROP_FONT, "Trebuchet MS Bold");
+   FP_ObjectSetInteger(0, PREFIX + addBtnName, OBJPROP_ZORDER, 10);
+   FP_ObjectSetString(0, PREFIX + addBtnName, OBJPROP_FONT, "Trebuchet MS Bold");
    
    currentY += headerHeight;
    
@@ -281,10 +281,10 @@ void DrawSymbolList()
       color itemBg = (dataIdx == g_SymbolHoverIndex || isCurrent) ? g_ColorBtnActive : g_ColorInput;
       
       CreateButton(btnName, symName, itemX, currentY, itemWidth, itemHeight, itemBg, g_ColorText);
-      ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); 
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, itemBg);
-      ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
+      FP_ObjectSetString(0, PREFIX + btnName, OBJPROP_TEXT, symName); 
+      FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_ZORDER, 10);
+      FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_BORDER_COLOR, itemBg);
+      FP_ObjectSetInteger(0, PREFIX + btnName, OBJPROP_COLOR, g_ColorText); 
       
       currentY += itemHeight;
    }
@@ -298,7 +298,7 @@ void DrawSymbolList()
        
        // Track
        CreateRect("ScrollTrack", trackX, trackY, scrollBarWidth, trackH, g_ColorBg, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "ScrollTrack", OBJPROP_ZORDER, 10);
+       FP_ObjectSetInteger(0, PREFIX + "ScrollTrack", OBJPROP_ZORDER, 10);
        
        // Thumb
        double ratio = (double)count / (double)total;
@@ -312,8 +312,8 @@ void DrawSymbolList()
        int relativeY = (int)(scrollPrc * availableTrack);
        
        CreateRect("ScrollThumb", trackX + 1, trackY + relativeY, scrollBarWidth - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
-       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_ZORDER, 11);
-       ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorText); 
+       FP_ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_ZORDER, 11);
+       FP_ObjectSetInteger(0, PREFIX + "ScrollThumb", OBJPROP_BGCOLOR, g_ColorText); 
    }
    
    ChartRedraw();

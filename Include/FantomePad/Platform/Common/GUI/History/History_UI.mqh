@@ -4,6 +4,8 @@
 //+------------------------------------------------------------------+
 #property strict
 
+#include "../Account/Account_Helpers.mqh"
+
 //+------------------------------------------------------------------+
 //| DRAW TOOLBAR (FILTERS & SYMBOL)                                  |
 //+------------------------------------------------------------------+
@@ -48,22 +50,22 @@ void DrawHistoryToolbar(int startX, int startY, int headerHeight)
    color bgCustom  = (g_HistoryFilterMode == H_FILTER_CUSTOM) ? g_ColorBtnActive : g_ColorInput;
    
    CreateButton("Hist_Btn_Daily", "Daily", curBtnX, btnY, btnW, btnH, bgDaily, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Hist_Btn_Daily", OBJPROP_ZORDER, 5);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Btn_Daily", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
    CreateButton("Hist_Btn_Weekly", "Weekly", curBtnX, btnY, btnW, btnH, bgWeekly, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Hist_Btn_Weekly", OBJPROP_ZORDER, 5);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Btn_Weekly", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
    CreateButton("Hist_Btn_Monthly", "Monthly", curBtnX, btnY, btnW, btnH, bgMonthly, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Hist_Btn_Monthly", OBJPROP_ZORDER, 5);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Btn_Monthly", OBJPROP_ZORDER, 5);
    curBtnX += btnW + gap;
    
    // New "All" Button
    CreateButton("Hist_Btn_All", "All", curBtnX, btnY, 50, btnH, bgAll, g_ColorText); // Smaller width for "All"
-   ObjectSetInteger(0, PREFIX + "Hist_Btn_All", OBJPROP_ZORDER, 5);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Btn_All", OBJPROP_ZORDER, 5);
    curBtnX += 50 + gap;
    
    CreateButton("Hist_Btn_Custom", "Custom", curBtnX, btnY, btnW, btnH, bgCustom, g_ColorText);
-   ObjectSetInteger(0, PREFIX + "Hist_Btn_Custom", OBJPROP_ZORDER, 5);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Btn_Custom", OBJPROP_ZORDER, 5);
    
    // Symbol Filter UI (Right of buttons)
    int symX = curBtnX + btnW + 30;
@@ -186,8 +188,8 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            
            // Background
            CreateButton(bgName, "", x + 5, itemY, w - 25, rowH - 2, g_ColorInput, clrNONE);
-           ObjectSetInteger(0, PREFIX + bgName, OBJPROP_BORDER_COLOR, g_ColorBg);
-           ObjectSetInteger(0, PREFIX + bgName, OBJPROP_ZORDER, 10);
+           FP_ObjectSetInteger(0, PREFIX + bgName, OBJPROP_BORDER_COLOR, g_ColorBg);
+           FP_ObjectSetInteger(0, PREFIX + bgName, OBJPROP_ZORDER, 10);
            
            // Data
            string timeStr = TimeToString(OrderCloseTime(), TIME_DATE|TIME_MINUTES);
@@ -201,9 +203,13 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            double prof    = OrderProfit() + OrderCommission() + OrderSwap();
            string profStr = DoubleToString(prof, 2);
            
+           double deps = 0, wits = 0, netPnl = 0;
+           GetAccountHistoryStats(deps, wits, netPnl);
            double bal = AccountBalance(); 
+           if(deps <= 0) deps = (bal - netPnl + wits);
+           
            double retPrc = 0.0;
-           if(bal > 0) retPrc = (prof / bal) * 100.0;
+           if(deps > 0) retPrc = (prof / deps) * 100.0;
            string retPrcStr = DoubleToString(retPrc, 2) + "%";
            
            double retR = 0.0;
@@ -221,13 +227,13 @@ void DrawHistoryContent(int x, int y, int w, int rowH)
            CreateLabel("Hist_Item_RetP"+sfx, retPrcStr, colX + wTime + wType + wSym + wFees + wProf, txtY, 8, profCol, "Trebuchet MS");
            CreateLabel("Hist_Item_RetR"+sfx, retRStr, colX + wTime + wType + wSym + wFees + wProf + wRetP, txtY, 8, profCol, "Trebuchet MS");
            
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Time"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Type"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Sym"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Fees"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_Prof"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_RetP"+sfx, OBJPROP_ZORDER, 12);
-           ObjectSetInteger(0, PREFIX + "Hist_Item_RetR"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_Time"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_Type"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_Sym"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_Fees"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_Prof"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_RetP"+sfx, OBJPROP_ZORDER, 12);
+           FP_ObjectSetInteger(0, PREFIX + "Hist_Item_RetR"+sfx, OBJPROP_ZORDER, 12);
        }
    }
 }
@@ -271,11 +277,11 @@ void DrawHistoryScrollbar(int x, int y, int w)
    }
    
    CreateRect("Hist_ScrollTrack", trackX, trackY, trackW, trackH, g_ColorInput, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_ScrollTrack", OBJPROP_ZORDER, 15);
    
    CreateRect("Hist_ScrollThumb", trackX + 1, thumbY, trackW - 2, thumbH, g_ColorBtnValid, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);
-   ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_ZORDER, 16);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_ScrollThumb", OBJPROP_BGCOLOR, g_ColorText);
 }
 
 //+------------------------------------------------------------------+
@@ -323,11 +329,15 @@ void DrawHistoryFooter(int x, int y, int w, int h)
       }
    }
    
+   double deps = 0, wits = 0, netPnl = 0;
+   GetAccountHistoryStats(deps, wits, netPnl);
    double bal = AccountBalance();
+   if(deps <= 0) deps = (bal - netPnl + wits);
+   
    double totalRetP = 0.0;
    double totalRetR = 0.0;
    
-   if(bal > 0) totalRetP = (sumProf / bal) * 100.0;
+   if(deps > 0) totalRetP = (sumProf / deps) * 100.0;
    if(g_OneRPercent > 0) totalRetR = totalRetP / g_OneRPercent;
    
    string sFees = DoubleToString(sumFees, 2);

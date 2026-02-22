@@ -61,7 +61,7 @@ void CreateHistoryPanel()
    
    // 1. Fond
    CreateRect("Hist_Bg", startX, startY, width, topSectionHeight + g_ScrollHistory.ViewportHeight + footerMargin + footerHeight, g_ColorBg, BORDER_FLAT);
-   ObjectSetInteger(0, PREFIX + "Hist_Bg", OBJPROP_ZORDER, 0);
+   FP_ObjectSetInteger(0, PREFIX + "Hist_Bg", OBJPROP_ZORDER, 0);
    
    // 2. Toolbar
    DrawHistoryToolbar(startX, startY, headerHeight);
