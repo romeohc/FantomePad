@@ -445,49 +445,34 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
 
                                             {/* Video Container */}
                                             <div className="w-full aspect-video bg-black border border-white/5 shadow-2xl rounded-2xl overflow-hidden relative flex items-center justify-center group/video">
-                                                {os === "windows" ? (
-                                                    !isPlaying ? (
-                                                        <div className="absolute inset-0 z-0 cursor-pointer group/preview flex flex-col items-center justify-center" onClick={() => setIsPlaying(true)}>
-                                                            <SpaceBackground isMobile={isMobile} />
-                                                            <div className="relative z-10 flex flex-col items-center">
-                                                                <div className="relative h-20 w-20 md:h-24 md:w-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover/preview:border-brand-blue/50 group-hover/preview:bg-white/15 transition-all">
-                                                                    <PlayCircle className="w-10 h-10 md:w-12 md:h-12 text-white fill-white/10 group-hover/preview:text-brand-blue group-hover/preview:fill-brand-blue/10 transition-all ml-1" />
-                                                                </div>
+                                                {!isPlaying ? (
+                                                    <div className="absolute inset-0 z-0 cursor-pointer group/preview flex flex-col items-center justify-center" onClick={() => setIsPlaying(true)}>
+                                                        <SpaceBackground isMobile={isMobile} />
+                                                        <div className="relative z-10 flex flex-col items-center">
+                                                            <div className="relative h-20 w-20 md:h-24 md:w-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-2xl group-hover/preview:border-brand-blue/50 group-hover/preview:bg-white/15 transition-all">
+                                                                <PlayCircle className="w-10 h-10 md:w-12 md:h-12 text-white fill-white/10 group-hover/preview:text-brand-blue group-hover/preview:fill-brand-blue/10 transition-all ml-1" />
                                                             </div>
-
                                                         </div>
-
-                                                    ) : (
-                                                        <video
-                                                            key={`${os}-${platform}`}
-                                                            className="w-full h-full object-contain relative z-10"
-                                                            controls
-                                                            autoPlay
-                                                            preload="auto"
-                                                            onTimeUpdate={(e) => {
-                                                                videoTimeRef.current = e.currentTarget.currentTime;
-                                                            }}
-                                                            onLoadedMetadata={(e) => {
-                                                                if (videoTimeRef.current > 0) {
-                                                                    e.currentTarget.currentTime = videoTimeRef.current;
-                                                                }
-                                                            }}
-                                                        >
-
-                                                            <source src={`/video/onboarding/windows-${platform}.mp4`} type="video/mp4" />
-                                                            Votre navigateur ne supporte pas la lecture de vidéos.
-                                                        </video>
-                                                    )
+                                                    </div>
                                                 ) : (
-                                                    <>
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-0 pointer-events-none" />
-                                                        <div className="flex flex-col items-center gap-4 opacity-40">
-                                                            <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-brand-blue/50" />
-                                                            <span className="text-xs md:text-sm font-black text-brand-gray tracking-[0.2em] uppercase text-center px-4">
-                                                                Vidéo explicative à venir {os === "mac" ? "pour Mac" : ""}
-                                                            </span>
-                                                        </div>
-                                                    </>
+                                                    <video
+                                                        key={`${os}-${platform}`}
+                                                        className="w-full h-full object-contain relative z-10"
+                                                        controls
+                                                        autoPlay
+                                                        preload="auto"
+                                                        onTimeUpdate={(e) => {
+                                                            videoTimeRef.current = e.currentTarget.currentTime;
+                                                        }}
+                                                        onLoadedMetadata={(e) => {
+                                                            if (videoTimeRef.current > 0) {
+                                                                e.currentTarget.currentTime = videoTimeRef.current;
+                                                            }
+                                                        }}
+                                                    >
+                                                        <source src={`/video/onboarding/${os}-${platform}.mp4`} type="video/mp4" />
+                                                        Votre navigateur ne supporte pas la lecture de vidéos.
+                                                    </video>
                                                 )}
                                             </div>
 
