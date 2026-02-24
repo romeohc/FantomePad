@@ -211,7 +211,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/Icone/logo mt4.png" alt="MT4" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <Image src="/Icone/logo-mt4.png" alt="MT4" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
                                             <span className="text-lg font-bold text-white">MT4</span>
                                         </div>
                                     </button>
@@ -224,7 +224,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/Icone/logo mt5.png" alt="MT5" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
+                                            <Image src="/Icone/logo-mt5.png" alt="MT5" width={40} height={40} className="h-10 w-10 object-contain rounded-lg" />
                                             <span className="text-lg font-bold text-white">MT5</span>
                                         </div>
                                     </button>
@@ -239,7 +239,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/Icone/logo windows.png" alt="Windows" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <Image src="/Icone/logo-windows.png" alt="Windows" width={40} height={40} className="h-10 w-10 object-contain" />
                                             <span className="text-lg font-bold text-white">Windows</span>
                                         </div>
                                     </button>
@@ -252,7 +252,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                             }`}
                                     >
                                         <div className="flex flex-col items-center gap-3 relative z-10">
-                                            <Image src="/Icone/logo apple.png" alt="Mac" width={40} height={40} className="h-10 w-10 object-contain" />
+                                            <Image src="/Icone/logo-apple.png" alt="Mac" width={40} height={40} className="h-10 w-10 object-contain" />
                                             <span className="text-lg font-bold text-white">Mac</span>
                                         </div>
                                     </button>
@@ -293,7 +293,7 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
                                         <div className="flex items-center gap-6">
                                             <div className="p-1 rounded-2xl flex items-center justify-center">
                                                 <Image
-                                                    src={platform === "mt4" ? "/Icone/logo mt4.png" : "/Icone/logo mt5.png"}
+                                                    src={platform === "mt4" ? "/Icone/logo-mt4.png" : "/Icone/logo-mt5.png"}
                                                     alt={platform?.toUpperCase() || "Platform"}
                                                     width={40}
                                                     height={40}

@@ -465,13 +465,13 @@ export default function Dashboard({ email, activationCode, status }: DashboardPr
                         {activeTab === 'docs' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[
-                                    { title: "Connecter son compte MT4", duration: "0:45", level: "Débutant", src: "/video/tuto-addaccount-mt4.mov" },
+                                    { title: "Guide complet d'utilisation", duration: "18:24", level: "Essentiel" },
                                     { title: "Première Configuration", duration: "12:10", level: "Débutant" },
                                     { title: "Comprendre les Signaux", duration: "8:45", level: "Intermédiaire" },
                                     { title: "Optimisation des Gains", duration: "15:30", level: "Avancé" },
                                     { title: "Gérer le Risque (Risk Management)", duration: "10:00", level: "Essentiel" },
                                     { title: "Dépannage Courant", duration: "6:15", level: "Support" },
-                                ].map((video, idx) => (
+                                ].map((video: any, idx) => (
                                     <div key={idx} className="group cursor-default">
                                         <div className="relative aspect-video bg-[#151515] border border-white/5 rounded-2xl overflow-hidden mb-4 group-hover:border-white/10 transition-all">
                                             {video.src ? (

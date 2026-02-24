@@ -79,7 +79,17 @@ export default function LoginForm({
                                     </div>
                                 )}
 
-                                <div className="space-y-2">
+                                {step === "otp" && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-[11px] text-center text-brand-gray/60"
+                                    >
+                                        Si vous ne recevez pas le mail, <span className="text-brand-gray/90">vérifiez vos spams</span>.
+                                    </motion.p>
+                                )}
+
+                                <div className="space-y-4">
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             {step === "email" ? (
