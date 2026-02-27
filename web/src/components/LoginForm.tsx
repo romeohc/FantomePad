@@ -72,22 +72,19 @@ export default function LoginForm({
                                         <span>{error}</span>
                                     </div>
                                 )}
-                                {message && (
-                                    <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs">
-                                        <CheckCircle2 className="h-4 w-4 shrink-0" />
-                                        <span>{message}</span>
+                                {message && step === "otp" && (
+                                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs transition-all">
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                                        <p className="text-green-500/90 font-medium">
+                                            {message}
+                                            <span className="text-white/60 ml-1.5 font-normal">
+                                                Pensez à vérifier vos spams.
+                                            </span>
+                                        </p>
                                     </div>
                                 )}
 
-                                {step === "otp" && (
-                                    <motion.p
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="text-[11px] text-center text-brand-gray/60"
-                                    >
-                                        Si vous ne recevez pas le mail, <span className="text-brand-gray/90">vérifiez vos spams</span>.
-                                    </motion.p>
-                                )}
+
 
                                 <div className="space-y-4">
                                     <div className="relative group">
@@ -165,6 +162,6 @@ export default function LoginForm({
                     <ArrowRight className="h-3.5 w-3.5 text-brand-gray group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </a>
             </motion.div>
-        </div>
+        </div >
     );
 }

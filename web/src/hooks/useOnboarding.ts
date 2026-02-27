@@ -36,7 +36,6 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
         // specific check if we already have initialData from parent
         if (initialData?.activation_code) {
             setActivationCode(initialData.activation_code);
-            setStep("activation");
             return;
         }
 
@@ -49,9 +48,6 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
 
             if (data?.activation_code) {
                 setActivationCode(data.activation_code);
-                setStep("activation"); // Jump to end if code exists
-                // Clear local storage for step since we are done, or keep it as "activation"
-                localStorage.setItem("onboarding_step", "activation");
             }
         } catch (err) {
             console.error("Error checking license:", err);
@@ -60,18 +56,14 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
 
     // Load state from localStorage on mount (Client-side only)
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const savedStep = localStorage.getItem("onboarding_step") as OnboardingStep;
-            const savedPlatform = localStorage.getItem("onboarding_platform") as Platform;
-            const savedOs = localStorage.getItem("onboarding_os") as OperatingSystem;
+        if (typeof window !== "undefined" && email) {
+            const savedStep = localStorage.getItem(`onboarding_step_${email}`) as OnboardingStep;
+            const savedPlatform = localStorage.getItem(`onboarding_platform_${email}`) as Platform;
+            const savedOs = localStorage.getItem(`onboarding_os_${email}`) as OperatingSystem;
 
-            // Only restore step if we don't have a code, OR if the code exists and we are essentially resuming
-            if (savedStep && !activationCode) {
+            // Always restore step if we have one in local storage
+            if (savedStep) {
                 setStep(savedStep);
-            }
-            // If we have an activation code, we FORCE step to activation (step 4)
-            if (activationCode || initialData?.activation_code) {
-                setStep("activation");
             }
 
             if (savedPlatform) setPlatform(savedPlatform);
@@ -84,12 +76,12 @@ export const useOnboarding = (email: string, initialData?: LicenseData | null) =
 
     // Persist state changes to localStorage
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            if (step) localStorage.setItem("onboarding_step", step);
-            if (platform) localStorage.setItem("onboarding_platform", platform);
-            if (os) localStorage.setItem("onboarding_os", os);
+        if (typeof window !== "undefined" && email) {
+            if (step) localStorage.setItem(`onboarding_step_${email}`, step);
+            if (platform) localStorage.setItem(`onboarding_platform_${email}`, platform);
+            if (os) localStorage.setItem(`onboarding_os_${email}`, os);
         }
-    }, [step, platform, os]);
+    }, [step, platform, os, email]);
 
 
 

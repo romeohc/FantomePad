@@ -129,8 +129,15 @@ bool CheckLicense(string code, int timeout_ms = 5000)
    }
    else 
    {
-      if(res == 4060 || res == 4014) g_AuthErrorMsg = "Fantomepad n'est pas connecté";
-      else if(res == -1) g_AuthErrorMsg = "Erreur Connexion (Err -1)";
+      if(res == 4060) g_AuthErrorMsg = "URL api.fantomepad.com non autorisée (Outils > Options)";
+      else if(res == 4014) g_AuthErrorMsg = "Connexion impossible en mode Testeur";
+      else if(res == -1)
+      {
+         if(!TerminalInfoInteger(TERMINAL_CONNECTED)) 
+            g_AuthErrorMsg = "Pas de connexion internet ou au Broker";
+         else 
+            g_AuthErrorMsg = "Connexion bloquee (Pare-feu / Internet)";
+      }
       else g_AuthErrorMsg = "Erreur Serveur (HTTP " + IntegerToString(res) + ")";
    }
    return false;

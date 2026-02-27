@@ -117,7 +117,7 @@ export default function Home() {
       if (authError) throw authError;
 
       setStep("otp");
-      setMessage("Un code de vérification a été envoyé à votre email.");
+      setMessage("Code de vérification envoyé.");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {

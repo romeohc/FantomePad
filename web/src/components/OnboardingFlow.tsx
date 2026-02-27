@@ -83,6 +83,14 @@ export default function OnboardingFlow({ email, initialData, onComplete }: Onboa
     const handleLogout = async () => {
         const supabase = createClient();
         await supabase.auth.signOut();
+
+        // Clean up visual progression from localStorage so the user starts fresh on their next login
+        if (email) {
+            localStorage.removeItem(`onboarding_step_${email}`);
+            localStorage.removeItem(`onboarding_platform_${email}`);
+            localStorage.removeItem(`onboarding_os_${email}`);
+        }
+
         window.location.reload();
     };
 
