@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/verify-license",
+      "destination": "https://zxgkjytxqqxkizqcrdwf.functions.supabase.co/verify-license"
+    }
+  ]
+}
